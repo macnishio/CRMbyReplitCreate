@@ -1,0 +1,38 @@
+{% extends "base.html" %}
+
+{% block title %}Opportunities{% endblock %}
+
+{% block content %}
+    <h1>Opportunities</h1>
+    <a href="{{ url_for('opportunities.create_opportunity') }}" class="button">Create New Opportunity</a>
+    <table>
+        <thead>
+            <tr>
+                <th>Name</th>
+                <th>Amount</th>
+                <th>Stage</th>
+                <th>Close Date</th>
+                <th>Account</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for opportunity in opportunities %}
+                <tr>
+                    <td>{{ opportunity.name }}</td>
+                    <td>${{ "%.2f"|format(opportunity.amount) }}</td>
+                    <td>{{ opportunity.stage }}</td>
+                    <td>{{ opportunity.close_date.strftime('%Y-%m-%d') }}</td>
+                    <td>{{ opportunity.account.name }}</td>
+                    <td>
+                        <a href="{{ url_for('opportunities.opportunity_detail', id=opportunity.id) }}">View</a>
+                        <a href="{{ url_for('opportunities.edit_opportunity', id=opportunity.id) }}">Edit</a>
+                        <form action="{{ url_for('opportunities.delete_opportunity', id=opportunity.id) }}" method="POST" style="display: inline;">
+                            <input type="submit" value="Delete" onclick="return confirm('Are you sure?');">
+                        </form>
+                    </td>
+                </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+{% endblock %}

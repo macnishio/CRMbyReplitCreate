@@ -1,0 +1,33 @@
+{% extends "base.html" %}
+
+{% block title %}Create Opportunity{% endblock %}
+
+{% block content %}
+    <h1>{% if form.name.data %}Edit{% else %}Create{% endif %} Opportunity</h1>
+    <form method="POST">
+        {{ form.hidden_tag() }}
+        <div>
+            {{ form.name.label }}
+            {{ form.name() }}
+        </div>
+        <div>
+            {{ form.amount.label }}
+            {{ form.amount() }}
+        </div>
+        <div>
+            {{ form.stage.label }}
+            {{ form.stage() }}
+        </div>
+        <div>
+            {{ form.close_date.label }}
+            {{ form.close_date() }}
+        </div>
+        <div>
+            {{ form.account.label }}
+            {{ form.account() }}
+        </div>
+        <div>
+            {{ form.submit() }}
+        </div>
+    </form>
+{% endblock %}

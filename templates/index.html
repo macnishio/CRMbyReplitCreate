@@ -1,0 +1,14 @@
+{% extends "base.html" %}
+
+{% block title %}Home{% endblock %}
+
+{% block content %}
+    <h1>Welcome to the CRM Application</h1>
+    <p>This is your central hub for managing customer relationships.</p>
+    <div class="quick-links">
+        <a href="{{ url_for('leads.list_leads') }}" class="button">Manage Leads</a>
+        <a href="{{ url_for('opportunities.list_opportunities') }}" class="button">Track Opportunities</a>
+        <a href="{{ url_for('accounts.list_accounts') }}" class="button">View Accounts</a>
+        <a href="{{ url_for('reports.index') }}" class="button">Generate Reports</a>
+    </div>
+{% endblock %}

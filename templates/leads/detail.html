@@ -1,0 +1,20 @@
+{% extends "base.html" %}
+
+{% block title %}Lead Details{% endblock %}
+
+{% block content %}
+    <h1>Lead Details</h1>
+    <div class="lead-details">
+        <p><strong>Name:</strong> {{ lead.name }}</p>
+        <p><strong>Email:</strong> {{ lead.email }}</p>
+        <p><strong>Phone:</strong> {{ lead.phone }}</p>
+        <p><strong>Status:</strong> {{ lead.status }}</p>
+        <p><strong>Created At:</strong> {{ lead.created_at.strftime('%Y-%m-%d %H:%M:%S') }}</p>
+    </div>
+    <div class="actions">
+        <a href="{{ url_for('leads.edit_lead', id=lead.id) }}" class="button">Edit Lead</a>
+        <form action="{{ url_for('leads.delete_lead', id=lead.id) }}" method="POST" style="display: inline;">
+            <input type="submit" value="Delete Lead" class="button delete" onclick="return confirm('Are you sure?');">
+        </form>
+    </div>
+{% endblock %}

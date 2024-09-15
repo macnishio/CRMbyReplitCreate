@@ -1,0 +1,36 @@
+{% extends "base.html" %}
+
+{% block title %}Leads{% endblock %}
+
+{% block content %}
+    <h1>Leads</h1>
+    <a href="{{ url_for('leads.create_lead') }}" class="button">Create New Lead</a>
+    <table>
+        <thead>
+            <tr>
+                <th>Name</th>
+                <th>Email</th>
+                <th>Phone</th>
+                <th>Status</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for lead in leads %}
+                <tr>
+                    <td>{{ lead.name }}</td>
+                    <td>{{ lead.email }}</td>
+                    <td>{{ lead.phone }}</td>
+                    <td>{{ lead.status }}</td>
+                    <td>
+                        <a href="{{ url_for('leads.lead_detail', id=lead.id) }}">View</a>
+                        <a href="{{ url_for('leads.edit_lead', id=lead.id) }}">Edit</a>
+                        <form action="{{ url_for('leads.delete_lead', id=lead.id) }}" method="POST" style="display: inline;">
+                            <input type="submit" value="Delete" onclick="return confirm('Are you sure?');">
+                        </form>
+                    </td>
+                </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+{% endblock %}

@@ -1,0 +1,33 @@
+{% extends "base.html" %}
+
+{% block title %}Dashboard{% endblock %}
+
+{% block content %}
+    <h1>Dashboard</h1>
+    <div class="dashboard-stats">
+        <div class="stat-card">
+            <h2>Leads</h2>
+            <p>{{ leads }}</p>
+        </div>
+        <div class="stat-card">
+            <h2>Opportunities</h2>
+            <p>{{ opportunities }}</p>
+        </div>
+        <div class="stat-card">
+            <h2>Accounts</h2>
+            <p>{{ accounts }}</p>
+        </div>
+    </div>
+    <div class="dashboard-charts">
+        <div class="chart">
+            <canvas id="leadStatusChart"></canvas>
+        </div>
+        <div class="chart">
+            <canvas id="opportunityStageChart"></canvas>
+        </div>
+    </div>
+{% endblock %}
+
+{% block scripts %}
+    <script src="{{ url_for('static', filename='js/dashboard.js') }}"></script>
+{% endblock %}
