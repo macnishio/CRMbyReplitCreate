@@ -1,0 +1,120 @@
+{% extends "base.html" %}
+
+{% block title %}Reports{% endblock %}
+
+{% block content %}
+    <h1>Reports</h1>
+    
+    <h2>Advanced Analytics</h2>
+    <div class="analytics-summary">
+        <div class="stat-card">
+            <h3>Conversion Rate</h3>
+            <p>{{ "%.2f"|format(conversion_rate) }}%</p>
+        </div>
+        <div class="stat-card">
+            <h3>Average Deal Size</h3>
+            <p>${{ "%.2f"|format(average_deal_size) }}</p>
+        </div>
+        <div class="stat-card">
+            <h3>Sales Pipeline Value</h3>
+            <p>${{ "%.2f"|format(sales_pipeline_value) }}</p>
+        </div>
+    </div>
+
+    <h2>Lead Status</h2>
+    <canvas id="leadStatusChart"></canvas>
+
+    <h2>Opportunity Stage</h2>
+    <canvas id="opportunityStageChart"></canvas>
+
+    <h2>Account Industry</h2>
+    <canvas id="accountIndustryChart"></canvas>
+
+    <h2>Lead Score Distribution</h2>
+    <canvas id="leadScoreChart"></canvas>
+{% endblock %}
+
+{% block scripts %}
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script>
+        // Lead Status Chart
+        new Chart(document.getElementById('leadStatusChart'), {
+            type: 'pie',
+            data: {
+                labels: {{ lead_status|map(attribute=0)|list|tojson }},
+                datasets: [{
+                    data: {{ lead_status|map(attribute=1)|list|tojson }},
+                    backgroundColor: ['#FF6384', '#36A2EB', '#FFCE56', '#4BC0C0']
+                }]
+            }
+        });
+
+        // Opportunity Stage Chart
+        new Chart(document.getElementById('opportunityStageChart'), {
+            type: 'bar',
+            data: {
+                labels: {{ opportunity_stage|map(attribute=0)|list|tojson }},
+                datasets: [{
+                    label: 'Count',
+                    data: {{ opportunity_stage|map(attribute=1)|list|tojson }},
+                    backgroundColor: '#36A2EB'
+                }, {
+                    label: 'Amount',
+                    data: {{ opportunity_stage|map(attribute=2)|list|tojson }},
+                    backgroundColor: '#FFCE56',
+                    yAxisID: 'y-axis-2'
+                }]
+            },
+            options: {
+                scales: {
+                    yAxes: [{
+                        id: 'y-axis-1',
+                        type: 'linear',
+                        position: 'left',
+                    }, {
+                        id: 'y-axis-2',
+                        type: 'linear',
+                        position: 'right',
+                        ticks: {
+                            beginAtZero: true
+                        }
+                    }]
+                }
+            }
+        });
+
+        // Account Industry Chart
+        new Chart(document.getElementById('accountIndustryChart'), {
+            type: 'doughnut',
+            data: {
+                labels: {{ account_industry|map(attribute=0)|list|tojson }},
+                datasets: [{
+                    data: {{ account_industry|map(attribute=1)|list|tojson }},
+                    backgroundColor: ['#FF6384', '#36A2EB', '#FFCE56', '#4BC0C0', '#9966FF']
+                }]
+            }
+        });
+
+        // Lead Score Distribution Chart
+        new Chart(document.getElementById('leadScoreChart'), {
+            type: 'bar',
+            data: {
+                labels: {{ lead_score_labels|tojson }},
+                datasets: [{
+                    label: 'Number of Leads',
+                    data: {{ lead_score_data|tojson }},
+                    backgroundColor: '#4BC0C0'
+                }]
+            },
+            options: {
+                scales: {
+                    yAxes: [{
+                        ticks: {
+                            beginAtZero: true
+                        }
+                    }]
+                }
+            }
+        });
+    </script>
+{% endblock %}

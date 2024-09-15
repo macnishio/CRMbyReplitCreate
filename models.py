@@ -27,6 +27,7 @@ class Lead(db.Model):
     created_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow)
     user_id: Mapped[int] = mapped_column(Integer, ForeignKey('user.id'))
     user: Mapped['User'] = relationship('User', backref='leads')
+    score: Mapped[float] = mapped_column(Float, default=0.0)
 
 class Opportunity(db.Model):
     id: Mapped[int] = mapped_column(Integer, primary_key=True)
@@ -39,6 +40,8 @@ class Opportunity(db.Model):
     user: Mapped['User'] = relationship('User', backref='opportunities')
     account_id: Mapped[int] = mapped_column(Integer, ForeignKey('account.id'))
     account: Mapped['Account'] = relationship('Account', backref='opportunities')
+    lead_id: Mapped[int] = mapped_column(Integer, ForeignKey('lead.id'))
+    lead: Mapped['Lead'] = relationship('Lead', backref='opportunities')
 
 class Account(db.Model):
     id: Mapped[int] = mapped_column(Integer, primary_key=True)
