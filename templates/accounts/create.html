@@ -1,0 +1,25 @@
+{% extends "base.html" %}
+
+{% block title %}{% if form.name.data %}Edit{% else %}Create{% endif %} Account{% endblock %}
+
+{% block content %}
+    <h1>{% if form.name.data %}Edit{% else %}Create{% endif %} Account</h1>
+    <form method="POST">
+        {{ form.hidden_tag() }}
+        <div>
+            {{ form.name.label }}
+            {{ form.name() }}
+        </div>
+        <div>
+            {{ form.industry.label }}
+            {{ form.industry() }}
+        </div>
+        <div>
+            {{ form.website.label }}
+            {{ form.website() }}
+        </div>
+        <div>
+            {{ form.submit() }}
+        </div>
+    </form>
+{% endblock %}

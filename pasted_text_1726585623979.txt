@@ -1,0 +1,51 @@
+172.31.196.32 - - [17/Sep/2024 15:06:15] "GET / HTTP/1.1" 200 -
+172.31.196.32 - - [17/Sep/2024 15:06:15] "GET /static/css/styles.css HTTP/1.1" 304 -
+172.31.196.32 - - [17/Sep/2024 15:06:15] "GET /static/js/main.js HTTP/1.1" 304 -
+172.31.196.32 - - [17/Sep/2024 15:06:21] "GET /leads/ HTTP/1.1" 200 -
+172.31.196.32 - - [17/Sep/2024 15:06:22] "GET /static/css/styles.css HTTP/1.1" 304 -
+172.31.196.32 - - [17/Sep/2024 15:06:22] "GET /static/js/main.js HTTP/1.1" 304 -
+[2024-09-17 15:06:32,181] ERROR in email_utils: SMTP Authentication Error: (535, b'5.7.8 Username and Password not accepted. For more information, go to\n5.7.8  https://support.google.com/mail/?p=BadCredentials d2e1a72fcca58-71944b7b11bsm5439206b3a.98 - gsmtp')
+[2024-09-17 15:06:32,181] ERROR in app: Exception on /leads/1/send-follow-up [GET]
+Traceback (most recent call last):
+  File "/home/runner/CRM/email_utils.py", line 54, in send_follow_up_email
+    mail.send(msg)
+  File "/home/runner/CRM/.pythonlibs/lib/python3.11/site-packages/flask_mail/__init__.py", line 539, in send
+    with self.connect() as connection:
+  File "/home/runner/CRM/.pythonlibs/lib/python3.11/site-packages/flask_mail/__init__.py", line 127, in __enter__
+    self.host = self.configure_host()
+                ^^^^^^^^^^^^^^^^^^^^^
+  File "/home/runner/CRM/.pythonlibs/lib/python3.11/site-packages/flask_mail/__init__.py", line 152, in configure_host
+    host.login(self.mail.username, self.mail.password)
+  File "/nix/store/f98g7xbckgqbkagdvpzc2r6lv3h1p9ki-python3-3.11.9/lib/python3.11/smtplib.py", line 750, in login
+    raise last_exception
+  File "/nix/store/f98g7xbckgqbkagdvpzc2r6lv3h1p9ki-python3-3.11.9/lib/python3.11/smtplib.py", line 739, in login
+    (code, resp) = self.auth(
+                   ^^^^^^^^^^
+  File "/nix/store/f98g7xbckgqbkagdvpzc2r6lv3h1p9ki-python3-3.11.9/lib/python3.11/smtplib.py", line 662, in auth
+    raise SMTPAuthenticationError(code, resp)
+smtplib.SMTPAuthenticationError: (535, b'5.7.8 Username and Password not accepted. For more information, go to\n5.7.8  https://support.google.com/mail/?p=BadCredentials d2e1a72fcca58-71944b7b11bsm5439206b3a.98 - gsmtp')
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/home/runner/CRM/.pythonlibs/lib/python3.11/site-packages/flask/app.py", line 1473, in wsgi_app
+    response = self.full_dispatch_request()
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/runner/CRM/.pythonlibs/lib/python3.11/site-packages/flask/app.py", line 882, in full_dispatch_request
+    rv = self.handle_user_exception(e)
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/runner/CRM/.pythonlibs/lib/python3.11/site-packages/flask/app.py", line 880, in full_dispatch_request
+    rv = self.dispatch_request()
+         ^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/runner/CRM/.pythonlibs/lib/python3.11/site-packages/flask/app.py", line 865, in dispatch_request
+    return self.ensure_sync(self.view_functions[rule.endpoint])(**view_args)  # type: ignore[no-any-return]
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/runner/CRM/.pythonlibs/lib/python3.11/site-packages/flask_login/utils.py", line 290, in decorated_view
+    return current_app.ensure_sync(func)(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/runner/CRM/routes/leads.py", line 85, in send_individual_follow_up
+    send_follow_up_email(lead)
+  File "/home/runner/CRM/email_utils.py", line 61, in send_follow_up_email
+    raise Exception("Failed to authenticate with the email server. Please check your email credentials.")
+Exception: Failed to authenticate with the email server. Please check your email credentials.
+172.31.196.32 - - [17/Sep/2024 15:06:32] "GET /leads/1/send-follow-up HTTP/1.1" 500 -

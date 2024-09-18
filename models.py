@@ -1,15 +1,15 @@
 from flask_login import UserMixin
 from werkzeug.security import generate_password_hash, check_password_hash
-from app import db
+from extensions import db
 from sqlalchemy import Integer, String, Float, DateTime, ForeignKey
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 from datetime import datetime
 
 class User(UserMixin, db.Model):
     id: Mapped[int] = mapped_column(Integer, primary_key=True)
-    username: Mapped[str] = mapped_column(String(64), unique=True, nullable=False)
-    email: Mapped[str] = mapped_column(String(120), unique=True, nullable=False)
-    password_hash: Mapped[str] = mapped_column(String(128))
+    username: Mapped[str] = mapped_column(String(255), unique=True, nullable=False)
+    email: Mapped[str] = mapped_column(String(255), unique=True, nullable=False)
+    password_hash: Mapped[str] = mapped_column(String(512))
     role: Mapped[str] = mapped_column(String(20), default='user')
 
     def set_password(self, password):
@@ -25,6 +25,10 @@ class Lead(db.Model):
     phone: Mapped[str] = mapped_column(String(20))
     status: Mapped[str] = mapped_column(String(20), default='New')
     created_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow)
+    last_contact: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow)
+    last_followup_email: Mapped[datetime] = mapped_column(DateTime, nullable=True)
+    last_followup_tracking_id: Mapped[str] = mapped_column(String(36), nullable=True)
+    last_email_opened: Mapped[datetime] = mapped_column(DateTime, nullable=True)
     user_id: Mapped[int] = mapped_column(Integer, ForeignKey('user.id'))
     user: Mapped['User'] = relationship('User', backref='leads')
     score: Mapped[float] = mapped_column(Float, default=0.0)

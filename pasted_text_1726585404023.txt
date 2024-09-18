@@ -1,0 +1,64 @@
+[2024-09-17 14:28:44,209] INFO in app: CRM startup
+[2024-09-17 14:28:44,210] INFO in app: Starting scheduler
+[2024-09-17 14:28:44,211] INFO in app: Scheduler started
+ * Serving Flask app 'app'
+ * Debug mode: off
+WARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.
+ * Running on all addresses (0.0.0.0)
+ * Running on http://127.0.0.1:5000
+ * Running on http://172.31.196.45:5000
+Press CTRL+C to quit
+172.31.196.45 - - [17/Sep/2024 14:28:45] "GET / HTTP/1.1" 302 -
+172.31.196.45 - - [17/Sep/2024 14:28:45] "GET /login?next=/ HTTP/1.1" 200 -
+172.31.196.45 - - [17/Sep/2024 14:28:45] "GET /static/css/styles.css HTTP/1.1" 304 -
+172.31.196.45 - - [17/Sep/2024 14:28:46] "GET /static/js/main.js HTTP/1.1" 304 -
+172.31.196.45 - - [17/Sep/2024 14:29:04] "GET / HTTP/1.1" 302 -
+172.31.196.45 - - [17/Sep/2024 14:29:04] "GET /login?next=/ HTTP/1.1" 200 -
+172.31.196.45 - - [17/Sep/2024 14:29:04] "GET /static/css/styles.css HTTP/1.1" 200 -
+172.31.196.45 - - [17/Sep/2024 14:29:04] "GET /static/js/main.js HTTP/1.1" 200 -
+172.31.196.45 - - [17/Sep/2024 14:30:06] "POST /login HTTP/1.1" 302 -
+/home/runner/CRM/app.py:25: LegacyAPIWarning: The Query.get() method is considered legacy as of the 1.x series of SQLAlchemy and becomes a legacy construct in 2.0. The method is now available as Session.get() (deprecated since: 2.0) (Background on SQLAlchemy 2.0 at: https://sqlalche.me/e/b8d9)
+  return User.query.get(int(user_id))
+172.31.196.45 - - [17/Sep/2024 14:30:07] "GET / HTTP/1.1" 200 -
+172.31.196.45 - - [17/Sep/2024 14:30:08] "GET /static/css/styles.css HTTP/1.1" 304 -
+172.31.196.45 - - [17/Sep/2024 14:30:08] "GET /static/js/main.js HTTP/1.1" 304 -
+172.31.196.45 - - [17/Sep/2024 14:30:13] "GET /leads/ HTTP/1.1" 200 -
+172.31.196.45 - - [17/Sep/2024 14:30:13] "GET /static/css/styles.css HTTP/1.1" 304 -
+172.31.196.45 - - [17/Sep/2024 14:30:13] "GET /static/js/main.js HTTP/1.1" 304 -
+[2024-09-17 14:30:19,897] INFO in email_utils: Starting automated follow-ups process
+[2024-09-17 14:30:19,897] INFO in email_utils: Follow-up interval: 7 days
+[2024-09-17 14:30:19,897] INFO in email_utils: Lead score threshold: 50
+[2024-09-17 14:30:20,131] INFO in email_utils: Found 0 leads that need follow-up
+[2024-09-17 14:30:20,360] INFO in email_utils: Successfully sent follow-up emails to 0 leads.
+[2024-09-17 14:30:20,360] INFO in email_utils: Completed automated follow-ups process
+172.31.196.45 - - [17/Sep/2024 14:30:20] "GET /leads/trigger-followups HTTP/1.1" 302 -
+172.31.196.45 - - [17/Sep/2024 14:30:21] "GET /leads/ HTTP/1.1" 200 -
+172.31.196.45 - - [17/Sep/2024 14:30:21] "GET /static/js/main.js HTTP/1.1" 304 -
+172.31.196.45 - - [17/Sep/2024 14:30:21] "GET /static/css/styles.css HTTP/1.1" 304 -
+172.31.196.45 - - [17/Sep/2024 14:31:58] "GET /leads/1 HTTP/1.1" 200 -
+172.31.196.45 - - [17/Sep/2024 14:31:59] "GET /static/css/styles.css HTTP/1.1" 304 -
+172.31.196.45 - - [17/Sep/2024 14:31:59] "GET /static/js/main.js HTTP/1.1" 304 -
+172.31.196.45 - - [17/Sep/2024 14:32:07] "GET /leads/ HTTP/1.1" 200 -
+172.31.196.45 - - [17/Sep/2024 14:32:07] "GET /static/css/styles.css HTTP/1.1" 304 -
+172.31.196.45 - - [17/Sep/2024 14:32:07] "GET /static/js/main.js HTTP/1.1" 304 -
+[2024-09-17 14:32:13,736] ERROR in email_utils: Failed to send follow-up email to macnishio@gmail.com: (535, b'5.7.8 Username and Password not accepted. For more information, go to\n5.7.8  https://support.google.com/mail/?p=BadCredentials d9443c01a7336-207945da6a2sm50943145ad.57 - gsmtp')
+172.31.196.45 - - [17/Sep/2024 14:32:15] "GET /leads/1/send-follow-up HTTP/1.1" 302 -
+172.31.196.45 - - [17/Sep/2024 14:32:16] "GET /leads/1 HTTP/1.1" 200 -
+172.31.196.45 - - [17/Sep/2024 14:32:16] "GET /static/js/main.js HTTP/1.1" 304 -
+172.31.196.45 - - [17/Sep/2024 14:32:16] "GET /static/css/styles.css HTTP/1.1" 304 -
+172.31.196.45 - - [17/Sep/2024 14:32:31] "GET /dashboard HTTP/1.1" 200 -
+172.31.196.45 - - [17/Sep/2024 14:32:31] "GET /static/js/dashboard.js HTTP/1.1" 404 -
+172.31.196.45 - - [17/Sep/2024 14:32:31] "GET /static/css/styles.css HTTP/1.1" 304 -
+172.31.196.45 - - [17/Sep/2024 14:32:31] "GET /static/js/main.js HTTP/1.1" 304 -
+172.31.196.45 - - [17/Sep/2024 14:32:38] "GET /leads/ HTTP/1.1" 200 -
+172.31.196.45 - - [17/Sep/2024 14:32:39] "GET /static/css/styles.css HTTP/1.1" 304 -
+172.31.196.45 - - [17/Sep/2024 14:32:39] "GET /static/js/main.js HTTP/1.1" 304 -
+[2024-09-17 14:32:42,954] ERROR in app: Exception on /accounts/ [GET]
+Traceback (most recent call last):
+  File "/home/runner/CRM/.pythonlibs/lib/python3.11/site-packages/flask/app.py", line 1473, in wsgi_app
+    response = self.full_dispatch_request()
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/runner/CRM/.pythonlibs/lib/python3.11/site-packages/flask/app.py", line 882, in full_dispatch_request
+    rv = self.handle_user_exception(e)
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/runner/CRM/.pythonlibs/...

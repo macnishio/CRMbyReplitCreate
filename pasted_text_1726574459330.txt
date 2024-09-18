@@ -1,0 +1,94 @@
+HTTP/1.1" 200 -
+172.31.196.45 - - [17/Sep/2024 04:50:56] "GET /static/css/styles.css HTTP/1.1" 200 -
+172.31.196.45 - - [17/Sep/2024 04:50:56] "GET /static/js/main.js HTTP/1.1" 200 -
+[2024-09-17 04:52:01,443] INFO in app: Manually triggering automated follow-ups
+[2024-09-17 04:52:01,443] INFO in email_utils: Starting automated follow-ups process
+[2024-09-17 04:52:01,444] INFO in email_utils: Follow-up interval: 7 days
+[2024-09-17 04:52:01,444] INFO in email_utils: Lead score threshold: 50
+[2024-09-17 04:52:02,147] INFO in email_utils: Found 0 leads that need follow-up
+[2024-09-17 04:52:02,374] INFO in email_utils: Successfully sent follow-up emails to 0 leads.
+[2024-09-17 04:52:02,375] INFO in email_utils: Completed automated follow-ups process
+172.31.196.45 - - [17/Sep/2024 04:52:02] "GET /test_followups HTTP/1.1" 200
+
+2 hours ago
+•
+Read
+MN
+
+macnishio
+
+AI
+You've hit the usage limit for the Replit Agent. Your usage will reset after 2024-09-17 10:32:20+0000 (UTC).
+
+2 hours ago
+Congratulations, you are now a registered user!
+Automated follow-ups triggered manually. Check logs for details.
+
+[2024-09-17 04:50:54,881] INFO in app: CRM startup
+[2024-09-17 04:50:54,881] INFO in app: Starting scheduler
+[2024-09-17 04:50:54,882] INFO in app: Scheduler started
+
+Serving Flask app 'app'
+Debug mode: off
+WARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.
+Running on all addresses (0.0.0.0)
+Running on http://127.0.0.1:5000
+Running on http://172.31.196.45:5000
+Press CTRL+C to quit
+172.31.196.45 - - [17/Sep/2024 04:50:55] "GET / HTTP/1.1" 302 -
+172.31.196.45 - - [17/Sep/2024 04:50:55] "GET /login?next=/ HTTP/1.1" 200 -
+172.31.196.45 - - [17/Sep/2024 04:50:55] "GET /static/js/main.js HTTP/1.1" 304 -
+172.31.196.45 - - [17/Sep/2024 04:50:55] "GET /static/css/styles.css HTTP/1.1" 304 -
+172.31.196.45 - - [17/Sep/2024 04:50:56] "GET / HTTP/1.1" 302 -
+172.31.196.45 - - [17/Sep/2024 04:50:56] "GET /login?next=/ HTTP/1.1" 200 -
+172.31.196.45 - - [17/Sep/2024 04:50:56] "GET /static/css/styles.css HTTP/1.1" 200 -
+172.31.196.45 - - [17/Sep/2024 04:50:56] "GET /static/js/main.js HTTP/1.1" 200 -
+[2024-09-17 04:52:01,443] INFO in app: Manually triggering automated follow-ups
+[2024-09-17 04:52:01,443] INFO in email_utils: Starting automated follow-ups process
+[2024-09-17 04:52:01,444] INFO in email_utils: Follow-up interval: 7 days
+[2024-09-17 04:52:01,444] INFO in email_utils: Lead score threshold: 50
+[2024-09-17 04:52:02,147] INFO in email_utils: Found 0 leads that need follow-up
+[2024-09-17 04:52:02,374] INFO in email_utils: Successfully sent follow-up emails to 0 leads.
+[2024-09-17 04:52:02,375] INFO in email_utils: Completed automated follow-ups process
+172.31.196.45 - - [17/Sep/2024 04:52:02] "GET /test_followups HTTP/1.1" 200
+
+47 minutes ago
+MN
+
+macnishio
+Congratulations, you are now a registered user!
+Automated follow-ups triggered manually. Check logs for details.
+
+[2024-09-17 04:50:54,881] INFO in app: CRM startup
+[2024-09-17 04:50:54,881] INFO in app: Starting scheduler
+[2024-09-17 04:50:54,882] INFO in app: Scheduler started
+
+Serving Flask app 'app'
+Debug mode: off
+WARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.
+Running on all addresses (0.0.0.0)
+Running on http://127.0.0.1:5000
+Running on http://172.31.196.45:5000
+Press CTRL+C to quit
+172.31.196.45 - - [17/Sep/2024 04:50:55] "GET / HTTP/1.1" 302 -
+172.31.196.45 - - [17/Sep/2024 04:50:55] "GET /login?next=/ HTTP/1.1" 200 -
+172.31.196.45 - - [17/Sep/2024 04:50:55] "GET /static/js/main.js HTTP/1.1" 304 -
+172.31.196.45 - - [17/Sep/2024 04:50:55] "GET /static/css/styles.css HTTP/1.1" 304 -
+172.31.196.45 - - [17/Sep/2024 04:50:56] "GET / HTTP/1.1" 302 -
+172.31.196.45 - - [17/Sep/2024 04:50:56] "GET /login?next=/ HTTP/1.1" 200 -
+172.31.196.45 - - [17/Sep/2024 04:50:56] "GET /static/css/styles.css HTTP/1.1" 200 -
+172.31.196.45 - - [17/Sep/2024 04:50:56] "GET /static/js/main.js HTTP/1.1" 200 -
+[2024-09-17 04:52:01,443] INFO in app: Manually triggering automated follow-ups
+[2024-09-17 04:52:01,443] INFO in email_utils: Starting automated follow-ups process
+[2024-09-17 04:52:01,444] INFO in email_utils: Follow-up interval: 7 days
+[2024-09-17 04:52:01,444] INFO in email_utils: Lead score threshold: 50
+[2024-09-17 04:52:02,147] INFO in email_utils: Found 0 leads that need follow-up
+[2024-09-17 04:52:02,374] INFO in email_utils: Successfully sent follow-up emails to 0 leads.
+[2024-09-17 04:52:02,375] INFO in email_utils: Completed automated follow-ups process
+172.31.196.45 - - [17/Sep/2024 04:52:02] "GET /test_followups HTTP/1.1" 200
+
+46 minutes ago
+MN
+
+macnishio
+Thinking…
