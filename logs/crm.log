@@ -19,3 +19,9 @@ Traceback (most recent call last):
     lead_status = db.session.query(Lead.status, func.count(Lead.id)).filter_by(user_id=current_user.id).group_by(Lead.status).all()
                   ^^
 NameError: name 'db' is not defined
+2024-09-18 07:49:16,282 INFO: CRM startup [in /home/runner/CRM/app.py:64]
+2024-09-18 07:49:16,283 INFO: Starting scheduler [in /home/runner/CRM/app.py:71]
+2024-09-18 07:49:16,284 INFO: Scheduler started [in /home/runner/CRM/app.py:73]
+2024-09-18 08:10:44,034 INFO: CRM startup [in /home/runner/CRM/app.py:64]
+2024-09-18 08:10:44,035 INFO: Starting scheduler [in /home/runner/CRM/app.py:71]
+2024-09-18 08:10:44,037 INFO: Scheduler started [in /home/runner/CRM/app.py:73]

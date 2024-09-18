@@ -32,6 +32,14 @@ class Lead(db.Model):
     user_id: Mapped[int] = mapped_column(Integer, ForeignKey('user.id'))
     user: Mapped['User'] = relationship('User', backref='leads')
     score: Mapped[float] = mapped_column(Float, default=0.0)
+    
+    # New enriched data fields
+    full_name: Mapped[str] = mapped_column(String(255), nullable=True)
+    job_title: Mapped[str] = mapped_column(String(255), nullable=True)
+    company_name: Mapped[str] = mapped_column(String(255), nullable=True)
+    company_domain: Mapped[str] = mapped_column(String(255), nullable=True)
+    company_industry: Mapped[str] = mapped_column(String(255), nullable=True)
+    company_employee_count: Mapped[int] = mapped_column(Integer, nullable=True)
 
 class Opportunity(db.Model):
     id: Mapped[int] = mapped_column(Integer, primary_key=True)

@@ -32,7 +32,7 @@ def create_app():
     from routes.accounts import bp as accounts_bp
     from routes.reports import bp as reports_bp
     from routes.tracking import bp as tracking_bp
-    from routes.mobile import bp as mobile_bp  # Add this line
+    from routes.mobile import bp as mobile_bp
 
     app.register_blueprint(main_bp)
     app.register_blueprint(auth_bp)
@@ -41,7 +41,7 @@ def create_app():
     app.register_blueprint(accounts_bp)
     app.register_blueprint(reports_bp)
     app.register_blueprint(tracking_bp)
-    app.register_blueprint(mobile_bp)  # Add this line
+    app.register_blueprint(mobile_bp)
 
     with app.app_context():
         migrate = Migrate(app, db)
