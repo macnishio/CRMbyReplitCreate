@@ -1,51 +1,50 @@
-2024-09-18 04:40:24,734 ERROR: Traceback (most recent call last):
+2024-09-18 08:32:44,822 ERROR: Exception on /leads/ [GET] [in /home/runner/CRM/.pythonlibs/lib/python3.11/site-packages/flask/app.py:838]
+Traceback (most recent call last):
   File "/home/runner/CRM/.pythonlibs/lib/python3.11/site-packages/sqlalchemy/engine/base.py", line 1967, in _exec_single_context
     self.dialect.do_execute(
   File "/home/runner/CRM/.pythonlibs/lib/python3.11/site-packages/sqlalchemy/engine/default.py", line 941, in do_execute
     cursor.execute(statement, parameters)
-psycopg2.errors.NotNullViolation: null value in column "lead_id" of relation "opportunity" violates not-null constraint
-DETAIL:  Failing row contains (9, 西尾システムコンサルタントZoho導入支援, 2000000, Prospecting, 2024-09-30 00:00:00, 2024-09-18 04:40:24.278128, 1, 1, null).
+psycopg2.errors.UndefinedColumn: column lead.full_name does not exist
+LINE 1: ...ser_id AS lead_user_id, lead.score AS lead_score, lead.full_...
+                                                             ^
 
 
 The above exception was the direct cause of the following exception:
 
 Traceback (most recent call last):
-  File "/home/runner/CRM/routes/opportunities.py", line 35, in create_opportunity
-    db.session.commit()
-  File "/home/runner/CRM/.pythonlibs/lib/python3.11/site-packages/sqlalchemy/orm/scoping.py", line 597, in commit
-    return self._proxied.commit()
-           ^^^^^^^^^^^^^^^^^^^^^^
-  File "/home/runner/CRM/.pythonlibs/lib/python3.11/site-packages/sqlalchemy/orm/session.py", line 2028, in commit
-    trans.commit(_to_root=True)
-  File "<string>", line 2, in commit
-  File "/home/runner/CRM/.pythonlibs/lib/python3.11/site-packages/sqlalchemy/orm/state_changes.py", line 139, in _go
-    ret_value = fn(self, *arg, **kw)
-                ^^^^^^^^^^^^^^^^^^^^
-  File "/home/runner/CRM/.pythonlibs/lib/python3.11/site-packages/sqlalchemy/orm/session.py", line 1313, in commit
-    self._prepare_impl()
-  File "<string>", line 2, in _prepare_impl
-  File "/home/runner/CRM/.pythonlibs/lib/python3.11/site-packages/sqlalchemy/orm/state_changes.py", line 139, in _go
-    ret_value = fn(self, *arg, **kw)
-                ^^^^^^^^^^^^^^^^^^^^
-  File "/home/runner/CRM/.pythonlibs/lib/python3.11/site-packages/sqlalchemy/orm/session.py", line 1288, in _prepare_impl
-    self.session.flush()
-  File "/home/runner/CRM/.pythonlibs/lib/python3.11/site-packages/sqlalchemy/orm/session.py", line 4352, in flush
-    self._flush(objects)
-  File "/home/runner/CRM/.pythonlibs/lib/python3.11/site-packages/sqlalchemy/orm/session.py", line 4487, in _flush
-    with util.safe_reraise():
-  File "/home/runner/CRM/.pythonlibs/lib/python3.11/site-packages/sqlalchemy/util/langhelpers.py", line 146, in __exit__
-    raise exc_value.with_traceback(exc_tb)
-  File "/home/runner/CRM/.pythonlibs/lib/python3.11/site-packages/sqlalchemy/orm/session.py", line 4448, in _flush
-    flush_context.execute()
-  File "/home/runner/CRM/.pythonlibs/lib/python3.11/site-packages/sqlalchemy/orm/unitofwork.py", line 466, in execute
-    rec.execute(self)
-  File "/home/runner/CRM/.pythonlibs/lib/python3.11/site-packages/sqlalchemy/orm/unitofwork.py", line 642, in execute
-    util.preloaded.orm_persistence.save_obj(
-  File "/home/runner/CRM/.pythonlibs/lib/python3.11/site-packages/sqlalchemy/orm/persistence.py", line 93, in save_obj
-    _emit_insert_statements(
-  File "/home/runner/CRM/.pythonlibs/lib/python3.11/site-packages/sqlalchemy/orm/persistence.py", line 1233, in _emit_insert_statements
-    result = connection.execute(
-             ^^^^^^^^^^^^^^^^^^^
+  File "/home/runner/CRM/.pythonlibs/lib/python3.11/site-packages/flask/app.py", line 1473, in wsgi_app
+    response = self.full_dispatch_request()
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/runner/CRM/.pythonlibs/lib/python3.11/site-packages/flask/app.py", line 882, in full_dispatch_request
+    rv = self.handle_user_exception(e)
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/runner/CRM/.pythonlibs/lib/python3.11/site-packages/flask/app.py", line 880, in full_dispatch_request
+    rv = self.dispatch_request()
+         ^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/runner/CRM/.pythonlibs/lib/python3.11/site-packages/flask/app.py", line 865, in dispatch_request
+    return self.ensure_sync(self.view_functions[rule.endpoint])(**view_args)  # type: ignore[no-any-return]
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/runner/CRM/.pythonlibs/lib/python3.11/site-packages/flask_login/utils.py", line 290, in decorated_view
+    return current_app.ensure_sync(func)(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/runner/CRM/routes/leads.py", line 16, in list_leads
+    leads = Lead.query.filter_by(user_id=current_user.id).all()
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/runner/CRM/.pythonlibs/lib/python3.11/site-packages/sqlalchemy/orm/query.py", line 2673, in all
+    return self._iter().all()  # type: ignore
+           ^^^^^^^^^^^^
+  File "/home/runner/CRM/.pythonlibs/lib/python3.11/site-packages/sqlalchemy/orm/query.py", line 2827, in _iter
+    result: Union[ScalarResult[_T], Result[_T]] = self.session.execute(
+                                                  ^^^^^^^^^^^^^^^^^^^^^
+  File "/home/runner/CRM/.pythonlibs/lib/python3.11/site-packages/sqlalchemy/orm/session.py", line 2362, in execute
+    return self._execute_internal(
+           ^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/runner/CRM/.pythonlibs/lib/python3.11/site-packages/sqlalchemy/orm/session.py", line 2247, in _execute_internal
+    result: Result[Any] = compile_state_cls.orm_execute_statement(
+                          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/runner/CRM/.pythonlibs/lib/python3.11/site-packages/sqlalchemy/orm/context.py", line 293, in orm_execute_statement
+    result = conn.execute(
+             ^^^^^^^^^^^^^
   File "/home/runner/CRM/.pythonlibs/lib/python3.11/site-packages/sqlalchemy/engine/base.py", line 1418, in execute
     return meth(
            ^^^^^
@@ -66,27 +65,12 @@ Traceback (most recent call last):
     self.dialect.do_execute(
   File "/home/runner/CRM/.pythonlibs/lib/python3.11/site-packages/sqlalchemy/engine/default.py", line 941, in do_execute
     cursor.execute(statement, parameters)
-sqlalchemy.exc.IntegrityError: (psycopg2.errors.NotNullViolation) null value in column "lead_id" of relation "opportunity" violates not-null constraint
-DETAIL:  Failing row contains (9, 西尾システムコンサルタントZoho導入支援, 2000000, Prospecting, 2024-09-30 00:00:00, 2024-09-18 04:40:24.278128, 1, 1, null).
+sqlalchemy.exc.ProgrammingError: (psycopg2.errors.UndefinedColumn) column lead.full_name does not exist
+LINE 1: ...ser_id AS lead_user_id, lead.score AS lead_score, lead.full_...
+                                                             ^
 
-[SQL: INSERT INTO opportunity (name, amount, stage, close_date, created_at, user_id, account_id, lead_id) VALUES (%(name)s, %(amount)s, %(stage)s, %(close_date)s, %(created_at)s, %(user_id)s, %(account_id)s, %(lead_id)s) RETURNING opportunity.id]
-[parameters: {'name': '西尾システムコンサルタントZoho導入支援', 'amount': 2000000.0, 'stage': 'Prospecting', 'close_date': datetime.date(2024, 9, 30), 'created_at': datetime.datetime(2024, 9, 18, 4, 40, 24, 278128), 'user_id': 1, 'account_id': 1, 'lead_id': None}]
-(Background on this error at: https://sqlalche.me/e/20/gkpj)
- [in /home/runner/CRM/routes/opportunities.py:42]
-2024-09-18 04:42:08,172 INFO: CRM startup [in /home/runner/CRM/app.py:88]
-2024-09-18 04:42:08,174 INFO: Starting scheduler [in /home/runner/CRM/app.py:95]
-2024-09-18 04:42:08,175 INFO: Scheduler started [in /home/runner/CRM/app.py:97]
-2024-09-18 04:42:38,775 INFO: CRM startup [in /home/runner/CRM/app.py:62]
-2024-09-18 04:42:38,775 INFO: Starting scheduler [in /home/runner/CRM/app.py:69]
-2024-09-18 04:42:38,777 INFO: Scheduler started [in /home/runner/CRM/app.py:71]
-2024-09-18 04:43:43,784 INFO: Form validation failed: {} [in /home/runner/CRM/routes/opportunities.py:46]
-2024-09-18 04:43:53,766 INFO: Attempting to create opportunity: 西尾システムコンサルタントZoho導入支援 [in /home/runner/CRM/routes/opportunities.py:23]
-2024-09-18 04:43:53,766 INFO: Form data: {'name': '西尾システムコンサルタントZoho導入支援', 'amount': 2000000.0, 'stage': 'Prospecting', 'close_date': datetime.date(2024, 9, 30), 'account': 1, 'submit': True, 'csrf_token': 'IjQ0NjI3ZDVkYTVmYzlkMDQxNTE1NzU2NWRjNTBlNjQwMmFjMmI4OTEi.Zupafw.pa5A_KluSXIiTkMXchWXeIouq2U'} [in /home/runner/CRM/routes/opportunities.py:24]
-2024-09-18 04:43:53,767 INFO: Opportunity object created: {'_sa_instance_state': <sqlalchemy.orm.state.InstanceState object at 0x7fc48d12c170>, 'name': '西尾システムコンサルタントZoho導入支援', 'amount': 2000000.0, 'stage': 'Prospecting', 'close_date': datetime.date(2024, 9, 30), 'account_id': 1, 'user_id': 1} [in /home/runner/CRM/routes/opportunities.py:33]
-2024-09-18 04:43:53,767 INFO: Opportunity added to session [in /home/runner/CRM/routes/opportunities.py:35]
-2024-09-18 04:43:54,226 ERROR: Opportunity creation error: (psycopg2.errors.NotNullViolation) null value in column "lead_id" of relation "opportunity" violates not-null constraint
-DETAIL:  Failing row contains (10, 西尾システムコンサルタントZoho導入支援, 2000000, Prospecting, 2024-09-30 00:00:00, 2024-09-18 04:43:53.769237, 1, 1, null).
-
-[SQL: INSERT INTO opportunity (name, amount, stage, close_date, created_at, user_id, account_id, lead_id) VALUES (%(name)s, %(amount)s, %(stage)s, %(close_date)s, %(created_at)s, %(user_id)s, %(account_id)s, %(lead_id)s) RETURNING opportunity.id]
-[parameters: {'name': '西尾システムコンサルタントZoho導入支援', 'amount': 2000000.0, 'stage': 'Prospecting', 'close_date': datetime.date(2024, 9, 30), 'created_at': datetime.datetime(2024, 9, 18, 4, 43, 53, 769237), 'user_id': 1, 'account_id': 1, 'lead_id': None}]
-(Background on this error at: https://sqlalche.me/e/20/gkpj) [in /home/runner/CRM/routes/opportunities.py:42]
+[SQL: SELECT lead.id AS lead_id, lead.name AS lead_name, lead.email AS lead_email, lead.phone AS lead_phone, lead.status AS lead_status, lead.created_at AS lead_created_at, lead.last_contact AS lead_last_contact, lead.last_followup_email AS lead_last_followup_email, lead.last_followup_tracking_id AS lead_last_followup_tracking_id, lead.last_email_opened AS lead_last_email_opened, lead.user_id AS lead_user_id, lead.score AS lead_score, lead.full_name AS lead_full_name, lead.job_title AS lead_job_title, lead.company_name AS lead_company_name, lead.company_domain AS lead_company_domain, lead.company_industry AS lead_company_industry, lead.company_employee_count AS lead_company_employee_count 
+FROM lead 
+WHERE lead.user_id = %(user_id_1)s]
+[parameters: {'user_id_1': 1}]
+(Background on this error at: https://sqlalche.me/e/20/f405)

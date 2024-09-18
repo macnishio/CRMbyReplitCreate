@@ -10,15 +10,6 @@
         <p><strong>Phone:</strong> {{ lead.phone }}</p>
         <p><strong>Status:</strong> {{ lead.status }}</p>
         <p><strong>Created At:</strong> {{ lead.created_at.strftime('%Y-%m-%d %H:%M:%S') }}</p>
-        <p><strong>Score:</strong> {{ "%.2f"|format(lead.score) }}</p>
-        
-        <h2>Enriched Data</h2>
-        <p><strong>Full Name:</strong> {{ lead.full_name or 'N/A' }}</p>
-        <p><strong>Job Title:</strong> {{ lead.job_title or 'N/A' }}</p>
-        <p><strong>Company Name:</strong> {{ lead.company_name or 'N/A' }}</p>
-        <p><strong>Company Domain:</strong> {{ lead.company_domain or 'N/A' }}</p>
-        <p><strong>Company Industry:</strong> {{ lead.company_industry or 'N/A' }}</p>
-        <p><strong>Company Employee Count:</strong> {{ lead.company_employee_count or 'N/A' }}</p>
     </div>
     <div class="actions">
         <a href="{{ url_for('leads.edit_lead', id=lead.id) }}" class="button">Edit Lead</a>

@@ -1,4 +1,4 @@
-2024-09-18 04:52:03,611 ERROR: Exception on /reports/ [GET] [in /home/runner/CRM/.pythonlibs/lib/python3.11/site-packages/flask/app.py:838]
+2024-09-18 10:26:29,277 ERROR: Exception on /reports/ [GET] [in /home/runner/CRM/.pythonlibs/lib/python3.11/site-packages/flask/app.py:838]
 Traceback (most recent call last):
   File "/home/runner/CRM/.pythonlibs/lib/python3.11/site-packages/flask/app.py", line 1473, in wsgi_app
     response = self.full_dispatch_request()
@@ -19,9 +19,43 @@ Traceback (most recent call last):
     lead_status = db.session.query(Lead.status, func.count(Lead.id)).filter_by(user_id=current_user.id).group_by(Lead.status).all()
                   ^^
 NameError: name 'db' is not defined
-2024-09-18 07:49:16,282 INFO: CRM startup [in /home/runner/CRM/app.py:64]
-2024-09-18 07:49:16,283 INFO: Starting scheduler [in /home/runner/CRM/app.py:71]
-2024-09-18 07:49:16,284 INFO: Scheduler started [in /home/runner/CRM/app.py:73]
-2024-09-18 08:10:44,034 INFO: CRM startup [in /home/runner/CRM/app.py:64]
-2024-09-18 08:10:44,035 INFO: Starting scheduler [in /home/runner/CRM/app.py:71]
-2024-09-18 08:10:44,037 INFO: Scheduler started [in /home/runner/CRM/app.py:73]
+2024-09-18 10:29:52,768 ERROR: Exception on /reports/ [GET] [in /home/runner/CRM/.pythonlibs/lib/python3.11/site-packages/flask/app.py:838]
+Traceback (most recent call last):
+  File "/home/runner/CRM/.pythonlibs/lib/python3.11/site-packages/flask/app.py", line 1473, in wsgi_app
+    response = self.full_dispatch_request()
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/runner/CRM/.pythonlibs/lib/python3.11/site-packages/flask/app.py", line 882, in full_dispatch_request
+    rv = self.handle_user_exception(e)
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/runner/CRM/.pythonlibs/lib/python3.11/site-packages/flask/app.py", line 880, in full_dispatch_request
+    rv = self.dispatch_request()
+         ^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/runner/CRM/.pythonlibs/lib/python3.11/site-packages/flask/app.py", line 865, in dispatch_request
+    return self.ensure_sync(self.view_functions[rule.endpoint])(**view_args)  # type: ignore[no-any-return]
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/runner/CRM/.pythonlibs/lib/python3.11/site-packages/flask_login/utils.py", line 290, in decorated_view
+    return current_app.ensure_sync(func)(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/runner/CRM/routes/reports.py", line 13, in index
+    def index():
+                 
+NameError: name 'db' is not defined
+2024-09-18 10:30:05,900 INFO: CRM startup [in /home/runner/CRM/app.py:64]
+2024-09-18 10:30:05,901 INFO: Starting scheduler [in /home/runner/CRM/app.py:71]
+2024-09-18 10:30:05,902 INFO: Scheduler started [in /home/runner/CRM/app.py:73]
+2024-09-18 10:34:13,378 INFO: CRM startup [in /home/runner/CRM/app.py:64]
+2024-09-18 10:34:13,378 INFO: Starting scheduler [in /home/runner/CRM/app.py:71]
+2024-09-18 10:34:13,379 INFO: Scheduler started [in /home/runner/CRM/app.py:73]
+2024-09-18 10:37:54,652 INFO: CRM startup [in /home/runner/CRM/app.py:64]
+2024-09-18 10:37:54,654 INFO: Starting scheduler [in /home/runner/CRM/app.py:71]
+2024-09-18 10:37:54,657 INFO: Scheduler started [in /home/runner/CRM/app.py:73]
+2024-09-18 10:42:14,025 INFO: Follow-up email sent to macnishio@gmail.com [in /home/runner/CRM/email_utils.py:55]
+2024-09-18 10:42:21,167 INFO: Follow-up email sent to macnishio@gmail.com [in /home/runner/CRM/email_utils.py:55]
+2024-09-18 10:43:57,493 INFO: Form validation failed: {} [in /home/runner/CRM/routes/opportunities.py:47]
+2024-09-18 10:44:22,509 INFO: Attempting to create opportunity: 西尾システムコンサルタントZoho導入支援 [in /home/runner/CRM/routes/opportunities.py:23]
+2024-09-18 10:44:22,510 INFO: Form data: {'name': '西尾システムコンサルタントZoho導入支援', 'amount': 2000000.0, 'stage': 'Qualification', 'close_date': datetime.date(2024, 10, 31), 'account': 2, 'submit': True, 'csrf_token': 'ImNmMWNiOWQxM2RhYTliMDIzMTAzNjY0MGEwODcxM2Y1MWY3YThiNTYi.Zuqu7Q.c9FggGpYvewsusMfU2-i9foi79U'} [in /home/runner/CRM/routes/opportunities.py:24]
+2024-09-18 10:44:22,510 INFO: Opportunity object created: {'_sa_instance_state': <sqlalchemy.orm.state.InstanceState object at 0x7fb7ad99ba70>, 'name': '西尾システムコンサルタントZoho導入支援', 'amount': 2000000.0, 'stage': 'Qualification', 'close_date': datetime.date(2024, 10, 31), 'account_id': 2, 'user_id': 2, 'lead_id': None} [in /home/runner/CRM/routes/opportunities.py:34]
+2024-09-18 10:44:22,510 INFO: Opportunity added to session [in /home/runner/CRM/routes/opportunities.py:36]
+2024-09-18 10:44:22,977 INFO: Opportunity committed to database [in /home/runner/CRM/routes/opportunities.py:38]
+2024-09-18 10:49:10,164 INFO: Starting automated follow-ups process [in /home/runner/CRM/email_utils.py:61]
+2024-09-18 10:49:10,394 INFO: Successfully sent follow-up emails to 0 leads. [in /home/runner/CRM/email_utils.py:81]
