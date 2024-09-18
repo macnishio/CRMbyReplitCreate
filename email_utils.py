@@ -1,5 +1,5 @@
 from flask import current_app, url_for
-from flask_mail import Message, smtplib
+from flask_mail import Message
 from extensions import db, mail
 from models import Lead, Opportunity
 from datetime import datetime, timedelta
@@ -48,35 +48,19 @@ def send_follow_up_email(lead):
     msg.html = body + tracking_pixel
     
     try:
-        current_app.logger.info(f"Attempting to send email to {lead.email}")
-        current_app.logger.debug(f"MAIL_SERVER: {current_app.config['MAIL_SERVER']}")
-        current_app.logger.debug(f"MAIL_PORT: {current_app.config['MAIL_PORT']}")
-        current_app.logger.debug(f"MAIL_USE_TLS: {current_app.config['MAIL_USE_TLS']}")
-        current_app.logger.debug(f"MAIL_USERNAME: {current_app.config['MAIL_USERNAME']}")
-        current_app.logger.debug(f"MAIL_DEBUG: {current_app.config['MAIL_DEBUG']}")
-        
         mail.send(msg)
         lead.last_followup_email = datetime.utcnow()
         lead.last_followup_tracking_id = tracking_id
         db.session.commit()
         current_app.logger.info(f"Follow-up email sent to {lead.email}")
-    except smtplib.SMTPAuthenticationError as e:
-        current_app.logger.error(f"SMTP Authentication Error: {str(e)}")
-        raise Exception(f"Failed to authenticate with the email server. Please check your email credentials.")
-    except smtplib.SMTPException as e:
-        current_app.logger.error(f"SMTP Error: {str(e)}")
-        raise Exception(f"An error occurred while sending the email: {str(e)}")
     except Exception as e:
         current_app.logger.error(f"Failed to send follow-up email to {lead.email}: {str(e)}")
-        raise Exception(f"An unexpected error occurred while sending the email: {str(e)}")
+        raise
 
 def send_automated_follow_ups():
     current_app.logger.info("Starting automated follow-ups process")
     follow_up_interval = current_app.config['FOLLOW_UP_INTERVAL_DAYS']
     lead_score_threshold = current_app.config['LEAD_SCORE_THRESHOLD']
-    
-    current_app.logger.info(f"Follow-up interval: {follow_up_interval} days")
-    current_app.logger.info(f"Lead score threshold: {lead_score_threshold}")
     
     cutoff_date = datetime.utcnow() - timedelta(days=follow_up_interval)
     
@@ -85,10 +69,7 @@ def send_automated_follow_ups():
         Lead.score >= lead_score_threshold
     ).all()
 
-    current_app.logger.info(f"Found {len(leads_to_follow_up)} leads that need follow-up")
-
     for lead in leads_to_follow_up:
-        current_app.logger.info(f"Sending follow-up email to {lead.email}")
         try:
             send_follow_up_email(lead)
             lead.last_contact = datetime.utcnow()
@@ -98,7 +79,6 @@ def send_automated_follow_ups():
             db.session.rollback()
     
     current_app.logger.info(f"Successfully sent follow-up emails to {len(leads_to_follow_up)} leads.")
-    current_app.logger.info("Completed automated follow-ups process")
 
 def needs_follow_up(lead):
     follow_up_interval = current_app.config['FOLLOW_UP_INTERVAL_DAYS']

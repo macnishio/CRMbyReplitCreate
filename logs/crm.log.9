@@ -1,4 +1,4 @@
-2024-09-17 15:36:52,127 ERROR: Exception on /accounts/create [GET] [in /home/runner/CRM/.pythonlibs/lib/python3.11/site-packages/flask/app.py:838]
+2024-09-17 15:44:54,867 ERROR: Exception on /accounts/create [GET] [in /home/runner/CRM/.pythonlibs/lib/python3.11/site-packages/flask/app.py:838]
 Traceback (most recent call last):
   File "/home/runner/CRM/.pythonlibs/lib/python3.11/site-packages/flask/app.py", line 1473, in wsgi_app
     response = self.full_dispatch_request()
@@ -39,7 +39,7 @@ Traceback (most recent call last):
   File "/home/runner/CRM/.pythonlibs/lib/python3.11/site-packages/flask/templating.py", line 99, in _get_source_fast
     raise TemplateNotFound(template)
 jinja2.exceptions.TemplateNotFound: accounts/create.html
-2024-09-17 15:37:08,734 ERROR: Exception on /reports/ [GET] [in /home/runner/CRM/.pythonlibs/lib/python3.11/site-packages/flask/app.py:838]
+2024-09-17 15:48:04,495 ERROR: Exception on /reports/ [GET] [in /home/runner/CRM/.pythonlibs/lib/python3.11/site-packages/flask/app.py:838]
 Traceback (most recent call last):
   File "/home/runner/CRM/.pythonlibs/lib/python3.11/site-packages/flask/app.py", line 1473, in wsgi_app
     response = self.full_dispatch_request()
@@ -60,10 +60,10 @@ Traceback (most recent call last):
     lead_status = db.session.query(Lead.status, func.count(Lead.id)).filter_by(user_id=current_user.id).group_by(Lead.status).all()
                   ^^
 NameError: name 'db' is not defined
-2024-09-17 15:38:32,981 INFO: CRM startup [in /home/runner/CRM/app.py:74]
-2024-09-17 15:38:32,982 INFO: Starting scheduler [in /home/runner/CRM/app.py:81]
-2024-09-17 15:38:32,983 INFO: Scheduler started [in /home/runner/CRM/app.py:83]
-2024-09-17 15:38:52,720 ERROR: Exception on /accounts/create [GET] [in /home/runner/CRM/.pythonlibs/lib/python3.11/site-packages/flask/app.py:838]
+2024-09-17 19:10:47,752 INFO: CRM startup [in /home/runner/CRM/app.py:74]
+2024-09-17 19:10:47,752 INFO: Starting scheduler [in /home/runner/CRM/app.py:81]
+2024-09-17 19:10:47,754 INFO: Scheduler started [in /home/runner/CRM/app.py:83]
+2024-09-17 19:11:48,950 ERROR: Exception on /accounts/create [GET] [in /home/runner/CRM/.pythonlibs/lib/python3.11/site-packages/flask/app.py:838]
 Traceback (most recent call last):
   File "/home/runner/CRM/.pythonlibs/lib/python3.11/site-packages/flask/app.py", line 1473, in wsgi_app
     response = self.full_dispatch_request()
@@ -104,3 +104,6 @@ Traceback (most recent call last):
   File "/home/runner/CRM/.pythonlibs/lib/python3.11/site-packages/flask/templating.py", line 99, in _get_source_fast
     raise TemplateNotFound(template)
 jinja2.exceptions.TemplateNotFound: accounts/create.html
+2024-09-18 01:55:08,843 INFO: CRM startup [in /home/runner/CRM/app.py:74]
+2024-09-18 01:55:08,844 INFO: Starting scheduler [in /home/runner/CRM/app.py:81]
+2024-09-18 01:55:08,845 INFO: Scheduler started [in /home/runner/CRM/app.py:83]

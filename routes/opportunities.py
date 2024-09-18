@@ -21,6 +21,7 @@ def create_opportunity():
     if form.validate_on_submit():
         try:
             current_app.logger.info(f"Attempting to create opportunity: {form.name.data}")
+            current_app.logger.info(f"Form data: {form.data}")
             opportunity = Opportunity(
                 name=form.name.data,
                 amount=form.amount.data,
@@ -29,7 +30,7 @@ def create_opportunity():
                 account_id=form.account.data,
                 user_id=current_user.id
             )
-            current_app.logger.info(f"Opportunity object created: {opportunity}")
+            current_app.logger.info(f"Opportunity object created: {opportunity.__dict__}")
             db.session.add(opportunity)
             current_app.logger.info("Opportunity added to session")
             db.session.commit()
