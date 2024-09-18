@@ -35,7 +35,7 @@ class Lead(db.Model):
 
 class Opportunity(db.Model):
     id: Mapped[int] = mapped_column(Integer, primary_key=True)
-    name: Mapped[str] = mapped_column(String(100), nullable=False)
+    name: Mapped[str] = mapped_column(String(255), nullable=False)
     amount: Mapped[float] = mapped_column(Float)
     stage: Mapped[str] = mapped_column(String(20), default='Prospecting')
     close_date: Mapped[datetime] = mapped_column(DateTime)

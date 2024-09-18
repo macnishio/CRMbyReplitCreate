@@ -1,4 +1,4 @@
-2024-09-17 14:39:40,685 ERROR: Exception on /accounts/ [GET] [in /home/runner/CRM/.pythonlibs/lib/python3.11/site-packages/flask/app.py:838]
+2024-09-17 15:13:25,428 ERROR: Exception on /leads/1/send-follow-up [GET] [in /home/runner/CRM/.pythonlibs/lib/python3.11/site-packages/flask/app.py:838]
 Traceback (most recent call last):
   File "/home/runner/CRM/.pythonlibs/lib/python3.11/site-packages/flask/app.py", line 1473, in wsgi_app
     response = self.full_dispatch_request()
@@ -15,36 +15,8 @@ Traceback (most recent call last):
   File "/home/runner/CRM/.pythonlibs/lib/python3.11/site-packages/flask_login/utils.py", line 290, in decorated_view
     return current_app.ensure_sync(func)(*args, **kwargs)
            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  File "/home/runner/CRM/routes/accounts.py", line 13, in list_accounts
-    return render_template('accounts/list.html', accounts=accounts)
-           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  File "/home/runner/CRM/.pythonlibs/lib/python3.11/site-packages/flask/templating.py", line 149, in render_template
-    template = app.jinja_env.get_or_select_template(template_name_or_list)
-               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  File "/home/runner/CRM/.pythonlibs/lib/python3.11/site-packages/jinja2/environment.py", line 1084, in get_or_select_template
-    return self.get_template(template_name_or_list, parent, globals)
-           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  File "/home/runner/CRM/.pythonlibs/lib/python3.11/site-packages/jinja2/environment.py", line 1013, in get_template
-    return self._load_template(name, globals)
-           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  File "/home/runner/CRM/.pythonlibs/lib/python3.11/site-packages/jinja2/environment.py", line 972, in _load_template
-    template = self.loader.load(self, name, self.make_globals(globals))
-               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  File "/home/runner/CRM/.pythonlibs/lib/python3.11/site-packages/jinja2/loaders.py", line 126, in load
-    source, filename, uptodate = self.get_source(environment, name)
-                                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  File "/home/runner/CRM/.pythonlibs/lib/python3.11/site-packages/flask/templating.py", line 65, in get_source
-    return self._get_source_fast(environment, template)
-           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  File "/home/runner/CRM/.pythonlibs/lib/python3.11/site-packages/flask/templating.py", line 99, in _get_source_fast
-    raise TemplateNotFound(template)
-jinja2.exceptions.TemplateNotFound: accounts/list.html
-2024-09-17 15:04:42,141 INFO: CRM startup [in /home/runner/CRM/app.py:74]
-2024-09-17 15:04:42,144 INFO: Starting scheduler [in /home/runner/CRM/app.py:81]
-2024-09-17 15:04:42,145 INFO: Scheduler started [in /home/runner/CRM/app.py:83]
-2024-09-17 15:06:32,181 ERROR: SMTP Authentication Error: (535, b'5.7.8 Username and Password not accepted. For more information, go to\n5.7.8  https://support.google.com/mail/?p=BadCredentials d2e1a72fcca58-71944b7b11bsm5439206b3a.98 - gsmtp') [in /home/runner/CRM/email_utils.py:60]
-2024-09-17 15:06:32,181 ERROR: Exception on /leads/1/send-follow-up [GET] [in /home/runner/CRM/.pythonlibs/lib/python3.11/site-packages/flask/app.py:838]
-Traceback (most recent call last):
+  File "/home/runner/CRM/routes/leads.py", line 85, in send_individual_follow_up
+    send_follow_up_email(lead)
   File "/home/runner/CRM/email_utils.py", line 54, in send_follow_up_email
     mail.send(msg)
   File "/home/runner/CRM/.pythonlibs/lib/python3.11/site-packages/flask_mail/__init__.py", line 539, in send
@@ -52,16 +24,57 @@ Traceback (most recent call last):
   File "/home/runner/CRM/.pythonlibs/lib/python3.11/site-packages/flask_mail/__init__.py", line 127, in __enter__
     self.host = self.configure_host()
                 ^^^^^^^^^^^^^^^^^^^^^
-  File "/home/runner/CRM/.pythonlibs/lib/python3.11/site-packages/flask_mail/__init__.py", line 152, in configure_host
-    host.login(self.mail.username, self.mail.password)
-  File "/nix/store/f98g7xbckgqbkagdvpzc2r6lv3h1p9ki-python3-3.11.9/lib/python3.11/smtplib.py", line 750, in login
-    raise last_exception
-  File "/nix/store/f98g7xbckgqbkagdvpzc2r6lv3h1p9ki-python3-3.11.9/lib/python3.11/smtplib.py", line 739, in login
-    (code, resp) = self.auth(
-                   ^^^^^^^^^^
-  File "/nix/store/f98g7xbckgqbkagdvpzc2r6lv3h1p9ki-python3-3.11.9/lib/python3.11/smtplib.py", line 662, in auth
-    raise SMTPAuthenticationError(code, resp)
-smtplib.SMTPAuthenticationError: (535, b'5.7.8 Username and Password not accepted. For more information, go to\n5.7.8  https://support.google.com/mail/?p=BadCredentials d2e1a72fcca58-71944b7b11bsm5439206b3a.98 - gsmtp')
+  File "/home/runner/CRM/.pythonlibs/lib/python3.11/site-packages/flask_mail/__init__.py", line 144, in configure_host
+    host = smtplib.SMTP(self.mail.server, self.mail.port)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/nix/store/f98g7xbckgqbkagdvpzc2r6lv3h1p9ki-python3-3.11.9/lib/python3.11/smtplib.py", line 255, in __init__
+    (code, msg) = self.connect(host, port)
+                  ^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/nix/store/f98g7xbckgqbkagdvpzc2r6lv3h1p9ki-python3-3.11.9/lib/python3.11/smtplib.py", line 341, in connect
+    self.sock = self._get_socket(host, port, self.timeout)
+                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/nix/store/f98g7xbckgqbkagdvpzc2r6lv3h1p9ki-python3-3.11.9/lib/python3.11/smtplib.py", line 312, in _get_socket
+    return socket.create_connection((host, port), timeout,
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/nix/store/f98g7xbckgqbkagdvpzc2r6lv3h1p9ki-python3-3.11.9/lib/python3.11/socket.py", line 827, in create_connection
+    for res in getaddrinfo(host, port, 0, SOCK_STREAM):
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/nix/store/f98g7xbckgqbkagdvpzc2r6lv3h1p9ki-python3-3.11.9/lib/python3.11/socket.py", line 962, in getaddrinfo
+    for res in _socket.getaddrinfo(host, port, family, type, proto, flags):
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+socket.gaierror: [Errno -2] Name or service not known
+2024-09-17 15:17:21,252 INFO: CRM startup [in /home/runner/CRM/app.py:74]
+2024-09-17 15:17:21,252 INFO: Starting scheduler [in /home/runner/CRM/app.py:81]
+2024-09-17 15:17:21,253 INFO: Scheduler started [in /home/runner/CRM/app.py:83]
+2024-09-17 15:18:52,695 ERROR: Failed to send follow-up email to makoto@team240.net: [Errno -2] Name or service not known [in /home/runner/CRM/email_utils.py:64]
+2024-09-17 15:18:52,695 ERROR: Exception on /leads/2/send-follow-up [GET] [in /home/runner/CRM/.pythonlibs/lib/python3.11/site-packages/flask/app.py:838]
+Traceback (most recent call last):
+  File "/home/runner/CRM/email_utils.py", line 52, in send_follow_up_email
+    mail.send(msg)
+  File "/home/runner/CRM/.pythonlibs/lib/python3.11/site-packages/flask_mail/__init__.py", line 539, in send
+    with self.connect() as connection:
+  File "/home/runner/CRM/.pythonlibs/lib/python3.11/site-packages/flask_mail/__init__.py", line 127, in __enter__
+    self.host = self.configure_host()
+                ^^^^^^^^^^^^^^^^^^^^^
+  File "/home/runner/CRM/.pythonlibs/lib/python3.11/site-packages/flask_mail/__init__.py", line 144, in configure_host
+    host = smtplib.SMTP(self.mail.server, self.mail.port)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/nix/store/f98g7xbckgqbkagdvpzc2r6lv3h1p9ki-python3-3.11.9/lib/python3.11/smtplib.py", line 255, in __init__
+    (code, msg) = self.connect(host, port)
+                  ^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/nix/store/f98g7xbckgqbkagdvpzc2r6lv3h1p9ki-python3-3.11.9/lib/python3.11/smtplib.py", line 341, in connect
+    self.sock = self._get_socket(host, port, self.timeout)
+                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/nix/store/f98g7xbckgqbkagdvpzc2r6lv3h1p9ki-python3-3.11.9/lib/python3.11/smtplib.py", line 312, in _get_socket
+    return socket.create_connection((host, port), timeout,
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/nix/store/f98g7xbckgqbkagdvpzc2r6lv3h1p9ki-python3-3.11.9/lib/python3.11/socket.py", line 827, in create_connection
+    for res in getaddrinfo(host, port, 0, SOCK_STREAM):
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/nix/store/f98g7xbckgqbkagdvpzc2r6lv3h1p9ki-python3-3.11.9/lib/python3.11/socket.py", line 962, in getaddrinfo
+    for res in _socket.getaddrinfo(host, port, family, type, proto, flags):
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+socket.gaierror: [Errno -2] Name or service not known
 
 During handling of the above exception, another exception occurred:
 
@@ -83,13 +96,10 @@ Traceback (most recent call last):
            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
   File "/home/runner/CRM/routes/leads.py", line 85, in send_individual_follow_up
     send_follow_up_email(lead)
-  File "/home/runner/CRM/email_utils.py", line 61, in send_follow_up_email
-    raise Exception("Failed to authenticate with the email server. Please check your email credentials.")
-Exception: Failed to authenticate with the email server. Please check your email credentials.
-2024-09-17 15:12:32,052 INFO: CRM startup [in /home/runner/CRM/app.py:74]
-2024-09-17 15:12:32,053 INFO: Starting scheduler [in /home/runner/CRM/app.py:81]
-2024-09-17 15:12:32,054 INFO: Scheduler started [in /home/runner/CRM/app.py:83]
-2024-09-17 15:12:58,816 INFO: CRM startup [in /home/runner/CRM/app.py:74]
-2024-09-17 15:12:58,816 INFO: Starting scheduler [in /home/runner/CRM/app.py:81]
-2024-09-17 15:12:58,818 INFO: Scheduler started [in /home/runner/CRM/app.py:83]
-2024-09-17 15:13:25,428 ERROR: Failed to send follow-up email to macnishio@gmail.com: [Errno -2] Name or service not known [in /home/runner/CRM/email_utils.py:63]
+  File "/home/runner/CRM/email_utils.py", line 65, in send_follow_up_email
+    raise Exception(f"An unexpected error occurred while sending the email: {str(e)}")
+Exception: An unexpected error occurred while sending the email: [Errno -2] Name or service not known
+2024-09-17 15:21:23,760 INFO: CRM startup [in /home/runner/CRM/app.py:74]
+2024-09-17 15:21:23,760 INFO: Starting scheduler [in /home/runner/CRM/app.py:81]
+2024-09-17 15:21:23,761 INFO: Scheduler started [in /home/runner/CRM/app.py:83]
+2024-09-17 15:22:08,650 ERROR: DNS lookup failed: [Errno -2] Name or service not known [in /home/runner/CRM/email_utils.py:59]
