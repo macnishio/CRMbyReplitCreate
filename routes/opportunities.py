@@ -28,7 +28,8 @@ def create_opportunity():
                 stage=form.stage.data,
                 close_date=form.close_date.data,
                 account_id=form.account.data,
-                user_id=current_user.id
+                user_id=current_user.id,
+                lead_id=None  # Set to None by default
             )
             current_app.logger.info(f"Opportunity object created: {opportunity.__dict__}")
             db.session.add(opportunity)
