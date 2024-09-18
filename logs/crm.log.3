@@ -1,32 +1,16 @@
-2024-09-18 01:57:00,572 ERROR: Exception on /opportunities/create [POST] [in /home/runner/CRM/.pythonlibs/lib/python3.11/site-packages/flask/app.py:838]
-Traceback (most recent call last):
+2024-09-18 04:28:15,054 ERROR: Traceback (most recent call last):
   File "/home/runner/CRM/.pythonlibs/lib/python3.11/site-packages/sqlalchemy/engine/base.py", line 1967, in _exec_single_context
     self.dialect.do_execute(
   File "/home/runner/CRM/.pythonlibs/lib/python3.11/site-packages/sqlalchemy/engine/default.py", line 941, in do_execute
     cursor.execute(statement, parameters)
 psycopg2.errors.NotNullViolation: null value in column "lead_id" of relation "opportunity" violates not-null constraint
-DETAIL:  Failing row contains (1, 西尾システムコンサルタントZoho導入支援, 2000000, Prospecting, 2024-09-30 00:00:00, 2024-09-18 01:57:00.105002, 1, 1, null).
+DETAIL:  Failing row contains (5, 西尾システムコンサルタントZoho導入支援, 2000000, Prospecting, 2024-09-30 00:00:00, 2024-09-18 04:28:14.586458, 1, 1, null).
 
 
 The above exception was the direct cause of the following exception:
 
 Traceback (most recent call last):
-  File "/home/runner/CRM/.pythonlibs/lib/python3.11/site-packages/flask/app.py", line 1473, in wsgi_app
-    response = self.full_dispatch_request()
-               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  File "/home/runner/CRM/.pythonlibs/lib/python3.11/site-packages/flask/app.py", line 882, in full_dispatch_request
-    rv = self.handle_user_exception(e)
-         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  File "/home/runner/CRM/.pythonlibs/lib/python3.11/site-packages/flask/app.py", line 880, in full_dispatch_request
-    rv = self.dispatch_request()
-         ^^^^^^^^^^^^^^^^^^^^^^^
-  File "/home/runner/CRM/.pythonlibs/lib/python3.11/site-packages/flask/app.py", line 865, in dispatch_request
-    return self.ensure_sync(self.view_functions[rule.endpoint])(**view_args)  # type: ignore[no-any-return]
-           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  File "/home/runner/CRM/.pythonlibs/lib/python3.11/site-packages/flask_login/utils.py", line 290, in decorated_view
-    return current_app.ensure_sync(func)(*args, **kwargs)
-           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  File "/home/runner/CRM/routes/opportunities.py", line 30, in create_opportunity
+  File "/home/runner/CRM/routes/opportunities.py", line 35, in create_opportunity
     db.session.commit()
   File "/home/runner/CRM/.pythonlibs/lib/python3.11/site-packages/sqlalchemy/orm/scoping.py", line 597, in commit
     return self._proxied.commit()
@@ -83,17 +67,22 @@ Traceback (most recent call last):
   File "/home/runner/CRM/.pythonlibs/lib/python3.11/site-packages/sqlalchemy/engine/default.py", line 941, in do_execute
     cursor.execute(statement, parameters)
 sqlalchemy.exc.IntegrityError: (psycopg2.errors.NotNullViolation) null value in column "lead_id" of relation "opportunity" violates not-null constraint
-DETAIL:  Failing row contains (1, 西尾システムコンサルタントZoho導入支援, 2000000, Prospecting, 2024-09-30 00:00:00, 2024-09-18 01:57:00.105002, 1, 1, null).
+DETAIL:  Failing row contains (5, 西尾システムコンサルタントZoho導入支援, 2000000, Prospecting, 2024-09-30 00:00:00, 2024-09-18 04:28:14.586458, 1, 1, null).
 
 [SQL: INSERT INTO opportunity (name, amount, stage, close_date, created_at, user_id, account_id, lead_id) VALUES (%(name)s, %(amount)s, %(stage)s, %(close_date)s, %(created_at)s, %(user_id)s, %(account_id)s, %(lead_id)s) RETURNING opportunity.id]
-[parameters: {'name': '西尾システムコンサルタントZoho導入支援', 'amount': 2000000.0, 'stage': 'Prospecting', 'close_date': datetime.date(2024, 9, 30), 'created_at': datetime.datetime(2024, 9, 18, 1, 57, 0, 105002), 'user_id': 1, 'account_id': 1, 'lead_id': None}]
+[parameters: {'name': '西尾システムコンサルタントZoho導入支援', 'amount': 2000000.0, 'stage': 'Prospecting', 'close_date': datetime.date(2024, 9, 30), 'created_at': datetime.datetime(2024, 9, 18, 4, 28, 14, 586458), 'user_id': 1, 'account_id': 1, 'lead_id': None}]
 (Background on this error at: https://sqlalche.me/e/20/gkpj)
-2024-09-18 02:00:56,766 INFO: CRM startup [in /home/runner/CRM/app.py:87]
-2024-09-18 02:00:56,767 INFO: Starting scheduler [in /home/runner/CRM/app.py:94]
-2024-09-18 02:00:56,768 INFO: Scheduler started [in /home/runner/CRM/app.py:96]
-2024-09-18 02:03:24,495 ERROR: Opportunity creation error: (psycopg2.errors.NotNullViolation) null value in column "lead_id" of relation "opportunity" violates not-null constraint
-DETAIL:  Failing row contains (2, 西尾システムコンサルタントZoho導入支援, 2000000, Prospecting, 2024-09-30 00:00:00, 2024-09-18 02:03:24.035583, 1, 1, null).
+ [in /home/runner/CRM/routes/opportunities.py:42]
+2024-09-18 04:30:42,703 INFO: CRM startup [in /home/runner/CRM/app.py:87]
+2024-09-18 04:30:42,703 INFO: Starting scheduler [in /home/runner/CRM/app.py:94]
+2024-09-18 04:30:42,705 INFO: Scheduler started [in /home/runner/CRM/app.py:96]
+2024-09-18 04:34:41,066 INFO: Form validation failed: {} [in /home/runner/CRM/routes/opportunities.py:45]
+2024-09-18 04:34:53,347 INFO: Attempting to create opportunity: 西尾システムコンサルタントZoho導入支援 [in /home/runner/CRM/routes/opportunities.py:23]
+2024-09-18 04:34:53,347 INFO: Opportunity object created: <Opportunity (transient 140625999641296)> [in /home/runner/CRM/routes/opportunities.py:32]
+2024-09-18 04:34:53,348 INFO: Opportunity added to session [in /home/runner/CRM/routes/opportunities.py:34]
+2024-09-18 04:34:53,817 ERROR: Opportunity creation error: (psycopg2.errors.NotNullViolation) null value in column "lead_id" of relation "opportunity" violates not-null constraint
+DETAIL:  Failing row contains (6, 西尾システムコンサルタントZoho導入支援, 2000000, Qualification, 2024-09-30 00:00:00, 2024-09-18 04:34:53.349457, 1, 1, null).
 
 [SQL: INSERT INTO opportunity (name, amount, stage, close_date, created_at, user_id, account_id, lead_id) VALUES (%(name)s, %(amount)s, %(stage)s, %(close_date)s, %(created_at)s, %(user_id)s, %(account_id)s, %(lead_id)s) RETURNING opportunity.id]
-[parameters: {'name': '西尾システムコンサルタントZoho導入支援', 'amount': 2000000.0, 'stage': 'Prospecting', 'close_date': datetime.date(2024, 9, 30), 'created_at': datetime.datetime(2024, 9, 18, 2, 3, 24, 35583), 'user_id': 1, 'account_id': 1, 'lead_id': None}]
-(Background on this error at: https://sqlalche.me/e/20/gkpj) [in /home/runner/CRM/routes/opportunities.py:37]
+[parameters: {'name': '西尾システムコンサルタントZoho導入支援', 'amount': 2000000.0, 'stage': 'Qualification', 'close_date': datetime.date(2024, 9, 30), 'created_at': datetime.datetime(2024, 9, 18, 4, 34, 53, 349457), 'user_id': 1, 'account_id': 1, 'lead_id': None}]
+(Background on this error at: https://sqlalche.me/e/20/gkpj) [in /home/runner/CRM/routes/opportunities.py:41]

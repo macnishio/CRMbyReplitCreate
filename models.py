@@ -36,15 +36,15 @@ class Lead(db.Model):
 class Opportunity(db.Model):
     id: Mapped[int] = mapped_column(Integer, primary_key=True)
     name: Mapped[str] = mapped_column(String(255), nullable=False)
-    amount: Mapped[float] = mapped_column(Float)
-    stage: Mapped[str] = mapped_column(String(20), default='Prospecting')
-    close_date: Mapped[datetime] = mapped_column(DateTime)
+    amount: Mapped[float] = mapped_column(Float, nullable=False)
+    stage: Mapped[str] = mapped_column(String(50), nullable=False)
+    close_date: Mapped[datetime] = mapped_column(DateTime, nullable=False)
     created_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow)
-    user_id: Mapped[int] = mapped_column(Integer, ForeignKey('user.id'))
+    user_id: Mapped[int] = mapped_column(Integer, ForeignKey('user.id'), nullable=False)
     user: Mapped['User'] = relationship('User', backref='opportunities')
-    account_id: Mapped[int] = mapped_column(Integer, ForeignKey('account.id'))
+    account_id: Mapped[int] = mapped_column(Integer, ForeignKey('account.id'), nullable=False)
     account: Mapped['Account'] = relationship('Account', backref='opportunities')
-    lead_id: Mapped[int] = mapped_column(Integer, ForeignKey('lead.id'))
+    lead_id: Mapped[int] = mapped_column(Integer, ForeignKey('lead.id'), nullable=True)
     lead: Mapped['Lead'] = relationship('Lead', backref='opportunities')
 
 class Account(db.Model):

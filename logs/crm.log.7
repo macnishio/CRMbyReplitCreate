@@ -1,82 +1,14 @@
-2024-09-17 15:13:25,428 ERROR: Exception on /leads/1/send-follow-up [GET] [in /home/runner/CRM/.pythonlibs/lib/python3.11/site-packages/flask/app.py:838]
+2024-09-18 01:57:00,572 ERROR: Exception on /opportunities/create [POST] [in /home/runner/CRM/.pythonlibs/lib/python3.11/site-packages/flask/app.py:838]
 Traceback (most recent call last):
-  File "/home/runner/CRM/.pythonlibs/lib/python3.11/site-packages/flask/app.py", line 1473, in wsgi_app
-    response = self.full_dispatch_request()
-               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  File "/home/runner/CRM/.pythonlibs/lib/python3.11/site-packages/flask/app.py", line 882, in full_dispatch_request
-    rv = self.handle_user_exception(e)
-         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  File "/home/runner/CRM/.pythonlibs/lib/python3.11/site-packages/flask/app.py", line 880, in full_dispatch_request
-    rv = self.dispatch_request()
-         ^^^^^^^^^^^^^^^^^^^^^^^
-  File "/home/runner/CRM/.pythonlibs/lib/python3.11/site-packages/flask/app.py", line 865, in dispatch_request
-    return self.ensure_sync(self.view_functions[rule.endpoint])(**view_args)  # type: ignore[no-any-return]
-           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  File "/home/runner/CRM/.pythonlibs/lib/python3.11/site-packages/flask_login/utils.py", line 290, in decorated_view
-    return current_app.ensure_sync(func)(*args, **kwargs)
-           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  File "/home/runner/CRM/routes/leads.py", line 85, in send_individual_follow_up
-    send_follow_up_email(lead)
-  File "/home/runner/CRM/email_utils.py", line 54, in send_follow_up_email
-    mail.send(msg)
-  File "/home/runner/CRM/.pythonlibs/lib/python3.11/site-packages/flask_mail/__init__.py", line 539, in send
-    with self.connect() as connection:
-  File "/home/runner/CRM/.pythonlibs/lib/python3.11/site-packages/flask_mail/__init__.py", line 127, in __enter__
-    self.host = self.configure_host()
-                ^^^^^^^^^^^^^^^^^^^^^
-  File "/home/runner/CRM/.pythonlibs/lib/python3.11/site-packages/flask_mail/__init__.py", line 144, in configure_host
-    host = smtplib.SMTP(self.mail.server, self.mail.port)
-           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  File "/nix/store/f98g7xbckgqbkagdvpzc2r6lv3h1p9ki-python3-3.11.9/lib/python3.11/smtplib.py", line 255, in __init__
-    (code, msg) = self.connect(host, port)
-                  ^^^^^^^^^^^^^^^^^^^^^^^^
-  File "/nix/store/f98g7xbckgqbkagdvpzc2r6lv3h1p9ki-python3-3.11.9/lib/python3.11/smtplib.py", line 341, in connect
-    self.sock = self._get_socket(host, port, self.timeout)
-                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  File "/nix/store/f98g7xbckgqbkagdvpzc2r6lv3h1p9ki-python3-3.11.9/lib/python3.11/smtplib.py", line 312, in _get_socket
-    return socket.create_connection((host, port), timeout,
-           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  File "/nix/store/f98g7xbckgqbkagdvpzc2r6lv3h1p9ki-python3-3.11.9/lib/python3.11/socket.py", line 827, in create_connection
-    for res in getaddrinfo(host, port, 0, SOCK_STREAM):
-               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  File "/nix/store/f98g7xbckgqbkagdvpzc2r6lv3h1p9ki-python3-3.11.9/lib/python3.11/socket.py", line 962, in getaddrinfo
-    for res in _socket.getaddrinfo(host, port, family, type, proto, flags):
-               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-socket.gaierror: [Errno -2] Name or service not known
-2024-09-17 15:17:21,252 INFO: CRM startup [in /home/runner/CRM/app.py:74]
-2024-09-17 15:17:21,252 INFO: Starting scheduler [in /home/runner/CRM/app.py:81]
-2024-09-17 15:17:21,253 INFO: Scheduler started [in /home/runner/CRM/app.py:83]
-2024-09-17 15:18:52,695 ERROR: Failed to send follow-up email to makoto@team240.net: [Errno -2] Name or service not known [in /home/runner/CRM/email_utils.py:64]
-2024-09-17 15:18:52,695 ERROR: Exception on /leads/2/send-follow-up [GET] [in /home/runner/CRM/.pythonlibs/lib/python3.11/site-packages/flask/app.py:838]
-Traceback (most recent call last):
-  File "/home/runner/CRM/email_utils.py", line 52, in send_follow_up_email
-    mail.send(msg)
-  File "/home/runner/CRM/.pythonlibs/lib/python3.11/site-packages/flask_mail/__init__.py", line 539, in send
-    with self.connect() as connection:
-  File "/home/runner/CRM/.pythonlibs/lib/python3.11/site-packages/flask_mail/__init__.py", line 127, in __enter__
-    self.host = self.configure_host()
-                ^^^^^^^^^^^^^^^^^^^^^
-  File "/home/runner/CRM/.pythonlibs/lib/python3.11/site-packages/flask_mail/__init__.py", line 144, in configure_host
-    host = smtplib.SMTP(self.mail.server, self.mail.port)
-           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  File "/nix/store/f98g7xbckgqbkagdvpzc2r6lv3h1p9ki-python3-3.11.9/lib/python3.11/smtplib.py", line 255, in __init__
-    (code, msg) = self.connect(host, port)
-                  ^^^^^^^^^^^^^^^^^^^^^^^^
-  File "/nix/store/f98g7xbckgqbkagdvpzc2r6lv3h1p9ki-python3-3.11.9/lib/python3.11/smtplib.py", line 341, in connect
-    self.sock = self._get_socket(host, port, self.timeout)
-                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  File "/nix/store/f98g7xbckgqbkagdvpzc2r6lv3h1p9ki-python3-3.11.9/lib/python3.11/smtplib.py", line 312, in _get_socket
-    return socket.create_connection((host, port), timeout,
-           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  File "/nix/store/f98g7xbckgqbkagdvpzc2r6lv3h1p9ki-python3-3.11.9/lib/python3.11/socket.py", line 827, in create_connection
-    for res in getaddrinfo(host, port, 0, SOCK_STREAM):
-               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  File "/nix/store/f98g7xbckgqbkagdvpzc2r6lv3h1p9ki-python3-3.11.9/lib/python3.11/socket.py", line 962, in getaddrinfo
-    for res in _socket.getaddrinfo(host, port, family, type, proto, flags):
-               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-socket.gaierror: [Errno -2] Name or service not known
+  File "/home/runner/CRM/.pythonlibs/lib/python3.11/site-packages/sqlalchemy/engine/base.py", line 1967, in _exec_single_context
+    self.dialect.do_execute(
+  File "/home/runner/CRM/.pythonlibs/lib/python3.11/site-packages/sqlalchemy/engine/default.py", line 941, in do_execute
+    cursor.execute(statement, parameters)
+psycopg2.errors.NotNullViolation: null value in column "lead_id" of relation "opportunity" violates not-null constraint
+DETAIL:  Failing row contains (1, 西尾システムコンサルタントZoho導入支援, 2000000, Prospecting, 2024-09-30 00:00:00, 2024-09-18 01:57:00.105002, 1, 1, null).
 
-During handling of the above exception, another exception occurred:
+
+The above exception was the direct cause of the following exception:
 
 Traceback (most recent call last):
   File "/home/runner/CRM/.pythonlibs/lib/python3.11/site-packages/flask/app.py", line 1473, in wsgi_app
@@ -94,12 +26,74 @@ Traceback (most recent call last):
   File "/home/runner/CRM/.pythonlibs/lib/python3.11/site-packages/flask_login/utils.py", line 290, in decorated_view
     return current_app.ensure_sync(func)(*args, **kwargs)
            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  File "/home/runner/CRM/routes/leads.py", line 85, in send_individual_follow_up
-    send_follow_up_email(lead)
-  File "/home/runner/CRM/email_utils.py", line 65, in send_follow_up_email
-    raise Exception(f"An unexpected error occurred while sending the email: {str(e)}")
-Exception: An unexpected error occurred while sending the email: [Errno -2] Name or service not known
-2024-09-17 15:21:23,760 INFO: CRM startup [in /home/runner/CRM/app.py:74]
-2024-09-17 15:21:23,760 INFO: Starting scheduler [in /home/runner/CRM/app.py:81]
-2024-09-17 15:21:23,761 INFO: Scheduler started [in /home/runner/CRM/app.py:83]
-2024-09-17 15:22:08,650 ERROR: DNS lookup failed: [Errno -2] Name or service not known [in /home/runner/CRM/email_utils.py:59]
+  File "/home/runner/CRM/routes/opportunities.py", line 30, in create_opportunity
+    db.session.commit()
+  File "/home/runner/CRM/.pythonlibs/lib/python3.11/site-packages/sqlalchemy/orm/scoping.py", line 597, in commit
+    return self._proxied.commit()
+           ^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/runner/CRM/.pythonlibs/lib/python3.11/site-packages/sqlalchemy/orm/session.py", line 2028, in commit
+    trans.commit(_to_root=True)
+  File "<string>", line 2, in commit
+  File "/home/runner/CRM/.pythonlibs/lib/python3.11/site-packages/sqlalchemy/orm/state_changes.py", line 139, in _go
+    ret_value = fn(self, *arg, **kw)
+                ^^^^^^^^^^^^^^^^^^^^
+  File "/home/runner/CRM/.pythonlibs/lib/python3.11/site-packages/sqlalchemy/orm/session.py", line 1313, in commit
+    self._prepare_impl()
+  File "<string>", line 2, in _prepare_impl
+  File "/home/runner/CRM/.pythonlibs/lib/python3.11/site-packages/sqlalchemy/orm/state_changes.py", line 139, in _go
+    ret_value = fn(self, *arg, **kw)
+                ^^^^^^^^^^^^^^^^^^^^
+  File "/home/runner/CRM/.pythonlibs/lib/python3.11/site-packages/sqlalchemy/orm/session.py", line 1288, in _prepare_impl
+    self.session.flush()
+  File "/home/runner/CRM/.pythonlibs/lib/python3.11/site-packages/sqlalchemy/orm/session.py", line 4352, in flush
+    self._flush(objects)
+  File "/home/runner/CRM/.pythonlibs/lib/python3.11/site-packages/sqlalchemy/orm/session.py", line 4487, in _flush
+    with util.safe_reraise():
+  File "/home/runner/CRM/.pythonlibs/lib/python3.11/site-packages/sqlalchemy/util/langhelpers.py", line 146, in __exit__
+    raise exc_value.with_traceback(exc_tb)
+  File "/home/runner/CRM/.pythonlibs/lib/python3.11/site-packages/sqlalchemy/orm/session.py", line 4448, in _flush
+    flush_context.execute()
+  File "/home/runner/CRM/.pythonlibs/lib/python3.11/site-packages/sqlalchemy/orm/unitofwork.py", line 466, in execute
+    rec.execute(self)
+  File "/home/runner/CRM/.pythonlibs/lib/python3.11/site-packages/sqlalchemy/orm/unitofwork.py", line 642, in execute
+    util.preloaded.orm_persistence.save_obj(
+  File "/home/runner/CRM/.pythonlibs/lib/python3.11/site-packages/sqlalchemy/orm/persistence.py", line 93, in save_obj
+    _emit_insert_statements(
+  File "/home/runner/CRM/.pythonlibs/lib/python3.11/site-packages/sqlalchemy/orm/persistence.py", line 1233, in _emit_insert_statements
+    result = connection.execute(
+             ^^^^^^^^^^^^^^^^^^^
+  File "/home/runner/CRM/.pythonlibs/lib/python3.11/site-packages/sqlalchemy/engine/base.py", line 1418, in execute
+    return meth(
+           ^^^^^
+  File "/home/runner/CRM/.pythonlibs/lib/python3.11/site-packages/sqlalchemy/sql/elements.py", line 515, in _execute_on_connection
+    return connection._execute_clauseelement(
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/runner/CRM/.pythonlibs/lib/python3.11/site-packages/sqlalchemy/engine/base.py", line 1640, in _execute_clauseelement
+    ret = self._execute_context(
+          ^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/runner/CRM/.pythonlibs/lib/python3.11/site-packages/sqlalchemy/engine/base.py", line 1846, in _execute_context
+    return self._exec_single_context(
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/runner/CRM/.pythonlibs/lib/python3.11/site-packages/sqlalchemy/engine/base.py", line 1986, in _exec_single_context
+    self._handle_dbapi_exception(
+  File "/home/runner/CRM/.pythonlibs/lib/python3.11/site-packages/sqlalchemy/engine/base.py", line 2355, in _handle_dbapi_exception
+    raise sqlalchemy_exception.with_traceback(exc_info[2]) from e
+  File "/home/runner/CRM/.pythonlibs/lib/python3.11/site-packages/sqlalchemy/engine/base.py", line 1967, in _exec_single_context
+    self.dialect.do_execute(
+  File "/home/runner/CRM/.pythonlibs/lib/python3.11/site-packages/sqlalchemy/engine/default.py", line 941, in do_execute
+    cursor.execute(statement, parameters)
+sqlalchemy.exc.IntegrityError: (psycopg2.errors.NotNullViolation) null value in column "lead_id" of relation "opportunity" violates not-null constraint
+DETAIL:  Failing row contains (1, 西尾システムコンサルタントZoho導入支援, 2000000, Prospecting, 2024-09-30 00:00:00, 2024-09-18 01:57:00.105002, 1, 1, null).
+
+[SQL: INSERT INTO opportunity (name, amount, stage, close_date, created_at, user_id, account_id, lead_id) VALUES (%(name)s, %(amount)s, %(stage)s, %(close_date)s, %(created_at)s, %(user_id)s, %(account_id)s, %(lead_id)s) RETURNING opportunity.id]
+[parameters: {'name': '西尾システムコンサルタントZoho導入支援', 'amount': 2000000.0, 'stage': 'Prospecting', 'close_date': datetime.date(2024, 9, 30), 'created_at': datetime.datetime(2024, 9, 18, 1, 57, 0, 105002), 'user_id': 1, 'account_id': 1, 'lead_id': None}]
+(Background on this error at: https://sqlalche.me/e/20/gkpj)
+2024-09-18 02:00:56,766 INFO: CRM startup [in /home/runner/CRM/app.py:87]
+2024-09-18 02:00:56,767 INFO: Starting scheduler [in /home/runner/CRM/app.py:94]
+2024-09-18 02:00:56,768 INFO: Scheduler started [in /home/runner/CRM/app.py:96]
+2024-09-18 02:03:24,495 ERROR: Opportunity creation error: (psycopg2.errors.NotNullViolation) null value in column "lead_id" of relation "opportunity" violates not-null constraint
+DETAIL:  Failing row contains (2, 西尾システムコンサルタントZoho導入支援, 2000000, Prospecting, 2024-09-30 00:00:00, 2024-09-18 02:03:24.035583, 1, 1, null).
+
+[SQL: INSERT INTO opportunity (name, amount, stage, close_date, created_at, user_id, account_id, lead_id) VALUES (%(name)s, %(amount)s, %(stage)s, %(close_date)s, %(created_at)s, %(user_id)s, %(account_id)s, %(lead_id)s) RETURNING opportunity.id]
+[parameters: {'name': '西尾システムコンサルタントZoho導入支援', 'amount': 2000000.0, 'stage': 'Prospecting', 'close_date': datetime.date(2024, 9, 30), 'created_at': datetime.datetime(2024, 9, 18, 2, 3, 24, 35583), 'user_id': 1, 'account_id': 1, 'lead_id': None}]
+(Background on this error at: https://sqlalche.me/e/20/gkpj) [in /home/runner/CRM/routes/opportunities.py:37]

@@ -1,13 +1,10 @@
 from flask import current_app, url_for
-from flask_mail import Message
+from flask_mail import Message, smtplib
 from extensions import db, mail
 from models import Lead, Opportunity
 from datetime import datetime, timedelta
 import logging
 import uuid
-from smtplib import SMTPAuthenticationError, SMTPException
-import socket
-import ssl
 
 def send_follow_up_email(lead):
     subject = f"Follow-up: {lead.name}"
@@ -56,29 +53,19 @@ def send_follow_up_email(lead):
         current_app.logger.debug(f"MAIL_PORT: {current_app.config['MAIL_PORT']}")
         current_app.logger.debug(f"MAIL_USE_TLS: {current_app.config['MAIL_USE_TLS']}")
         current_app.logger.debug(f"MAIL_USERNAME: {current_app.config['MAIL_USERNAME']}")
+        current_app.logger.debug(f"MAIL_DEBUG: {current_app.config['MAIL_DEBUG']}")
         
-        # Create an SSL context
-        context = ssl.create_default_context()
-        
-        with current_app.app_context():
-            mail.send(msg)
-        
+        mail.send(msg)
         lead.last_followup_email = datetime.utcnow()
         lead.last_followup_tracking_id = tracking_id
         db.session.commit()
         current_app.logger.info(f"Follow-up email sent to {lead.email}")
-    except socket.gaierror as e:
-        current_app.logger.error(f"DNS lookup failed: {str(e)}")
-        raise Exception(f"Failed to connect to the email server. Please check your MAIL_SERVER setting: {str(e)}")
-    except SMTPAuthenticationError as e:
+    except smtplib.SMTPAuthenticationError as e:
         current_app.logger.error(f"SMTP Authentication Error: {str(e)}")
-        raise Exception("Failed to authenticate with the email server. Please check your email credentials.")
-    except SMTPException as e:
+        raise Exception(f"Failed to authenticate with the email server. Please check your email credentials.")
+    except smtplib.SMTPException as e:
         current_app.logger.error(f"SMTP Error: {str(e)}")
         raise Exception(f"An error occurred while sending the email: {str(e)}")
-    except ssl.SSLError as e:
-        current_app.logger.error(f"SSL Error: {str(e)}")
-        raise Exception(f"An SSL error occurred while connecting to the email server: {str(e)}")
     except Exception as e:
         current_app.logger.error(f"Failed to send follow-up email to {lead.email}: {str(e)}")
         raise Exception(f"An unexpected error occurred while sending the email: {str(e)}")

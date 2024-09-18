@@ -1,8 +1,8 @@
 import os
 from flask import Flask, current_app
-from flask_login import LoginManager, login_required
+from flask_login import LoginManager, login_required, current_user
 from extensions import db, mail, scheduler
-from models import User
+from models import User, Lead
 from config import Config
 import logging
 from logging.handlers import RotatingFileHandler
@@ -15,6 +15,7 @@ def create_app():
 
     db.init_app(app)
     mail.init_app(app)
+    app.config['MAIL_DEBUG'] = True
     scheduler.init_app(app)
 
     login_manager = LoginManager()
@@ -63,13 +64,13 @@ def create_app():
             current_app.logger.error(f"Error triggering automated follow-ups: {str(e)}")
             return f"Error triggering automated follow-ups: {str(e)}", 500
 
-    # Add a test route for sending a single follow-up email
+    # Add a test route for sending a single follow-up email (without authentication)
     @app.route('/test_single_email/<int:lead_id>')
     def test_single_email(lead_id):
-        from models import Lead
         lead = Lead.query.get_or_404(lead_id)
         try:
             send_follow_up_email(lead)
+            current_app.logger.info(f"Test email sent to {lead.email}")
             return f"Test email sent to {lead.email}. Check logs for details."
         except Exception as e:
             current_app.logger.error(f"Error sending test email: {str(e)}")
