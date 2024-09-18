@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CRM Mobile</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/mobile.css') }}">
+    <link rel="manifest" href="{{ url_for('static', filename='manifest.json') }}">
+</head>
+<body>
+    <header>
+        <h1>CRM Mobile</h1>
+    </header>
+    <nav>
+        <ul>
+            <li><a href="#leads">Leads</a></li>
+            <li><a href="#opportunities">Opportunities</a></li>
+            <li><a href="#accounts">Accounts</a></li>
+        </ul>
+    </nav>
+    <main>
+        <section id="leads">
+            <h2>Leads</h2>
+            <ul>
+                {% for lead in leads %}
+                <li>
+                    <strong>{{ lead.name }}</strong>
+                    <p>Email: {{ lead.email }}</p>
+                    <p>Status: {{ lead.status }}</p>
+                </li>
+                {% endfor %}
+            </ul>
+        </section>
+        <section id="opportunities">
+            <h2>Opportunities</h2>
+            <ul>
+                {% for opportunity in opportunities %}
+                <li>
+                    <strong>{{ opportunity.name }}</strong>
+                    <p>Amount: ${{ "%.2f"|format(opportunity.amount) }}</p>
+                    <p>Stage: {{ opportunity.stage }}</p>
+                </li>
+                {% endfor %}
+            </ul>
+        </section>
+        <section id="accounts">
+            <h2>Accounts</h2>
+            <ul>
+                {% for account in accounts %}
+                <li>
+                    <strong>{{ account.name }}</strong>
+                    <p>Industry: {{ account.industry }}</p>
+                </li>
+                {% endfor %}
+            </ul>
+        </section>
+    </main>
+    <script src="{{ url_for('static', filename='js/mobile.js') }}"></script>
+</body>
+</html>
