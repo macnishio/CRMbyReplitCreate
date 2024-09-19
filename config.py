@@ -1,8 +1,10 @@
 import os
+from datetime import timedelta
 
 class Config:
-    SECRET_KEY = os.urandom(32)
-    SQLALCHEMY_DATABASE_URI = os.environ.get('DATABASE_URL')
+    # Security settings
+    SECRET_KEY = os.environ.get('SECRET_KEY') or os.urandom(32)
+    SQLALCHEMY_DATABASE_URI = os.environ.get('DATABASE_URL') or 'sqlite:///crm.db'
     SQLALCHEMY_TRACK_MODIFICATIONS = False
     SQLALCHEMY_ENGINE_OPTIONS = {
         'pool_size': 10,
@@ -12,7 +14,7 @@ class Config:
 
     # Email configuration
     MAIL_SERVER = os.environ.get('MAIL_SERVER')
-    MAIL_PORT = int(os.environ.get('MAIL_PORT'))
+    MAIL_PORT = int(os.environ.get('MAIL_PORT', 587))
     MAIL_USE_TLS = os.environ.get('MAIL_USE_TLS', 'true').lower() in ['true', 'on', '1']
     MAIL_USERNAME = os.environ.get('MAIL_USERNAME')
     MAIL_PASSWORD = os.environ.get('MAIL_PASSWORD')
@@ -20,11 +22,57 @@ class Config:
 
     # Scheduler configuration
     SCHEDULER_API_ENABLED = True
-    FOLLOW_UP_INTERVAL_DAYS = 7
-    FOLLOW_UP_HOUR = 9  # 9 AM
+    FOLLOW_UP_INTERVAL_DAYS = int(os.environ.get('FOLLOW_UP_INTERVAL_DAYS', 7))
+    FOLLOW_UP_HOUR = int(os.environ.get('FOLLOW_UP_HOUR', 9))  # 9 AM by default
 
     # Lead scoring configuration
-    LEAD_SCORE_THRESHOLD = 50  # Minimum score to send follow-up emails
+    LEAD_SCORE_THRESHOLD = float(os.environ.get('LEAD_SCORE_THRESHOLD', 50))  # Minimum score to send follow-up emails
 
     # Logging configuration
     LOG_LEVEL = os.environ.get('LOG_LEVEL', 'INFO')
+
+    # Session configuration
+    PERMANENT_SESSION_LIFETIME = timedelta(days=int(os.environ.get('SESSION_LIFETIME_DAYS', 30)))
+
+    # API rate limiting
+    RATELIMIT_DEFAULT = os.environ.get('RATELIMIT_DEFAULT', "200 per day;50 per hour")
+
+    # CSRF protection
+    WTF_CSRF_ENABLED = True
+    WTF_CSRF_TIME_LIMIT = int(os.environ.get('CSRF_TIME_LIMIT', 3600))
+
+    # Content Security Policy
+    CONTENT_SECURITY_POLICY = {
+        'default-src': "'self'",
+        'script-src': "'self' 'unsafe-inline'",
+        'style-src': "'self' 'unsafe-inline'",
+        'img-src': "'self' data:",
+        'font-src': "'self'",
+    }
+
+    @staticmethod
+    def init_app(app):
+        pass
+
+class DevelopmentConfig(Config):
+    DEBUG = True
+
+class ProductionConfig(Config):
+    DEBUG = False
+
+    @classmethod
+    def init_app(cls, app):
+        Config.init_app(app)
+
+        # Log to stderr
+        import logging
+        from logging import StreamHandler
+        file_handler = StreamHandler()
+        file_handler.setLevel(logging.INFO)
+        app.logger.addHandler(file_handler)
+
+config = {
+    'development': DevelopmentConfig,
+    'production': ProductionConfig,
+    'default': DevelopmentConfig
+}

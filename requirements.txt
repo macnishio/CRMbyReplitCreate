@@ -9,3 +9,6 @@ psycopg2-binary
 numpy
 scikit-learn
 flask-migrate
+gunicorn
+python-dotenv
+flask-talisman

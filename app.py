@@ -3,19 +3,37 @@ from flask import Flask, current_app
 from flask_login import LoginManager
 from extensions import db, mail, scheduler
 from models import User
-from config import Config
+from config import config
 import logging
 from logging.handlers import RotatingFileHandler
 from flask_migrate import Migrate
 from email_utils import send_automated_follow_ups
+from flask_talisman import Talisman
+from dotenv import load_dotenv
+
+load_dotenv()  # Load environment variables from .env file
 
 def create_app():
     app = Flask(__name__)
-    app.config.from_object(Config)
+    
+    # Use the correct configuration based on the environment
+    env = os.environ.get('FLASK_ENV', 'development')
+    app.config.from_object(config[env])
+    config[env].init_app(app)
 
     db.init_app(app)
     mail.init_app(app)
     scheduler.init_app(app)
+
+    # Initialize Talisman
+    csp = {
+        'default-src': "'self'",
+        'script-src': "'self' 'unsafe-inline'",
+        'style-src': "'self' 'unsafe-inline'",
+        'img-src': "'self' data:",
+        'font-src': "'self'",
+    }
+    Talisman(app, content_security_policy=csp)
 
     login_manager = LoginManager()
     login_manager.login_view = 'auth.login'
@@ -52,6 +70,7 @@ def create_app():
     scheduler.add_job(id='send_automated_follow_ups', func=send_automated_follow_ups, trigger='interval', hours=24)
     app.logger.info("Scheduled automated follow-ups job")
 
+    # Set up logging
     if not app.debug:
         if not os.path.exists('logs'):
             os.mkdir('logs')
