@@ -21,6 +21,9 @@ flask-migrate = "^4.0.7"
 flask-talisman = "^1.1.0"
 gunicorn = "^23.0.0"
 python-dotenv = "^1.0.1"
+sqlalchemy = "^2.0.35"
+werkzeug = "^3.0.4"
+wtforms = "^3.1.2"
 
 
 [build-system]
