@@ -1,6 +1,6 @@
 {pkgs}: {
   deps = [
     pkgs.glibcLocales
-    pkgs.postgresql
+    pkgs.postgresql_16
   ];
 }

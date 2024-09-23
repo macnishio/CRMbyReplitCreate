@@ -1,0 +1,222 @@
+"""Add Task model
+
+Revision ID: 034f0f44f679
+Revises: e55f8e9a02fb
+Create Date: 2024-09-23 15:34:37.278626
+
+"""
+from alembic import op
+import sqlalchemy as sa
+from sqlalchemy.dialects import postgresql
+
+# revision identifiers, used by Alembic.
+revision = '034f0f44f679'
+down_revision = 'e55f8e9a02fb'
+branch_labels = None
+depends_on = None
+
+
+def upgrade():
+    # 既存のテーブルを削除
+    op.drop_table('tasks')
+    op.drop_table('schedules')
+    op.drop_table('opportunities')
+    op.drop_table('leads')
+    op.drop_table('accounts')
+    op.drop_table('users')
+
+    # 新しいテーブルを作成
+    op.create_table('users',
+        sa.Column('id', sa.Integer(), nullable=False),
+        sa.Column('username', sa.String(length=255), nullable=False),
+        sa.Column('email', sa.String(length=255), nullable=False),
+        sa.Column('password_hash', sa.String(length=512), nullable=False),
+        sa.Column('role', sa.String(length=20), nullable=False),
+        sa.PrimaryKeyConstraint('id'),
+        sa.UniqueConstraint('email'),
+        sa.UniqueConstraint('username')
+    )
+
+    op.create_table('accounts',
+        sa.Column('id', sa.Integer(), nullable=False),
+        sa.Column('name', sa.String(length=100), nullable=False),
+        sa.Column('industry', sa.String(length=50), nullable=True),
+        sa.Column('website', sa.String(length=120), nullable=True),
+        sa.Column('created_at', sa.DateTime(), nullable=False),
+        sa.Column('user_id', sa.Integer(), nullable=False),
+        sa.ForeignKeyConstraint(['user_id'], ['users.id'], ),
+        sa.PrimaryKeyConstraint('id')
+    )
+
+    op.create_table('leads',
+        sa.Column('id', sa.Integer(), nullable=False),
+        sa.Column('name', sa.String(length=100), nullable=False),
+        sa.Column('email', sa.String(length=120), nullable=True),
+        sa.Column('phone', sa.String(length=20), nullable=True),
+        sa.Column('status', sa.String(length=20), nullable=False),
+        sa.Column('created_at', sa.DateTime(), nullable=False),
+        sa.Column('last_contact', sa.DateTime(), nullable=False),
+        sa.Column('last_followup_email', sa.DateTime(), nullable=True),
+        sa.Column('last_followup_tracking_id', sa.String(length=36), nullable=True),
+        sa.Column('last_email_opened', sa.DateTime(), nullable=True),
+        sa.Column('user_id', sa.Integer(), nullable=False),
+        sa.Column('score', sa.Float(), nullable=False),
+        sa.ForeignKeyConstraint(['user_id'], ['users.id'], ),
+        sa.PrimaryKeyConstraint('id')
+    )
+
+    op.create_table('opportunities',
+        sa.Column('id', sa.Integer(), nullable=False),
+        sa.Column('name', sa.String(length=255), nullable=False),
+        sa.Column('amount', sa.Float(), nullable=False),
+        sa.Column('stage', sa.String(length=50), nullable=False),
+        sa.Column('close_date', sa.DateTime(), nullable=False),
+        sa.Column('created_at', sa.DateTime(), nullable=False),
+        sa.Column('user_id', sa.Integer(), nullable=False),
+        sa.Column('account_id', sa.Integer(), nullable=False),
+        sa.Column('lead_id', sa.Integer(), nullable=True),
+        sa.ForeignKeyConstraint(['account_id'], ['accounts.id'], ),
+        sa.ForeignKeyConstraint(['lead_id'], ['leads.id'], ),
+        sa.ForeignKeyConstraint(['user_id'], ['users.id'], ),
+        sa.PrimaryKeyConstraint('id')
+    )
+
+    op.create_table('schedules',
+        sa.Column('id', sa.Integer(), nullable=False),
+        sa.Column('title', sa.String(length=255), nullable=False),
+        sa.Column('description', sa.Text(), nullable=True),
+        sa.Column('start_time', sa.DateTime(), nullable=False),
+        sa.Column('end_time', sa.DateTime(), nullable=False),
+        sa.Column('user_id', sa.Integer(), nullable=False),
+        sa.Column('account_id', sa.Integer(), nullable=True),
+        sa.Column('lead_id', sa.Integer(), nullable=True),
+        sa.Column('opportunity_id', sa.Integer(), nullable=True),
+        sa.ForeignKeyConstraint(['account_id'], ['accounts.id'], ),
+        sa.ForeignKeyConstraint(['lead_id'], ['leads.id'], ),
+        sa.ForeignKeyConstraint(['opportunity_id'], ['opportunities.id'], ),
+        sa.ForeignKeyConstraint(['user_id'], ['users.id'], ),
+        sa.PrimaryKeyConstraint('id')
+    )
+
+    op.create_table('tasks',
+        sa.Column('id', sa.Integer(), nullable=False),
+        sa.Column('title', sa.String(length=255), nullable=False),
+        sa.Column('description', sa.Text(), nullable=True),
+        sa.Column('due_date', sa.DateTime(), nullable=True),
+        sa.Column('completed', sa.Boolean(), nullable=False),
+        sa.Column('created_at', sa.DateTime(), nullable=False),
+        sa.Column('user_id', sa.Integer(), nullable=False),
+        sa.Column('lead_id', sa.Integer(), nullable=True),
+        sa.Column('opportunity_id', sa.Integer(), nullable=True),
+        sa.Column('account_id', sa.Integer(), nullable=True),
+        sa.ForeignKeyConstraint(['account_id'], ['accounts.id'], ),
+        sa.ForeignKeyConstraint(['lead_id'], ['leads.id'], ),
+        sa.ForeignKeyConstraint(['opportunity_id'], ['opportunities.id'], ),
+        sa.ForeignKeyConstraint(['user_id'], ['users.id'], ),
+        sa.PrimaryKeyConstraint('id')
+    )
+
+
+def downgrade():
+    # テーブルを削除
+    op.drop_table('tasks')
+    op.drop_table('schedules')
+    op.drop_table('opportunities')
+    op.drop_table('leads')
+    op.drop_table('accounts')
+    op.drop_table('users')
+
+    # 元のテーブルを再作成
+    op.create_table('user',
+        sa.Column('id', sa.INTEGER(), server_default=sa.text("nextval('user_id_seq'::regclass)"), autoincrement=True, nullable=False),
+        sa.Column('username', sa.VARCHAR(length=255), autoincrement=False, nullable=False),
+        sa.Column('email', sa.VARCHAR(length=255), autoincrement=False, nullable=False),
+        sa.Column('password_hash', sa.VARCHAR(length=512), autoincrement=False, nullable=False),
+        sa.Column('role', sa.VARCHAR(length=20), autoincrement=False, nullable=False),
+        sa.PrimaryKeyConstraint('id', name='user_pkey'),
+        sa.UniqueConstraint('email', name='user_email_key'),
+        sa.UniqueConstraint('username', name='user_username_key'),
+        postgresql_ignore_search_path=False
+    )
+
+    op.create_table('account',
+        sa.Column('id', sa.INTEGER(), server_default=sa.text("nextval('account_id_seq'::regclass)"), autoincrement=True, nullable=False),
+        sa.Column('name', sa.VARCHAR(length=100), autoincrement=False, nullable=False),
+        sa.Column('industry', sa.VARCHAR(length=50), autoincrement=False, nullable=False),
+        sa.Column('website', sa.VARCHAR(length=120), autoincrement=False, nullable=False),
+        sa.Column('created_at', postgresql.TIMESTAMP(), autoincrement=False, nullable=False),
+        sa.Column('user_id', sa.INTEGER(), autoincrement=False, nullable=False),
+        sa.ForeignKeyConstraint(['user_id'], ['user.id'], name='account_user_id_fkey'),
+        sa.PrimaryKeyConstraint('id', name='account_pkey'),
+        postgresql_ignore_search_path=False
+    )
+
+    op.create_table('lead',
+        sa.Column('id', sa.INTEGER(), server_default=sa.text("nextval('lead_id_seq'::regclass)"), autoincrement=True, nullable=False),
+        sa.Column('name', sa.VARCHAR(length=100), autoincrement=False, nullable=False),
+        sa.Column('email', sa.VARCHAR(length=120), autoincrement=False, nullable=False),
+        sa.Column('phone', sa.VARCHAR(length=20), autoincrement=False, nullable=False),
+        sa.Column('status', sa.VARCHAR(length=20), autoincrement=False, nullable=False),
+        sa.Column('created_at', postgresql.TIMESTAMP(), autoincrement=False, nullable=False),
+        sa.Column('last_contact', postgresql.TIMESTAMP(), autoincrement=False, nullable=False),
+        sa.Column('last_followup_email', postgresql.TIMESTAMP(), autoincrement=False, nullable=True),
+        sa.Column('user_id', sa.INTEGER(), autoincrement=False, nullable=False),
+        sa.Column('score', sa.DOUBLE_PRECISION(precision=53), autoincrement=False, nullable=False),
+        sa.Column('last_followup_tracking_id', sa.VARCHAR(length=36), autoincrement=False, nullable=True),
+        sa.Column('last_email_opened', postgresql.TIMESTAMP(), autoincrement=False, nullable=True),
+        sa.ForeignKeyConstraint(['user_id'], ['user.id'], name='lead_user_id_fkey'),
+        sa.PrimaryKeyConstraint('id', name='lead_pkey'),
+        postgresql_ignore_search_path=False
+    )
+
+    op.create_table('opportunity',
+        sa.Column('id', sa.INTEGER(), server_default=sa.text("nextval('opportunity_id_seq'::regclass)"), autoincrement=True, nullable=False),
+        sa.Column('name', sa.VARCHAR(length=255), autoincrement=False, nullable=False),
+        sa.Column('amount', sa.DOUBLE_PRECISION(precision=53), autoincrement=False, nullable=False),
+        sa.Column('stage', sa.VARCHAR(length=50), autoincrement=False, nullable=False),
+        sa.Column('close_date', postgresql.TIMESTAMP(), autoincrement=False, nullable=False),
+        sa.Column('created_at', postgresql.TIMESTAMP(), autoincrement=False, nullable=False),
+        sa.Column('user_id', sa.INTEGER(), autoincrement=False, nullable=False),
+        sa.Column('account_id', sa.INTEGER(), autoincrement=False, nullable=False),
+        sa.Column('lead_id', sa.INTEGER(), autoincrement=False, nullable=True),
+        sa.ForeignKeyConstraint(['account_id'], ['account.id'], name='opportunity_account_id_fkey'),
+        sa.ForeignKeyConstraint(['lead_id'], ['lead.id'], name='opportunity_lead_id_fkey'),
+        sa.ForeignKeyConstraint(['user_id'], ['user.id'], name='opportunity_user_id_fkey'),
+        sa.PrimaryKeyConstraint('id', name='opportunity_pkey'),
+        postgresql_ignore_search_path=False
+    )
+
+    op.create_table('schedule',
+        sa.Column('id', sa.INTEGER(), autoincrement=True, nullable=False),
+        sa.Column('title', sa.VARCHAR(length=255), autoincrement=False, nullable=False),
+        sa.Column('description', sa.TEXT(), autoincrement=False, nullable=False),
+        sa.Column('start_time', postgresql.TIMESTAMP(), autoincrement=False, nullable=False),
+        sa.Column('end_time', postgresql.TIMESTAMP(), autoincrement=False, nullable=False),
+        sa.Column('user_id', sa.INTEGER(), autoincrement=False, nullable=False),
+        sa.Column('account_id', sa.INTEGER(), autoincrement=False, nullable=True),
+        sa.Column('lead_id', sa.INTEGER(), autoincrement=False, nullable=True),
+        sa.Column('opportunity_id', sa.INTEGER(), autoincrement=False, nullable=True),
+        sa.ForeignKeyConstraint(['account_id'], ['account.id'], name='schedule_account_id_fkey'),
+        sa.ForeignKeyConstraint(['lead_id'], ['lead.id'], name='schedule_lead_id_fkey'),
+        sa.ForeignKeyConstraint(['opportunity_id'], ['opportunity.id'], name='schedule_opportunity_id_fkey'),
+        sa.ForeignKeyConstraint(['user_id'], ['user.id'], name='schedule_user_id_fkey'),
+        sa.PrimaryKeyConstraint('id', name='schedule_pkey')
+    )
+
+    op.create_table('task',
+        sa.Column('id', sa.INTEGER(), autoincrement=True, nullable=False),
+        sa.Column('title', sa.VARCHAR(length=255), autoincrement=False, nullable=False),
+        sa.Column('description', sa.TEXT(), autoincrement=False, nullable=False),
+        sa.Column('due_date', postgresql.TIMESTAMP(), autoincrement=False, nullable=False),
+        sa.Column('completed', sa.BOOLEAN(), autoincrement=False, nullable=False),
+        sa.Column('created_at', postgresql.TIMESTAMP(), autoincrement=False, nullable=False),
+        sa.Column('user_id', sa.INTEGER(), autoincrement=False, nullable=False),
+        sa.Column('lead_id', sa.INTEGER(), autoincrement=False, nullable=True),
+        sa.Column('opportunity_id', sa.INTEGER(), autoincrement=False, nullable=True),
+        sa.Column('account_id', sa.INTEGER(), autoincrement=False, nullable=True),
+        sa.ForeignKeyConstraint(['account_id'], ['account.id'], name='task_account_id_fkey'),
+        sa.ForeignKeyConstraint(['lead_id'], ['lead.id'], name='task_lead_id_fkey'),
+        sa.ForeignKeyConstraint(['opportunity_id'], ['opportunity.id'], name='task_opportunity_id_fkey'),
+        sa.ForeignKeyConstraint(['user_id'], ['user.id'], name='task_user_id_fkey'),
+        sa.PrimaryKeyConstraint('id', name='task_pkey')
+    )

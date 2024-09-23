@@ -1,37 +1,49 @@
 import os
-from flask import Flask, current_app
+from flask import Flask
 from flask_login import LoginManager
-from extensions import db, mail, scheduler, cache
-from models import User
-from config import config
-import logging
-from logging.handlers import RotatingFileHandler
 from flask_migrate import Migrate
-from email_utils import send_automated_follow_ups
 from flask_talisman import Talisman
 from dotenv import load_dotenv
 from flask_limiter import Limiter
 from flask_limiter.util import get_remote_address
+import logging
+from logging.handlers import RotatingFileHandler
+from extensions import db, mail, scheduler, cache
 
-load_dotenv()  # Load environment variables from .env file
+# Redisのインポートを試みる
+try:
+    from redis import Redis
+except ImportError:
+    Redis = None
 
-limiter = Limiter(key_func=get_remote_address)
+# 環境変数の読み込み
+load_dotenv()
 
 def create_app():
+    from models import User
+    from config import config
+    from email_utils import send_automated_follow_ups
+
     app = Flask(__name__)
-    
-    # Use the correct configuration based on the environment
-    env = os.environ.get('FLASK_ENV', 'development')
+
+    # 環境に基づいて正しい設定を使用
+    env = 'development' if os.environ.get('FLASK_ENV') == 'development' else 'production'
     app.config.from_object(config[env])
     config[env].init_app(app)
 
+    # 拡張機能の初期化
     db.init_app(app)
     mail.init_app(app)
     scheduler.init_app(app)
     cache.init_app(app)
-    limiter.init_app(app)
 
-    # Initialize Talisman
+    # Limiterの初期化
+    limiter = Limiter(
+        app,
+        default_limits=["200 per day", "50 per hour"]
+    )
+
+    # Talismanの初期化
     csp = {
         'default-src': "'self'",
         'script-src': "'self' 'unsafe-inline' https://cdn.jsdelivr.net",
@@ -43,6 +55,7 @@ def create_app():
     }
     Talisman(app, content_security_policy=csp, force_https=True)
 
+    # LoginManagerの設定
     login_manager = LoginManager()
     login_manager.login_view = 'auth.login'
     login_manager.init_app(app)
@@ -51,41 +64,30 @@ def create_app():
     def load_user(user_id):
         return User.query.get(int(user_id))
 
-    from routes.main import bp as main_bp
-    from routes.auth import bp as auth_bp
-    from routes.leads import bp as leads_bp
-    from routes.opportunities import bp as opportunities_bp
-    from routes.accounts import bp as accounts_bp
-    from routes.reports import bp as reports_bp
-    from routes.tracking import bp as tracking_bp
-    from routes.mobile import bp as mobile_bp
-    from routes.schedules import bp as schedules_bp
-    from routes.tasks import bp as tasks_bp
+    # Blueprintの登録
+    from routes import main, auth, leads, opportunities, accounts, reports, tracking, mobile, schedules, tasks
+    app.register_blueprint(main.bp)
+    app.register_blueprint(auth.bp)
+    app.register_blueprint(leads.bp)
+    app.register_blueprint(opportunities.bp)
+    app.register_blueprint(accounts.bp)
+    app.register_blueprint(reports.bp)
+    app.register_blueprint(tracking.bp)
+    app.register_blueprint(mobile.bp)
+    app.register_blueprint(schedules.bp)
+    app.register_blueprint(tasks.bp)
 
-    app.register_blueprint(main_bp)
-    app.register_blueprint(auth_bp)
-    app.register_blueprint(leads_bp)
-    app.register_blueprint(opportunities_bp)
-    app.register_blueprint(accounts_bp)
-    app.register_blueprint(reports_bp)
-    app.register_blueprint(tracking_bp)
-    app.register_blueprint(mobile_bp)
-    app.register_blueprint(schedules_bp)
-    app.register_blueprint(tasks_bp)
-
-    # Apply rate limiting to all routes
-    limiter.limit("200/day;50/hour")(app)
-
+    # データベースマイグレーションの設定
     with app.app_context():
         migrate = Migrate(app, db)
         migrate.init_app(app, db)
         db.create_all()
 
-    # Set up the scheduler job for automated follow-ups
+    # 自動フォローアップのスケジューラージョブの設定
     scheduler.add_job(id='send_automated_follow_ups', func=send_automated_follow_ups, trigger='interval', hours=24)
     app.logger.info("Scheduled automated follow-ups job")
 
-    # Set up logging
+    # ロギングの設定
     if not app.debug:
         if not os.path.exists('logs'):
             os.mkdir('logs')
@@ -99,10 +101,12 @@ def create_app():
 
     return app
 
+# アプリケーションのインスタンス作成
 app = create_app()
 
 if __name__ == '__main__':
     app.logger.info('Starting scheduler')
-    scheduler.start()
+    with app.app_context():
+        scheduler.start()
     app.logger.info('Scheduler started')
     app.run(host='0.0.0.0', port=5000)

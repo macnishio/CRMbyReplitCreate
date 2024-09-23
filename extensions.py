@@ -1,13 +1,12 @@
 from flask_sqlalchemy import SQLAlchemy
-from flask_login import LoginManager
 from flask_mail import Mail
 from flask_apscheduler import APScheduler
-from sqlalchemy.orm import DeclarativeBase
+from flask_caching import Cache
+from sqlalchemy.ext.declarative import declarative_base
 
-class Base(DeclarativeBase):
-    pass
+Base = declarative_base()
 
 db = SQLAlchemy(model_class=Base)
-login_manager = LoginManager()
 mail = Mail()
 scheduler = APScheduler()
+cache = Cache()
