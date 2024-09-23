@@ -1,0 +1,23 @@
+{% extends "base.html" %}
+
+{% block title %}Schedule Details{% endblock %}
+
+{% block content %}
+    <h1>Schedule Details</h1>
+    <div class="schedule-details">
+        <p><strong>Title:</strong> {{ schedule.title }}</p>
+        <p><strong>Description:</strong> {{ schedule.description }}</p>
+        <p><strong>Start Time:</strong> {{ schedule.start_time.strftime('%Y-%m-%d %H:%M') }}</p>
+        <p><strong>End Time:</strong> {{ schedule.end_time.strftime('%Y-%m-%d %H:%M') }}</p>
+        <p><strong>User:</strong> {{ schedule.user.username }}</p>
+        <p><strong>Account:</strong> {{ schedule.account.name if schedule.account else 'N/A' }}</p>
+        <p><strong>Lead:</strong> {{ schedule.lead.name if schedule.lead else 'N/A' }}</p>
+        <p><strong>Opportunity:</strong> {{ schedule.opportunity.name if schedule.opportunity else 'N/A' }}</p>
+    </div>
+    <div class="actions">
+        <a href="{{ url_for('schedules.edit_schedule', id=schedule.id) }}" class="button">Edit Schedule</a>
+        <form action="{{ url_for('schedules.delete_schedule', id=schedule.id) }}" method="POST" style="display: inline;">
+            <input type="submit" value="Delete Schedule" class="button delete" onclick="return confirm('Are you sure?');">
+        </form>
+    </div>
+{% endblock %}

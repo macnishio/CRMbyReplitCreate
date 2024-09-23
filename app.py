@@ -51,6 +51,7 @@ def create_app():
     from routes.reports import bp as reports_bp
     from routes.tracking import bp as tracking_bp
     from routes.mobile import bp as mobile_bp
+    from routes.schedules import bp as schedules_bp
 
     app.register_blueprint(main_bp)
     app.register_blueprint(auth_bp)
@@ -60,6 +61,7 @@ def create_app():
     app.register_blueprint(reports_bp)
     app.register_blueprint(tracking_bp)
     app.register_blueprint(mobile_bp)
+    app.register_blueprint(schedules_bp)
 
     with app.app_context():
         migrate = Migrate(app, db)

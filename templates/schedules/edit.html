@@ -1,0 +1,45 @@
+{% extends "base.html" %}
+
+{% block title %}Edit Schedule{% endblock %}
+
+{% block content %}
+    <h1>Edit Schedule</h1>
+    <form method="POST">
+        {{ form.hidden_tag() }}
+        <div>
+            {{ form.title.label }}
+            {{ form.title() }}
+        </div>
+        <div>
+            {{ form.description.label }}
+            {{ form.description() }}
+        </div>
+        <div>
+            {{ form.start_time.label }}
+            {{ form.start_time() }}
+        </div>
+        <div>
+            {{ form.end_time.label }}
+            {{ form.end_time() }}
+        </div>
+        <div>
+            {{ form.user_id.label }}
+            {{ form.user_id() }}
+        </div>
+        <div>
+            {{ form.account_id.label }}
+            {{ form.account_id() }}
+        </div>
+        <div>
+            {{ form.lead_id.label }}
+            {{ form.lead_id() }}
+        </div>
+        <div>
+            {{ form.opportunity_id.label }}
+            {{ form.opportunity_id() }}
+        </div>
+        <div>
+            {{ form.submit() }}
+        </div>
+    </form>
+{% endblock %}

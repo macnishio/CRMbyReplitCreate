@@ -9,7 +9,7 @@
 - [ ] Check LEAD_SCORE_THRESHOLD is set to the desired value
 
 ## Database
-- [ ] Ensure all migrations are up to date
+- [ ] Ensure all migrations are up to date, including the new Schedule model
 - [ ] Perform a test run of migrations on a staging environment
 - [ ] Create a database backup before deployment
 
@@ -22,6 +22,7 @@
 - [ ] Ensure debug mode is turned off in production
 - [ ] Verify CSRF protection is enabled
 - [ ] Check that all sensitive data is properly encrypted
+- [ ] Review and update Content Security Policy if necessary
 
 ## Performance
 - [ ] Run performance tests to ensure the application can handle expected load
@@ -29,13 +30,15 @@
 - [ ] Implement caching where appropriate
 
 ## Functionality
-- [ ] Perform thorough testing of all features
+- [ ] Perform thorough testing of all features, including the new Schedule functionality
 - [ ] Verify email functionality is working correctly
 - [ ] Test lead scoring and automated follow-ups
+- [ ] Ensure proper integration of Schedule feature with other modules (Leads, Opportunities, Accounts)
 
 ## Documentation
-- [ ] Update user manual if any last-minute changes were made
-- [ ] Prepare release notes documenting new features and any breaking changes
+- [ ] Update user manual to include instructions for the new Schedule feature
+- [ ] Prepare release notes documenting new features (including Schedule) and any breaking changes
+- [ ] Update API documentation if any changes were made
 
 ## Deployment
 - [ ] Set up production environment on Replit
@@ -46,11 +49,18 @@
 ## Monitoring and Logging
 - [ ] Set up error logging and monitoring
 - [ ] Configure performance monitoring
-- [ ] Ensure all necessary logs are being captured
+- [ ] Ensure all necessary logs are being captured, including for the new Schedule feature
 
 ## Backup and Recovery
 - [ ] Set up regular database backups
 - [ ] Document the recovery process
+
+## Mobile Application
+- [ ] Test the mobile version of the application
+- [ ] Ensure the Schedule feature is accessible and functional on mobile devices
+
+## Internationalization
+- [ ] Verify that all new strings related to the Schedule feature are properly internationalized
 
 ## Post-Deployment
 - [ ] Perform smoke tests on the production environment

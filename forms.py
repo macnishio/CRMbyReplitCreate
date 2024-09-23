@@ -1,6 +1,6 @@
 from flask_wtf import FlaskForm
-from wtforms import StringField, PasswordField, SubmitField, FloatField, DateField, SelectField
-from wtforms.validators import DataRequired, Email, EqualTo, Length
+from wtforms import StringField, PasswordField, SubmitField, FloatField, DateField, SelectField, TextAreaField, DateTimeField
+from wtforms.validators import DataRequired, Email, EqualTo, Length, Optional
 
 class LoginForm(FlaskForm):
     username = StringField('Username', validators=[DataRequired()])
@@ -27,10 +27,22 @@ class OpportunityForm(FlaskForm):
     stage = SelectField('Stage', choices=[('Prospecting', 'Prospecting'), ('Qualification', 'Qualification'), ('Proposal', 'Proposal'), ('Negotiation', 'Negotiation'), ('Closed Won', 'Closed Won'), ('Closed Lost', 'Closed Lost')])
     close_date = DateField('Close Date', validators=[DataRequired()])
     account = SelectField('Account', coerce=int)
+    lead = SelectField('Lead', coerce=int, validators=[Optional()])
     submit = SubmitField('Submit')
 
 class AccountForm(FlaskForm):
     name = StringField('Name', validators=[DataRequired()])
     industry = StringField('Industry')
     website = StringField('Website')
+    submit = SubmitField('Submit')
+
+class ScheduleForm(FlaskForm):
+    title = StringField('Title', validators=[DataRequired()])
+    description = TextAreaField('Description')
+    start_time = DateTimeField('Start Time', validators=[DataRequired()], format='%Y-%m-%d %H:%M')
+    end_time = DateTimeField('End Time', validators=[DataRequired()], format='%Y-%m-%d %H:%M')
+    user_id = SelectField('User', coerce=int, validators=[DataRequired()])
+    account_id = SelectField('Account', coerce=int, validators=[Optional()])
+    lead_id = SelectField('Lead', coerce=int, validators=[Optional()])
+    opportunity_id = SelectField('Opportunity', coerce=int, validators=[Optional()])
     submit = SubmitField('Submit')

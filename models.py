@@ -1,7 +1,7 @@
 from flask_login import UserMixin
 from werkzeug.security import generate_password_hash, check_password_hash
 from extensions import db
-from sqlalchemy import Integer, String, Float, DateTime, ForeignKey
+from sqlalchemy import Integer, String, Float, DateTime, ForeignKey, Text
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 from datetime import datetime
 
@@ -77,3 +77,19 @@ class Account(db.Model):
                                                  default=datetime.utcnow)
     user_id: Mapped[int] = mapped_column(Integer, ForeignKey('user.id'))
     user: Mapped['User'] = relationship('User', backref='accounts')
+
+
+class Schedule(db.Model):
+    id: Mapped[int] = mapped_column(Integer, primary_key=True)
+    title: Mapped[str] = mapped_column(String(255), nullable=False)
+    description: Mapped[str] = mapped_column(Text)
+    start_time: Mapped[datetime] = mapped_column(DateTime, nullable=False)
+    end_time: Mapped[datetime] = mapped_column(DateTime, nullable=False)
+    user_id: Mapped[int] = mapped_column(Integer, ForeignKey('user.id'), nullable=False)
+    user: Mapped['User'] = relationship('User', backref='schedules')
+    account_id: Mapped[int] = mapped_column(Integer, ForeignKey('account.id'), nullable=True)
+    account: Mapped['Account'] = relationship('Account', backref='schedules')
+    lead_id: Mapped[int] = mapped_column(Integer, ForeignKey('lead.id'), nullable=True)
+    lead: Mapped['Lead'] = relationship('Lead', backref='schedules')
+    opportunity_id: Mapped[int] = mapped_column(Integer, ForeignKey('opportunity.id'), nullable=True)
+    opportunity: Mapped['Opportunity'] = relationship('Opportunity', backref='schedules')
