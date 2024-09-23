@@ -717,6 +717,7 @@ COPY public."user" (id, username, email, password_hash, role) FROM stdin;
 --
 
 COPY public.users (id, username, email, password_hash, role) FROM stdin;
+1	makoto	makoto@team240.net	pbkdf2:sha256:260000$KhisrwOPnMWzy9yV$f30fc01301dc11c25543867a6dac7e829480be0fe64f4929cc3a329fec35e301	user
 \.
 
 
@@ -801,7 +802,7 @@ SELECT pg_catalog.setval('public.user_id_seq', 2, true);
 -- Name: users_id_seq; Type: SEQUENCE SET; Schema: public; Owner: neondb_owner
 --
 
-SELECT pg_catalog.setval('public.users_id_seq', 1, false);
+SELECT pg_catalog.setval('public.users_id_seq', 1, true);
 
 
 --

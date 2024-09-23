@@ -39,6 +39,10 @@ args = "Check Pending Migrations"
 task = "workflow.run"
 args = "Create New Migration"
 
+[[workflows.workflow.tasks]]
+task = "workflow.run"
+args = "Remove Old Migrations"
+
 [[workflows.workflow]]
 name = "Run Flask App"
 author = "agent"
@@ -121,6 +125,17 @@ agentRequireRestartOnSave = false
 [[workflows.workflow.tasks]]
 task = "shell.exec"
 args = "flask db migrate -m 'Update account and related tables'"
+
+[[workflows.workflow]]
+name = "Remove Old Migrations"
+author = "agent"
+
+[workflows.workflow.metadata]
+agentRequireRestartOnSave = false
+
+[[workflows.workflow.tasks]]
+task = "shell.exec"
+args = "find migrations/versions -type f -name 'e8587aed691b_add_task_model.py' -delete"
 
 [deployment]
 run = ["sh", "-c", "python app.py"]
