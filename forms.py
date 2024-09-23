@@ -1,6 +1,7 @@
 from flask_wtf import FlaskForm
 from wtforms import StringField, PasswordField, SubmitField, FloatField, DateField, SelectField, TextAreaField, DateTimeField
 from wtforms.validators import DataRequired, Email, EqualTo, Length, Optional
+from wtforms.fields import DateTimeLocalField
 
 class LoginForm(FlaskForm):
     username = StringField('Username', validators=[DataRequired()])
@@ -39,8 +40,8 @@ class AccountForm(FlaskForm):
 class ScheduleForm(FlaskForm):
     title = StringField('Title', validators=[DataRequired()])
     description = TextAreaField('Description')
-    start_time = DateTimeField('Start Time', validators=[DataRequired()], format='%Y-%m-%d %H:%M')
-    end_time = DateTimeField('End Time', validators=[DataRequired()], format='%Y-%m-%d %H:%M')
+    start_time = DateTimeLocalField('Start Time', format='%Y-%m-%dT%H:%M', validators=[DataRequired()])
+    end_time = DateTimeLocalField('End Time', format='%Y-%m-%dT%H:%M', validators=[DataRequired()])
     user_id = SelectField('User', coerce=int, validators=[DataRequired()])
     account_id = SelectField('Account', coerce=int, validators=[Optional()])
     lead_id = SelectField('Lead', coerce=int, validators=[Optional()])
