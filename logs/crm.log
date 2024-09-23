@@ -1,4 +1,4 @@
-2024-09-18 10:26:29,277 ERROR: Exception on /reports/ [GET] [in /home/runner/CRM/.pythonlibs/lib/python3.11/site-packages/flask/app.py:838]
+2024-09-23 06:41:23,731 ERROR: Exception on /leads/2/edit [GET] [in /home/runner/CRM/.pythonlibs/lib/python3.11/site-packages/flask/app.py:838]
 Traceback (most recent call last):
   File "/home/runner/CRM/.pythonlibs/lib/python3.11/site-packages/flask/app.py", line 1473, in wsgi_app
     response = self.full_dispatch_request()
@@ -15,102 +15,30 @@ Traceback (most recent call last):
   File "/home/runner/CRM/.pythonlibs/lib/python3.11/site-packages/flask_login/utils.py", line 290, in decorated_view
     return current_app.ensure_sync(func)(*args, **kwargs)
            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  File "/home/runner/CRM/routes/reports.py", line 13, in index
-    lead_status = db.session.query(Lead.status, func.count(Lead.id)).filter_by(user_id=current_user.id).group_by(Lead.status).all()
-                  ^^
-NameError: name 'db' is not defined
-2024-09-18 10:29:52,768 ERROR: Exception on /reports/ [GET] [in /home/runner/CRM/.pythonlibs/lib/python3.11/site-packages/flask/app.py:838]
-Traceback (most recent call last):
-  File "/home/runner/CRM/.pythonlibs/lib/python3.11/site-packages/flask/app.py", line 1473, in wsgi_app
-    response = self.full_dispatch_request()
-               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  File "/home/runner/CRM/.pythonlibs/lib/python3.11/site-packages/flask/app.py", line 882, in full_dispatch_request
-    rv = self.handle_user_exception(e)
-         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  File "/home/runner/CRM/.pythonlibs/lib/python3.11/site-packages/flask/app.py", line 880, in full_dispatch_request
-    rv = self.dispatch_request()
-         ^^^^^^^^^^^^^^^^^^^^^^^
-  File "/home/runner/CRM/.pythonlibs/lib/python3.11/site-packages/flask/app.py", line 865, in dispatch_request
-    return self.ensure_sync(self.view_functions[rule.endpoint])(**view_args)  # type: ignore[no-any-return]
-           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  File "/home/runner/CRM/.pythonlibs/lib/python3.11/site-packages/flask_login/utils.py", line 290, in decorated_view
-    return current_app.ensure_sync(func)(*args, **kwargs)
-           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  File "/home/runner/CRM/routes/reports.py", line 13, in index
-    def index():
-                 
-NameError: name 'db' is not defined
-2024-09-18 10:30:05,900 INFO: CRM startup [in /home/runner/CRM/app.py:64]
-2024-09-18 10:30:05,901 INFO: Starting scheduler [in /home/runner/CRM/app.py:71]
-2024-09-18 10:30:05,902 INFO: Scheduler started [in /home/runner/CRM/app.py:73]
-2024-09-18 10:34:13,378 INFO: CRM startup [in /home/runner/CRM/app.py:64]
-2024-09-18 10:34:13,378 INFO: Starting scheduler [in /home/runner/CRM/app.py:71]
-2024-09-18 10:34:13,379 INFO: Scheduler started [in /home/runner/CRM/app.py:73]
-2024-09-18 10:37:54,652 INFO: CRM startup [in /home/runner/CRM/app.py:64]
-2024-09-18 10:37:54,654 INFO: Starting scheduler [in /home/runner/CRM/app.py:71]
-2024-09-18 10:37:54,657 INFO: Scheduler started [in /home/runner/CRM/app.py:73]
-2024-09-18 10:42:14,025 INFO: Follow-up email sent to macnishio@gmail.com [in /home/runner/CRM/email_utils.py:55]
-2024-09-18 10:42:21,167 INFO: Follow-up email sent to macnishio@gmail.com [in /home/runner/CRM/email_utils.py:55]
-2024-09-18 10:43:57,493 INFO: Form validation failed: {} [in /home/runner/CRM/routes/opportunities.py:47]
-2024-09-18 10:44:22,509 INFO: Attempting to create opportunity: 西尾システムコンサルタントZoho導入支援 [in /home/runner/CRM/routes/opportunities.py:23]
-2024-09-18 10:44:22,510 INFO: Form data: {'name': '西尾システムコンサルタントZoho導入支援', 'amount': 2000000.0, 'stage': 'Qualification', 'close_date': datetime.date(2024, 10, 31), 'account': 2, 'submit': True, 'csrf_token': 'ImNmMWNiOWQxM2RhYTliMDIzMTAzNjY0MGEwODcxM2Y1MWY3YThiNTYi.Zuqu7Q.c9FggGpYvewsusMfU2-i9foi79U'} [in /home/runner/CRM/routes/opportunities.py:24]
-2024-09-18 10:44:22,510 INFO: Opportunity object created: {'_sa_instance_state': <sqlalchemy.orm.state.InstanceState object at 0x7fb7ad99ba70>, 'name': '西尾システムコンサルタントZoho導入支援', 'amount': 2000000.0, 'stage': 'Qualification', 'close_date': datetime.date(2024, 10, 31), 'account_id': 2, 'user_id': 2, 'lead_id': None} [in /home/runner/CRM/routes/opportunities.py:34]
-2024-09-18 10:44:22,510 INFO: Opportunity added to session [in /home/runner/CRM/routes/opportunities.py:36]
-2024-09-18 10:44:22,977 INFO: Opportunity committed to database [in /home/runner/CRM/routes/opportunities.py:38]
-2024-09-18 10:49:10,164 INFO: Starting automated follow-ups process [in /home/runner/CRM/email_utils.py:61]
-2024-09-18 10:49:10,394 INFO: Successfully sent follow-up emails to 0 leads. [in /home/runner/CRM/email_utils.py:81]
-2024-09-19 04:04:02,594 INFO: CRM startup [in /home/runner/CRM/app.py:83]
-2024-09-19 04:04:02,597 INFO: Starting scheduler [in /home/runner/CRM/app.py:90]
-2024-09-19 04:04:02,598 INFO: Scheduler started [in /home/runner/CRM/app.py:92]
-2024-09-19 04:04:02,801 INFO: CRM startup [in /home/runner/CRM/app.py:83]
-2024-09-19 04:04:08,927 INFO: CRM startup [in /home/runner/CRM/app.py:83]
-2024-09-19 04:04:08,928 INFO: Starting scheduler [in /home/runner/CRM/app.py:90]
-2024-09-19 04:04:08,929 INFO: Scheduler started [in /home/runner/CRM/app.py:92]
-2024-09-19 08:41:20,248 INFO: CRM startup [in /home/runner/CRM/app.py:83]
-2024-09-19 08:41:20,373 INFO: CRM startup [in /home/runner/CRM/app.py:83]
-2024-09-19 08:41:20,374 INFO: Starting scheduler [in /home/runner/CRM/app.py:90]
-2024-09-19 08:41:20,375 INFO: Scheduler started [in /home/runner/CRM/app.py:92]
-2024-09-20 09:18:45,276 INFO: CRM startup [in /home/runner/CRM/app.py:83]
-2024-09-20 09:18:45,281 INFO: Starting scheduler [in /home/runner/CRM/app.py:90]
-2024-09-20 09:18:45,282 INFO: Scheduler started [in /home/runner/CRM/app.py:92]
-2024-09-20 09:18:45,682 INFO: CRM startup [in /home/runner/CRM/app.py:83]
-2024-09-20 09:18:46,798 INFO: CRM startup [in /home/runner/CRM/app.py:83]
-2024-09-20 09:18:46,798 INFO: Starting scheduler [in /home/runner/CRM/app.py:90]
-2024-09-20 09:18:46,799 INFO: Scheduler started [in /home/runner/CRM/app.py:92]
-2024-09-20 18:03:30,914 INFO: CRM startup [in /home/runner/CRM/app.py:83]
-2024-09-20 18:03:30,919 INFO: Starting scheduler [in /home/runner/CRM/app.py:90]
-2024-09-20 18:03:30,920 INFO: Scheduler started [in /home/runner/CRM/app.py:92]
-2024-09-21 11:17:08,324 INFO: CRM startup [in /home/runner/CRM/app.py:83]
-2024-09-21 11:17:36,275 INFO: CRM startup [in /home/runner/CRM/app.py:83]
-2024-09-21 11:17:36,275 INFO: Starting scheduler [in /home/runner/CRM/app.py:90]
-2024-09-21 11:17:36,276 INFO: Scheduler started [in /home/runner/CRM/app.py:92]
-2024-09-21 11:17:42,845 INFO: CRM startup [in /home/runner/CRM/app.py:83]
-2024-09-23 02:55:27,209 INFO: CRM startup [in /home/runner/CRM/app.py:83]
-2024-09-23 02:55:27,209 INFO: Starting scheduler [in /home/runner/CRM/app.py:90]
-2024-09-23 02:55:27,211 INFO: Scheduler started [in /home/runner/CRM/app.py:92]
-2024-09-23 02:55:27,215 INFO: CRM startup [in /home/runner/CRM/app.py:83]
-2024-09-23 03:04:26,458 INFO: CRM startup [in /home/runner/CRM/app.py:85]
-2024-09-23 03:04:53,088 INFO: CRM startup [in /home/runner/CRM/app.py:85]
-2024-09-23 05:39:17,507 INFO: CRM startup [in /home/runner/CRM/app.py:85]
-2024-09-23 05:39:17,509 INFO: Starting scheduler [in /home/runner/CRM/app.py:92]
-2024-09-23 05:39:17,510 INFO: Scheduler started [in /home/runner/CRM/app.py:94]
-2024-09-23 05:39:17,727 INFO: CRM startup [in /home/runner/CRM/app.py:85]
-2024-09-23 05:44:53,880 INFO: CRM startup [in /home/runner/CRM/app.py:85]
-2024-09-23 05:44:53,880 INFO: Starting scheduler [in /home/runner/CRM/app.py:92]
-2024-09-23 05:44:53,882 INFO: Scheduler started [in /home/runner/CRM/app.py:94]
-2024-09-23 05:45:00,574 INFO: CRM startup [in /home/runner/CRM/app.py:85]
-2024-09-23 05:46:30,354 INFO: CRM startup [in /home/runner/CRM/app.py:85]
-2024-09-23 05:46:30,354 INFO: Starting scheduler [in /home/runner/CRM/app.py:92]
-2024-09-23 05:46:30,355 INFO: Scheduler started [in /home/runner/CRM/app.py:94]
-2024-09-23 05:49:51,312 INFO: Form validation failed: {} [in /home/runner/CRM/routes/schedules.py:47]
-2024-09-23 05:50:02,063 INFO: Form validation failed: {'start_time': ['This field is required.'], 'end_time': ['This field is required.']} [in /home/runner/CRM/routes/schedules.py:47]
-2024-09-23 05:50:15,986 INFO: Form validation failed: {'start_time': ['This field is required.'], 'end_time': ['This field is required.']} [in /home/runner/CRM/routes/schedules.py:47]
-2024-09-23 05:51:35,472 INFO: Form validation failed: {} [in /home/runner/CRM/routes/schedules.py:47]
-2024-09-23 05:52:16,632 INFO: Form validation failed: {'start_time': ['This field is required.'], 'end_time': ['This field is required.']} [in /home/runner/CRM/routes/schedules.py:47]
-2024-09-23 05:53:16,391 INFO: CRM startup [in /home/runner/CRM/app.py:85]
-2024-09-23 05:53:16,392 INFO: Starting scheduler [in /home/runner/CRM/app.py:92]
-2024-09-23 05:53:16,393 INFO: Scheduler started [in /home/runner/CRM/app.py:94]
-2024-09-23 05:58:14,774 INFO: CRM startup [in /home/runner/CRM/app.py:85]
-2024-09-23 05:58:18,468 INFO: CRM startup [in /home/runner/CRM/app.py:85]
-2024-09-23 06:11:57,672 INFO: Form validation failed: {'start_time': ['This field is required.'], 'end_time': ['This field is required.']} [in /home/runner/CRM/routes/schedules.py:47]
-2024-09-23 06:12:29,857 INFO: Schedule created: <Schedule 1> [in /home/runner/CRM/routes/schedules.py:39]
+  File "/home/runner/CRM/routes/leads.py", line 60, in edit_lead
+    @login_required
+               ^^^^^
+  File "/home/runner/CRM/.pythonlibs/lib/python3.11/site-packages/flask/templating.py", line 150, in render_template
+    return _render(app, template, context)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/runner/CRM/.pythonlibs/lib/python3.11/site-packages/flask/templating.py", line 131, in _render
+    rv = template.render(context)
+         ^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/runner/CRM/.pythonlibs/lib/python3.11/site-packages/jinja2/environment.py", line 1304, in render
+    self.environment.handle_exception()
+  File "/home/runner/CRM/.pythonlibs/lib/python3.11/site-packages/jinja2/environment.py", line 939, in handle_exception
+    raise rewrite_traceback_stack(source=source)
+  File "/home/runner/CRM/templates/leads/create.html", line 1, in top-level template code
+    {% extends "base.html" %}
+  File "/home/runner/CRM/templates/base.html", line 40, in top-level template code
+    {% block content %}{% endblock %}
+    ^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/runner/CRM/templates/leads/create.html", line 26, in block 'content'
+    {{ form.score.label }}
+  File "/home/runner/CRM/.pythonlibs/lib/python3.11/site-packages/jinja2/environment.py", line 487, in getattr
+    return getattr(obj, attribute)
+           ^^^^^^^^^^^^^^^^^^^^^^^
+jinja2.exceptions.UndefinedError: 'forms.LeadForm object' has no attribute 'score'
+2024-09-23 06:44:17,151 INFO: CRM startup [in /home/runner/CRM/app.py:85]
+2024-09-23 06:44:17,151 INFO: Starting scheduler [in /home/runner/CRM/app.py:92]
+2024-09-23 06:44:17,155 INFO: Scheduler started [in /home/runner/CRM/app.py:94]
