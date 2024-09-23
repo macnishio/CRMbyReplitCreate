@@ -1,7 +1,6 @@
 from flask_wtf import FlaskForm
 from wtforms import StringField, PasswordField, SubmitField, FloatField, DateField, SelectField, TextAreaField, DateTimeField
-from wtforms.validators import DataRequired, Email, EqualTo, Length, Optional
-from wtforms.fields import DateTimeLocalField
+from wtforms.validators import DataRequired, Email, EqualTo, Length, Optional, NumberRange
 
 class LoginForm(FlaskForm):
     username = StringField('Username', validators=[DataRequired()])
@@ -19,7 +18,8 @@ class LeadForm(FlaskForm):
     name = StringField('Name', validators=[DataRequired()])
     email = StringField('Email', validators=[DataRequired(), Email()])
     phone = StringField('Phone')
-    status = SelectField('Status', choices=[('New', 'New'), ('Contacted', 'Contacted'), ('Qualified', 'Qualified'), ('Lost', 'Lost')])
+    status = SelectField('Status', choices=[('New', 'New'), ('Contacted', 'Contacted'), ('Qualified', 'Qualified'), ('Lost', 'Lost')], validators=[DataRequired()])
+    score = FloatField('Score', validators=[Optional(), NumberRange(min=0, max=100)])
     submit = SubmitField('Submit')
 
 class OpportunityForm(FlaskForm):
@@ -40,8 +40,8 @@ class AccountForm(FlaskForm):
 class ScheduleForm(FlaskForm):
     title = StringField('Title', validators=[DataRequired()])
     description = TextAreaField('Description')
-    start_time = DateTimeLocalField('Start Time', format='%Y-%m-%dT%H:%M', validators=[DataRequired()])
-    end_time = DateTimeLocalField('End Time', format='%Y-%m-%dT%H:%M', validators=[DataRequired()])
+    start_time = DateTimeField('Start Time', format='%Y-%m-%dT%H:%M', validators=[DataRequired()])
+    end_time = DateTimeField('End Time', format='%Y-%m-%dT%H:%M', validators=[DataRequired()])
     user_id = SelectField('User', coerce=int, validators=[DataRequired()])
     account_id = SelectField('Account', coerce=int, validators=[Optional()])
     lead_id = SelectField('Lead', coerce=int, validators=[Optional()])

@@ -13,6 +13,7 @@
                 <th>Email</th>
                 <th>Phone</th>
                 <th>Status</th>
+                <th>Score</th>
                 <th>Last Contact</th>
                 <th>Last Follow-up Email</th>
                 <th>Needs Follow-up</th>
@@ -26,6 +27,7 @@
                     <td>{{ lead.email }}</td>
                     <td>{{ lead.phone }}</td>
                     <td>{{ lead.status }}</td>
+                    <td>{{ lead.score|round(2) }}</td>
                     <td>{{ lead.last_contact.strftime('%Y-%m-%d %H:%M:%S') }}</td>
                     <td>{{ lead.last_followup_email.strftime('%Y-%m-%d %H:%M:%S') if lead.last_followup_email else 'N/A' }}</td>
                     <td>{{ 'Yes' if lead.needs_follow_up else 'No' }}</td>

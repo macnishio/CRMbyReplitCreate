@@ -1,9 +1,9 @@
 {% extends "base.html" %}
 
-{% block title %}Create Lead{% endblock %}
+{% block title %}Edit Lead{% endblock %}
 
 {% block content %}
-    <h1>{% if form.name.data %}Edit{% else %}Create{% endif %} Lead</h1>
+    <h1>Edit Lead</h1>
     <form method="POST">
         {{ form.hidden_tag() }}
         <div>
