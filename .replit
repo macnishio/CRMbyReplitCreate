@@ -35,6 +35,10 @@ args = "Database Backup"
 task = "workflow.run"
 args = "Check Pending Migrations"
 
+[[workflows.workflow.tasks]]
+task = "workflow.run"
+args = "Create New Migration"
+
 [[workflows.workflow]]
 name = "Run Flask App"
 author = "agent"
@@ -106,6 +110,17 @@ agentRequireRestartOnSave = false
 [[workflows.workflow.tasks]]
 task = "shell.exec"
 args = "flask db check"
+
+[[workflows.workflow]]
+name = "Create New Migration"
+author = "agent"
+
+[workflows.workflow.metadata]
+agentRequireRestartOnSave = false
+
+[[workflows.workflow.tasks]]
+task = "shell.exec"
+args = "flask db migrate -m 'Update account and related tables'"
 
 [deployment]
 run = ["sh", "-c", "python app.py"]
