@@ -38,6 +38,16 @@
 <div style="width: 80%; max-width: 600px; margin: auto;">
     <canvas id="leadScoreChart"></canvas>
 </div>
+
+<h2>Task Status Distribution</h2>
+<div style="width: 80%; max-width: 600px; margin: auto;">
+    <canvas id="taskStatusChart"></canvas>
+</div>
+
+<h2>Task Due Date Distribution</h2>
+<div style="width: 80%; max-width: 600px; margin: auto;">
+    <canvas id="taskDueDateChart"></canvas>
+</div>
 {% endblock %}
 
 {% block scripts %}
@@ -157,6 +167,70 @@
                 label: 'Number of Leads',
                 data: {{ lead_score_data|tojson }},
                 backgroundColor: '#4BC0C0'
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            scales: {
+                y: {
+                    beginAtZero: true
+                }
+            },
+            plugins: {
+                legend: {
+                    position: 'top',
+                },
+            },
+            layout: {
+                padding: {
+                    left: 10,
+                    right: 10,
+                    top: 0,
+                    bottom: 0
+                }
+            }
+        }
+    });
+
+    // Task Status Distribution Chart
+    new Chart(document.getElementById('taskStatusChart'), {
+        type: 'pie',
+        data: {
+            labels: ['Completed', 'Not Completed'],
+            datasets: [{
+                data: {{ task_status|map(attribute=1)|list|tojson }},
+                backgroundColor: ['#4BC0C0', '#FF6384']
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: {
+                    position: 'top',
+                },
+            },
+            layout: {
+                padding: {
+                    left: 10,
+                    right: 10,
+                    top: 0,
+                    bottom: 0
+                }
+            }
+        }
+    });
+
+    // Task Due Date Distribution Chart
+    new Chart(document.getElementById('taskDueDateChart'), {
+        type: 'bar',
+        data: {
+            labels: {{ task_due_date|map(attribute=0)|list|tojson }},
+            datasets: [{
+                label: 'Number of Tasks',
+                data: {{ task_due_date|map(attribute=1)|list|tojson }},
+                backgroundColor: ['#FF6384', '#36A2EB', '#FFCE56']
             }]
         },
         options: {

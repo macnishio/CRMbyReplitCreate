@@ -1,9 +1,10 @@
 from flask import Blueprint, render_template, current_app
 from flask_login import login_required, current_user
 from extensions import db
-from models import Lead, Opportunity, Account
+from models import Lead, Opportunity, Account, Task
 from sqlalchemy import func
 from analytics import get_conversion_rate, get_average_deal_size, get_sales_pipeline_value
+from datetime import datetime, timedelta
 
 bp = Blueprint('reports', __name__, url_prefix='/reports')
 
@@ -44,6 +45,24 @@ def index():
     lead_score_data = [count for _, count in lead_scores]
     current_app.logger.debug(f"Lead score distribution: {lead_scores}")
 
+    # Task status report
+    task_status = db.session.query(
+        Task.completed, func.count(Task.id)
+    ).filter_by(user_id=current_user.id).group_by(Task.completed).all()
+    current_app.logger.debug(f"Task status data: {task_status}")
+
+    # Task due date report
+    today = datetime.utcnow().date()
+    task_due_date = db.session.query(
+        func.case(
+            (Task.due_date.cast(db.Date) < today, 'Overdue'),
+            (Task.due_date.cast(db.Date) == today, 'Due Today'),
+            else_='Upcoming'
+        ).label('due_status'),
+        func.count(Task.id)
+    ).filter_by(user_id=current_user.id).group_by('due_status').all()
+    current_app.logger.debug(f"Task due date data: {task_due_date}")
+
     current_app.logger.debug(f"Conversion rate: {conversion_rate}")
     current_app.logger.debug(f"Average deal size: {average_deal_size}")
     current_app.logger.debug(f"Sales pipeline value: {sales_pipeline_value}")
@@ -55,6 +74,8 @@ def index():
     current_app.logger.info(f"Account industry: {account_industry}")
     current_app.logger.info(f"Lead score labels: {lead_score_labels}")
     current_app.logger.info(f"Lead score data: {lead_score_data}")
+    current_app.logger.info(f"Task status: {task_status}")
+    current_app.logger.info(f"Task due date: {task_due_date}")
 
     return render_template('reports/index.html',
                            lead_status=lead_status,
@@ -64,4 +85,6 @@ def index():
                            average_deal_size=average_deal_size,
                            sales_pipeline_value=sales_pipeline_value,
                            lead_score_labels=lead_score_labels,
-                           lead_score_data=lead_score_data)
+                           lead_score_data=lead_score_data,
+                           task_status=task_status,
+                           task_due_date=task_due_date)
