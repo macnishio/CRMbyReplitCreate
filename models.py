@@ -1,7 +1,7 @@
 from flask_login import UserMixin
 from werkzeug.security import generate_password_hash, check_password_hash
 from extensions import db
-from sqlalchemy import Integer, String, Float, DateTime, ForeignKey, Text
+from sqlalchemy import Integer, String, Float, DateTime, ForeignKey, Text, Boolean
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 from datetime import datetime
 
@@ -93,3 +93,19 @@ class Schedule(db.Model):
     lead: Mapped['Lead'] = relationship('Lead', backref='schedules')
     opportunity_id: Mapped[int] = mapped_column(Integer, ForeignKey('opportunity.id'), nullable=True)
     opportunity: Mapped['Opportunity'] = relationship('Opportunity', backref='schedules')
+
+class Task(db.Model):
+    id: Mapped[int] = mapped_column(Integer, primary_key=True)
+    title: Mapped[str] = mapped_column(String(255), nullable=False)
+    description: Mapped[str] = mapped_column(Text)
+    due_date: Mapped[datetime] = mapped_column(DateTime)
+    completed: Mapped[bool] = mapped_column(Boolean, default=False)
+    created_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow)
+    user_id: Mapped[int] = mapped_column(Integer, ForeignKey('user.id'), nullable=False)
+    user: Mapped['User'] = relationship('User', backref='tasks')
+    lead_id: Mapped[int] = mapped_column(Integer, ForeignKey('lead.id'), nullable=True)
+    lead: Mapped['Lead'] = relationship('Lead', backref='tasks')
+    opportunity_id: Mapped[int] = mapped_column(Integer, ForeignKey('opportunity.id'), nullable=True)
+    opportunity: Mapped['Opportunity'] = relationship('Opportunity', backref='tasks')
+    account_id: Mapped[int] = mapped_column(Integer, ForeignKey('account.id'), nullable=True)
+    account: Mapped['Account'] = relationship('Account', backref='tasks')

@@ -1,5 +1,6 @@
-{% extends "base.html" %} {% block title %}Reports{% endblock %} {% block
-content %}
+{% extends "base.html" %}
+{% block title %}Reports{% endblock %}
+{% block content %}
 <h1>Reports</h1>
 
 <h2>Advanced Analytics</h2>
@@ -19,17 +20,27 @@ content %}
 </div>
 
 <h2>Lead Status</h2>
-<canvas id="leadStatusChart"></canvas>
+<div style="width: 80%; max-width: 600px; margin: auto;">
+    <canvas id="leadStatusChart"></canvas>
+</div>
 
 <h2>Opportunity Stage</h2>
-<canvas id="opportunityStageChart"></canvas>
+<div style="width: 80%; max-width: 600px; margin: auto;">
+    <canvas id="opportunityStageChart"></canvas>
+</div>
 
 <h2>Account Industry</h2>
-<canvas id="accountIndustryChart"></canvas>
+<div style="width: 80%; max-width: 600px; margin: auto;">
+    <canvas id="accountIndustryChart"></canvas>
+</div>
 
 <h2>Lead Score Distribution</h2>
-<canvas id="leadScoreChart"></canvas>
-{% endblock %} {% block scripts %}
+<div style="width: 80%; max-width: 600px; margin: auto;">
+    <canvas id="leadScoreChart"></canvas>
+</div>
+{% endblock %}
+
+{% block scripts %}
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script>
     // Lead Status Chart
@@ -41,40 +52,72 @@ content %}
                 data: {{ lead_status|map(attribute=1)|list|tojson }},
                 backgroundColor: ['#FF6384', '#36A2EB', '#FFCE56', '#4BC0C0']
             }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: {
+                    position: 'top',
+                },
+            },
+            layout: {
+                padding: {
+                    left: 10,
+                    right: 10,
+                    top: 0,
+                    bottom: 0
+                }
+            }
         }
     });
 
-                    // Opportunity Stage Chart
-                    new Chart(document.getElementById('opportunityStageChart'), {
-                        type: 'bar',
-                        data: {
-                            labels: {{ opportunity_stage|map(attribute=0)|list|tojson }},
-                            datasets: [{
-                                label: 'Count',
-                                data: {{ opportunity_stage|map(attribute=1)|list|tojson }},
-                                backgroundColor: '#36A2EB'
-                            }, {
-                                label: 'Amount',
-                                data: {{ opportunity_stage|map(attribute=2)|list|tojson }},
-                                backgroundColor: '#FFCE56',
-                                yAxisID: 'y-axis-2'
-                            }]
-                        },
-                        options: {
-                            scales: {
-                                y: {
-                                    type: 'linear',
-                                    position: 'left',
-                                    beginAtZero: true
-                                },
-                                'y-axis-2': {
-                                    type: 'linear',
-                                    position: 'right',
-                                    beginAtZero: true
-                                }
-                            }
-                        }
-                    });
+    // Opportunity Stage Chart
+    new Chart(document.getElementById('opportunityStageChart'), {
+        type: 'bar',
+        data: {
+            labels: {{ opportunity_stage|map(attribute=0)|list|tojson }},
+            datasets: [{
+                label: 'Count',
+                data: {{ opportunity_stage|map(attribute=1)|list|tojson }},
+                backgroundColor: '#36A2EB'
+            }, {
+                label: 'Amount',
+                data: {{ opportunity_stage|map(attribute=2)|list|tojson }},
+                backgroundColor: '#FFCE56',
+                yAxisID: 'y-axis-2'
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            scales: {
+                y: {
+                    type: 'linear',
+                    position: 'left',
+                    beginAtZero: true
+                },
+                'y-axis-2': {
+                    type: 'linear',
+                    position: 'right',
+                    beginAtZero: true
+                }
+            },
+            plugins: {
+                legend: {
+                    position: 'top',
+                },
+            },
+            layout: {
+                padding: {
+                    left: 10,
+                    right: 10,
+                    top: 0,
+                    bottom: 0
+                }
+            }
+        }
+    });
 
     // Account Industry Chart
     new Chart(document.getElementById('accountIndustryChart'), {
@@ -85,27 +128,59 @@ content %}
                 data: {{ account_industry|map(attribute=1)|list|tojson }},
                 backgroundColor: ['#FF6384', '#36A2EB', '#FFCE56', '#4BC0C0', '#9966FF']
             }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: {
+                    position: 'top',
+                },
+            },
+            layout: {
+                padding: {
+                    left: 10,
+                    right: 10,
+                    top: 0,
+                    bottom: 0
+                }
+            }
         }
     });
 
-                                       // Lead Score Distribution Chart
-                                       new Chart(document.getElementById('leadScoreChart'), {
-                                           type: 'bar',
-                                           data: {
-                                               labels: {{ lead_score_labels|tojson }},
-                                               datasets: [{
-                                                   label: 'Number of Leads',
-                                                   data: {{ lead_score_data|tojson }},
-                                                   backgroundColor: '#4BC0C0'
-                                               }]
-                                           },
-                                           options: {
-                                               scales: {
-                                                   y: {
-                                                       beginAtZero: true
-                                                   }
-                                               }
-                                           }
-                                       });
+    // Lead Score Distribution Chart
+    new Chart(document.getElementById('leadScoreChart'), {
+        type: 'bar',
+        data: {
+            labels: {{ lead_score_labels|tojson }},
+            datasets: [{
+                label: 'Number of Leads',
+                data: {{ lead_score_data|tojson }},
+                backgroundColor: '#4BC0C0'
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            scales: {
+                y: {
+                    beginAtZero: true
+                }
+            },
+            plugins: {
+                legend: {
+                    position: 'top',
+                },
+            },
+            layout: {
+                padding: {
+                    left: 10,
+                    right: 10,
+                    top: 0,
+                    bottom: 0
+                }
+            }
+        }
+    });
 </script>
 {% endblock %}

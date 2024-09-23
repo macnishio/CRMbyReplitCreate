@@ -1,0 +1,41 @@
+{% extends "base.html" %}
+
+{% block title %}Create Task{% endblock %}
+
+{% block content %}
+    <h1>Create Task</h1>
+    <form method="POST">
+        {{ form.hidden_tag() }}
+        <div>
+            {{ form.title.label }}
+            {{ form.title() }}
+        </div>
+        <div>
+            {{ form.description.label }}
+            {{ form.description() }}
+        </div>
+        <div>
+            {{ form.due_date.label }}
+            {{ form.due_date(type="datetime-local") }}
+        </div>
+        <div>
+            {{ form.user_id.label }}
+            {{ form.user_id() }}
+        </div>
+        <div>
+            {{ form.lead_id.label }}
+            {{ form.lead_id() }}
+        </div>
+        <div>
+            {{ form.opportunity_id.label }}
+            {{ form.opportunity_id() }}
+        </div>
+        <div>
+            {{ form.account_id.label }}
+            {{ form.account_id() }}
+        </div>
+        <div>
+            {{ form.submit() }}
+        </div>
+    </form>
+{% endblock %}

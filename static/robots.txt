@@ -1,0 +1,8 @@
+User-agent: *
+Disallow: /admin/
+Disallow: /user/
+Disallow: /leads/
+Disallow: /opportunities/
+Disallow: /accounts/
+Disallow: /reports/
+Allow: /

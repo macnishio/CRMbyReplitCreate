@@ -17,6 +17,7 @@
                 <li><a href="{{ url_for('opportunities.list_opportunities') }}">Opportunities</a></li>
                 <li><a href="{{ url_for('accounts.list_accounts') }}">Accounts</a></li>
                 <li><a href="{{ url_for('schedules.list_schedules') }}">Schedules</a></li>
+                <li><a href="{{ url_for('tasks.list_tasks') }}">Tasks</a></li>
                 <li><a href="{{ url_for('reports.index') }}">Reports</a></li>
                 {% if current_user.is_authenticated %}
                     <li><a href="{{ url_for('auth.logout') }}">Logout</a></li>

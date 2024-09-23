@@ -1,5 +1,5 @@
 from flask_wtf import FlaskForm
-from wtforms import StringField, PasswordField, SubmitField, FloatField, DateField, SelectField, TextAreaField, DateTimeField
+from wtforms import StringField, PasswordField, SubmitField, FloatField, DateField, SelectField, TextAreaField, DateTimeField, BooleanField
 from wtforms.validators import DataRequired, Email, EqualTo, Length, Optional, NumberRange
 
 class LoginForm(FlaskForm):
@@ -46,4 +46,15 @@ class ScheduleForm(FlaskForm):
     account_id = SelectField('Account', coerce=int, validators=[Optional()])
     lead_id = SelectField('Lead', coerce=int, validators=[Optional()])
     opportunity_id = SelectField('Opportunity', coerce=int, validators=[Optional()])
+    submit = SubmitField('Submit')
+
+class TaskForm(FlaskForm):
+    title = StringField('Title', validators=[DataRequired()])
+    description = TextAreaField('Description')
+    due_date = DateTimeField('Due Date', format='%Y-%m-%dT%H:%M', validators=[DataRequired()])
+    completed = BooleanField('Completed')
+    user_id = SelectField('User', coerce=int, validators=[DataRequired()])
+    lead_id = SelectField('Lead', coerce=int, validators=[Optional()])
+    opportunity_id = SelectField('Opportunity', coerce=int, validators=[Optional()])
+    account_id = SelectField('Account', coerce=int, validators=[Optional()])
     submit = SubmitField('Submit')

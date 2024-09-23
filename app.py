@@ -1,7 +1,7 @@
 import os
 from flask import Flask, current_app
 from flask_login import LoginManager
-from extensions import db, mail, scheduler
+from extensions import db, mail, scheduler, cache
 from models import User
 from config import config
 import logging
@@ -10,8 +10,12 @@ from flask_migrate import Migrate
 from email_utils import send_automated_follow_ups
 from flask_talisman import Talisman
 from dotenv import load_dotenv
+from flask_limiter import Limiter
+from flask_limiter.util import get_remote_address
 
 load_dotenv()  # Load environment variables from .env file
+
+limiter = Limiter(key_func=get_remote_address)
 
 def create_app():
     app = Flask(__name__)
@@ -24,6 +28,8 @@ def create_app():
     db.init_app(app)
     mail.init_app(app)
     scheduler.init_app(app)
+    cache.init_app(app)
+    limiter.init_app(app)
 
     # Initialize Talisman
     csp = {
@@ -32,8 +38,10 @@ def create_app():
         'style-src': "'self' 'unsafe-inline'",
         'img-src': "'self' data:",
         'font-src': "'self'",
+        'form-action': "'self'",
+        'frame-ancestors': "'none'",
     }
-    Talisman(app, content_security_policy=csp)
+    Talisman(app, content_security_policy=csp, force_https=True)
 
     login_manager = LoginManager()
     login_manager.login_view = 'auth.login'
@@ -52,6 +60,7 @@ def create_app():
     from routes.tracking import bp as tracking_bp
     from routes.mobile import bp as mobile_bp
     from routes.schedules import bp as schedules_bp
+    from routes.tasks import bp as tasks_bp
 
     app.register_blueprint(main_bp)
     app.register_blueprint(auth_bp)
@@ -62,6 +71,10 @@ def create_app():
     app.register_blueprint(tracking_bp)
     app.register_blueprint(mobile_bp)
     app.register_blueprint(schedules_bp)
+    app.register_blueprint(tasks_bp)
+
+    # Apply rate limiting to all routes
+    limiter.limit("200/day;50/hour")(app)
 
     with app.app_context():
         migrate = Migrate(app, db)
