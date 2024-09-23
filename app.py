@@ -27,7 +27,7 @@ def create_app():
     app = Flask(__name__)
 
     # 環境に基づいて正しい設定を使用
-    env = 'development' if os.environ.get('FLASK_ENV') == 'development' else 'production'
+    env = 'development' if os.environ.get('FLASK_DEBUG') == 'True' else 'production'
     app.config.from_object(config[env])
     config[env].init_app(app)
 
@@ -62,7 +62,7 @@ def create_app():
 
     @login_manager.user_loader
     def load_user(user_id):
-        return User.query.get(int(user_id))
+        return db.session.get(User, int(user_id))
 
     # Blueprintの登録
     from routes import main, auth, leads, opportunities, accounts, reports, tracking, mobile, schedules, tasks
