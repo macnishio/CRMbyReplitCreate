@@ -27,6 +27,10 @@ args = "Apply Migrations"
 task = "workflow.run"
 args = "Run Flask Migrations"
 
+[[workflows.workflow.tasks]]
+task = "workflow.run"
+args = "Database Backup"
+
 [[workflows.workflow]]
 name = "Run Flask App"
 author = "agent"
@@ -71,6 +75,22 @@ agentRequireRestartOnSave = false
 [[workflows.workflow.tasks]]
 task = "shell.exec"
 args = "flask db migrate -m 'Add Task model' && flask db upgrade"
+
+[[workflows.workflow]]
+name = "Database Backup"
+author = "agent"
+
+[workflows.workflow.metadata]
+agentRequireRestartOnSave = false
+
+[[workflows.workflow.tasks]]
+task = "shell.exec"
+args = """
+
+    current_date=$(date +%Y%m%d)
+    pg_dump $DATABASE_URL > crm_backup_$current_date.sql
+    echo \"Database backup created: crm_backup_$current_date.sql\"
+    """
 
 [deployment]
 run = ["sh", "-c", "python app.py"]

@@ -1,6 +1,8 @@
 from flask_wtf import FlaskForm
 from wtforms import StringField, PasswordField, SubmitField, FloatField, DateField, SelectField, TextAreaField, DateTimeField, BooleanField
-from wtforms.validators import DataRequired, Email, EqualTo, Length, Optional, NumberRange
+from wtforms.validators import DataRequired, Email, EqualTo, Length, Optional, NumberRange, ValidationError
+from models import Lead
+from datetime import date
 
 class LoginForm(FlaskForm):
     username = StringField('Username', validators=[DataRequired()])
@@ -22,14 +24,23 @@ class LeadForm(FlaskForm):
     score = FloatField('Score', validators=[Optional(), NumberRange(min=0, max=100)])
     submit = SubmitField('Submit')
 
+    def validate_email(self, email):
+        lead = Lead.query.filter_by(email=email.data).first()
+        if lead:
+            raise ValidationError('That email is already in use. Please choose a different one.')
+
 class OpportunityForm(FlaskForm):
     name = StringField('Name', validators=[DataRequired()])
-    amount = FloatField('Amount', validators=[DataRequired()])
+    amount = FloatField('Amount', validators=[DataRequired(), NumberRange(min=0.01, message="Amount must be a positive number.")])
     stage = SelectField('Stage', choices=[('Prospecting', 'Prospecting'), ('Qualification', 'Qualification'), ('Proposal', 'Proposal'), ('Negotiation', 'Negotiation'), ('Closed Won', 'Closed Won'), ('Closed Lost', 'Closed Lost')])
     close_date = DateField('Close Date', validators=[DataRequired()])
     account = SelectField('Account', coerce=int)
     lead = SelectField('Lead', coerce=int, validators=[Optional()])
     submit = SubmitField('Submit')
+
+    def validate_close_date(self, close_date):
+        if close_date.data <= date.today():
+            raise ValidationError('Close date must be in the future.')
 
 class AccountForm(FlaskForm):
     name = StringField('Name', validators=[DataRequired()])

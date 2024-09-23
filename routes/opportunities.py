@@ -29,21 +29,24 @@ def create_opportunity():
                 close_date=form.close_date.data,
                 account_id=form.account.data,
                 user_id=current_user.id,
-                lead_id=None  # Set to None by default
+                lead_id=form.lead.data if form.lead.data else None
             )
             current_app.logger.info(f"Opportunity object created: {opportunity.__dict__}")
             db.session.add(opportunity)
             current_app.logger.info("Opportunity added to session")
             db.session.commit()
             current_app.logger.info("Opportunity committed to database")
-            flash('Opportunity created successfully')
+            flash('Opportunity created successfully', 'success')
             return redirect(url_for('opportunities.list_opportunities'))
         except Exception as e:
             db.session.rollback()
             current_app.logger.error(f"Opportunity creation error: {str(e)}")
             current_app.logger.error(traceback.format_exc())
-            flash('An error occurred while creating the opportunity. Please try again.')
+            flash('An error occurred while creating the opportunity. Please try again.', 'error')
     else:
+        for field, errors in form.errors.items():
+            for error in errors:
+                flash(f"{field.title()}: {error}", 'error')
         current_app.logger.info(f"Form validation failed: {form.errors}")
     return render_template('opportunities/create.html', form=form)
 
@@ -63,13 +66,17 @@ def edit_opportunity(id):
         try:
             form.populate_obj(opportunity)
             db.session.commit()
-            flash('Opportunity updated successfully')
+            flash('Opportunity updated successfully', 'success')
             return redirect(url_for('opportunities.opportunity_detail', id=opportunity.id))
         except Exception as e:
             db.session.rollback()
             current_app.logger.error(f"Opportunity update error: {str(e)}")
             current_app.logger.error(traceback.format_exc())
-            flash('An error occurred while updating the opportunity. Please try again.')
+            flash('An error occurred while updating the opportunity. Please try again.', 'error')
+    else:
+        for field, errors in form.errors.items():
+            for error in errors:
+                flash(f"{field.title()}: {error}", 'error')
     return render_template('opportunities/create.html', form=form)
 
 @bp.route('/<int:id>/delete', methods=['POST'])
@@ -79,10 +86,10 @@ def delete_opportunity(id):
     try:
         db.session.delete(opportunity)
         db.session.commit()
-        flash('Opportunity deleted successfully')
+        flash('Opportunity deleted successfully', 'success')
     except Exception as e:
         db.session.rollback()
         current_app.logger.error(f"Opportunity deletion error: {str(e)}")
         current_app.logger.error(traceback.format_exc())
-        flash('An error occurred while deleting the opportunity. Please try again.')
+        flash('An error occurred while deleting the opportunity. Please try again.', 'error')
     return redirect(url_for('opportunities.list_opportunities'))
