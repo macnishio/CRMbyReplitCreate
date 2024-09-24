@@ -5,7 +5,7 @@ bp = Blueprint('main', __name__)
 
 @bp.route('/')
 def index():
-    return render_template('home.html')  # Ensure this line uses render_template
+    return render_template('home.html')
 
 @bp.route('/health')
 def health_check():
@@ -14,7 +14,6 @@ def health_check():
 @bp.route('/dashboard')
 @login_required
 def dashboard():
-    # Add any necessary dashboard logic here
     return render_template('dashboard.html')
 
-# Add other existing routes here
+# Other routes are handled by their respective blueprints
