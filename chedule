@@ -1,0 +1,21 @@
+                                        Table "public.opportunity"
+   Column   |            Type             | Collation | Nullable |                 Default                 
+------------+-----------------------------+-----------+----------+-----------------------------------------
+ id         | integer                     |           | not null | nextval('opportunity_id_seq'::regclass)
+ name       | character varying(255)      |           | not null | 
+ amount     | double precision            |           | not null | 
+ stage      | character varying(50)       |           | not null | 
+ close_date | timestamp without time zone |           | not null | 
+ created_at | timestamp without time zone |           | not null | 
+ user_id    | integer                     |           | not null | 
+ account_id | integer                     |           | not null | 
+ lead_id    | integer                     |           |          | 
+Indexes:
+    "opportunity_pkey" PRIMARY KEY, btree (id)
+Foreign-key constraints:
+    "opportunity_lead_id_fkey" FOREIGN KEY (lead_id) REFERENCES lead(id)
+    "opportunity_user_id_fkey" FOREIGN KEY (user_id) REFERENCES "user"(id)
+Referenced by:
+    TABLE "schedule" CONSTRAINT "schedule_opportunity_id_fkey" FOREIGN KEY (opportunity_id) REFERENCES opportunity(id)
+    TABLE "task" CONSTRAINT "task_opportunity_id_fkey" FOREIGN KEY (opportunity_id) REFERENCES opportunity(id)
+

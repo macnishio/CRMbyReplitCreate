@@ -1,7 +1,7 @@
 from flask import Blueprint, render_template, redirect, url_for, flash, current_app
 from flask_login import login_required, current_user
 from extensions import db
-from models import Opportunity, Account
+from models import Opportunity, Account, Lead
 from forms import OpportunityForm
 import traceback
 
@@ -17,7 +17,12 @@ def list_opportunities():
 @login_required
 def create_opportunity():
     form = OpportunityForm()
-    form.account.choices = [(a.id, a.name) for a in Account.query.filter_by(user_id=current_user.id).all()]
+    # アカウントの選択肢を設定
+    form.account.choices = [(str(a.id), a.name) for a in Account.query.filter_by(user_id=current_user.id).all()]
+
+    # リードの選択肢を設定
+    form.lead.choices = [('', 'None')] + [(str(l.id), l.name) for l in Lead.query.filter_by(user_id=current_user.id).all()]
+
     if form.validate_on_submit():
         try:
             current_app.logger.info(f"Attempting to create opportunity: {form.name.data}")
@@ -27,9 +32,9 @@ def create_opportunity():
                 amount=form.amount.data,
                 stage=form.stage.data,
                 close_date=form.close_date.data,
-                account_id=form.account.data,
+                account_id=int(form.account.data),
                 user_id=current_user.id,
-                lead_id=form.lead.data if form.lead.data else None
+                lead_id=int(form.lead.data) if form.lead.data else None
             )
             current_app.logger.info(f"Opportunity object created: {opportunity.__dict__}")
             db.session.add(opportunity)
@@ -61,10 +66,16 @@ def opportunity_detail(id):
 def edit_opportunity(id):
     opportunity = Opportunity.query.get_or_404(id)
     form = OpportunityForm(obj=opportunity)
-    form.account.choices = [(a.id, a.name) for a in Account.query.filter_by(user_id=current_user.id).all()]
+    form.account.choices = [(str(a.id), a.name) for a in Account.query.filter_by(user_id=current_user.id).all()]
+
+    # リードの選択肢を設定
+    form.lead.choices = [('', 'None')] + [(str(l.id), l.name) for l in Lead.query.filter_by(user_id=current_user.id).all()]
+
     if form.validate_on_submit():
         try:
             form.populate_obj(opportunity)
+            opportunity.account_id = int(form.account.data)
+            opportunity.lead_id = int(form.lead.data) if form.lead.data else None
             db.session.commit()
             flash('Opportunity updated successfully', 'success')
             return redirect(url_for('opportunities.opportunity_detail', id=opportunity.id))

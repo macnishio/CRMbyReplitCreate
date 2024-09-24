@@ -3,19 +3,16 @@ from wtforms import StringField, PasswordField, SubmitField, FloatField, DateFie
 from wtforms.validators import DataRequired, Email, EqualTo, Length, Optional, NumberRange, ValidationError
 from models import Lead
 from datetime import date
-
 class LoginForm(FlaskForm):
     username = StringField('Username', validators=[DataRequired()])
     password = PasswordField('Password', validators=[DataRequired()])
     submit = SubmitField('Sign In')
-
 class RegistrationForm(FlaskForm):
     username = StringField('Username', validators=[DataRequired(), Length(min=2, max=20)])
     email = StringField('Email', validators=[DataRequired(), Email()])
     password = PasswordField('Password', validators=[DataRequired()])
     confirm_password = PasswordField('Confirm Password', validators=[DataRequired(), EqualTo('password')])
     submit = SubmitField('Sign Up')
-
 class LeadForm(FlaskForm):
     name = StringField('Name', validators=[DataRequired()])
     email = StringField('Email', validators=[DataRequired(), Email()])
@@ -23,21 +20,18 @@ class LeadForm(FlaskForm):
     status = SelectField('Status', choices=[('New', 'New'), ('Contacted', 'Contacted'), ('Qualified', 'Qualified'), ('Lost', 'Lost')], validators=[DataRequired()])
     score = FloatField('Score', validators=[Optional(), NumberRange(min=0, max=100)])
     submit = SubmitField('Submit')
-
     def validate_email(self, email):
         lead = Lead.query.filter_by(email=email.data).first()
         if lead:
             raise ValidationError('That email is already in use. Please choose a different one.')
-
 class OpportunityForm(FlaskForm):
     name = StringField('Name', validators=[DataRequired()])
     amount = FloatField('Amount', validators=[DataRequired(), NumberRange(min=0.01, message="Amount must be a positive number.")])
     stage = SelectField('Stage', choices=[('Prospecting', 'Prospecting'), ('Qualification', 'Qualification'), ('Proposal', 'Proposal'), ('Negotiation', 'Negotiation'), ('Closed Won', 'Closed Won'), ('Closed Lost', 'Closed Lost')])
     close_date = DateField('Close Date', validators=[DataRequired()])
     account = SelectField('Account', coerce=int)
-    lead = SelectField('Lead', coerce=int, validators=[Optional()])
+    lead = SelectField('Lead', coerce=lambda x: int(x) if x else None, validators=[Optional()])
     submit = SubmitField('Submit')
-
     def validate_close_date(self, close_date):
         if close_date.data <= date.today():
             raise ValidationError('Close date must be in the future.')

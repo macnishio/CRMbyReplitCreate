@@ -5,7 +5,7 @@ bp = Blueprint('main', __name__)
 
 @bp.route('/')
 def index():
-    return "Welcome to the CRM Application"
+    return render_template('home.html')  # Ensure this line uses render_template
 
 @bp.route('/health')
 def health_check():
