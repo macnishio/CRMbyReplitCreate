@@ -44,9 +44,10 @@ def create_app():
 
     # Limiterの初期化
     limiter = Limiter(
-        app,
+        key_func=get_remote_address,
         default_limits=["200 per day", "50 per hour"]
     )
+    limiter.init_app(app)
 
     # Talismanの初期化
     csp = {
@@ -121,8 +122,8 @@ def create_app():
 app = create_app()
 
 if __name__ == '__main__':
-    app.logger.info('Starting scheduler')
     with app.app_context():
+        app.logger.info('Starting scheduler')
         scheduler.start()
-    app.logger.info('Scheduler started')
-    app.run(host='0.0.0.0', port=5000)
+        app.logger.info('Scheduler started')
+        app.run(host='0.0.0.0', port=5000)

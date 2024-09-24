@@ -58,7 +58,8 @@ def setup_email_scheduler(app):
     @scheduler.task('interval', id='check_emails', minutes=15, misfire_grace_time=900)
     def check_emails_task():
         with app.app_context():
-            current_app.logger.info("Checking for new emails")
+            app.logger.info("Checking for new emails")
             fetch_emails()
 
-    current_app.logger.info("Email scheduler set up")
+    with app.app_context():
+        app.logger.info("Email scheduler set up")
