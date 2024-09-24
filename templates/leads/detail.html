@@ -9,7 +9,9 @@
         <p><strong>Email:</strong> {{ lead.email }}</p>
         <p><strong>Phone:</strong> {{ lead.phone }}</p>
         <p><strong>Status:</strong> {{ lead.status }}</p>
+        <p><strong>Score:</strong> {{ lead.score }}</p>
         <p><strong>Created At:</strong> {{ lead.created_at.strftime('%Y-%m-%d %H:%M:%S') }}</p>
+        <p><strong>Last Contact:</strong> {{ lead.last_contact.strftime('%Y-%m-%d %H:%M:%S') }}</p>
     </div>
     <div class="actions">
         <a href="{{ url_for('leads.edit_lead', id=lead.id) }}" class="button">Edit Lead</a>
@@ -18,4 +20,50 @@
         </form>
         <a href="{{ url_for('leads.send_individual_follow_up', id=lead.id) }}" class="button">Send Follow-up Email</a>
     </div>
+
+    <h2>Associated Emails</h2>
+    {% if emails %}
+        <table>
+            <thead>
+                <tr>
+                    <th>Sender</th>
+                    <th>Subject</th>
+                    <th>Received At</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for email in emails %}
+                    <tr>
+                        <td>{{ email.sender }}</td>
+                        <td>{{ email.subject }}</td>
+                        <td>{{ email.received_at.strftime('%Y-%m-%d %H:%M:%S') }}</td>
+                        <td>
+                            <button onclick="toggleEmailContent({{ email.id }})">View Content</button>
+                        </td>
+                    </tr>
+                    <tr id="email-content-{{ email.id }}" style="display: none;">
+                        <td colspan="4">
+                            <pre>{{ email.content }}</pre>
+                        </td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    {% else %}
+        <p>No emails associated with this lead.</p>
+    {% endif %}
+{% endblock %}
+
+{% block scripts %}
+<script>
+function toggleEmailContent(emailId) {
+    var content = document.getElementById('email-content-' + emailId);
+    if (content.style.display === 'none') {
+        content.style.display = 'table-row';
+    } else {
+        content.style.display = 'none';
+    }
+}
+</script>
 {% endblock %}

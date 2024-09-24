@@ -31,12 +31,23 @@ class Lead(db.Model):
     last_followup_email: Mapped[datetime] = mapped_column(DateTime, nullable=True)
     last_followup_tracking_id: Mapped[str] = mapped_column(String(36), nullable=True)
     last_email_opened: Mapped[datetime] = mapped_column(DateTime, nullable=True)
-    user_id: Mapped[int] = mapped_column(Integer, ForeignKey('users.id'))  # 'user.id' から 'users.id' に変更
+    user_id: Mapped[int] = mapped_column(Integer, ForeignKey('users.id'))
     user: Mapped['User'] = relationship('User', backref='leads')
     score: Mapped[float] = mapped_column(Float, default=0.0)
+    emails: Mapped[list['Email']] = relationship('Email', back_populates='lead')
+
+class Email(db.Model):
+    __tablename__ = 'emails'
+    id: Mapped[int] = mapped_column(Integer, primary_key=True)
+    sender: Mapped[str] = mapped_column(String(255), nullable=False)
+    subject: Mapped[str] = mapped_column(String(255))
+    content: Mapped[str] = mapped_column(Text)
+    received_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow)
+    lead_id: Mapped[int] = mapped_column(Integer, ForeignKey('leads.id'))
+    lead: Mapped['Lead'] = relationship('Lead', back_populates='emails')
 
 class Opportunity(db.Model):
-    __tablename__ = 'opportunities'  # 小文字に変更
+    __tablename__ = 'opportunities'
     id: Mapped[int] = mapped_column(Integer, primary_key=True)
     name: Mapped[str] = mapped_column(String(255), nullable=False)
     amount: Mapped[float] = mapped_column(Float, nullable=False)
@@ -51,7 +62,7 @@ class Opportunity(db.Model):
     lead: Mapped['Lead'] = relationship('Lead', backref='opportunities')
 
 class Account(db.Model):
-    __tablename__ = 'accounts'  # 小文字に変更
+    __tablename__ = 'accounts'
     id: Mapped[int] = mapped_column(Integer, primary_key=True)
     name: Mapped[str] = mapped_column(String(100), nullable=False)
     industry: Mapped[str] = mapped_column(String(50))
@@ -61,7 +72,7 @@ class Account(db.Model):
     user: Mapped['User'] = relationship('User', backref='accounts')
 
 class Schedule(db.Model):
-    __tablename__ = 'schedules'  # 小文字に変更
+    __tablename__ = 'schedules'
     id: Mapped[int] = mapped_column(Integer, primary_key=True)
     title: Mapped[str] = mapped_column(String(255), nullable=False)
     description: Mapped[str] = mapped_column(Text)
@@ -77,7 +88,7 @@ class Schedule(db.Model):
     opportunity: Mapped['Opportunity'] = relationship('Opportunity', backref='schedules')
 
 class Task(db.Model):
-    __tablename__ = 'tasks'  # 小文字に変更
+    __tablename__ = 'tasks'
     id: Mapped[int] = mapped_column(Integer, primary_key=True)
     title: Mapped[str] = mapped_column(String(255), nullable=False)
     description: Mapped[str] = mapped_column(Text)

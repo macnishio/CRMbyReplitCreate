@@ -368,7 +368,7 @@ COPY public.schedules (id, title, description, start_time, end_time, user_id, ac
 --
 
 COPY public.tasks (id, title, description, due_date, completed, created_at, user_id, lead_id, opportunity_id, account_id) FROM stdin;
-1	Zoho test task	Create Zoho test task	2024-09-24 05:45:00	f	2024-09-23 20:45:30.412668	1	1	\N	\N
+1	Zoho test task	Create Zoho test task	2024-09-24 05:45:00	t	2024-09-23 20:45:30.412668	1	1	\N	\N
 \.
 
 

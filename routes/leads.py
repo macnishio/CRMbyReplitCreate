@@ -1,7 +1,7 @@
 from flask import Blueprint, render_template, redirect, url_for, flash, current_app
 from flask_login import login_required, current_user
 from extensions import db
-from models import Lead
+from models import Lead, Email
 from forms import LeadForm
 from analytics import calculate_lead_score, train_lead_scoring_model, predict_lead_score
 from email_utils import send_follow_up_email, send_automated_follow_ups, needs_follow_up
@@ -46,7 +46,8 @@ def create_lead():
 @login_required
 def lead_detail(id):
     lead = Lead.query.get_or_404(id)
-    return render_template('leads/detail.html', lead=lead)
+    emails = Email.query.filter_by(lead_id=lead.id).order_by(Email.received_at.desc()).all()
+    return render_template('leads/detail.html', lead=lead, emails=emails)
 
 @bp.route('/<int:id>/edit', methods=['GET', 'POST'])
 @login_required

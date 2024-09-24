@@ -1,5 +1,5 @@
 import os
-from flask import Flask
+from flask import Flask, render_template
 from flask_login import LoginManager
 from flask_migrate import Migrate
 from flask_talisman import Talisman
@@ -9,6 +9,7 @@ from flask_limiter.util import get_remote_address
 import logging
 from logging.handlers import RotatingFileHandler
 from extensions import db, mail, scheduler, cache
+from email_receiver import setup_email_scheduler
 
 # Redisのインポートを試みる
 try:
@@ -34,7 +35,11 @@ def create_app():
     # 拡張機能の初期化
     db.init_app(app)
     mail.init_app(app)
+    
+    # Modify scheduler initialization to disable the API
+    app.config['SCHEDULER_API_ENABLED'] = False
     scheduler.init_app(app)
+    
     cache.init_app(app)
 
     # Limiterの初期化
@@ -87,6 +92,9 @@ def create_app():
     scheduler.add_job(id='send_automated_follow_ups', func=send_automated_follow_ups, trigger='interval', hours=24)
     app.logger.info("Scheduled automated follow-ups job")
 
+    # Email receiving scheduler setup
+    setup_email_scheduler(app)
+
     # ロギングの設定
     if not app.debug:
         if not os.path.exists('logs'):
@@ -98,6 +106,14 @@ def create_app():
         app.logger.addHandler(file_handler)
         app.logger.setLevel(logging.INFO)
         app.logger.info('CRM startup')
+
+    @app.route('/dashboard')
+    def dashboard():
+        # ダミーデータを作成するか、データを実際に取得します
+        leads = 100
+        opportunities = 50
+        accounts = 30
+        return render_template('dashboard.html', leads=leads, opportunities=opportunities, accounts=accounts)
 
     return app
 
