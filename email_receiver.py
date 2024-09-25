@@ -16,14 +16,22 @@ def connect_to_email_server():
     return mail
 
 def extract_email_address(sender):
-    email_pattern = r'[\w\.-]+@[\w\.-]+'
+    email_pattern = r'<?([\w\.-]+@[\w\.-]+)>?'
     match = re.search(email_pattern, sender)
     if match:
-        return match.group(0)
+        return match.group(1)
     return sender
+
+def extract_sender_name(sender):
+    name_pattern = r'^(.*?)\s*<'
+    match = re.search(name_pattern, sender)
+    if match:
+        return match.group(1).strip()
+    return None
 
 def process_email(sender, subject, content, date):
     sender_email = extract_email_address(sender)
+    sender_name = extract_sender_name(sender)
     
     lead = Lead.query.filter(func.lower(Lead.email) == func.lower(sender_email)).first()
     
@@ -35,7 +43,8 @@ def process_email(sender, subject, content, date):
     if lead:
         existing_email = Email.query.filter_by(lead_id=lead.id, subject=subject, received_at=date).first()
         if not existing_email:
-            new_email = Email(sender=sender,
+            new_email = Email(sender=sender_email,
+                              sender_name=sender_name,
                               subject=subject,
                               content=content,
                               received_at=date,
@@ -47,7 +56,8 @@ def process_email(sender, subject, content, date):
             current_app.logger.info(f"Duplicate email skipped for lead: {lead.name}, received at {date}")
     else:
         current_app.logger.warning(f"Received email from unknown sender: {sender}")
-        unknown_email = UnknownEmail(sender=sender,
+        unknown_email = UnknownEmail(sender=sender_email,
+                                     sender_name=sender_name,
                                      subject=subject,
                                      content=content,
                                      received_at=date)

@@ -17,9 +17,8 @@
             {% for email in emails %}
                 <tr>
                     <td>
-                        {% set sender_parts = email.sender.split('<') %}
-                        {% if sender_parts|length > 1 %}
-                            {{ sender_parts[0].strip() }} &lt;{{ sender_parts[1].split('>')[0] }}&gt;
+                        {% if email.sender_name %}
+                            {{ email.sender_name }} &lt;{{ email.sender }}&gt;
                         {% else %}
                             {{ email.sender }}
                         {% endif %}
