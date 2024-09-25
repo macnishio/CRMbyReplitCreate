@@ -12,7 +12,7 @@ import re
 
 
 def connect_to_email_server():
-    mail = imaplib.IMAP4_SSL(current_app.config['RECEIVE_MAIL_SERVER'])
+    mail = imaplib.IMAP4_SSL(current_app.config['MAIL_SERVER'])
     mail.login(current_app.config['MAIL_USERNAME'],
                current_app.config['MAIL_PASSWORD'])
     return mail
@@ -60,7 +60,7 @@ def process_email(sender, subject, content, date):
                               sender_name=sender_name,
                               subject=subject,
                               content=content,
-                              received_at=date,
+                              received_at=date,  # Use the original email date
                               lead=lead)
             db.session.add(new_email)
             db.session.commit()
@@ -132,18 +132,23 @@ def fetch_emails(days_back=30, lead_id=None):
             for part in email_message.walk():
                 if part.get_content_type() == "text/plain":
                     try:
-                        body = part.get_payload(decode=True).decode(encoding or 'utf-8', errors='ignore')
-                        body = body.replace('\x00', '')  # Remove NUL characters
+                        body = part.get_payload(decode=True).decode(
+                            encoding or 'utf-8', errors='ignore')
+                        body = body.replace('\x00',
+                                            '')  # Remove NUL characters
                     except Exception as e:
-                        current_app.logger.error(f"Error decoding email body: {str(e)}")
+                        current_app.logger.error(
+                            f"Error decoding email body: {str(e)}")
                         body = "Error: Unable to decode email content"
                     break
         else:
             try:
-                body = email_message.get_payload(decode=True).decode(encoding or 'utf-8', errors='ignore')
+                body = email_message.get_payload(decode=True).decode(
+                    encoding or 'utf-8', errors='ignore')
                 body = body.replace('\x00', '')  # Remove NUL characters
             except Exception as e:
-                current_app.logger.error(f"Error decoding email body: {str(e)}")
+                current_app.logger.error(
+                    f"Error decoding email body: {str(e)}")
                 body = "Error: Unable to decode email content"
 
         try:
@@ -151,7 +156,8 @@ def fetch_emails(days_back=30, lead_id=None):
         except DataError as e:
             current_app.logger.error(f"DataError processing email: {str(e)}")
         except Exception as e:
-            current_app.logger.error(f"Unexpected error processing email: {str(e)}")
+            current_app.logger.error(
+                f"Unexpected error processing email: {str(e)}")
 
     mail.close()
     mail.logout()

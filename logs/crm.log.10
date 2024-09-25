@@ -1,65 +1,42 @@
-2024-09-25 17:32:05,360 INFO: Stored email from unknown sender: systemgenerated@zohocrm.com [in /home/runner/CRM/email_receiver.py:66]
-2024-09-25 17:32:05,737 INFO: Processing email - Sender: 
-	=?utf-8?q?YEALE_=E9=81=8B=E5=96=B6=E4=BA=8B=E5=8B=99=E5=B1=80_powered_by_?=
-	=?utf-8?q?=E6=A0=AA=E5=BC=8F=E4=BC=9A=E7=A4=BE=E3=82=BB=E3=83=AC=E3=83=96?=
-	=?utf-8?q?=E3=83=AA=E3=83=83=E3=82=AF=E3=82=B9?=
-	<yeale_support@yeale-by-cerebrix.com>, Subject: マネージャーが持つべき "本当の優しさ" とは？, Date: 2024-08-26 02:52:58 [in /home/runner/CRM/email_receiver.py:103]
-2024-09-25 17:32:06,656 WARNING: Received email from unknown sender: 
-	=?utf-8?q?YEALE_=E9=81=8B=E5=96=B6=E4=BA=8B=E5=8B=99=E5=B1=80_powered_by_?=
-	=?utf-8?q?=E6=A0=AA=E5=BC=8F=E4=BC=9A=E7=A4=BE=E3=82=BB=E3=83=AC=E3=83=96?=
-	=?utf-8?q?=E3=83=AA=E3=83=83=E3=82=AF=E3=82=B9?=
-	<yeale_support@yeale-by-cerebrix.com> [in /home/runner/CRM/email_receiver.py:58]
-2024-09-25 17:32:07,118 INFO: Stored email from unknown sender: 
-	=?utf-8?q?YEALE_=E9=81=8B=E5=96=B6=E4=BA=8B=E5=8B=99=E5=B1=80_powered_by_?=
-	=?utf-8?q?=E6=A0=AA=E5=BC=8F=E4=BC=9A=E7=A4=BE=E3=82=BB=E3=83=AC=E3=83=96?=
-	=?utf-8?q?=E3=83=AA=E3=83=83=E3=82=AF=E3=82=B9?=
-	<yeale_support@yeale-by-cerebrix.com> [in /home/runner/CRM/email_receiver.py:66]
-2024-09-25 17:32:08,313 INFO: Processing email - Sender: 
-	=?utf-8?q?=E3=82=AB=E3=83=81=E3=82=A2=E3=83=AB=E3=82=B5=E3=83=9D=E3=83=BC?=
-	=?utf-8?q?=E3=83=88=E4=BA=8B=E5=8B=99=E5=B1=80?=
-	<entry@kachiaru-support.lingcorp.co.jp>, Subject: 【カチアルサポート】【お役立ち記事紹介】 オンライン秘書のおすすめサービス12選！他, Date: 2024-08-26 03:15:05 [in /home/runner/CRM/email_receiver.py:103]
-2024-09-25 17:32:09,232 WARNING: Received email from unknown sender: 
-	=?utf-8?q?=E3=82=AB=E3=83=81=E3=82=A2=E3=83=AB=E3=82=B5=E3=83=9D=E3=83=BC?=
-	=?utf-8?q?=E3=83=88=E4=BA=8B=E5=8B=99=E5=B1=80?=
-	<entry@kachiaru-support.lingcorp.co.jp> [in /home/runner/CRM/email_receiver.py:58]
-2024-09-25 17:32:09,693 INFO: Stored email from unknown sender: 
-	=?utf-8?q?=E3=82=AB=E3=83=81=E3=82=A2=E3=83=AB=E3=82=B5=E3=83=9D=E3=83=BC?=
-	=?utf-8?q?=E3=83=88=E4=BA=8B=E5=8B=99=E5=B1=80?=
-	<entry@kachiaru-support.lingcorp.co.jp> [in /home/runner/CRM/email_receiver.py:66]
-2024-09-25 17:32:10,043 INFO: Processing email - Sender: =?UTF-8?B?55+z5bed5rWp5a2d?= <ishikawahirotaka@gmail.com>, Subject: test, Date: 2024-08-26 03:56:09 [in /home/runner/CRM/email_receiver.py:103]
-2024-09-25 17:32:10,963 WARNING: Received email from unknown sender: =?UTF-8?B?55+z5bed5rWp5a2d?= <ishikawahirotaka@gmail.com> [in /home/runner/CRM/email_receiver.py:58]
-2024-09-25 17:32:11,424 INFO: Stored email from unknown sender: =?UTF-8?B?55+z5bed5rWp5a2d?= <ishikawahirotaka@gmail.com> [in /home/runner/CRM/email_receiver.py:66]
-2024-09-25 17:32:11,740 INFO: Processing email - Sender: "=?UTF-8?Q?=E8=B5=A4=E6=9C=A8=E4=BF=8A=E4=B9=9F_=28ManageEngine=29?=" <jp-memarketing@zohocorp.com>, Subject: 【お菓子付無料カフェセッション】SIEMツールで実現するセキュリティ強化策～オンプレもクラウドもサポート実現～, Date: 2024-08-26 04:04:21 [in /home/runner/CRM/email_receiver.py:103]
-2024-09-25 17:32:12,658 WARNING: Received email from unknown sender: "=?UTF-8?Q?=E8=B5=A4=E6=9C=A8=E4=BF=8A=E4=B9=9F_=28ManageEngine=29?=" <jp-memarketing@zohocorp.com> [in /home/runner/CRM/email_receiver.py:58]
-2024-09-25 17:32:13,120 INFO: Stored email from unknown sender: "=?UTF-8?Q?=E8=B5=A4=E6=9C=A8=E4=BF=8A=E4=B9=9F_=28ManageEngine=29?=" <jp-memarketing@zohocorp.com> [in /home/runner/CRM/email_receiver.py:66]
-2024-09-25 17:32:13,599 INFO: Processing email - Sender: "no-reply@zohobooks.com" <no-reply@zohobooks.com>, Subject: 見積書 EST-002483を（有）西尾システムコンサルタントからの承認用に送信しました, Date: 2024-08-26 04:11:35 [in /home/runner/CRM/email_receiver.py:103]
-2024-09-25 17:32:14,517 WARNING: Received email from unknown sender: "no-reply@zohobooks.com" <no-reply@zohobooks.com> [in /home/runner/CRM/email_receiver.py:58]
-2024-09-25 17:32:14,977 INFO: Stored email from unknown sender: "no-reply@zohobooks.com" <no-reply@zohobooks.com> [in /home/runner/CRM/email_receiver.py:66]
-2024-09-25 17:32:15,310 INFO: Processing email - Sender: "=?UTF-8?B?44CQ44OT44K644K544K/44CR?=" <info@biz-study.com>, Subject: 【9/11水曜】LINEヤフー株式会社 齊藤氏『LINEヤフーグループの認証基盤統合プロジェクトの成功』, Date: 2024-08-26 04:11:57 [in /home/runner/CRM/email_receiver.py:103]
-2024-09-25 17:32:16,229 WARNING: Received email from unknown sender: "=?UTF-8?B?44CQ44OT44K644K544K/44CR?=" <info@biz-study.com> [in /home/runner/CRM/email_receiver.py:58]
-2024-09-25 17:32:16,690 INFO: Stored email from unknown sender: "=?UTF-8?B?44CQ44OT44K644K544K/44CR?=" <info@biz-study.com> [in /home/runner/CRM/email_receiver.py:66]
-2024-09-25 17:32:17,148 INFO: Processing email - Sender: "no-reply@zohobooks.com" <no-reply@zohobooks.com>, Subject: 請求書 INV-002294を（有）西尾システムコンサルタントからの承認用に送信しました, Date: 2024-08-26 04:13:13 [in /home/runner/CRM/email_receiver.py:103]
-2024-09-25 17:32:18,066 WARNING: Received email from unknown sender: "no-reply@zohobooks.com" <no-reply@zohobooks.com> [in /home/runner/CRM/email_receiver.py:58]
-2024-09-25 17:32:18,527 INFO: Stored email from unknown sender: "no-reply@zohobooks.com" <no-reply@zohobooks.com> [in /home/runner/CRM/email_receiver.py:66]
-2024-09-25 17:32:18,898 INFO: Processing email - Sender: systemgenerated@zohocrm.com, Subject: Zoho CRM - 予定のリマインダー, Date: 2024-08-26 04:45:01 [in /home/runner/CRM/email_receiver.py:103]
-2024-09-25 17:32:19,817 WARNING: Received email from unknown sender: systemgenerated@zohocrm.com [in /home/runner/CRM/email_receiver.py:58]
-2024-09-25 17:32:20,278 INFO: Stored email from unknown sender: systemgenerated@zohocrm.com [in /home/runner/CRM/email_receiver.py:66]
-2024-09-25 17:32:20,563 INFO: Processing email - Sender: "Money Forward" <feedback@moneyforward.com>, Subject: 不動産価格上昇中！？いくらで売れるか、まずは業界大手に無料で相談！（マネーフォワードPR）, Date: 2024-08-26 05:02:43 [in /home/runner/CRM/email_receiver.py:103]
-2024-09-25 17:32:21,483 WARNING: Received email from unknown sender: "Money Forward" <feedback@moneyforward.com> [in /home/runner/CRM/email_receiver.py:58]
-2024-09-25 17:32:22,441 INFO: Stored email from unknown sender: "Money Forward" <feedback@moneyforward.com> [in /home/runner/CRM/email_receiver.py:66]
-2024-09-25 17:32:22,723 INFO: Processing email - Sender: =?UTF-8?B?Q29kZVppbmXnt6jpm4bpg6g=?= <support@codezine.jp>, Subject: 多彩な領域で活躍するITエンジニアを応援する「Developers X Summit」開催[CodeZine News号外], Date: 2024-08-26 05:03:00 [in /home/runner/CRM/email_receiver.py:103]
-2024-09-25 17:32:25,023 INFO: New email processed for lead: Zoho Support, received at 2024-08-26 05:03:00 [in /home/runner/CRM/email_receiver.py:54]
-2024-09-25 17:32:25,331 INFO: Processing email - Sender: "=?UTF-8?B?44Kk44OZ44Oz44OI6YGL5Za25LqL5YuZ5bGA?=" <zoho-events@zoho.co.jp>, Subject: 【近日開催(品川)】Zoho を活用したデジタルマーケティングの始め方, Date: 2024-08-26 05:03:35 [in /home/runner/CRM/email_receiver.py:103]
-2024-09-25 17:32:25,792 WARNING: Received email from unknown sender: "=?UTF-8?B?44Kk44OZ44Oz44OI6YGL5Za25LqL5YuZ5bGA?=" <zoho-events@zoho.co.jp> [in /home/runner/CRM/email_receiver.py:58]
-2024-09-25 17:32:26,254 INFO: Stored email from unknown sender: "=?UTF-8?B?44Kk44OZ44Oz44OI6YGL5Za25LqL5YuZ5bGA?=" <zoho-events@zoho.co.jp> [in /home/runner/CRM/email_receiver.py:66]
-2024-09-25 17:32:26,540 INFO: Processing email - Sender: "=?UTF-8?B?44Kk44OZ44Oz44OI6YGL5Za25LqL5YuZ5bGA?=" <zoho-events@zoho.co.jp>, Subject: 【近日開催(品川)】Zoho を活用したデジタルマーケティングの始め方, Date: 2024-08-26 05:05:06 [in /home/runner/CRM/email_receiver.py:103]
-2024-09-25 17:32:27,459 WARNING: Received email from unknown sender: "=?UTF-8?B?44Kk44OZ44Oz44OI6YGL5Za25LqL5YuZ5bGA?=" <zoho-events@zoho.co.jp> [in /home/runner/CRM/email_receiver.py:58]
-2024-09-25 17:32:27,922 INFO: Stored email from unknown sender: "=?UTF-8?B?44Kk44OZ44Oz44OI6YGL5Za25LqL5YuZ5bGA?=" <zoho-events@zoho.co.jp> [in /home/runner/CRM/email_receiver.py:66]
-2024-09-25 17:32:28,366 INFO: Processing email - Sender: systemgenerated@zohocrm.com, Subject: Zoho CRM - 予定のリマインダー, Date: 2024-08-26 05:15:02 [in /home/runner/CRM/email_receiver.py:103]
-2024-09-25 17:32:29,285 WARNING: Received email from unknown sender: systemgenerated@zohocrm.com [in /home/runner/CRM/email_receiver.py:58]
-2024-09-25 17:32:29,746 INFO: Stored email from unknown sender: systemgenerated@zohocrm.com [in /home/runner/CRM/email_receiver.py:66]
-2024-09-25 17:32:30,030 INFO: Processing email - Sender: =?UTF-8?B?Qml6L1ppbmXnt6jpm4bpg6g=?= <support@bizzine.jp>, Subject: 宇田川准教授が迫る創業100年企業の変革／「iPS細胞技術の社会実装」とは [Biz/Zine News 2024-08-26], Date: 2024-08-26 06:01:53 [in /home/runner/CRM/email_receiver.py:103]
-2024-09-25 17:32:32,573 INFO: New email processed for lead: Zoho Support, received at 2024-08-26 06:01:53 [in /home/runner/CRM/email_receiver.py:54]
-2024-09-25 17:32:32,897 INFO: Processing email - Sender: =?UTF-8?B?6KW/5bC+IOecn+iogA==?= <makoto@team240.net>, Subject: 【お約束時間のお知らせ】, Date: 2024-08-26 06:44:07 [in /home/runner/CRM/email_receiver.py:103]
-2024-09-25 17:32:34,509 INFO: New email processed for lead: 西尾真言, received at 2024-08-26 06:44:07 [in /home/runner/CRM/email_receiver.py:54]
-2024-09-25 17:32:34,824 INFO: Processing email - Sender: "Money Forward" <feedback@moneyforward.com>, Subject: 先人のマネをして不動産投資を始めてみたら理想の生活を実現しました｜師弟投資家対談（マネーフォワードPR）, Date: 2024-08-26 06:44:05 [in /home/runner/CRM/email_receiver.py:103]
+2024-09-25 22:52:20,741 INFO: Processing email - Sender: =?UTF-8?B?5piO5oWnIOaelw==?= <linminghui@team240.net>, Subject: グループ「幼稚園用事」で新しい予定が作成されました, Original Date: Thu, 29 Aug 2024 16:05:04 -0700 (PDT), Parsed Date: 2024-08-29 23:05:04 [in /home/runner/CRM/email_receiver.py:127]
+2024-09-25 22:52:21,195 INFO: Duplicate email skipped for lead: 林明慧, received at 2024-08-29 23:05:04 [in /home/runner/CRM/email_receiver.py:69]
+2024-09-25 22:52:21,590 INFO: Processing email - Sender: =?UTF-8?B?5piO5oWnIOaelw==?= <linminghui@team240.net>, Subject: グループ「幼稚園用事」で新しい予定が作成されました, Original Date: Thu, 29 Aug 2024 16:05:44 -0700 (PDT), Parsed Date: 2024-08-29 23:05:44 [in /home/runner/CRM/email_receiver.py:127]
+2024-09-25 22:52:22,043 INFO: Duplicate email skipped for lead: 林明慧, received at 2024-08-29 23:05:44 [in /home/runner/CRM/email_receiver.py:69]
+2024-09-25 22:52:22,512 INFO: Processing email - Sender: =?UTF-8?B?5piO5oWnIOaelw==?= <linminghui@team240.net>, Subject: グループの予定「始めの集い 制服登園の午前保育 バスは平常運行」の招待が更新されました, Original Date: Thu, 29 Aug 2024 16:06:35 -0700 (PDT), Parsed Date: 2024-08-29 23:06:35 [in /home/runner/CRM/email_receiver.py:127]
+2024-09-25 22:52:24,094 INFO: New email processed for lead: 林明慧, received at 2024-08-29 23:06:35 [in /home/runner/CRM/email_receiver.py:65]
+2024-09-25 22:52:24,518 INFO: Processing email - Sender: =?UTF-8?B?5piO5oWnIOaelw==?= <linminghui@team240.net>, Subject: グループ「幼稚園用事」で新しい予定が作成されました, Original Date: Thu, 29 Aug 2024 16:09:32 -0700 (PDT), Parsed Date: 2024-08-29 23:09:32 [in /home/runner/CRM/email_receiver.py:127]
+2024-09-25 22:52:26,101 INFO: New email processed for lead: 林明慧, received at 2024-08-29 23:09:32 [in /home/runner/CRM/email_receiver.py:65]
+2024-09-25 22:52:26,583 INFO: Processing email - Sender: =?UTF-8?B?5piO5oWnIOaelw==?= <linminghui@team240.net>, Subject: グループ「幼稚園用事」で新しい予定が作成されました, Original Date: Thu, 29 Aug 2024 16:16:31 -0700 (PDT), Parsed Date: 2024-08-29 23:16:31 [in /home/runner/CRM/email_receiver.py:127]
+2024-09-25 22:52:28,164 INFO: New email processed for lead: 林明慧, received at 2024-08-29 23:16:31 [in /home/runner/CRM/email_receiver.py:65]
+2024-09-25 22:52:28,721 INFO: Processing email - Sender: =?UTF-8?B?5piO5oWnIOaelw==?= <linminghui@team240.net>, Subject: グループの予定「給食　」の招待が更新されました, Original Date: Thu, 29 Aug 2024 16:25:40 -0700 (PDT), Parsed Date: 2024-08-29 23:25:40 [in /home/runner/CRM/email_receiver.py:127]
+2024-09-25 22:52:30,307 INFO: New email processed for lead: 林明慧, received at 2024-08-29 23:25:40 [in /home/runner/CRM/email_receiver.py:65]
+2024-09-25 22:52:30,838 INFO: Processing email - Sender: =?UTF-8?B?5piO5oWnIOaelw==?= <linminghui@team240.net>, Subject: グループの予定「給食」の招待が更新されました, Original Date: Thu, 29 Aug 2024 16:25:55 -0700 (PDT), Parsed Date: 2024-08-29 23:25:55 [in /home/runner/CRM/email_receiver.py:127]
+2024-09-25 22:52:32,419 INFO: New email processed for lead: 林明慧, received at 2024-08-29 23:25:55 [in /home/runner/CRM/email_receiver.py:65]
+2024-09-25 22:52:32,898 INFO: Processing email - Sender: =?UTF-8?B?5piO5oWnIOaelw==?= <linminghui@team240.net>, Subject: グループの予定「給食」の招待が更新されました, Original Date: Thu, 29 Aug 2024 16:26:13 -0700 (PDT), Parsed Date: 2024-08-29 23:26:13 [in /home/runner/CRM/email_receiver.py:127]
+2024-09-25 22:52:33,350 INFO: Duplicate email skipped for lead: 林明慧, received at 2024-08-29 23:26:13 [in /home/runner/CRM/email_receiver.py:69]
+2024-09-25 22:52:33,786 INFO: Processing email - Sender: =?UTF-8?B?5piO5oWnIOaelw==?= <linminghui@team240.net>, Subject: グループの予定「給食」の招待が更新されました, Original Date: Thu, 29 Aug 2024 16:26:33 -0700 (PDT), Parsed Date: 2024-08-29 23:26:33 [in /home/runner/CRM/email_receiver.py:127]
+2024-09-25 22:52:34,239 INFO: Duplicate email skipped for lead: 林明慧, received at 2024-08-29 23:26:33 [in /home/runner/CRM/email_receiver.py:69]
+2024-09-25 22:52:34,946 INFO: Processing email - Sender: =?UTF-8?B?5piO5oWnIOaelw==?= <linminghui@team240.net>, Subject: グループの予定「給食」の招待が更新されました, Original Date: Thu, 29 Aug 2024 16:26:49 -0700 (PDT), Parsed Date: 2024-08-29 23:26:49 [in /home/runner/CRM/email_receiver.py:127]
+2024-09-25 22:52:35,399 INFO: Duplicate email skipped for lead: 林明慧, received at 2024-08-29 23:26:49 [in /home/runner/CRM/email_receiver.py:69]
+2024-09-25 22:52:35,800 INFO: Processing email - Sender: =?UTF-8?B?5piO5oWnIOaelw==?= <linminghui@team240.net>, Subject: グループの予定「給食　」の招待が更新されました, Original Date: Thu, 29 Aug 2024 16:27:01 -0700 (PDT), Parsed Date: 2024-08-29 23:27:01 [in /home/runner/CRM/email_receiver.py:127]
+2024-09-25 22:52:37,382 INFO: New email processed for lead: 林明慧, received at 2024-08-29 23:27:01 [in /home/runner/CRM/email_receiver.py:65]
+2024-09-25 22:52:37,929 INFO: Processing email - Sender: =?UTF-8?B?5piO5oWnIOaelw==?= <linminghui@team240.net>, Subject: グループの予定「５日（木）…給食開始」の招待が更新されました, Original Date: Mon, 2 Sep 2024 16:46:20 -0700 (PDT), Parsed Date: 2024-09-02 23:46:20 [in /home/runner/CRM/email_receiver.py:127]
+2024-09-25 22:52:39,523 INFO: New email processed for lead: 林明慧, received at 2024-09-02 23:46:20 [in /home/runner/CRM/email_receiver.py:65]
+2024-09-25 22:52:40,317 INFO: Processing email - Sender: "linminghui@team240.net" <linminghui@team240.net>, Subject: 見積書’を承認しました, Original Date: Fri, 6 Sep 2024 20:24:28 -0700 (PDT), Parsed Date: 2024-09-07 03:24:28 [in /home/runner/CRM/email_receiver.py:127]
+2024-09-25 22:52:41,899 INFO: New email processed for lead: 林明慧, received at 2024-09-07 03:24:28 [in /home/runner/CRM/email_receiver.py:65]
+2024-09-25 22:52:42,296 INFO: Processing email - Sender: =?UTF-8?B?5piO5oWnIOaelw==?= <linminghui@team240.net>, Subject: グループ「幼稚園用事」で新しい予定が作成されました, Original Date: Sat, 7 Sep 2024 17:42:14 -0700 (PDT), Parsed Date: 2024-09-08 00:42:14 [in /home/runner/CRM/email_receiver.py:127]
+2024-09-25 22:52:43,876 INFO: New email processed for lead: 林明慧, received at 2024-09-08 00:42:14 [in /home/runner/CRM/email_receiver.py:65]
+2024-09-25 22:52:44,304 INFO: Processing email - Sender: =?UTF-8?B?5piO5oWnIOaelw==?= <linminghui@team240.net>, Subject: グループの予定「醬醬 橫濱lalaport的奧特曼粉絲會」の招待が更新されました, Original Date: Sat, 7 Sep 2024 17:43:21 -0700 (PDT), Parsed Date: 2024-09-08 00:43:21 [in /home/runner/CRM/email_receiver.py:127]
+2024-09-25 22:52:45,887 INFO: New email processed for lead: 林明慧, received at 2024-09-08 00:43:21 [in /home/runner/CRM/email_receiver.py:65]
+2024-09-25 22:52:46,322 INFO: Processing email - Sender: =?UTF-8?B?5piO5oWnIOaelw==?= <linminghui@team240.net>, Subject: グループ「幼稚園用事」で新しい予定が作成されました, Original Date: Sat, 7 Sep 2024 17:43:41 -0700 (PDT), Parsed Date: 2024-09-08 00:43:41 [in /home/runner/CRM/email_receiver.py:127]
+2024-09-25 22:52:47,902 INFO: New email processed for lead: 林明慧, received at 2024-09-08 00:43:41 [in /home/runner/CRM/email_receiver.py:65]
+2024-09-25 22:52:48,288 INFO: Processing email - Sender: =?UTF-8?B?5piO5oWnIOaelw==?= <linminghui@team240.net>, Subject: グループ「幼稚園用事」で新しい予定が作成されました, Original Date: Sun, 8 Sep 2024 21:15:26 -0700 (PDT), Parsed Date: 2024-09-09 04:15:26 [in /home/runner/CRM/email_receiver.py:127]
+2024-09-25 22:52:49,868 INFO: New email processed for lead: 林明慧, received at 2024-09-09 04:15:26 [in /home/runner/CRM/email_receiver.py:65]
+2024-09-25 22:52:50,226 INFO: Processing email - Sender: =?UTF-8?B?5piO5oWnIOaelw==?= <linminghui@team240.net>, Subject: グループ「幼稚園用事」で新しい予定が作成されました, Original Date: Thu, 19 Sep 2024 08:46:57 -0700 (PDT), Parsed Date: 2024-09-19 15:46:57 [in /home/runner/CRM/email_receiver.py:127]
+2024-09-25 22:52:51,804 INFO: New email processed for lead: 林明慧, received at 2024-09-19 15:46:57 [in /home/runner/CRM/email_receiver.py:65]
+2024-09-25 22:52:52,213 INFO: Processing email - Sender: =?UTF-8?B?5piO5oWnIOaelw==?= <linminghui@team240.net>, Subject: グループ「幼稚園用事」で新しい予定が作成されました, Original Date: Thu, 19 Sep 2024 08:53:05 -0700 (PDT), Parsed Date: 2024-09-19 15:53:05 [in /home/runner/CRM/email_receiver.py:127]
+2024-09-25 22:52:53,793 INFO: New email processed for lead: 林明慧, received at 2024-09-19 15:53:05 [in /home/runner/CRM/email_receiver.py:65]
+2024-09-25 22:52:54,189 INFO: Processing email - Sender: =?UTF-8?B?5piO5oWnIOaelw==?= <linminghui@team240.net>, Subject: グループ「幼稚園用事」で新しい予定が作成されました, Original Date: Thu, 19 Sep 2024 08:57:26 -0700 (PDT), Parsed Date: 2024-09-19 15:57:26 [in /home/runner/CRM/email_receiver.py:127]
+2024-09-25 22:52:55,770 INFO: New email processed for lead: 林明慧, received at 2024-09-19 15:57:26 [in /home/runner/CRM/email_receiver.py:65]
+2024-09-25 22:52:56,189 INFO: Processing email - Sender: =?UTF-8?B?5piO5oWnIOaelw==?= <linminghui@team240.net>, Subject: グループ「幼稚園用事」で新しい予定が作成されました, Original Date: Mon, 23 Sep 2024 18:11:51 -0700 (PDT), Parsed Date: 2024-09-24 01:11:51 [in /home/runner/CRM/email_receiver.py:127]
+2024-09-25 22:52:57,768 INFO: New email processed for lead: 林明慧, received at 2024-09-24 01:11:51 [in /home/runner/CRM/email_receiver.py:65]
