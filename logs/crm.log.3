@@ -1,102 +1,125 @@
-2024-09-25 13:04:52,925 INFO: Email sender: makoto@team240.net [in /home/runner/CRM/routes/main.py:37]
-2024-09-25 13:04:52,926 INFO: Email sender: makoto@team240.net [in /home/runner/CRM/routes/main.py:37]
-2024-09-25 13:04:52,926 INFO: Email sender: makoto@team240.net [in /home/runner/CRM/routes/main.py:37]
-2024-09-25 13:04:52,927 INFO: Email sender: makoto@team240.net [in /home/runner/CRM/routes/main.py:37]
-2024-09-25 13:04:52,927 INFO: Email sender: makoto@team240.net [in /home/runner/CRM/routes/main.py:37]
-2024-09-25 13:04:52,927 INFO: Email sender: makoto@team240.net [in /home/runner/CRM/routes/main.py:37]
-2024-09-25 13:04:52,927 INFO: Email sender: makoto@team240.net [in /home/runner/CRM/routes/main.py:37]
-2024-09-25 13:04:52,928 INFO: Email sender: makoto@team240.net [in /home/runner/CRM/routes/main.py:37]
-2024-09-25 13:04:52,928 INFO: Email sender: makoto@team240.net [in /home/runner/CRM/routes/main.py:37]
-2024-09-25 13:04:52,928 INFO: Email sender: makoto@team240.net [in /home/runner/CRM/routes/main.py:37]
-2024-09-25 13:04:52,928 INFO: Email sender: makoto@team240.net [in /home/runner/CRM/routes/main.py:37]
-2024-09-25 13:04:52,928 INFO: Email sender: makoto@team240.net [in /home/runner/CRM/routes/main.py:37]
-2024-09-25 13:04:52,928 INFO: Email sender: makoto@team240.net [in /home/runner/CRM/routes/main.py:37]
-2024-09-25 13:04:52,929 INFO: Email sender: makoto@team240.net [in /home/runner/CRM/routes/main.py:37]
-2024-09-25 13:04:52,929 INFO: Email sender: makoto@team240.net [in /home/runner/CRM/routes/main.py:37]
-2024-09-25 13:04:52,929 INFO: Email sender: makoto@team240.net [in /home/runner/CRM/routes/main.py:37]
-2024-09-25 13:04:52,929 INFO: Email sender: makoto@team240.net [in /home/runner/CRM/routes/main.py:37]
-2024-09-25 13:04:52,929 INFO: Email sender: makoto@team240.net [in /home/runner/CRM/routes/main.py:37]
-2024-09-25 13:04:52,929 INFO: Email sender: makoto@team240.net [in /home/runner/CRM/routes/main.py:37]
-2024-09-25 13:04:52,929 INFO: Email sender: makoto@team240.net [in /home/runner/CRM/routes/main.py:37]
-2024-09-25 13:04:52,930 INFO: Email sender: makoto@team240.net [in /home/runner/CRM/routes/main.py:37]
-2024-09-25 13:04:52,930 INFO: Email sender: makoto@team240.net [in /home/runner/CRM/routes/main.py:37]
-2024-09-25 13:04:52,930 INFO: Email sender: makoto@team240.net [in /home/runner/CRM/routes/main.py:37]
-2024-09-25 17:22:29,321 INFO: CRM startup [in /home/runner/CRM/app.py:97]
-2024-09-25 17:22:29,322 INFO: Starting scheduler [in /home/runner/CRM/app.py:114]
-2024-09-25 17:22:29,323 INFO: Scheduler started [in /home/runner/CRM/app.py:116]
-2024-09-25 17:22:30,962 INFO: CRM startup [in /home/runner/CRM/app.py:97]
-2024-09-25 17:22:30,963 INFO: Starting scheduler [in /home/runner/CRM/app.py:114]
-2024-09-25 17:22:30,964 INFO: Scheduler started [in /home/runner/CRM/app.py:116]
-2024-09-25 17:22:49,271 ERROR: Exception on /recent-emails [GET] [in /home/runner/CRM/.pythonlibs/lib/python3.11/site-packages/flask/app.py:1744]
-Traceback (most recent call last):
-  File "/home/runner/CRM/.pythonlibs/lib/python3.11/site-packages/flask/app.py", line 2529, in wsgi_app
-    response = self.full_dispatch_request()
-               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  File "/home/runner/CRM/.pythonlibs/lib/python3.11/site-packages/flask/app.py", line 1825, in full_dispatch_request
-    rv = self.handle_user_exception(e)
-         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  File "/home/runner/CRM/.pythonlibs/lib/python3.11/site-packages/flask/app.py", line 1823, in full_dispatch_request
-    rv = self.dispatch_request()
-         ^^^^^^^^^^^^^^^^^^^^^^^
-  File "/home/runner/CRM/.pythonlibs/lib/python3.11/site-packages/flask/app.py", line 1799, in dispatch_request
-    return self.ensure_sync(self.view_functions[rule.endpoint])(**view_args)
-           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  File "/home/runner/CRM/.pythonlibs/lib/python3.11/site-packages/flask_login/utils.py", line 290, in decorated_view
-    return current_app.ensure_sync(func)(*args, **kwargs)
-           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  File "/home/runner/CRM/routes/main.py", line 37, in recent_emails
-    current_app.logger.info(f"Email sender: {email.sender_name} <{email.sender}>, Received at: {email.received_at}")
-                                             ^^^^^^^^^^^^^^^^^
-AttributeError: 'Email' object has no attribute 'sender_name'
-2024-09-25 17:22:59,189 ERROR: Exception on /recent-emails [GET] [in /home/runner/CRM/.pythonlibs/lib/python3.11/site-packages/flask/app.py:1744]
-Traceback (most recent call last):
-  File "/home/runner/CRM/.pythonlibs/lib/python3.11/site-packages/flask/app.py", line 2529, in wsgi_app
-    response = self.full_dispatch_request()
-               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  File "/home/runner/CRM/.pythonlibs/lib/python3.11/site-packages/flask/app.py", line 1825, in full_dispatch_request
-    rv = self.handle_user_exception(e)
-         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  File "/home/runner/CRM/.pythonlibs/lib/python3.11/site-packages/flask/app.py", line 1823, in full_dispatch_request
-    rv = self.dispatch_request()
-         ^^^^^^^^^^^^^^^^^^^^^^^
-  File "/home/runner/CRM/.pythonlibs/lib/python3.11/site-packages/flask/app.py", line 1799, in dispatch_request
-    return self.ensure_sync(self.view_functions[rule.endpoint])(**view_args)
-           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  File "/home/runner/CRM/.pythonlibs/lib/python3.11/site-packages/flask_login/utils.py", line 290, in decorated_view
-    return current_app.ensure_sync(func)(*args, **kwargs)
-           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  File "/home/runner/CRM/routes/main.py", line 37, in recent_emails
-    current_app.logger.info(f"Email sender: {email.sender_name} <{email.sender}>, Received at: {email.received_at}")
-                                             ^^^^^^^^^^^^^^^^^
-AttributeError: 'Email' object has no attribute 'sender_name'
-2024-09-25 17:24:44,049 INFO: CRM startup [in /home/runner/CRM/app.py:97]
-2024-09-25 17:25:18,866 INFO: CRM startup [in /home/runner/CRM/app.py:97]
-2024-09-25 17:25:18,866 INFO: Starting scheduler [in /home/runner/CRM/app.py:114]
-2024-09-25 17:25:18,867 INFO: Scheduler started [in /home/runner/CRM/app.py:116]
-2024-09-25 17:25:19,873 INFO: CRM startup [in /home/runner/CRM/app.py:97]
-2024-09-25 17:25:20,075 INFO: CRM startup [in /home/runner/CRM/app.py:97]
-2024-09-25 17:25:34,449 INFO: Email sender: None <makoto@team240.net>, Received at: 2024-09-25 06:28:17.033646 [in /home/runner/CRM/routes/main.py:37]
-2024-09-25 17:25:34,450 INFO: Email sender: None <makoto@team240.net>, Received at: 2024-09-25 05:13:10.141256 [in /home/runner/CRM/routes/main.py:37]
-2024-09-25 17:25:34,450 INFO: Email sender: None <makoto@team240.net>, Received at: 2024-09-25 04:03:11.150789 [in /home/runner/CRM/routes/main.py:37]
-2024-09-25 17:25:34,450 INFO: Email sender: None <makoto@team240.net>, Received at: 2024-09-25 02:53:16.061861 [in /home/runner/CRM/routes/main.py:37]
-2024-09-25 17:25:34,450 INFO: Email sender: None <makoto@team240.net>, Received at: 2024-09-25 02:53:10.770705 [in /home/runner/CRM/routes/main.py:37]
-2024-09-25 17:25:34,450 INFO: Email sender: None <makoto@team240.net>, Received at: 2024-09-25 02:43:31.171858 [in /home/runner/CRM/routes/main.py:37]
-2024-09-25 17:25:34,451 INFO: Email sender: None <makoto@team240.net>, Received at: 2024-09-25 02:43:23.185771 [in /home/runner/CRM/routes/main.py:37]
-2024-09-25 17:25:34,451 INFO: Email sender: None <makoto@team240.net>, Received at: 2024-09-25 02:43:18.488994 [in /home/runner/CRM/routes/main.py:37]
-2024-09-25 17:25:34,451 INFO: Email sender: None <makoto@team240.net>, Received at: 2024-09-25 02:43:12.226351 [in /home/runner/CRM/routes/main.py:37]
-2024-09-25 17:25:34,451 INFO: Email sender: None <makoto@team240.net>, Received at: 2024-09-25 02:38:08.724653 [in /home/runner/CRM/routes/main.py:37]
-2024-09-25 17:25:34,451 INFO: Email sender: None <makoto@team240.net>, Received at: 2024-09-25 02:33:17.288939 [in /home/runner/CRM/routes/main.py:37]
-2024-09-25 17:25:34,452 INFO: Email sender: None <makoto@team240.net>, Received at: 2024-09-25 02:33:14.003756 [in /home/runner/CRM/routes/main.py:37]
-2024-09-25 17:25:34,452 INFO: Email sender: None <makoto@team240.net>, Received at: 2024-09-25 02:33:10.879439 [in /home/runner/CRM/routes/main.py:37]
-2024-09-25 17:25:34,452 INFO: Email sender: None <makoto@team240.net>, Received at: 2024-09-25 01:48:17.732286 [in /home/runner/CRM/routes/main.py:37]
-2024-09-25 17:25:34,452 INFO: Email sender: None <makoto@team240.net>, Received at: 2024-09-25 01:48:09.820215 [in /home/runner/CRM/routes/main.py:37]
-2024-09-25 17:25:34,452 INFO: Email sender: None <makoto@team240.net>, Received at: 2024-09-25 01:43:12.642451 [in /home/runner/CRM/routes/main.py:37]
-2024-09-25 17:25:34,452 INFO: Email sender: None <makoto@team240.net>, Received at: 2024-09-25 01:28:18.732374 [in /home/runner/CRM/routes/main.py:37]
-2024-09-25 17:25:34,453 INFO: Email sender: None <makoto@team240.net>, Received at: 2024-09-25 01:28:14.918507 [in /home/runner/CRM/routes/main.py:37]
-2024-09-25 17:25:34,453 INFO: Email sender: None <makoto@team240.net>, Received at: 2024-09-25 01:08:14.309885 [in /home/runner/CRM/routes/main.py:37]
-2024-09-25 17:25:34,453 INFO: Email sender: None <makoto@team240.net>, Received at: 2024-09-25 00:58:12.510725 [in /home/runner/CRM/routes/main.py:37]
-2024-09-25 17:25:34,453 INFO: Email sender: None <makoto@team240.net>, Received at: 2024-09-25 00:53:11.734537 [in /home/runner/CRM/routes/main.py:37]
-2024-09-25 17:25:34,453 INFO: Email sender: None <makoto@team240.net>, Received at: 2024-09-25 00:43:15.491592 [in /home/runner/CRM/routes/main.py:37]
-2024-09-25 17:25:34,453 INFO: Email sender: None <makoto@team240.net>, Received at: 2024-09-25 00:38:28.971665 [in /home/runner/CRM/routes/main.py:37]
-2024-09-25 17:25:34,453 INFO: Email sender: None <makoto@team240.net>, Received at: 2024-09-25 00:38:26.148031 [in /home/runner/CRM/routes/main.py:37]
-2024-09-25 17:25:34,454 INFO: Email sender: None <makoto@team240.net>, Received at: 2024-09-25 00:38:17.970180 [in /home/runner/CRM/routes/main.py:37]
+2024-09-25 17:32:53,632 INFO: Processing email - Sender: =?UTF-8?Q?Lenovo_Laptop_Hinge_Re?=
+ =?UTF-8?Q?pair_for_=E3=83=88=E3=83=BC?=
+ =?UTF-8?Q?=E3=83=9E=E3=82=B9_=E3=83=9E=E3=82=B1?=
+ =?UTF-8?Q?=E3=83=B4=E3=82=A9=E3=82=A4_=E9=80=9A=E7=9F=A5?=
+ <notifications@zohoprojects.com>, Subject: [Lenovo Laptop Hinge Repair for トーマス マケヴォイ] [LL2-T2 Order Parts] タスクのコメントを追加しました, Date: 2024-08-26 06:51:22 [in /home/runner/CRM/email_receiver.py:103]
+2024-09-25 17:32:54,553 WARNING: Received email from unknown sender: =?UTF-8?Q?Lenovo_Laptop_Hinge_Re?=
+ =?UTF-8?Q?pair_for_=E3=83=88=E3=83=BC?=
+ =?UTF-8?Q?=E3=83=9E=E3=82=B9_=E3=83=9E=E3=82=B1?=
+ =?UTF-8?Q?=E3=83=B4=E3=82=A9=E3=82=A4_=E9=80=9A=E7=9F=A5?=
+ <notifications@zohoprojects.com> [in /home/runner/CRM/email_receiver.py:58]
+2024-09-25 17:32:55,244 INFO: Stored email from unknown sender: =?UTF-8?Q?Lenovo_Laptop_Hinge_Re?=
+ =?UTF-8?Q?pair_for_=E3=83=88=E3=83=BC?=
+ =?UTF-8?Q?=E3=83=9E=E3=82=B9_=E3=83=9E=E3=82=B1?=
+ =?UTF-8?Q?=E3=83=B4=E3=82=A9=E3=82=A4_=E9=80=9A=E7=9F=A5?=
+ <notifications@zohoprojects.com> [in /home/runner/CRM/email_receiver.py:66]
+2024-09-25 17:32:55,523 INFO: Processing email - Sender: =?UTF-8?Q?Lenovo_Laptop_Hinge_Re?=
+ =?UTF-8?Q?pair_for_=E3=83=88=E3=83=BC?=
+ =?UTF-8?Q?=E3=83=9E=E3=82=B9_=E3=83=9E=E3=82=B1?=
+ =?UTF-8?Q?=E3=83=B4=E3=82=A9=E3=82=A4_=E9=80=9A=E7=9F=A5?=
+ <notifications@zohoprojects.com>, Subject: [Lenovo Laptop Hinge Repair for トーマス マケヴォイ] [LL2-T1 Initial Assessment of Laptop Hinge Damage] タスクのコメントを追加しました, Date: 2024-08-26 06:51:23 [in /home/runner/CRM/email_receiver.py:103]
+2024-09-25 17:32:56,444 WARNING: Received email from unknown sender: =?UTF-8?Q?Lenovo_Laptop_Hinge_Re?=
+ =?UTF-8?Q?pair_for_=E3=83=88=E3=83=BC?=
+ =?UTF-8?Q?=E3=83=9E=E3=82=B9_=E3=83=9E=E3=82=B1?=
+ =?UTF-8?Q?=E3=83=B4=E3=82=A9=E3=82=A4_=E9=80=9A=E7=9F=A5?=
+ <notifications@zohoprojects.com> [in /home/runner/CRM/email_receiver.py:58]
+2024-09-25 17:32:57,135 INFO: Stored email from unknown sender: =?UTF-8?Q?Lenovo_Laptop_Hinge_Re?=
+ =?UTF-8?Q?pair_for_=E3=83=88=E3=83=BC?=
+ =?UTF-8?Q?=E3=83=9E=E3=82=B9_=E3=83=9E=E3=82=B1?=
+ =?UTF-8?Q?=E3=83=B4=E3=82=A9=E3=82=A4_=E9=80=9A=E7=9F=A5?=
+ <notifications@zohoprojects.com> [in /home/runner/CRM/email_receiver.py:66]
+2024-09-25 17:32:57,414 INFO: Processing email - Sender: =?UTF-8?Q?Lenovo_Laptop_Hinge_Re?=
+ =?UTF-8?Q?pair_for_=E3=83=88=E3=83=BC?=
+ =?UTF-8?Q?=E3=83=9E=E3=82=B9_=E3=83=9E=E3=82=B1?=
+ =?UTF-8?Q?=E3=83=B4=E3=82=A9=E3=82=A4_=E9=80=9A=E7=9F=A5?=
+ <notifications@zohoprojects.com>, Subject: [Lenovo Laptop Hinge Repair for トーマス マケヴォイ] [LL2-T6 Delay in Parts Delivery] タスクのコメントを追加しました, Date: 2024-08-26 06:51:22 [in /home/runner/CRM/email_receiver.py:103]
+2024-09-25 17:32:58,333 WARNING: Received email from unknown sender: =?UTF-8?Q?Lenovo_Laptop_Hinge_Re?=
+ =?UTF-8?Q?pair_for_=E3=83=88=E3=83=BC?=
+ =?UTF-8?Q?=E3=83=9E=E3=82=B9_=E3=83=9E=E3=82=B1?=
+ =?UTF-8?Q?=E3=83=B4=E3=82=A9=E3=82=A4_=E9=80=9A=E7=9F=A5?=
+ <notifications@zohoprojects.com> [in /home/runner/CRM/email_receiver.py:58]
+2024-09-25 17:32:59,024 INFO: Stored email from unknown sender: =?UTF-8?Q?Lenovo_Laptop_Hinge_Re?=
+ =?UTF-8?Q?pair_for_=E3=83=88=E3=83=BC?=
+ =?UTF-8?Q?=E3=83=9E=E3=82=B9_=E3=83=9E=E3=82=B1?=
+ =?UTF-8?Q?=E3=83=B4=E3=82=A9=E3=82=A4_=E9=80=9A=E7=9F=A5?=
+ <notifications@zohoprojects.com> [in /home/runner/CRM/email_receiver.py:66]
+2024-09-25 17:32:59,304 INFO: Processing email - Sender: =?UTF-8?Q?Lenovo_Laptop_Hinge_Re?=
+ =?UTF-8?Q?pair_for_=E3=83=88=E3=83=BC?=
+ =?UTF-8?Q?=E3=83=9E=E3=82=B9_=E3=83=9E=E3=82=B1?=
+ =?UTF-8?Q?=E3=83=B4=E3=82=A9=E3=82=A4_=E9=80=9A=E7=9F=A5?=
+ <notifications@zohoprojects.com>, Subject: [Lenovo Laptop Hinge Repair for トーマス マケヴォイ] [LL2-T5 Customer Communication] タスクのコメントを追加しました, Date: 2024-08-26 06:51:23 [in /home/runner/CRM/email_receiver.py:103]
+2024-09-25 17:33:00,225 WARNING: Received email from unknown sender: =?UTF-8?Q?Lenovo_Laptop_Hinge_Re?=
+ =?UTF-8?Q?pair_for_=E3=83=88=E3=83=BC?=
+ =?UTF-8?Q?=E3=83=9E=E3=82=B9_=E3=83=9E=E3=82=B1?=
+ =?UTF-8?Q?=E3=83=B4=E3=82=A9=E3=82=A4_=E9=80=9A=E7=9F=A5?=
+ <notifications@zohoprojects.com> [in /home/runner/CRM/email_receiver.py:58]
+2024-09-25 17:33:00,916 INFO: Stored email from unknown sender: =?UTF-8?Q?Lenovo_Laptop_Hinge_Re?=
+ =?UTF-8?Q?pair_for_=E3=83=88=E3=83=BC?=
+ =?UTF-8?Q?=E3=83=9E=E3=82=B9_=E3=83=9E=E3=82=B1?=
+ =?UTF-8?Q?=E3=83=B4=E3=82=A9=E3=82=A4_=E9=80=9A=E7=9F=A5?=
+ <notifications@zohoprojects.com> [in /home/runner/CRM/email_receiver.py:66]
+2024-09-25 17:33:01,280 INFO: Processing email - Sender: =?UTF-8?Q?Lenovo_Laptop_Hinge_Re?=
+ =?UTF-8?Q?pair_for_=E3=83=88=E3=83=BC?=
+ =?UTF-8?Q?=E3=83=9E=E3=82=B9_=E3=83=9E=E3=82=B1?=
+ =?UTF-8?Q?=E3=83=B4=E3=82=A9=E3=82=A4_=E9=80=9A=E7=9F=A5?=
+ <notifications@zohoprojects.com>, Subject: [Lenovo Laptop Hinge Repair for トーマス マケヴォイ] [LL2-T7 Additional Damage] タスクのコメントを追加しました, Date: 2024-08-26 06:51:23 [in /home/runner/CRM/email_receiver.py:103]
+2024-09-25 17:33:02,199 WARNING: Received email from unknown sender: =?UTF-8?Q?Lenovo_Laptop_Hinge_Re?=
+ =?UTF-8?Q?pair_for_=E3=83=88=E3=83=BC?=
+ =?UTF-8?Q?=E3=83=9E=E3=82=B9_=E3=83=9E=E3=82=B1?=
+ =?UTF-8?Q?=E3=83=B4=E3=82=A9=E3=82=A4_=E9=80=9A=E7=9F=A5?=
+ <notifications@zohoprojects.com> [in /home/runner/CRM/email_receiver.py:58]
+2024-09-25 17:33:02,889 INFO: Stored email from unknown sender: =?UTF-8?Q?Lenovo_Laptop_Hinge_Re?=
+ =?UTF-8?Q?pair_for_=E3=83=88=E3=83=BC?=
+ =?UTF-8?Q?=E3=83=9E=E3=82=B9_=E3=83=9E=E3=82=B1?=
+ =?UTF-8?Q?=E3=83=B4=E3=82=A9=E3=82=A4_=E9=80=9A=E7=9F=A5?=
+ <notifications@zohoprojects.com> [in /home/runner/CRM/email_receiver.py:66]
+2024-09-25 17:33:03,172 INFO: Processing email - Sender: =?UTF-8?Q?Lenovo_Laptop_Hinge_Re?=
+ =?UTF-8?Q?pair_for_=E3=83=88=E3=83=BC?=
+ =?UTF-8?Q?=E3=83=9E=E3=82=B9_=E3=83=9E=E3=82=B1?=
+ =?UTF-8?Q?=E3=83=B4=E3=82=A9=E3=82=A4_=E9=80=9A=E7=9F=A5?=
+ <notifications@zohoprojects.com>, Subject: [Lenovo Laptop Hinge Repair for トーマス マケヴォイ] [LL2-T3 Repair Hinge] タスクのコメントを追加しました, Date: 2024-08-26 06:51:24 [in /home/runner/CRM/email_receiver.py:103]
+2024-09-25 17:33:04,091 WARNING: Received email from unknown sender: =?UTF-8?Q?Lenovo_Laptop_Hinge_Re?=
+ =?UTF-8?Q?pair_for_=E3=83=88=E3=83=BC?=
+ =?UTF-8?Q?=E3=83=9E=E3=82=B9_=E3=83=9E=E3=82=B1?=
+ =?UTF-8?Q?=E3=83=B4=E3=82=A9=E3=82=A4_=E9=80=9A=E7=9F=A5?=
+ <notifications@zohoprojects.com> [in /home/runner/CRM/email_receiver.py:58]
+2024-09-25 17:33:04,781 INFO: Stored email from unknown sender: =?UTF-8?Q?Lenovo_Laptop_Hinge_Re?=
+ =?UTF-8?Q?pair_for_=E3=83=88=E3=83=BC?=
+ =?UTF-8?Q?=E3=83=9E=E3=82=B9_=E3=83=9E=E3=82=B1?=
+ =?UTF-8?Q?=E3=83=B4=E3=82=A9=E3=82=A4_=E9=80=9A=E7=9F=A5?=
+ <notifications@zohoprojects.com> [in /home/runner/CRM/email_receiver.py:66]
+2024-09-25 17:33:05,070 INFO: Processing email - Sender: =?UTF-8?Q?Lenovo_Laptop_Hinge_Re?=
+ =?UTF-8?Q?pair_for_=E3=83=88=E3=83=BC?=
+ =?UTF-8?Q?=E3=83=9E=E3=82=B9_=E3=83=9E=E3=82=B1?=
+ =?UTF-8?Q?=E3=83=B4=E3=82=A9=E3=82=A4_=E9=80=9A=E7=9F=A5?=
+ <notifications@zohoprojects.com>, Subject: [Lenovo Laptop Hinge Repair for トーマス マケヴォイ] [LL2-T4 Quality Check on Hinge Repair] タスクのコメントを追加しました, Date: 2024-08-26 06:51:23 [in /home/runner/CRM/email_receiver.py:103]
+2024-09-25 17:33:05,989 WARNING: Received email from unknown sender: =?UTF-8?Q?Lenovo_Laptop_Hinge_Re?=
+ =?UTF-8?Q?pair_for_=E3=83=88=E3=83=BC?=
+ =?UTF-8?Q?=E3=83=9E=E3=82=B9_=E3=83=9E=E3=82=B1?=
+ =?UTF-8?Q?=E3=83=B4=E3=82=A9=E3=82=A4_=E9=80=9A=E7=9F=A5?=
+ <notifications@zohoprojects.com> [in /home/runner/CRM/email_receiver.py:58]
+2024-09-25 17:33:06,679 INFO: Stored email from unknown sender: =?UTF-8?Q?Lenovo_Laptop_Hinge_Re?=
+ =?UTF-8?Q?pair_for_=E3=83=88=E3=83=BC?=
+ =?UTF-8?Q?=E3=83=9E=E3=82=B9_=E3=83=9E=E3=82=B1?=
+ =?UTF-8?Q?=E3=83=B4=E3=82=A9=E3=82=A4_=E9=80=9A=E7=9F=A5?=
+ <notifications@zohoprojects.com> [in /home/runner/CRM/email_receiver.py:66]
+2024-09-25 17:33:07,011 INFO: Processing email - Sender: 
+	=?utf-8?q?YEALE_=E9=81=8B=E5=96=B6=E4=BA=8B=E5=8B=99=E5=B1=80_powered_by_?=
+	=?utf-8?q?=E6=A0=AA=E5=BC=8F=E4=BC=9A=E7=A4=BE=E3=82=BB=E3=83=AC=E3=83=96?=
+	=?utf-8?q?=E3=83=AA=E3=83=83=E3=82=AF=E3=82=B9?=
+	<yeale_support@yeale-by-cerebrix.com>, Subject: BtoB向け”購買意思決定を促す”コンテンツとは？, Date: 2024-08-26 07:13:24 [in /home/runner/CRM/email_receiver.py:103]
+2024-09-25 17:33:07,931 WARNING: Received email from unknown sender: 
+	=?utf-8?q?YEALE_=E9=81=8B=E5=96=B6=E4=BA=8B=E5=8B=99=E5=B1=80_powered_by_?=
+	=?utf-8?q?=E6=A0=AA=E5=BC=8F=E4=BC=9A=E7=A4=BE=E3=82=BB=E3=83=AC=E3=83=96?=
+	=?utf-8?q?=E3=83=AA=E3=83=83=E3=82=AF=E3=82=B9?=
+	<yeale_support@yeale-by-cerebrix.com> [in /home/runner/CRM/email_receiver.py:58]
+2024-09-25 17:33:08,394 INFO: Stored email from unknown sender: 
+	=?utf-8?q?YEALE_=E9=81=8B=E5=96=B6=E4=BA=8B=E5=8B=99=E5=B1=80_powered_by_?=
+	=?utf-8?q?=E6=A0=AA=E5=BC=8F=E4=BC=9A=E7=A4=BE=E3=82=BB=E3=83=AC=E3=83=96?=
+	=?utf-8?q?=E3=83=AA=E3=83=83=E3=82=AF=E3=82=B9?=
+	<yeale_support@yeale-by-cerebrix.com> [in /home/runner/CRM/email_receiver.py:66]
+2024-09-25 17:33:08,752 INFO: Processing email - Sender: noreply@site24x7.com, Subject: team240.com は ダウン  シアトル - US, Date: 2024-08-26 07:15:25 [in /home/runner/CRM/email_receiver.py:103]
+2024-09-25 17:33:09,671 WARNING: Received email from unknown sender: noreply@site24x7.com [in /home/runner/CRM/email_receiver.py:58]
+2024-09-25 17:33:10,134 INFO: Stored email from unknown sender: noreply@site24x7.com [in /home/runner/CRM/email_receiver.py:66]
+2024-09-25 17:33:10,485 INFO: Processing email - Sender: noreply@site24x7.com, Subject: team240.net は ダウン  シアトル - US, Date: 2024-08-26 07:15:25 [in /home/runner/CRM/email_receiver.py:103]
+2024-09-25 17:33:11,404 WARNING: Received email from unknown sender: noreply@site24x7.com [in /home/runner/CRM/email_receiver.py:58]
