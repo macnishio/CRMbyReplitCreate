@@ -35,3 +35,7 @@
 2024-09-25 06:18:13,388 WARNING: Received email from unknown sender: Zoho Community <community@zoho.co.jp> [in /home/runner/CRM/email_receiver.py:58]
 2024-09-25 06:18:14,139 WARNING: Received email from unknown sender: =?UTF-8?B?6KW/5bC+44K344K544OG44Og44Kz44Oz44K144Or44K/44Oz44OI?= <notifications@zohocrm.com> [in /home/runner/CRM/email_receiver.py:58]
 2024-09-25 06:18:14,747 WARNING: Received email from unknown sender: =?UTF-8?B?6KW/5bC+IOecn+iogA==?= <makoto@team240.net> [in /home/runner/CRM/email_receiver.py:58]
+2024-09-25 06:23:03,966 INFO: Checking for new emails [in /home/runner/CRM/email_receiver.py:73]
+2024-09-25 06:23:08,467 WARNING: Received email from unknown sender: =?utf-8?B?6KW/5bC+IOecn+iogA==?= <makoto@team240.net> [in /home/runner/CRM/email_receiver.py:58]
+2024-09-25 06:23:09,230 WARNING: Received email from unknown sender: =?utf-8?B?6KW/5bC+IOecn+iogA==?= <makoto@team240.net> [in /home/runner/CRM/email_receiver.py:58]
+2024-09-25 06:23:09,834 WARNING: Received email from unknown sender: "satoshi ishii" <isiimami@ba.mbn.or.jp> [in /home/runner/CRM/email_receiver.py:58]

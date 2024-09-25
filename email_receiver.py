@@ -5,7 +5,7 @@ from flask import current_app
 from models import Email, Lead
 from extensions import db
 from flask_apscheduler import APScheduler
-
+from datetime import datetime, timedelta
 
 def connect_to_email_server():
     mail = imaplib.IMAP4_SSL(current_app.config['MAIL_SERVER'])
@@ -13,11 +13,19 @@ def connect_to_email_server():
                current_app.config['MAIL_PASSWORD'])
     return mail
 
-
-def fetch_emails():
+def fetch_emails(days_back=30):
     mail = connect_to_email_server()
     mail.select('inbox')
-    _, search_data = mail.search(None, 'UNSEEN')
+
+    # Calculate the date range
+    end_date = datetime.now()
+    start_date = end_date - timedelta(days=days_back)
+    
+    date_criterion = f'(SINCE "{start_date.strftime("%d-%b-%Y")}")'
+    
+    current_app.logger.info(f"Fetching emails from {start_date.strftime('%Y-%m-%d')} to {end_date.strftime('%Y-%m-%d')}")
+
+    _, search_data = mail.search(None, date_criterion)
 
     for num in search_data[0].split():
         _, data = mail.fetch(num, '(RFC822)')
@@ -29,35 +37,43 @@ def fetch_emails():
             subject = subject.decode(encoding or 'utf-8')
 
         sender = email_message["From"]
+        date_tuple = email.utils.parsedate_tz(email_message["Date"])
+        if date_tuple:
+            local_date = datetime.fromtimestamp(email.utils.mktime_tz(date_tuple))
+            current_app.logger.info(f"Processing email from {sender} sent on {local_date.strftime('%Y-%m-%d %H:%M:%S')}")
+        else:
+            current_app.logger.warning(f"Unable to parse date for email from {sender}")
 
         if email_message.is_multipart():
             for part in email_message.walk():
                 if part.get_content_type() == "text/plain":
-                    body = part.get_payload(decode=True).decode()
+                    body = part.get_payload(decode=True).decode(encoding or 'utf-8', errors='ignore')
                     break
         else:
-            body = email_message.get_payload(decode=True).decode()
+            body = email_message.get_payload(decode=True).decode(encoding or 'utf-8', errors='ignore')
 
-        process_email(sender, subject, body)
+        process_email(sender, subject, body, local_date)
 
     mail.close()
     mail.logout()
 
-
-def process_email(sender, subject, content):
+def process_email(sender, subject, content, date):
     lead = Lead.query.filter_by(email=sender).first()
     if lead:
-        new_email = Email(sender=sender,
-                          subject=subject,
-                          content=content,
-                          lead=lead)
-        db.session.add(new_email)
-        db.session.commit()
-        current_app.logger.info(f"New email processed for lead: {lead.name}")
+        existing_email = Email.query.filter_by(lead_id=lead.id, subject=subject, received_at=date).first()
+        if not existing_email:
+            new_email = Email(sender=sender,
+                              subject=subject,
+                              content=content,
+                              received_at=date,
+                              lead=lead)
+            db.session.add(new_email)
+            db.session.commit()
+            current_app.logger.info(f"New email processed for lead: {lead.name}, received at {date}")
+        else:
+            current_app.logger.info(f"Duplicate email skipped for lead: {lead.name}, received at {date}")
     else:
-        current_app.logger.warning(
-            f"Received email from unknown sender: {sender}")
-
+        current_app.logger.warning(f"Received email from unknown sender: {sender}")
 
 def setup_email_scheduler(app):
     scheduler = APScheduler()
@@ -66,7 +82,7 @@ def setup_email_scheduler(app):
 
     @scheduler.task('interval',
                     id='check_emails',
-                    minutes=5,
+                    minutes=30,
                     misfire_grace_time=900)
     def check_emails_task():
         with app.app_context():
