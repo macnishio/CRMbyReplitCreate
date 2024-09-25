@@ -23,14 +23,11 @@ def extract_email_address(sender):
     return sender
 
 def process_email(sender, subject, content, date):
-    # Extract email address from sender string
     sender_email = extract_email_address(sender)
     
-    # Try to find a lead with an exact email match
     lead = Lead.query.filter(func.lower(Lead.email) == func.lower(sender_email)).first()
     
     if not lead:
-        # If no exact match, try to find a lead with a similar email
         similar_lead = Lead.query.filter(func.lower(Lead.email).like(f"%{sender_email.split('@')[0]}%")).first()
         if similar_lead:
             lead = similar_lead

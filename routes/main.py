@@ -33,6 +33,8 @@ def manual_fetch_emails():
 @login_required
 def recent_emails():
     emails = Email.query.order_by(Email.received_at.desc()).limit(100).all()
+    for email in emails:
+        current_app.logger.info(f"Email sender: {email.sender}")
     return render_template('recent_emails.html', emails=emails)
 
 # Other routes are handled by their respective blueprints

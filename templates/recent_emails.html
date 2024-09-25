@@ -16,7 +16,7 @@
         <tbody>
             {% for email in emails %}
                 <tr>
-                    <td>{{ email.sender }}</td>
+                    <td>{{ email.sender.split('<')[0].strip() }} &lt;{{ email.sender.split('<')[1].split('>')[0] }}&gt;</td>
                     <td>{{ email.subject }}</td>
                     <td>{{ email.received_at.strftime('%Y-%m-%d %H:%M:%S') }}</td>
                     <td>

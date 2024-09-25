@@ -1,22 +1,4 @@
-2024-09-25 10:56:56,220 ERROR: Exception on /leads/1 [GET] [in /home/runner/CRM/.pythonlibs/lib/python3.11/site-packages/flask/app.py:1744]
-Traceback (most recent call last):
-  File "/home/runner/CRM/.pythonlibs/lib/python3.11/site-packages/redis/connection.py", line 277, in connect
-    sock = self.retry.call_with_retry(
-           ^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  File "/home/runner/CRM/.pythonlibs/lib/python3.11/site-packages/redis/retry.py", line 62, in call_with_retry
-    return do()
-           ^^^^
-  File "/home/runner/CRM/.pythonlibs/lib/python3.11/site-packages/redis/connection.py", line 278, in <lambda>
-    lambda: self._connect(), lambda error: self.disconnect(error)
-            ^^^^^^^^^^^^^^^
-  File "/home/runner/CRM/.pythonlibs/lib/python3.11/site-packages/redis/connection.py", line 639, in _connect
-    raise err
-  File "/home/runner/CRM/.pythonlibs/lib/python3.11/site-packages/redis/connection.py", line 627, in _connect
-    sock.connect(socket_address)
-OSError: [Errno 99] Cannot assign requested address
-
-During handling of the above exception, another exception occurred:
-
+2024-09-25 11:37:25,767 ERROR: Exception on /recent-emails [GET] [in /home/runner/CRM/.pythonlibs/lib/python3.11/site-packages/flask/app.py:1744]
 Traceback (most recent call last):
   File "/home/runner/CRM/.pythonlibs/lib/python3.11/site-packages/flask/app.py", line 2529, in wsgi_app
     response = self.full_dispatch_request()
@@ -24,100 +6,112 @@ Traceback (most recent call last):
   File "/home/runner/CRM/.pythonlibs/lib/python3.11/site-packages/flask/app.py", line 1825, in full_dispatch_request
     rv = self.handle_user_exception(e)
          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  File "/home/runner/CRM/.pythonlibs/lib/python3.11/site-packages/flask/app.py", line 1821, in full_dispatch_request
-    rv = self.preprocess_request()
-         ^^^^^^^^^^^^^^^^^^^^^^^^^
-  File "/home/runner/CRM/.pythonlibs/lib/python3.11/site-packages/flask/app.py", line 2313, in preprocess_request
-    rv = self.ensure_sync(before_func)()
-         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  File "/home/runner/CRM/.pythonlibs/lib/python3.11/site-packages/flask_limiter/extension.py", line 1168, in _check_request_limit
-    raise e
-  File "/home/runner/CRM/.pythonlibs/lib/python3.11/site-packages/flask_limiter/extension.py", line 1149, in _check_request_limit
-    self.__evaluate_limits(endpoint, all_limits)
-  File "/home/runner/CRM/.pythonlibs/lib/python3.11/site-packages/flask_limiter/extension.py", line 1086, in __evaluate_limits
-    if not method(lim.limit, *args, **kwargs):
-           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  File "/home/runner/CRM/.pythonlibs/lib/python3.11/site-packages/limits/strategies.py", line 140, in hit
-    self.storage.incr(
-  File "/home/runner/CRM/.pythonlibs/lib/python3.11/site-packages/limits/storage/base.py", line 27, in inner
-    return fn(*args, **kwargs)
-           ^^^^^^^^^^^^^^^^^^^
-  File "/home/runner/CRM/.pythonlibs/lib/python3.11/site-packages/limits/storage/redis.py", line 209, in incr
-    return int(self.lua_incr_expire([key], [expiry, amount]))
-               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  File "/home/runner/CRM/.pythonlibs/lib/python3.11/site-packages/redis/commands/core.py", line 6296, in __call__
-    return client.evalsha(self.sha, len(keys), *args)
-           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  File "/home/runner/CRM/.pythonlibs/lib/python3.11/site-packages/redis/commands/core.py", line 5672, in evalsha
-    return self._evalsha("EVALSHA", sha, numkeys, *keys_and_args)
-           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  File "/home/runner/CRM/.pythonlibs/lib/python3.11/site-packages/redis/commands/core.py", line 5656, in _evalsha
-    return self.execute_command(command, sha, numkeys, *keys_and_args)
-           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  File "/home/runner/CRM/.pythonlibs/lib/python3.11/site-packages/redis/client.py", line 545, in execute_command
-    conn = self.connection or pool.get_connection(command_name, **options)
-                              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  File "/home/runner/CRM/.pythonlibs/lib/python3.11/site-packages/redis/connection.py", line 1074, in get_connection
-    connection.connect()
-  File "/home/runner/CRM/.pythonlibs/lib/python3.11/site-packages/redis/connection.py", line 283, in connect
-    raise ConnectionError(self._error_message(e))
-redis.exceptions.ConnectionError: Error 99 connecting to localhost:6379. Cannot assign requested address.
-2024-09-25 10:57:45,777 INFO: CRM startup [in /home/runner/CRM/app.py:98]
-2024-09-25 10:57:45,778 INFO: Starting scheduler [in /home/runner/CRM/app.py:115]
-2024-09-25 10:57:45,779 INFO: Scheduler started [in /home/runner/CRM/app.py:117]
-2024-09-25 10:58:52,333 INFO: CRM startup [in /home/runner/CRM/app.py:98]
-2024-09-25 10:58:52,334 INFO: Starting scheduler [in /home/runner/CRM/app.py:115]
-2024-09-25 10:58:52,335 INFO: Scheduler started [in /home/runner/CRM/app.py:117]
-2024-09-25 10:59:13,727 INFO: CRM startup [in /home/runner/CRM/app.py:98]
-2024-09-25 10:59:13,728 INFO: Starting scheduler [in /home/runner/CRM/app.py:115]
-2024-09-25 10:59:13,730 INFO: Scheduler started [in /home/runner/CRM/app.py:117]
-2024-09-25 10:59:52,042 INFO: CRM startup [in /home/runner/CRM/app.py:98]
-2024-09-25 10:59:52,043 INFO: Starting scheduler [in /home/runner/CRM/app.py:115]
-2024-09-25 10:59:52,044 INFO: Scheduler started [in /home/runner/CRM/app.py:117]
-2024-09-25 11:00:57,794 INFO: Fetching emails from 2024-08-26 to 2024-09-25 [in /home/runner/CRM/email_receiver.py:31]
-2024-09-25 11:00:58,106 INFO: Total emails fetched: 0 [in /home/runner/CRM/email_receiver.py:36]
-2024-09-25 11:00:58,940 INFO: Emails from known leads: 711 [in /home/runner/CRM/email_receiver.py:68]
-2024-09-25 11:00:59,193 INFO: Emails from unknown senders: 2 [in /home/runner/CRM/email_receiver.py:69]
-2024-09-25 11:03:35,127 INFO: Data being passed to the reports template: [in /home/runner/CRM/routes/reports.py:67]
-2024-09-25 11:03:35,127 INFO: Lead status: [('New', 6)] [in /home/runner/CRM/routes/reports.py:68]
-2024-09-25 11:03:35,127 INFO: Opportunity stage: [('Negotiation', 1, 12000000.0), ('Prospecting', 1, 2000000.0)] [in /home/runner/CRM/routes/reports.py:69]
-2024-09-25 11:03:35,128 INFO: Account industry: [('サービス業', 1)] [in /home/runner/CRM/routes/reports.py:70]
-2024-09-25 11:03:35,128 INFO: Lead score labels: ['10-19'] [in /home/runner/CRM/routes/reports.py:71]
-2024-09-25 11:03:35,128 INFO: Lead score data: [6] [in /home/runner/CRM/routes/reports.py:72]
-2024-09-25 11:03:35,128 INFO: Task status: [(True, 1)] [in /home/runner/CRM/routes/reports.py:73]
-2024-09-25 11:03:35,128 INFO: Task due date: [('Overdue', 1)] [in /home/runner/CRM/routes/reports.py:74]
-2024-09-25 11:03:54,473 INFO: Fetching emails from 2024-08-26 to 2024-09-25 [in /home/runner/CRM/email_receiver.py:31]
-2024-09-25 11:03:54,778 INFO: Total emails fetched: 0 [in /home/runner/CRM/email_receiver.py:36]
-2024-09-25 11:03:55,598 INFO: Emails from known leads: 711 [in /home/runner/CRM/email_receiver.py:68]
-2024-09-25 11:03:55,847 INFO: Emails from unknown senders: 2 [in /home/runner/CRM/email_receiver.py:69]
-2024-09-25 11:04:52,623 INFO: Fetching emails from 2024-08-26 to 2024-09-25 [in /home/runner/CRM/email_receiver.py:31]
-2024-09-25 11:04:52,953 INFO: Total emails fetched: 2 [in /home/runner/CRM/email_receiver.py:36]
-2024-09-25 11:04:53,262 INFO: Processing email from makoto nishio <macnishio@gmail.com> sent on 2024-08-30 06:13:38 [in /home/runner/CRM/email_receiver.py:51]
-2024-09-25 11:04:53,764 WARNING: Received email from unknown sender: makoto nishio <macnishio@gmail.com> [in /home/runner/CRM/email_receiver.py:96]
-2024-09-25 11:04:54,267 INFO: Stored email from unknown sender: makoto nishio <macnishio@gmail.com> [in /home/runner/CRM/email_receiver.py:103]
-2024-09-25 11:04:54,621 INFO: Processing email from makoto nishio <macnishio@gmail.com> sent on 2024-09-17 08:30:07 [in /home/runner/CRM/email_receiver.py:51]
-2024-09-25 11:04:55,614 WARNING: Received email from unknown sender: makoto nishio <macnishio@gmail.com> [in /home/runner/CRM/email_receiver.py:96]
-2024-09-25 11:04:56,116 INFO: Stored email from unknown sender: makoto nishio <macnishio@gmail.com> [in /home/runner/CRM/email_receiver.py:103]
-2024-09-25 11:04:57,424 INFO: Emails from known leads: 711 [in /home/runner/CRM/email_receiver.py:68]
-2024-09-25 11:04:57,673 INFO: Emails from unknown senders: 4 [in /home/runner/CRM/email_receiver.py:69]
-2024-09-25 11:09:44,120 INFO: CRM startup [in /home/runner/CRM/app.py:98]
-2024-09-25 11:09:44,121 INFO: Starting scheduler [in /home/runner/CRM/app.py:115]
-2024-09-25 11:09:44,122 INFO: Scheduler started [in /home/runner/CRM/app.py:117]
-2024-09-25 11:11:19,066 INFO: CRM startup [in /home/runner/CRM/app.py:98]
-2024-09-25 11:11:19,068 INFO: Starting scheduler [in /home/runner/CRM/app.py:115]
-2024-09-25 11:11:19,069 INFO: Scheduler started [in /home/runner/CRM/app.py:117]
-2024-09-25 11:11:22,714 INFO: CRM startup [in /home/runner/CRM/app.py:98]
-2024-09-25 11:11:22,715 INFO: Starting scheduler [in /home/runner/CRM/app.py:115]
-2024-09-25 11:11:22,716 INFO: Scheduler started [in /home/runner/CRM/app.py:117]
-2024-09-25 11:11:26,358 INFO: CRM startup [in /home/runner/CRM/app.py:98]
-2024-09-25 11:11:26,359 INFO: Starting scheduler [in /home/runner/CRM/app.py:115]
-2024-09-25 11:11:26,360 INFO: Scheduler started [in /home/runner/CRM/app.py:117]
-2024-09-25 11:15:08,656 INFO: Fetching emails from 2024-08-26 to 2024-09-25 [in /home/runner/CRM/email_receiver.py:31]
-2024-09-25 11:15:08,973 INFO: Total emails fetched: 0 [in /home/runner/CRM/email_receiver.py:36]
-2024-09-25 11:15:09,761 INFO: Emails from known leads: 711 [in /home/runner/CRM/email_receiver.py:68]
-2024-09-25 11:15:09,997 INFO: Emails from unknown senders: 4 [in /home/runner/CRM/email_receiver.py:69]
-2024-09-25 11:16:22,339 INFO: CRM startup [in /home/runner/CRM/app.py:98]
-2024-09-25 11:16:22,340 INFO: Starting scheduler [in /home/runner/CRM/app.py:115]
-2024-09-25 11:16:22,341 INFO: Scheduler started [in /home/runner/CRM/app.py:117]
-2024-09-25 11:16:49,531 INFO: Fetching emails from 2024-08-26 to 2024-09-25 [in /home/runner/CRM/email_receiver.py:76]
-2024-09-25 11:16:49,827 INFO: Total emails fetched: 2 [in /home/runner/CRM/email_receiver.py:81]
+  File "/home/runner/CRM/.pythonlibs/lib/python3.11/site-packages/flask/app.py", line 1823, in full_dispatch_request
+    rv = self.dispatch_request()
+         ^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/runner/CRM/.pythonlibs/lib/python3.11/site-packages/flask/app.py", line 1799, in dispatch_request
+    return self.ensure_sync(self.view_functions[rule.endpoint])(**view_args)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/runner/CRM/.pythonlibs/lib/python3.11/site-packages/flask_login/utils.py", line 290, in decorated_view
+    return current_app.ensure_sync(func)(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/runner/CRM/routes/main.py", line 38, in recent_emails
+    return render_template('recent_emails.html', emails=emails)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/runner/CRM/.pythonlibs/lib/python3.11/site-packages/flask/templating.py", line 147, in render_template
+    return _render(app, template, context)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/runner/CRM/.pythonlibs/lib/python3.11/site-packages/flask/templating.py", line 130, in _render
+    rv = template.render(context)
+         ^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/runner/CRM/.pythonlibs/lib/python3.11/site-packages/jinja2/environment.py", line 1304, in render
+    self.environment.handle_exception()
+  File "/home/runner/CRM/.pythonlibs/lib/python3.11/site-packages/jinja2/environment.py", line 939, in handle_exception
+    raise rewrite_traceback_stack(source=source)
+  File "/home/runner/CRM/templates/recent_emails.html", line 1, in top-level template code
+    {% extends "base.html" %}
+  File "/home/runner/CRM/templates/base.html", line 42, in top-level template code
+    {% block content %}{% endblock %}
+    ^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/runner/CRM/templates/recent_emails.html", line 19, in block 'content'
+    <td>{{ email.sender.split('<')[0].strip() }} &lt;{{ email.sender.split('<')[1].split('>')[0] }}&gt;</td>
+    ^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/runner/CRM/.pythonlibs/lib/python3.11/site-packages/jinja2/environment.py", line 487, in getattr
+    return getattr(obj, attribute)
+           ^^^^^^^^^^^^^^^^^^^^^^^
+jinja2.exceptions.UndefinedError: list object has no element 1
+2024-09-25 11:37:49,487 INFO: CRM startup [in /home/runner/CRM/app.py:97]
+2024-09-25 11:37:49,906 INFO: CRM startup [in /home/runner/CRM/app.py:97]
+2024-09-25 11:37:50,331 INFO: CRM startup [in /home/runner/CRM/app.py:97]
+2024-09-25 11:37:50,971 INFO: CRM startup [in /home/runner/CRM/app.py:97]
+2024-09-25 11:37:51,444 INFO: CRM startup [in /home/runner/CRM/app.py:97]
+2024-09-25 11:37:52,185 INFO: CRM startup [in /home/runner/CRM/app.py:97]
+2024-09-25 11:37:52,351 INFO: CRM startup [in /home/runner/CRM/app.py:97]
+2024-09-25 11:37:52,351 INFO: Starting scheduler [in /home/runner/CRM/app.py:114]
+2024-09-25 11:37:52,352 INFO: Scheduler started [in /home/runner/CRM/app.py:116]
+2024-09-25 11:38:24,704 INFO: CRM startup [in /home/runner/CRM/app.py:97]
+2024-09-25 11:38:24,706 INFO: Starting scheduler [in /home/runner/CRM/app.py:114]
+2024-09-25 11:38:24,707 INFO: Scheduler started [in /home/runner/CRM/app.py:116]
+2024-09-25 11:38:25,613 INFO: CRM startup [in /home/runner/CRM/app.py:97]
+2024-09-25 11:38:56,848 INFO: CRM startup [in /home/runner/CRM/app.py:97]
+2024-09-25 11:38:56,849 INFO: Starting scheduler [in /home/runner/CRM/app.py:114]
+2024-09-25 11:38:56,850 INFO: Scheduler started [in /home/runner/CRM/app.py:116]
+2024-09-25 11:39:03,951 INFO: Email sender: makoto@team240.net [in /home/runner/CRM/routes/main.py:37]
+2024-09-25 11:39:03,952 INFO: Email sender: makoto@team240.net [in /home/runner/CRM/routes/main.py:37]
+2024-09-25 11:39:03,952 INFO: Email sender: makoto@team240.net [in /home/runner/CRM/routes/main.py:37]
+2024-09-25 11:39:03,953 INFO: Email sender: makoto@team240.net [in /home/runner/CRM/routes/main.py:37]
+2024-09-25 11:39:03,953 INFO: Email sender: makoto@team240.net [in /home/runner/CRM/routes/main.py:37]
+2024-09-25 11:39:03,953 INFO: Email sender: makoto@team240.net [in /home/runner/CRM/routes/main.py:37]
+2024-09-25 11:39:03,953 INFO: Email sender: makoto@team240.net [in /home/runner/CRM/routes/main.py:37]
+2024-09-25 11:39:03,954 INFO: Email sender: makoto@team240.net [in /home/runner/CRM/routes/main.py:37]
+2024-09-25 11:39:03,954 INFO: Email sender: makoto@team240.net [in /home/runner/CRM/routes/main.py:37]
+2024-09-25 11:39:03,954 INFO: Email sender: makoto@team240.net [in /home/runner/CRM/routes/main.py:37]
+2024-09-25 11:39:03,954 INFO: Email sender: makoto@team240.net [in /home/runner/CRM/routes/main.py:37]
+2024-09-25 11:39:03,954 INFO: Email sender: makoto@team240.net [in /home/runner/CRM/routes/main.py:37]
+2024-09-25 11:39:03,954 INFO: Email sender: makoto@team240.net [in /home/runner/CRM/routes/main.py:37]
+2024-09-25 11:39:03,955 INFO: Email sender: makoto@team240.net [in /home/runner/CRM/routes/main.py:37]
+2024-09-25 11:39:03,955 INFO: Email sender: makoto@team240.net [in /home/runner/CRM/routes/main.py:37]
+2024-09-25 11:39:03,955 INFO: Email sender: makoto@team240.net [in /home/runner/CRM/routes/main.py:37]
+2024-09-25 11:39:03,955 INFO: Email sender: makoto@team240.net [in /home/runner/CRM/routes/main.py:37]
+2024-09-25 11:39:03,955 INFO: Email sender: makoto@team240.net [in /home/runner/CRM/routes/main.py:37]
+2024-09-25 11:39:03,955 INFO: Email sender: makoto@team240.net [in /home/runner/CRM/routes/main.py:37]
+2024-09-25 11:39:03,955 INFO: Email sender: makoto@team240.net [in /home/runner/CRM/routes/main.py:37]
+2024-09-25 11:39:03,956 INFO: Email sender: makoto@team240.net [in /home/runner/CRM/routes/main.py:37]
+2024-09-25 11:39:03,956 INFO: Email sender: makoto@team240.net [in /home/runner/CRM/routes/main.py:37]
+2024-09-25 11:39:03,956 INFO: Email sender: makoto@team240.net [in /home/runner/CRM/routes/main.py:37]
+2024-09-25 11:39:03,956 INFO: Email sender: makoto@team240.net [in /home/runner/CRM/routes/main.py:37]
+2024-09-25 11:39:03,956 INFO: Email sender: makoto@team240.net [in /home/runner/CRM/routes/main.py:37]
+2024-09-25 11:39:03,956 INFO: Email sender: makoto@team240.net [in /home/runner/CRM/routes/main.py:37]
+2024-09-25 11:39:03,956 INFO: Email sender: makoto@team240.net [in /home/runner/CRM/routes/main.py:37]
+2024-09-25 11:39:03,957 INFO: Email sender: makoto@team240.net [in /home/runner/CRM/routes/main.py:37]
+2024-09-25 11:39:03,957 INFO: Email sender: makoto@team240.net [in /home/runner/CRM/routes/main.py:37]
+2024-09-25 11:39:03,957 INFO: Email sender: makoto@team240.net [in /home/runner/CRM/routes/main.py:37]
+2024-09-25 11:39:03,957 INFO: Email sender: makoto@team240.net [in /home/runner/CRM/routes/main.py:37]
+2024-09-25 11:39:03,957 INFO: Email sender: makoto@team240.net [in /home/runner/CRM/routes/main.py:37]
+2024-09-25 11:39:03,957 INFO: Email sender: makoto@team240.net [in /home/runner/CRM/routes/main.py:37]
+2024-09-25 11:39:03,958 INFO: Email sender: makoto@team240.net [in /home/runner/CRM/routes/main.py:37]
+2024-09-25 11:39:03,958 INFO: Email sender: makoto@team240.net [in /home/runner/CRM/routes/main.py:37]
+2024-09-25 11:39:03,958 INFO: Email sender: makoto@team240.net [in /home/runner/CRM/routes/main.py:37]
+2024-09-25 11:39:03,958 INFO: Email sender: makoto@team240.net [in /home/runner/CRM/routes/main.py:37]
+2024-09-25 11:39:03,958 INFO: Email sender: makoto@team240.net [in /home/runner/CRM/routes/main.py:37]
+2024-09-25 11:39:03,958 INFO: Email sender: makoto@team240.net [in /home/runner/CRM/routes/main.py:37]
+2024-09-25 11:39:03,958 INFO: Email sender: makoto@team240.net [in /home/runner/CRM/routes/main.py:37]
+2024-09-25 11:39:03,958 INFO: Email sender: makoto@team240.net [in /home/runner/CRM/routes/main.py:37]
+2024-09-25 11:39:03,958 INFO: Email sender: makoto@team240.net [in /home/runner/CRM/routes/main.py:37]
+2024-09-25 11:39:03,959 INFO: Email sender: makoto@team240.net [in /home/runner/CRM/routes/main.py:37]
+2024-09-25 11:39:03,959 INFO: Email sender: makoto@team240.net [in /home/runner/CRM/routes/main.py:37]
+2024-09-25 11:39:03,959 INFO: Email sender: makoto@team240.net [in /home/runner/CRM/routes/main.py:37]
+2024-09-25 11:39:03,959 INFO: Email sender: makoto@team240.net [in /home/runner/CRM/routes/main.py:37]
+2024-09-25 11:39:03,959 INFO: Email sender: makoto@team240.net [in /home/runner/CRM/routes/main.py:37]
+2024-09-25 11:39:03,959 INFO: Email sender: makoto@team240.net [in /home/runner/CRM/routes/main.py:37]
+2024-09-25 11:39:03,959 INFO: Email sender: makoto@team240.net [in /home/runner/CRM/routes/main.py:37]
+2024-09-25 11:39:03,960 INFO: Email sender: makoto@team240.net [in /home/runner/CRM/routes/main.py:37]
+2024-09-25 11:39:03,960 INFO: Email sender: makoto@team240.net [in /home/runner/CRM/routes/main.py:37]
+2024-09-25 11:39:03,960 INFO: Email sender: makoto@team240.net [in /home/runner/CRM/routes/main.py:37]
+2024-09-25 11:39:03,960 INFO: Email sender: makoto@team240.net [in /home/runner/CRM/routes/main.py:37]
+2024-09-25 11:39:03,960 INFO: Email sender: makoto@team240.net [in /home/runner/CRM/routes/main.py:37]
+2024-09-25 11:39:03,960 INFO: Email sender: makoto@team240.net [in /home/runner/CRM/routes/main.py:37]
+2024-09-25 11:39:03,961 INFO: Email sender: makoto@team240.net [in /home/runner/CRM/routes/main.py:37]
+2024-09-25 11:39:03,961 INFO: Email sender: makoto@team240.net [in /home/runner/CRM/routes/main.py:37]
+2024-09-25 11:39:03,961 INFO: Email sender: makoto@team240.net [in /home/runner/CRM/routes/main.py:37]
+2024-09-25 11:39:03,961 INFO: Email sender: makoto@team240.net [in /home/runner/CRM/routes/main.py:37]
