@@ -1,6 +1,7 @@
 from flask import Blueprint, jsonify, render_template, redirect, url_for, flash, current_app
 from flask_login import login_required
 from email_receiver import fetch_emails
+from models import Email
 
 bp = Blueprint('main', __name__)
 
@@ -27,5 +28,11 @@ def manual_fetch_emails():
         current_app.logger.error(f"Error fetching emails: {str(e)}")
         flash('An error occurred while fetching emails. Please try again.', 'error')
     return redirect(url_for('main.index'))
+
+@bp.route('/recent-emails')
+@login_required
+def recent_emails():
+    emails = Email.query.order_by(Email.received_at.desc()).limit(100).all()
+    return render_template('recent_emails.html', emails=emails)
 
 # Other routes are handled by their respective blueprints
