@@ -1,5 +1,40 @@
-2024-09-25 17:34:24,340 INFO: Email sender: None <makoto@team240.net>, Received at: 2024-09-24 22:44:28.281852 [in /home/runner/CRM/routes/main.py:37]
-2024-09-25 17:34:24,341 INFO: Email sender: None <makoto@team240.net>, Received at: 2024-09-24 22:44:14.490913 [in /home/runner/CRM/routes/main.py:37]
-2024-09-25 17:34:24,341 INFO: Email sender: None <makoto@team240.net>, Received at: 2024-09-24 22:44:12.634898 [in /home/runner/CRM/routes/main.py:37]
-2024-09-25 17:34:24,341 INFO: Email sender: None <makoto@team240.net>, Received at: 2024-09-24 22:44:08.847752 [in /home/runner/CRM/routes/main.py:37]
-2024-09-25 17:34:24,341 INFO: Email sender: None <makoto@team240.net>, Received at: 2024-09-24 22:44:02.428205 [in /home/runner/CRM/routes/main.py:37]
+2024-09-25 17:38:45,761 INFO: Stored email from unknown sender: noreply@site24x7.com [in /home/runner/CRM/email_receiver.py:66]
+2024-09-25 17:38:46,094 INFO: Processing email - Sender: noreply@site24x7.com, Subject: インシデントの概要 : team240.net, Date: 2024-08-26 07:25:31 [in /home/runner/CRM/email_receiver.py:103]
+2024-09-25 17:38:47,013 WARNING: Received email from unknown sender: noreply@site24x7.com [in /home/runner/CRM/email_receiver.py:58]
+2024-09-25 17:38:47,517 INFO: Stored email from unknown sender: noreply@site24x7.com [in /home/runner/CRM/email_receiver.py:66]
+2024-09-25 17:38:47,807 INFO: Processing email - Sender: noreply@site24x7.com, Subject: インシデントの概要 : team240.com, Date: 2024-08-26 07:25:31 [in /home/runner/CRM/email_receiver.py:103]
+2024-09-25 17:38:48,726 WARNING: Received email from unknown sender: noreply@site24x7.com [in /home/runner/CRM/email_receiver.py:58]
+2024-09-25 17:38:49,229 INFO: Stored email from unknown sender: noreply@site24x7.com [in /home/runner/CRM/email_receiver.py:66]
+2024-09-25 17:38:49,598 INFO: Processing email - Sender: noreply@site24x7.com, Subject: team240.net は アップ, Date: 2024-08-26 07:25:31 [in /home/runner/CRM/email_receiver.py:103]
+2024-09-25 17:38:50,516 WARNING: Received email from unknown sender: noreply@site24x7.com [in /home/runner/CRM/email_receiver.py:58]
+2024-09-25 17:38:51,021 INFO: Stored email from unknown sender: noreply@site24x7.com [in /home/runner/CRM/email_receiver.py:66]
+2024-09-25 17:38:51,394 INFO: Processing email - Sender: noreply@site24x7.com, Subject: team240.com は アップ, Date: 2024-08-26 07:25:31 [in /home/runner/CRM/email_receiver.py:103]
+2024-09-25 17:38:52,313 WARNING: Received email from unknown sender: noreply@site24x7.com [in /home/runner/CRM/email_receiver.py:58]
+2024-09-25 17:38:52,817 INFO: Stored email from unknown sender: noreply@site24x7.com [in /home/runner/CRM/email_receiver.py:66]
+2024-09-25 17:38:53,161 INFO: Processing email - Sender: Salesforce Trailblazer Community
+ <trailblazercommunity-notif@salesforce.com>, Subject: テクサポ 日本 に関する今日の Salesforce Trailblazer Community ダイジェスト, Date: 2024-08-26 07:33:36 [in /home/runner/CRM/email_receiver.py:103]
+2024-09-25 17:38:54,079 WARNING: Received email from unknown sender: Salesforce Trailblazer Community
+ <trailblazercommunity-notif@salesforce.com> [in /home/runner/CRM/email_receiver.py:58]
+2024-09-25 17:38:54,540 INFO: Stored email from unknown sender: Salesforce Trailblazer Community
+ <trailblazercommunity-notif@salesforce.com> [in /home/runner/CRM/email_receiver.py:66]
+2024-09-25 17:38:54,830 INFO: Processing email - Sender: =?UTF-8?B?5qCq5byP5Lya56S+44Oe44OD44K344Ol44Oe44OI44Oq44OD44Kv44K5?=
+ <info@mashmatrix.com>, Subject: 【残席わずか】ここでしか聞けないSalesforceの成功事例をお届けします！Go UP SUCCCESS 2024, Date: 2024-08-26 07:43:05 [in /home/runner/CRM/email_receiver.py:103]
+2024-09-25 17:38:55,749 WARNING: Received email from unknown sender: =?UTF-8?B?5qCq5byP5Lya56S+44Oe44OD44K344Ol44Oe44OI44Oq44OD44Kv44K5?=
+ <info@mashmatrix.com> [in /home/runner/CRM/email_receiver.py:58]
+2024-09-25 17:38:56,211 INFO: Stored email from unknown sender: =?UTF-8?B?5qCq5byP5Lya56S+44Oe44OD44K344Ol44Oe44OI44Oq44OD44Kv44K5?=
+ <info@mashmatrix.com> [in /home/runner/CRM/email_receiver.py:66]
+2024-09-25 17:38:56,516 INFO: Processing email - Sender: "=?utf-8?q?Pinterest?=" <recommendations@explore.pinterest.com>, Subject: Makoto さん、いいセンスをしてますね！, Date: 2024-08-26 08:01:59 [in /home/runner/CRM/email_receiver.py:103]
+2024-09-25 17:38:57,436 WARNING: Received email from unknown sender: "=?utf-8?q?Pinterest?=" <recommendations@explore.pinterest.com> [in /home/runner/CRM/email_receiver.py:58]
+2024-09-25 17:38:57,898 INFO: Stored email from unknown sender: "=?utf-8?q?Pinterest?=" <recommendations@explore.pinterest.com> [in /home/runner/CRM/email_receiver.py:66]
+2024-09-25 17:38:58,195 INFO: Processing email - Sender: =?iso-2022-jp?B?GyRCJVklLyU/ITwlVyVtJWwlOBsoQg==?= <shopmail@vector.co.jp>, Subject: 【特別賞受賞記念】, Date: 2024-08-26 08:07:09 [in /home/runner/CRM/email_receiver.py:103]
+2024-09-25 17:38:59,114 WARNING: Received email from unknown sender: =?iso-2022-jp?B?GyRCJVklLyU/ITwlVyVtJWwlOBsoQg==?= <shopmail@vector.co.jp> [in /home/runner/CRM/email_receiver.py:58]
+2024-09-25 17:38:59,576 INFO: Stored email from unknown sender: =?iso-2022-jp?B?GyRCJVklLyU/ITwlVyVtJWwlOBsoQg==?= <shopmail@vector.co.jp> [in /home/runner/CRM/email_receiver.py:66]
+2024-09-25 17:38:59,872 INFO: Processing email - Sender: =?ISO-2022-JP?B?QkIuZXhjaXRlGyRCJCskaSROJCpDTiRpJDsbKEI=?=
+ <info@bb.excite.co.jp>, Subject: 【年間最大20,328円お得】契約更新前に切り替えて値上げを回避【にねん割終了に備えて】, Date: 2024-08-26 09:40:29 [in /home/runner/CRM/email_receiver.py:103]
+2024-09-25 17:39:00,792 WARNING: Received email from unknown sender: =?ISO-2022-JP?B?QkIuZXhjaXRlGyRCJCskaSROJCpDTiRpJDsbKEI=?=
+ <info@bb.excite.co.jp> [in /home/runner/CRM/email_receiver.py:58]
+2024-09-25 17:39:01,482 INFO: Stored email from unknown sender: =?ISO-2022-JP?B?QkIuZXhjaXRlGyRCJCskaSROJCpDTiRpJDsbKEI=?=
+ <info@bb.excite.co.jp> [in /home/runner/CRM/email_receiver.py:66]
+2024-09-25 17:39:01,801 INFO: Processing email - Sender: noreply-dmarc-support@google.com, Subject: Report domain: team240.net Submitter: google.com Report-ID: 6518013372328911449, Date: 2024-08-25 23:59:59 [in /home/runner/CRM/email_receiver.py:103]
+2024-09-25 17:39:02,721 WARNING: Received email from unknown sender: noreply-dmarc-support@google.com [in /home/runner/CRM/email_receiver.py:58]
+2024-09-25 17:39:02,951 ERROR: Error fetching emails: A string literal cannot contain NUL (0x00) characters. [in /home/runner/CRM/routes/main.py:28]

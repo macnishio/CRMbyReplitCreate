@@ -49,9 +49,12 @@ def process_email(sender, subject, content, date):
             lead = similar_lead
 
     if lead:
-        existing_email = Email.query.filter_by(lead_id=lead.id,
-                                               subject=subject,
-                                               received_at=date).first()
+        existing_email = Email.query.filter(
+            Email.lead_id == lead.id,
+            Email.subject == subject,
+            Email.received_at >= date - timedelta(minutes=1),
+            Email.received_at <= date + timedelta(minutes=1)
+        ).first()
         if not existing_email:
             new_email = Email(sender=sender_email,
                               sender_name=sender_name,
@@ -117,15 +120,13 @@ def fetch_emails(days_back=30, lead_id=None):
         sender = email_message["From"]
         date_tuple = email.utils.parsedate_tz(email_message["Date"])
         if date_tuple:
-            local_date = datetime.fromtimestamp(
-                email.utils.mktime_tz(date_tuple))
-            current_app.logger.info(
-                f"Processing email - Sender: {sender}, Subject: {subject}, Date: {local_date.strftime('%Y-%m-%d %H:%M:%S')}"
-            )
+            local_date = datetime.fromtimestamp(email.utils.mktime_tz(date_tuple))
         else:
-            current_app.logger.warning(
-                f"Unable to parse date for email from {sender}")
-            continue
+            local_date = datetime.utcnow()  # Fallback to current time if date parsing fails
+
+        current_app.logger.info(
+            f"Processing email - Sender: {sender}, Subject: {subject}, Original Date: {email_message['Date']}, Parsed Date: {local_date.strftime('%Y-%m-%d %H:%M:%S')}"
+        )
 
         if email_message.is_multipart():
             for part in email_message.walk():
