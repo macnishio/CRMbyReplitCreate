@@ -1,50 +1,73 @@
-2024-09-25 10:33:16,148 WARNING: Received email from unknown sender: 
-	Salesforce Trailblazer Community <trailblazercommunity-notif@salesforce.com> [in /home/runner/CRM/email_receiver.py:76]
-2024-09-25 10:33:16,438 INFO: Processing email from =?UTF-8?B?57+U5rOz56S+IEJvb2sgTmV3cw==?=
- <sebn_support@shoeisha.co.jp> sent on 2024-09-25 07:32:56 [in /home/runner/CRM/email_receiver.py:43]
-2024-09-25 10:33:16,448 INFO: Processing email from =?UTF-8?B?57+U5rOz56S+IEJvb2sgTmV3cw==?=
- <sebn_support@shoeisha.co.jp> sent on 2024-09-25 07:32:56 [in /home/runner/CRM/email_receiver.py:43]
-2024-09-25 10:33:16,666 WARNING: Received email from unknown sender: =?UTF-8?B?57+U5rOz56S+IEJvb2sgTmV3cw==?=
- <sebn_support@shoeisha.co.jp> [in /home/runner/CRM/email_receiver.py:76]
-2024-09-25 10:33:16,682 WARNING: Received email from unknown sender: =?UTF-8?B?57+U5rOz56S+IEJvb2sgTmV3cw==?=
- <sebn_support@shoeisha.co.jp> [in /home/runner/CRM/email_receiver.py:76]
-2024-09-25 10:33:17,220 INFO: Processing email from =?UTF-8?B?5qCq5byP5Lya56S+44Oe44OD44K344Ol44Oe44OI44Oq44OD44Kv44K5?=
- <info@mashmatrix.com> sent on 2024-09-25 07:40:09 [in /home/runner/CRM/email_receiver.py:43]
-2024-09-25 10:33:17,223 INFO: Processing email from =?UTF-8?B?5qCq5byP5Lya56S+44Oe44OD44K344Ol44Oe44OI44Oq44OD44Kv44K5?=
- <info@mashmatrix.com> sent on 2024-09-25 07:40:09 [in /home/runner/CRM/email_receiver.py:43]
-2024-09-25 10:33:17,451 WARNING: Received email from unknown sender: =?UTF-8?B?5qCq5byP5Lya56S+44Oe44OD44K344Ol44Oe44OI44Oq44OD44Kv44K5?=
- <info@mashmatrix.com> [in /home/runner/CRM/email_receiver.py:76]
-2024-09-25 10:33:17,457 WARNING: Received email from unknown sender: =?UTF-8?B?5qCq5byP5Lya56S+44Oe44OD44K344Ol44Oe44OI44Oq44OD44Kv44K5?=
- <info@mashmatrix.com> [in /home/runner/CRM/email_receiver.py:76]
-2024-09-25 10:33:17,754 INFO: Processing email from notify@zohoconnect.com sent on 2024-09-25 08:10:14 [in /home/runner/CRM/email_receiver.py:43]
-2024-09-25 10:33:17,760 INFO: Processing email from notify@zohoconnect.com sent on 2024-09-25 08:10:14 [in /home/runner/CRM/email_receiver.py:43]
-2024-09-25 10:33:17,988 WARNING: Received email from unknown sender: notify@zohoconnect.com [in /home/runner/CRM/email_receiver.py:76]
-2024-09-25 10:33:17,989 WARNING: Received email from unknown sender: notify@zohoconnect.com [in /home/runner/CRM/email_receiver.py:76]
-2024-09-25 10:33:18,292 INFO: Processing email from notify@zohoconnect.com sent on 2024-09-25 08:13:39 [in /home/runner/CRM/email_receiver.py:43]
-2024-09-25 10:33:18,308 INFO: Processing email from notify@zohoconnect.com sent on 2024-09-25 08:13:39 [in /home/runner/CRM/email_receiver.py:43]
-2024-09-25 10:33:18,521 WARNING: Received email from unknown sender: notify@zohoconnect.com [in /home/runner/CRM/email_receiver.py:76]
-2024-09-25 10:33:18,542 WARNING: Received email from unknown sender: notify@zohoconnect.com [in /home/runner/CRM/email_receiver.py:76]
-2024-09-25 10:33:18,822 INFO: Processing email from =?UTF-8?B?57+U5rOz56S+IEJvb2sgTmV3cw==?=
- <sebn_support@shoeisha.co.jp> sent on 2024-09-25 08:33:18 [in /home/runner/CRM/email_receiver.py:43]
-2024-09-25 10:33:18,836 INFO: Processing email from =?UTF-8?B?57+U5rOz56S+IEJvb2sgTmV3cw==?=
- <sebn_support@shoeisha.co.jp> sent on 2024-09-25 08:33:18 [in /home/runner/CRM/email_receiver.py:43]
-2024-09-25 10:33:19,050 WARNING: Received email from unknown sender: =?UTF-8?B?57+U5rOz56S+IEJvb2sgTmV3cw==?=
- <sebn_support@shoeisha.co.jp> [in /home/runner/CRM/email_receiver.py:76]
-2024-09-25 10:33:19,070 WARNING: Received email from unknown sender: =?UTF-8?B?57+U5rOz56S+IEJvb2sgTmV3cw==?=
- <sebn_support@shoeisha.co.jp> [in /home/runner/CRM/email_receiver.py:76]
-2024-09-25 10:33:19,350 INFO: Processing email from "=?utf-8?q?Pinterest?=" <recommendations@explore.pinterest.com> sent on 2024-09-25 08:57:51 [in /home/runner/CRM/email_receiver.py:43]
-2024-09-25 10:33:19,370 INFO: Processing email from "=?utf-8?q?Pinterest?=" <recommendations@explore.pinterest.com> sent on 2024-09-25 08:57:51 [in /home/runner/CRM/email_receiver.py:43]
-2024-09-25 10:33:19,578 WARNING: Received email from unknown sender: "=?utf-8?q?Pinterest?=" <recommendations@explore.pinterest.com> [in /home/runner/CRM/email_receiver.py:76]
-2024-09-25 10:33:19,604 WARNING: Received email from unknown sender: "=?utf-8?q?Pinterest?=" <recommendations@explore.pinterest.com> [in /home/runner/CRM/email_receiver.py:76]
-2024-09-25 10:33:19,894 INFO: Processing email from =?UTF-8?B?Q2hhdHdvcms=?= <noreply@chatwork.com> sent on 2024-09-25 09:13:17 [in /home/runner/CRM/email_receiver.py:43]
-2024-09-25 10:33:19,898 INFO: Processing email from =?UTF-8?B?Q2hhdHdvcms=?= <noreply@chatwork.com> sent on 2024-09-25 09:13:17 [in /home/runner/CRM/email_receiver.py:43]
-2024-09-25 10:33:20,123 WARNING: Received email from unknown sender: =?UTF-8?B?Q2hhdHdvcms=?= <noreply@chatwork.com> [in /home/runner/CRM/email_receiver.py:76]
-2024-09-25 10:33:20,132 WARNING: Received email from unknown sender: =?UTF-8?B?Q2hhdHdvcms=?= <noreply@chatwork.com> [in /home/runner/CRM/email_receiver.py:76]
-2024-09-25 10:33:20,471 INFO: Processing email from noreply-dmarc-support@google.com sent on 2024-09-24 23:59:59 [in /home/runner/CRM/email_receiver.py:43]
-2024-09-25 10:33:20,473 INFO: Processing email from noreply-dmarc-support@google.com sent on 2024-09-24 23:59:59 [in /home/runner/CRM/email_receiver.py:43]
-2024-09-25 10:33:20,702 WARNING: Received email from unknown sender: noreply-dmarc-support@google.com [in /home/runner/CRM/email_receiver.py:76]
-2024-09-25 10:33:20,705 WARNING: Received email from unknown sender: noreply-dmarc-support@google.com [in /home/runner/CRM/email_receiver.py:76]
-2024-09-25 10:33:21,141 INFO: Processing email from <noreply@zohosalesiq.com> sent on 2024-09-25 09:45:00 [in /home/runner/CRM/email_receiver.py:43]
-2024-09-25 10:33:21,211 INFO: Processing email from <noreply@zohosalesiq.com> sent on 2024-09-25 09:45:00 [in /home/runner/CRM/email_receiver.py:43]
-2024-09-25 10:33:21,369 WARNING: Received email from unknown sender: <noreply@zohosalesiq.com> [in /home/runner/CRM/email_receiver.py:76]
-2024-09-25 10:33:21,445 WARNING: Received email from unknown sender: <noreply@zohosalesiq.com> [in /home/runner/CRM/email_receiver.py:76]
+2024-09-25 10:56:56,220 ERROR: Exception on /leads/1 [GET] [in /home/runner/CRM/.pythonlibs/lib/python3.11/site-packages/flask/app.py:1744]
+Traceback (most recent call last):
+  File "/home/runner/CRM/.pythonlibs/lib/python3.11/site-packages/redis/connection.py", line 277, in connect
+    sock = self.retry.call_with_retry(
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/runner/CRM/.pythonlibs/lib/python3.11/site-packages/redis/retry.py", line 62, in call_with_retry
+    return do()
+           ^^^^
+  File "/home/runner/CRM/.pythonlibs/lib/python3.11/site-packages/redis/connection.py", line 278, in <lambda>
+    lambda: self._connect(), lambda error: self.disconnect(error)
+            ^^^^^^^^^^^^^^^
+  File "/home/runner/CRM/.pythonlibs/lib/python3.11/site-packages/redis/connection.py", line 639, in _connect
+    raise err
+  File "/home/runner/CRM/.pythonlibs/lib/python3.11/site-packages/redis/connection.py", line 627, in _connect
+    sock.connect(socket_address)
+OSError: [Errno 99] Cannot assign requested address
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/home/runner/CRM/.pythonlibs/lib/python3.11/site-packages/flask/app.py", line 2529, in wsgi_app
+    response = self.full_dispatch_request()
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/runner/CRM/.pythonlibs/lib/python3.11/site-packages/flask/app.py", line 1825, in full_dispatch_request
+    rv = self.handle_user_exception(e)
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/runner/CRM/.pythonlibs/lib/python3.11/site-packages/flask/app.py", line 1821, in full_dispatch_request
+    rv = self.preprocess_request()
+         ^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/runner/CRM/.pythonlibs/lib/python3.11/site-packages/flask/app.py", line 2313, in preprocess_request
+    rv = self.ensure_sync(before_func)()
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/runner/CRM/.pythonlibs/lib/python3.11/site-packages/flask_limiter/extension.py", line 1168, in _check_request_limit
+    raise e
+  File "/home/runner/CRM/.pythonlibs/lib/python3.11/site-packages/flask_limiter/extension.py", line 1149, in _check_request_limit
+    self.__evaluate_limits(endpoint, all_limits)
+  File "/home/runner/CRM/.pythonlibs/lib/python3.11/site-packages/flask_limiter/extension.py", line 1086, in __evaluate_limits
+    if not method(lim.limit, *args, **kwargs):
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/runner/CRM/.pythonlibs/lib/python3.11/site-packages/limits/strategies.py", line 140, in hit
+    self.storage.incr(
+  File "/home/runner/CRM/.pythonlibs/lib/python3.11/site-packages/limits/storage/base.py", line 27, in inner
+    return fn(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^
+  File "/home/runner/CRM/.pythonlibs/lib/python3.11/site-packages/limits/storage/redis.py", line 209, in incr
+    return int(self.lua_incr_expire([key], [expiry, amount]))
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/runner/CRM/.pythonlibs/lib/python3.11/site-packages/redis/commands/core.py", line 6296, in __call__
+    return client.evalsha(self.sha, len(keys), *args)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/runner/CRM/.pythonlibs/lib/python3.11/site-packages/redis/commands/core.py", line 5672, in evalsha
+    return self._evalsha("EVALSHA", sha, numkeys, *keys_and_args)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/runner/CRM/.pythonlibs/lib/python3.11/site-packages/redis/commands/core.py", line 5656, in _evalsha
+    return self.execute_command(command, sha, numkeys, *keys_and_args)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/runner/CRM/.pythonlibs/lib/python3.11/site-packages/redis/client.py", line 545, in execute_command
+    conn = self.connection or pool.get_connection(command_name, **options)
+                              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/runner/CRM/.pythonlibs/lib/python3.11/site-packages/redis/connection.py", line 1074, in get_connection
+    connection.connect()
+  File "/home/runner/CRM/.pythonlibs/lib/python3.11/site-packages/redis/connection.py", line 283, in connect
+    raise ConnectionError(self._error_message(e))
+redis.exceptions.ConnectionError: Error 99 connecting to localhost:6379. Cannot assign requested address.
+2024-09-25 10:57:45,777 INFO: CRM startup [in /home/runner/CRM/app.py:98]
+2024-09-25 10:57:45,778 INFO: Starting scheduler [in /home/runner/CRM/app.py:115]
+2024-09-25 10:57:45,779 INFO: Scheduler started [in /home/runner/CRM/app.py:117]
+2024-09-25 10:58:52,333 INFO: CRM startup [in /home/runner/CRM/app.py:98]
+2024-09-25 10:58:52,334 INFO: Starting scheduler [in /home/runner/CRM/app.py:115]
+2024-09-25 10:58:52,335 INFO: Scheduler started [in /home/runner/CRM/app.py:117]
+2024-09-25 10:59:13,727 INFO: CRM startup [in /home/runner/CRM/app.py:98]
+2024-09-25 10:59:13,728 INFO: Starting scheduler [in /home/runner/CRM/app.py:115]
+2024-09-25 10:59:13,730 INFO: Scheduler started [in /home/runner/CRM/app.py:117]

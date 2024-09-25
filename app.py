@@ -1,3 +1,4 @@
+
 import os
 from flask import Flask, render_template
 from flask_login import LoginManager
@@ -9,15 +10,8 @@ from flask_limiter.util import get_remote_address
 import logging
 from logging.handlers import RotatingFileHandler
 from extensions import db, mail, scheduler, cache
-from email_receiver import setup_email_scheduler
 
-# Redisのインポートを試みる
-try:
-    from redis import Redis
-except ImportError:
-    Redis = None
-
-# 環境変数の読み込み
+# Load environment variables
 load_dotenv()
 
 def create_app():
@@ -27,12 +21,12 @@ def create_app():
 
     app = Flask(__name__)
 
-    # 環境に基づいて正しい設定を使用
-    env = 'development' if os.environ.get('FLASK_DEBUG') == 'True' else 'production'
+    # Use the correct configuration based on the environment
+    env = 'production' if os.environ.get('FLASK_DEBUG') != 'True' else 'development'
     app.config.from_object(config[env])
     config[env].init_app(app)
 
-    # 拡張機能の初期化
+    # Initialize extensions
     db.init_app(app)
     mail.init_app(app)
     
@@ -42,14 +36,15 @@ def create_app():
     
     cache.init_app(app)
 
-    # Limiterの初期化
+    # Initialize Limiter with in-memory storage
     limiter = Limiter(
-        key_func=get_remote_address,
-        default_limits=["200 per day", "50 per hour"]
+        get_remote_address,
+        app=app,
+        default_limits=["200 per day", "50 per hour"],
+        storage_uri="memory://"
     )
-    limiter.init_app(app)
 
-    # Talismanの初期化
+    # Initialize Talisman
     csp = {
         'default-src': "'self'",
         'script-src': "'self' 'unsafe-inline' https://cdn.jsdelivr.net",
@@ -61,7 +56,7 @@ def create_app():
     }
     Talisman(app, content_security_policy=csp, force_https=True)
 
-    # LoginManagerの設定
+    # Set up LoginManager
     login_manager = LoginManager()
     login_manager.login_view = 'auth.login'
     login_manager.init_app(app)
@@ -70,7 +65,7 @@ def create_app():
     def load_user(user_id):
         return db.session.get(User, int(user_id))
 
-    # Blueprintの登録
+    # Register blueprints
     from routes import main, auth, leads, opportunities, accounts, reports, tracking, mobile, schedules, tasks
     app.register_blueprint(main.bp)
     app.register_blueprint(auth.bp)
@@ -83,20 +78,14 @@ def create_app():
     app.register_blueprint(schedules.bp)
     app.register_blueprint(tasks.bp)
 
-    # データベースマイグレーションの設定
-    with app.app_context():
-        migrate = Migrate(app, db)
-        migrate.init_app(app, db)
-        db.create_all()
+    # Set up database migrations
+    migrate = Migrate(app, db)
 
-    # 自動フォローアップのスケジューラージョブの設定
+    # Set up automated follow-up scheduler job
     scheduler.add_job(id='send_automated_follow_ups', func=send_automated_follow_ups, trigger='interval', hours=24)
     app.logger.info("Scheduled automated follow-ups job")
 
-    # Email receiving scheduler setup
-    setup_email_scheduler(app)
-
-    # ロギングの設定
+    # Set up logging
     if not app.debug:
         if not os.path.exists('logs'):
             os.mkdir('logs')
@@ -110,7 +99,7 @@ def create_app():
 
     @app.route('/dashboard')
     def dashboard():
-        # ダミーデータを作成するか、データを実際に取得します
+        # Create dummy data or fetch actual data
         leads = 100
         opportunities = 50
         accounts = 30
@@ -118,7 +107,7 @@ def create_app():
 
     return app
 
-# アプリケーションのインスタンス作成
+# Create application instance
 app = create_app()
 
 if __name__ == '__main__':
