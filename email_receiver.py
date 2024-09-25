@@ -6,12 +6,57 @@ from models import Email, Lead, UnknownEmail
 from extensions import db
 from flask_apscheduler import APScheduler
 from datetime import datetime, timedelta
+from sqlalchemy import func
+import re
 
 def connect_to_email_server():
     mail = imaplib.IMAP4_SSL(current_app.config['MAIL_SERVER'])
     mail.login(current_app.config['MAIL_USERNAME'],
                current_app.config['MAIL_PASSWORD'])
     return mail
+
+def extract_email_address(sender):
+    email_pattern = r'[\w\.-]+@[\w\.-]+'
+    match = re.search(email_pattern, sender)
+    if match:
+        return match.group(0)
+    return sender
+
+def process_email(sender, subject, content, date):
+    # Extract email address from sender string
+    sender_email = extract_email_address(sender)
+    
+    # Try to find a lead with an exact email match
+    lead = Lead.query.filter(func.lower(Lead.email) == func.lower(sender_email)).first()
+    
+    if not lead:
+        # If no exact match, try to find a lead with a similar email
+        similar_lead = Lead.query.filter(func.lower(Lead.email).like(f"%{sender_email.split('@')[0]}%")).first()
+        if similar_lead:
+            lead = similar_lead
+    
+    if lead:
+        existing_email = Email.query.filter_by(lead_id=lead.id, subject=subject, received_at=date).first()
+        if not existing_email:
+            new_email = Email(sender=sender,
+                              subject=subject,
+                              content=content,
+                              received_at=date,
+                              lead=lead)
+            db.session.add(new_email)
+            db.session.commit()
+            current_app.logger.info(f"New email processed for lead: {lead.name}, received at {date}")
+        else:
+            current_app.logger.info(f"Duplicate email skipped for lead: {lead.name}, received at {date}")
+    else:
+        current_app.logger.warning(f"Received email from unknown sender: {sender}")
+        unknown_email = UnknownEmail(sender=sender,
+                                     subject=subject,
+                                     content=content,
+                                     received_at=date)
+        db.session.add(unknown_email)
+        db.session.commit()
+        current_app.logger.info(f"Stored email from unknown sender: {sender}")
 
 def fetch_emails(days_back=30, lead_id=None):
     mail = connect_to_email_server()
@@ -48,9 +93,10 @@ def fetch_emails(days_back=30, lead_id=None):
         date_tuple = email.utils.parsedate_tz(email_message["Date"])
         if date_tuple:
             local_date = datetime.fromtimestamp(email.utils.mktime_tz(date_tuple))
-            current_app.logger.info(f"Processing email from {sender} sent on {local_date.strftime('%Y-%m-%d %H:%M:%S')}")
+            current_app.logger.info(f"Processing email - Sender: {sender}, Subject: {subject}, Date: {local_date.strftime('%Y-%m-%d %H:%M:%S')}")
         else:
             current_app.logger.warning(f"Unable to parse date for email from {sender}")
+            continue
 
         if email_message.is_multipart():
             for part in email_message.walk():
@@ -67,40 +113,6 @@ def fetch_emails(days_back=30, lead_id=None):
 
     current_app.logger.info(f"Emails from known leads: {Email.query.filter(Email.received_at >= start_date).count()}")
     current_app.logger.info(f"Emails from unknown senders: {UnknownEmail.query.filter(UnknownEmail.received_at >= start_date).count()}")
-
-def process_email(sender, subject, content, date):
-    lead = Lead.query.filter_by(email=sender).first()
-    if lead:
-        existing_email = Email.query.filter_by(lead_id=lead.id, subject=subject, received_at=date).first()
-        if not existing_email:
-            new_email = Email(sender=sender,
-                              subject=subject,
-                              content=content,
-                              received_at=date,
-                              lead=lead)
-            db.session.add(new_email)
-            db.session.commit()
-            current_app.logger.info(f"New email processed for lead: {lead.name}, received at {date}")
-        else:
-            current_app.logger.info(f"Duplicate email skipped for lead: {lead.name}, received at {date}")
-    else:
-        # Check if there's an existing lead with a similar email
-        similar_lead = Lead.query.filter(Lead.email.like(f"%{sender.split('@')[0]}%")).first()
-        if similar_lead:
-            # Associate the email with the similar lead
-            new_email = Email(sender=sender, subject=subject, content=content, received_at=date, lead=similar_lead)
-            db.session.add(new_email)
-            db.session.commit()
-            current_app.logger.info(f"Associated email with similar lead: {similar_lead.name}")
-        else:
-            current_app.logger.warning(f"Received email from unknown sender: {sender}")
-            unknown_email = UnknownEmail(sender=sender,
-                                         subject=subject,
-                                         content=content,
-                                         received_at=date)
-            db.session.add(unknown_email)
-            db.session.commit()
-            current_app.logger.info(f"Stored email from unknown sender: {sender}")
 
 def setup_email_scheduler(app):
     scheduler = APScheduler()
