@@ -1,41 +1,60 @@
-2024-09-25 04:23:03,966 INFO: Checking for new emails [in /home/runner/CRM/email_receiver.py:73]
-2024-09-25 04:28:03,966 INFO: Checking for new emails [in /home/runner/CRM/email_receiver.py:73]
-2024-09-25 04:33:03,966 INFO: Checking for new emails [in /home/runner/CRM/email_receiver.py:73]
-2024-09-25 04:38:03,966 INFO: Checking for new emails [in /home/runner/CRM/email_receiver.py:73]
-2024-09-25 04:43:03,966 INFO: Checking for new emails [in /home/runner/CRM/email_receiver.py:73]
-2024-09-25 04:48:03,966 INFO: Checking for new emails [in /home/runner/CRM/email_receiver.py:73]
-2024-09-25 04:53:03,966 INFO: Checking for new emails [in /home/runner/CRM/email_receiver.py:73]
-2024-09-25 04:58:03,966 INFO: Checking for new emails [in /home/runner/CRM/email_receiver.py:73]
-2024-09-25 05:03:03,966 INFO: Checking for new emails [in /home/runner/CRM/email_receiver.py:73]
-2024-09-25 05:08:03,966 INFO: Checking for new emails [in /home/runner/CRM/email_receiver.py:73]
-2024-09-25 05:13:03,967 INFO: Checking for new emails [in /home/runner/CRM/email_receiver.py:73]
-2024-09-25 05:13:12,796 INFO: New email processed for lead: 西尾真言 [in /home/runner/CRM/email_receiver.py:56]
-2024-09-25 05:18:03,966 INFO: Checking for new emails [in /home/runner/CRM/email_receiver.py:73]
-2024-09-25 05:23:03,966 INFO: Checking for new emails [in /home/runner/CRM/email_receiver.py:73]
-2024-09-25 05:28:03,966 INFO: Checking for new emails [in /home/runner/CRM/email_receiver.py:73]
-2024-09-25 05:33:03,966 INFO: Checking for new emails [in /home/runner/CRM/email_receiver.py:73]
-2024-09-25 05:38:03,966 INFO: Checking for new emails [in /home/runner/CRM/email_receiver.py:73]
-2024-09-25 05:38:10,367 WARNING: Received email from unknown sender: =?UTF-8?B?R29vZ2xlIOOCq+ODrOODs+ODgOODvA==?= <calendar-notification@google.com> [in /home/runner/CRM/email_receiver.py:58]
-2024-09-25 05:38:11,295 WARNING: Received email from unknown sender: Zoho Payments Notification <notification@zohopayments.com> [in /home/runner/CRM/email_receiver.py:58]
-2024-09-25 05:43:03,966 INFO: Checking for new emails [in /home/runner/CRM/email_receiver.py:73]
-2024-09-25 05:48:03,966 INFO: Checking for new emails [in /home/runner/CRM/email_receiver.py:73]
-2024-09-25 05:48:10,588 WARNING: Received email from unknown sender: =?utf-8?B?6KW/5bC+IOecn+iogA==?= <makoto@team240.net> [in /home/runner/CRM/email_receiver.py:58]
-2024-09-25 05:53:03,966 INFO: Checking for new emails [in /home/runner/CRM/email_receiver.py:73]
-2024-09-25 05:58:03,966 INFO: Checking for new emails [in /home/runner/CRM/email_receiver.py:73]
-2024-09-25 06:03:03,966 INFO: Checking for new emails [in /home/runner/CRM/email_receiver.py:73]
-2024-09-25 06:08:03,966 INFO: Checking for new emails [in /home/runner/CRM/email_receiver.py:73]
-2024-09-25 06:13:03,966 INFO: Checking for new emails [in /home/runner/CRM/email_receiver.py:73]
-2024-09-25 06:18:03,966 INFO: Checking for new emails [in /home/runner/CRM/email_receiver.py:73]
-2024-09-25 06:18:09,045 WARNING: Received email from unknown sender: =?UTF-8?B?6KW/5bC+IOecn+iogA==?= <makoto@team240.net> [in /home/runner/CRM/email_receiver.py:58]
-2024-09-25 06:18:09,826 WARNING: Received email from unknown sender: =?UTF-8?B?6KW/5bC+IOecn+iogA==?= <makoto@team240.net> [in /home/runner/CRM/email_receiver.py:58]
-2024-09-25 06:18:10,541 WARNING: Received email from unknown sender: =?UTF-8?B?6KW/5bC+IOecn+iogA==?= <makoto@team240.net> [in /home/runner/CRM/email_receiver.py:58]
-2024-09-25 06:18:11,288 WARNING: Received email from unknown sender: =?UTF-8?B?6KW/5bC+IOecn+iogA==?= <makoto@team240.net> [in /home/runner/CRM/email_receiver.py:58]
-2024-09-25 06:18:12,026 WARNING: Received email from unknown sender: =?UTF-8?B?6KW/5bC+IOecn+iogA==?= <makoto@team240.net> [in /home/runner/CRM/email_receiver.py:58]
-2024-09-25 06:18:12,768 WARNING: Received email from unknown sender: =?UTF-8?B?6KW/5bC+IOecn+iogA==?= <makoto@team240.net> [in /home/runner/CRM/email_receiver.py:58]
-2024-09-25 06:18:13,388 WARNING: Received email from unknown sender: Zoho Community <community@zoho.co.jp> [in /home/runner/CRM/email_receiver.py:58]
-2024-09-25 06:18:14,139 WARNING: Received email from unknown sender: =?UTF-8?B?6KW/5bC+44K344K544OG44Og44Kz44Oz44K144Or44K/44Oz44OI?= <notifications@zohocrm.com> [in /home/runner/CRM/email_receiver.py:58]
-2024-09-25 06:18:14,747 WARNING: Received email from unknown sender: =?UTF-8?B?6KW/5bC+IOecn+iogA==?= <makoto@team240.net> [in /home/runner/CRM/email_receiver.py:58]
-2024-09-25 06:23:03,966 INFO: Checking for new emails [in /home/runner/CRM/email_receiver.py:73]
-2024-09-25 06:23:08,467 WARNING: Received email from unknown sender: =?utf-8?B?6KW/5bC+IOecn+iogA==?= <makoto@team240.net> [in /home/runner/CRM/email_receiver.py:58]
-2024-09-25 06:23:09,230 WARNING: Received email from unknown sender: =?utf-8?B?6KW/5bC+IOecn+iogA==?= <makoto@team240.net> [in /home/runner/CRM/email_receiver.py:58]
-2024-09-25 06:23:09,834 WARNING: Received email from unknown sender: "satoshi ishii" <isiimami@ba.mbn.or.jp> [in /home/runner/CRM/email_receiver.py:58]
+2024-09-25 09:10:05,809 INFO: Processing email from =?UTF-8?B?5Yy755mC5rOV5Lq66Iez6Kqg5Lya44Gf44KT44G944G95q2v56eR?=
+ =?UTF-8?B?44CA44CM44Gf44KT44G944G95q2v56eR5qeY5ZCR44GR44OR44K944Kz?=
+ =?UTF-8?B?44Oz6LK344GE5pu/44GI6Kq/5p+744O75o+Q5qGI44Gu44GU5qGI5YaF?=
+ =?UTF-8?B?44CNIOizvOWFpeODu+ioree9ruWVhuWTgeizvOWFpSDpgJrnn6U=?=
+ <notifications@zohoprojects.com> sent on 2024-08-26 12:49:43 [in /home/runner/CRM/email_receiver.py:43]
+2024-09-25 09:10:06,040 WARNING: Received email from unknown sender: =?UTF-8?B?5Yy755mC5rOV5Lq66Iez6Kqg5Lya44Gf44KT44G944G95q2v56eR?=
+ =?UTF-8?B?44CA44CM44Gf44KT44G944G95q2v56eR5qeY5ZCR44GR44OR44K944Kz?=
+ =?UTF-8?B?44Oz6LK344GE5pu/44GI6Kq/5p+744O75o+Q5qGI44Gu44GU5qGI5YaF?=
+ =?UTF-8?B?44CNIOizvOWFpeODu+ioree9ruWVhuWTgeizvOWFpSDpgJrnn6U=?=
+ <notifications@zohoprojects.com> [in /home/runner/CRM/email_receiver.py:76]
+2024-09-25 09:10:06,419 INFO: Processing email from =?UTF-8?B?5Yy755mC5rOV5Lq66Iez6Kqg5Lya44Gf44KT44G944G95q2v56eR?=
+ =?UTF-8?B?44CA44CM44Gf44KT44G944G95q2v56eR5qeY5ZCR44GR44OR44K944Kz?=
+ =?UTF-8?B?44Oz6LK344GE5pu/44GI6Kq/5p+744O75o+Q5qGI44Gu44GU5qGI5YaF?=
+ =?UTF-8?B?44CNIOizvOWFpeODu+ioree9ruWVhuWTgeizvOWFpSDpgJrnn6U=?=
+ <notifications@zohoprojects.com> sent on 2024-08-26 12:49:47 [in /home/runner/CRM/email_receiver.py:43]
+2024-09-25 09:10:06,648 WARNING: Received email from unknown sender: =?UTF-8?B?5Yy755mC5rOV5Lq66Iez6Kqg5Lya44Gf44KT44G944G95q2v56eR?=
+ =?UTF-8?B?44CA44CM44Gf44KT44G944G95q2v56eR5qeY5ZCR44GR44OR44K944Kz?=
+ =?UTF-8?B?44Oz6LK344GE5pu/44GI6Kq/5p+744O75o+Q5qGI44Gu44GU5qGI5YaF?=
+ =?UTF-8?B?44CNIOizvOWFpeODu+ioree9ruWVhuWTgeizvOWFpSDpgJrnn6U=?=
+ <notifications@zohoprojects.com> [in /home/runner/CRM/email_receiver.py:76]
+2024-09-25 09:10:07,019 INFO: Processing email from =?UTF-8?B?5Yy755mC5rOV5Lq66Iez6Kqg5Lya44Gf44KT44G944G95q2v56eR?=
+ =?UTF-8?B?44CA44CM44Gf44KT44G944G95q2v56eR5qeY5ZCR44GR44OR44K944Kz?=
+ =?UTF-8?B?44Oz6LK344GE5pu/44GI6Kq/5p+744O75o+Q5qGI44Gu44GU5qGI5YaF?=
+ =?UTF-8?B?44CNIOizvOWFpeODu+ioree9ruWVhuWTgeizvOWFpSDpgJrnn6U=?=
+ <notifications@zohoprojects.com> sent on 2024-08-26 12:49:49 [in /home/runner/CRM/email_receiver.py:43]
+2024-09-25 09:10:07,248 WARNING: Received email from unknown sender: =?UTF-8?B?5Yy755mC5rOV5Lq66Iez6Kqg5Lya44Gf44KT44G944G95q2v56eR?=
+ =?UTF-8?B?44CA44CM44Gf44KT44G944G95q2v56eR5qeY5ZCR44GR44OR44K944Kz?=
+ =?UTF-8?B?44Oz6LK344GE5pu/44GI6Kq/5p+744O75o+Q5qGI44Gu44GU5qGI5YaF?=
+ =?UTF-8?B?44CNIOizvOWFpeODu+ioree9ruWVhuWTgeizvOWFpSDpgJrnn6U=?=
+ <notifications@zohoprojects.com> [in /home/runner/CRM/email_receiver.py:76]
+2024-09-25 09:10:07,608 INFO: Processing email from =?UTF-8?B?5Yy755mC5rOV5Lq66Iez6Kqg5Lya44Gf44KT44G944G95q2v56eR?=
+ =?UTF-8?B?44CA44CM44Gf44KT44G944G95q2v56eR5qeY5ZCR44GR44OR44K944Kz?=
+ =?UTF-8?B?44Oz6LK344GE5pu/44GI6Kq/5p+744O75o+Q5qGI44Gu44GU5qGI5YaF?=
+ =?UTF-8?B?44CNIOizvOWFpeODu+ioree9ruWVhuWTgeizvOWFpSDpgJrnn6U=?=
+ <notifications@zohoprojects.com> sent on 2024-08-26 12:49:55 [in /home/runner/CRM/email_receiver.py:43]
+2024-09-25 09:10:07,838 WARNING: Received email from unknown sender: =?UTF-8?B?5Yy755mC5rOV5Lq66Iez6Kqg5Lya44Gf44KT44G944G95q2v56eR?=
+ =?UTF-8?B?44CA44CM44Gf44KT44G944G95q2v56eR5qeY5ZCR44GR44OR44K944Kz?=
+ =?UTF-8?B?44Oz6LK344GE5pu/44GI6Kq/5p+744O75o+Q5qGI44Gu44GU5qGI5YaF?=
+ =?UTF-8?B?44CNIOizvOWFpeODu+ioree9ruWVhuWTgeizvOWFpSDpgJrnn6U=?=
+ <notifications@zohoprojects.com> [in /home/runner/CRM/email_receiver.py:76]
+2024-09-25 09:10:08,209 INFO: Processing email from =?UTF-8?B?5Yy755mC5rOV5Lq66Iez6Kqg5Lya44Gf44KT44G944G95q2v56eR?=
+ =?UTF-8?B?44CA44CM44Gf44KT44G944G95q2v56eR5qeY5ZCR44GR44OR44K944Kz?=
+ =?UTF-8?B?44Oz6LK344GE5pu/44GI6Kq/5p+744O75o+Q5qGI44Gu44GU5qGI5YaF?=
+ =?UTF-8?B?44CNIOizvOWFpeODu+ioree9ruWVhuWTgeizvOWFpSDpgJrnn6U=?=
+ <notifications@zohoprojects.com> sent on 2024-08-26 12:49:55 [in /home/runner/CRM/email_receiver.py:43]
+2024-09-25 09:10:08,438 WARNING: Received email from unknown sender: =?UTF-8?B?5Yy755mC5rOV5Lq66Iez6Kqg5Lya44Gf44KT44G944G95q2v56eR?=
+ =?UTF-8?B?44CA44CM44Gf44KT44G944G95q2v56eR5qeY5ZCR44GR44OR44K944Kz?=
+ =?UTF-8?B?44Oz6LK344GE5pu/44GI6Kq/5p+744O75o+Q5qGI44Gu44GU5qGI5YaF?=
+ =?UTF-8?B?44CNIOizvOWFpeODu+ioree9ruWVhuWTgeizvOWFpSDpgJrnn6U=?=
+ <notifications@zohoprojects.com> [in /home/runner/CRM/email_receiver.py:76]
+2024-09-25 09:10:08,920 INFO: Processing email from =?UTF-8?B?5Yy755mC5rOV5Lq66Iez6Kqg5Lya44Gf44KT44G944G95q2v56eR?=
+ =?UTF-8?B?44CA44CM44Gf44KT44G944G95q2v56eR5qeY5ZCR44GR44OR44K944Kz?=
+ =?UTF-8?B?44Oz6LK344GE5pu/44GI6Kq/5p+744O75o+Q5qGI44Gu44GU5qGI5YaF?=
+ =?UTF-8?B?44CNIOizvOWFpeODu+ioree9ruWVhuWTgeizvOWFpSDpgJrnn6U=?=
+ <notifications@zohoprojects.com> sent on 2024-08-26 12:49:59 [in /home/runner/CRM/email_receiver.py:43]
+2024-09-25 09:10:09,149 WARNING: Received email from unknown sender: =?UTF-8?B?5Yy755mC5rOV5Lq66Iez6Kqg5Lya44Gf44KT44G944G95q2v56eR?=
+ =?UTF-8?B?44CA44CM44Gf44KT44G944G95q2v56eR5qeY5ZCR44GR44OR44K944Kz?=
+ =?UTF-8?B?44Oz6LK344GE5pu/44GI6Kq/5p+744O75o+Q5qGI44Gu44GU5qGI5YaF?=
+ =?UTF-8?B?44CNIOizvOWFpeODu+ioree9ruWVhuWTgeizvOWFpSDpgJrnn6U=?=
+ <notifications@zohoprojects.com> [in /home/runner/CRM/email_receiver.py:76]

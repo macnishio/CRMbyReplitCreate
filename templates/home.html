@@ -1,23 +1,12 @@
-<!doctype html>
-<html lang="en">
-    <head>
-        <meta charset="UTF-8" />
-        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-        <title>CRM Application</title>
-        <link
-            rel="stylesheet"
-            href="{{ url_for('static', filename='styles.css') }}"
-        />
-    </head>
-    <body>
-        {% include 'header.html' %}
-        <main>
-            <h1>Welcome to the CRM Application</h1>
-            <p>Your central hub for managing customer relationships.</p>
-            <div id="dashboard-summary">
-                <p>Dashboard content or summary goes here.</p>
-            </div>
-        </main>
-        {% include 'footer.html' %}
-    </body>
-</html>
+{% extends "base.html" %}
+
+{% block content %}
+<h1>Welcome to the CRM Application</h1>
+<p>Your central hub for managing customer relationships.</p>
+
+<form action="{{ url_for('main.manual_fetch_emails') }}" method="POST">
+    <button type="submit" class="btn btn-primary">Fetch Emails Manually</button>
+</form>
+
+<!-- Add more content as needed -->
+{% endblock %}
