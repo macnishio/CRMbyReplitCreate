@@ -1,0 +1,299 @@
+~/CRM$ python app.py
+[2024-09-25 11:40:55,506] INFO in app: CRM startup
+CRM startup
+[2024-09-25 11:40:55,507] INFO in app: Starting scheduler
+Starting scheduler
+[2024-09-25 11:40:55,509] INFO in app: Scheduler started
+Scheduler started
+ * Serving Flask app 'app'
+ * Debug mode: off
+WARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.
+ * Running on all addresses (0.0.0.0)
+ * Running on http://127.0.0.1:5001
+ * Running on http://172.31.196.3:5001
+Press CTRL+C to quit
+[2024-09-25 11:41:02,431] INFO in main: Email sender: makoto@team240.net
+Email sender: makoto@team240.net
+[2024-09-25 11:41:02,431] INFO in main: Email sender: makoto@team240.net
+Email sender: makoto@team240.net
+[2024-09-25 11:41:02,431] INFO in main: Email sender: makoto@team240.net
+Email sender: makoto@team240.net
+[2024-09-25 11:41:02,431] INFO in main: Email sender: makoto@team240.net
+Email sender: makoto@team240.net
+[2024-09-25 11:41:02,432] INFO in main: Email sender: makoto@team240.net
+Email sender: makoto@team240.net
+[2024-09-25 11:41:02,432] INFO in main: Email sender: makoto@team240.net
+Email sender: makoto@team240.net
+[2024-09-25 11:41:02,432] INFO in main: Email sender: makoto@team240.net
+Email sender: makoto@team240.net
+[2024-09-25 11:41:02,432] INFO in main: Email sender: makoto@team240.net
+Email sender: makoto@team240.net
+[2024-09-25 11:41:02,432] INFO in main: Email sender: makoto@team240.net
+Email sender: makoto@team240.net
+[2024-09-25 11:41:02,433] INFO in main: Email sender: makoto@team240.net
+Email sender: makoto@team240.net
+[2024-09-25 11:41:02,433] INFO in main: Email sender: makoto@team240.net
+Email sender: makoto@team240.net
+[2024-09-25 11:41:02,433] INFO in main: Email sender: makoto@team240.net
+Email sender: makoto@team240.net
+[2024-09-25 11:41:02,433] INFO in main: Email sender: makoto@team240.net
+Email sender: makoto@team240.net
+[2024-09-25 11:41:02,433] INFO in main: Email sender: makoto@team240.net
+Email sender: makoto@team240.net
+[2024-09-25 11:41:02,433] INFO in main: Email sender: makoto@team240.net
+Email sender: makoto@team240.net
+[2024-09-25 11:41:02,434] INFO in main: Email sender: makoto@team240.net
+Email sender: makoto@team240.net
+[2024-09-25 11:41:02,434] INFO in main: Email sender: makoto@team240.net
+Email sender: makoto@team240.net
+[2024-09-25 11:41:02,434] INFO in main: Email sender: makoto@team240.net
+Email sender: makoto@team240.net
+[2024-09-25 11:41:02,434] INFO in main: Email sender: makoto@team240.net
+Email sender: makoto@team240.net
+[2024-09-25 11:41:02,434] INFO in main: Email sender: makoto@team240.net
+Email sender: makoto@team240.net
+[2024-09-25 11:41:02,434] INFO in main: Email sender: makoto@team240.net
+Email sender: makoto@team240.net
+[2024-09-25 11:41:02,434] INFO in main: Email sender: makoto@team240.net
+Email sender: makoto@team240.net
+[2024-09-25 11:41:02,434] INFO in main: Email sender: makoto@team240.net
+Email sender: makoto@team240.net
+[2024-09-25 11:41:02,435] INFO in main: Email sender: makoto@team240.net
+Email sender: makoto@team240.net
+[2024-09-25 11:41:02,435] INFO in main: Email sender: makoto@team240.net
+Email sender: makoto@team240.net
+[2024-09-25 11:41:02,435] INFO in main: Email sender: makoto@team240.net
+Email sender: makoto@team240.net
+[2024-09-25 11:41:02,435] INFO in main: Email sender: makoto@team240.net
+Email sender: makoto@team240.net
+[2024-09-25 11:41:02,435] INFO in main: Email sender: makoto@team240.net
+Email sender: makoto@team240.net
+[2024-09-25 11:41:02,435] INFO in main: Email sender: makoto@team240.net
+Email sender: makoto@team240.net
+[2024-09-25 11:41:02,436] INFO in main: Email sender: makoto@team240.net
+Email sender: makoto@team240.net
+[2024-09-25 11:41:02,437] INFO in main: Email sender: makoto@team240.net
+Email sender: makoto@team240.net
+[2024-09-25 11:41:02,437] INFO in main: Email sender: makoto@team240.net
+Email sender: makoto@team240.net
+[2024-09-25 11:41:02,437] INFO in main: Email sender: makoto@team240.net
+Email sender: makoto@team240.net
+[2024-09-25 11:41:02,437] INFO in main: Email sender: makoto@team240.net
+Email sender: makoto@team240.net
+[2024-09-25 11:41:02,437] INFO in main: Email sender: makoto@team240.net
+Email sender: makoto@team240.net
+[2024-09-25 11:41:02,437] INFO in main: Email sender: makoto@team240.net
+Email sender: makoto@team240.net
+[2024-09-25 11:41:02,437] INFO in main: Email sender: makoto@team240.net
+Email sender: makoto@team240.net
+[2024-09-25 11:41:02,437] INFO in main: Email sender: makoto@team240.net
+Email sender: makoto@team240.net
+[2024-09-25 11:41:02,438] INFO in main: Email sender: makoto@team240.net
+Email sender: makoto@team240.net
+[2024-09-25 11:41:02,438] INFO in main: Email sender: makoto@team240.net
+Email sender: makoto@team240.net
+[2024-09-25 11:41:02,438] INFO in main: Email sender: makoto@team240.net
+Email sender: makoto@team240.net
+[2024-09-25 11:41:02,438] INFO in main: Email sender: makoto@team240.net
+Email sender: makoto@team240.net
+[2024-09-25 11:41:02,438] INFO in main: Email sender: makoto@team240.net
+Email sender: makoto@team240.net
+[2024-09-25 11:41:02,438] INFO in main: Email sender: makoto@team240.net
+Email sender: makoto@team240.net
+[2024-09-25 11:41:02,438] INFO in main: Email sender: makoto@team240.net
+Email sender: makoto@team240.net
+[2024-09-25 11:41:02,439] INFO in main: Email sender: makoto@team240.net
+Email sender: makoto@team240.net
+[2024-09-25 11:41:02,439] INFO in main: Email sender: makoto@team240.net
+Email sender: makoto@team240.net
+[2024-09-25 11:41:02,439] INFO in main: Email sender: makoto@team240.net
+Email sender: makoto@team240.net
+[2024-09-25 11:41:02,439] INFO in main: Email sender: makoto@team240.net
+Email sender: makoto@team240.net
+[2024-09-25 11:41:02,439] INFO in main: Email sender: makoto@team240.net
+Email sender: makoto@team240.net
+[2024-09-25 11:41:02,439] INFO in main: Email sender: makoto@team240.net
+Email sender: makoto@team240.net
+[2024-09-25 11:41:02,439] INFO in main: Email sender: makoto@team240.net
+Email sender: makoto@team240.net
+[2024-09-25 11:41:02,440] INFO in main: Email sender: makoto@team240.net
+Email sender: makoto@team240.net
+[2024-09-25 11:41:02,440] INFO in main: Email sender: makoto@team240.net
+Email sender: makoto@team240.net
+[2024-09-25 11:41:02,440] INFO in main: Email sender: makoto@team240.net
+Email sender: makoto@team240.net
+[2024-09-25 11:41:02,440] INFO in main: Email sender: makoto@team240.net
+Email sender: makoto@team240.net
+[2024-09-25 11:41:02,440] INFO in main: Email sender: makoto@team240.net
+Email sender: makoto@team240.net
+[2024-09-25 11:41:02,440] INFO in main: Email sender: makoto@team240.net
+Email sender: makoto@team240.net
+[2024-09-25 11:41:02,440] INFO in main: Email sender: makoto@team240.net
+Email sender: makoto@team240.net
+[2024-09-25 11:41:02,441] INFO in main: Email sender: makoto@team240.net
+Email sender: makoto@team240.net
+[2024-09-25 11:41:02,441] INFO in main: Email sender: makoto@team240.net
+Email sender: makoto@team240.net
+[2024-09-25 11:41:02,441] INFO in main: Email sender: makoto@team240.net
+Email sender: makoto@team240.net
+[2024-09-25 11:41:02,441] INFO in main: Email sender: makoto@team240.net
+Email sender: makoto@team240.net
+[2024-09-25 11:41:02,441] INFO in main: Email sender: makoto@team240.net
+Email sender: makoto@team240.net
+[2024-09-25 11:41:02,441] INFO in main: Email sender: makoto@team240.net
+Email sender: makoto@team240.net
+[2024-09-25 11:41:02,441] INFO in main: Email sender: makoto@team240.net
+Email sender: makoto@team240.net
+[2024-09-25 11:41:02,442] INFO in main: Email sender: makoto@team240.net
+Email sender: makoto@team240.net
+[2024-09-25 11:41:02,442] INFO in main: Email sender: makoto@team240.net
+Email sender: makoto@team240.net
+[2024-09-25 11:41:02,442] INFO in main: Email sender: makoto@team240.net
+Email sender: makoto@team240.net
+[2024-09-25 11:41:02,442] INFO in main: Email sender: makoto@team240.net
+Email sender: makoto@team240.net
+[2024-09-25 11:41:02,442] INFO in main: Email sender: makoto@team240.net
+Email sender: makoto@team240.net
+[2024-09-25 11:41:02,442] INFO in main: Email sender: makoto@team240.net
+Email sender: makoto@team240.net
+[2024-09-25 11:41:02,442] INFO in main: Email sender: makoto@team240.net
+Email sender: makoto@team240.net
+[2024-09-25 11:41:02,443] INFO in main: Email sender: makoto@team240.net
+Email sender: makoto@team240.net
+[2024-09-25 11:41:02,443] INFO in main: Email sender: makoto@team240.net
+Email sender: makoto@team240.net
+[2024-09-25 11:41:02,443] INFO in main: Email sender: makoto@team240.net
+Email sender: makoto@team240.net
+[2024-09-25 11:41:02,443] INFO in main: Email sender: makoto@team240.net
+Email sender: makoto@team240.net
+[2024-09-25 11:41:02,443] INFO in main: Email sender: makoto@team240.net
+Email sender: makoto@team240.net
+[2024-09-25 11:41:02,443] INFO in main: Email sender: makoto@team240.net
+Email sender: makoto@team240.net
+[2024-09-25 11:41:02,443] INFO in main: Email sender: makoto@team240.net
+Email sender: makoto@team240.net
+[2024-09-25 11:41:02,444] INFO in main: Email sender: makoto@team240.net
+Email sender: makoto@team240.net
+[2024-09-25 11:41:02,444] INFO in main: Email sender: makoto@team240.net
+Email sender: makoto@team240.net
+[2024-09-25 11:41:02,444] INFO in main: Email sender: makoto@team240.net
+Email sender: makoto@team240.net
+[2024-09-25 11:41:02,444] INFO in main: Email sender: makoto@team240.net
+Email sender: makoto@team240.net
+[2024-09-25 11:41:02,444] INFO in main: Email sender: makoto@team240.net
+Email sender: makoto@team240.net
+[2024-09-25 11:41:02,444] INFO in main: Email sender: makoto@team240.net
+Email sender: makoto@team240.net
+[2024-09-25 11:41:02,444] INFO in main: Email sender: makoto@team240.net
+Email sender: makoto@team240.net
+[2024-09-25 11:41:02,444] INFO in main: Email sender: makoto@team240.net
+Email sender: makoto@team240.net
+[2024-09-25 11:41:02,445] INFO in main: Email sender: makoto@team240.net
+Email sender: makoto@team240.net
+[2024-09-25 11:41:02,445] INFO in main: Email sender: makoto@team240.net
+Email sender: makoto@team240.net
+[2024-09-25 11:41:02,445] INFO in main: Email sender: makoto@team240.net
+Email sender: makoto@team240.net
+[2024-09-25 11:41:02,445] INFO in main: Email sender: makoto@team240.net
+Email sender: makoto@team240.net
+[2024-09-25 11:41:02,445] INFO in main: Email sender: makoto@team240.net
+Email sender: makoto@team240.net
+[2024-09-25 11:41:02,445] INFO in main: Email sender: makoto@team240.net
+Email sender: makoto@team240.net
+[2024-09-25 11:41:02,445] INFO in main: Email sender: makoto@team240.net
+Email sender: makoto@team240.net
+[2024-09-25 11:41:02,445] INFO in main: Email sender: makoto@team240.net
+Email sender: makoto@team240.net
+[2024-09-25 11:41:02,446] INFO in main: Email sender: makoto@team240.net
+Email sender: makoto@team240.net
+[2024-09-25 11:41:02,446] INFO in main: Email sender: makoto@team240.net
+Email sender: makoto@team240.net
+[2024-09-25 11:41:02,446] INFO in main: Email sender: makoto@team240.net
+Email sender: makoto@team240.net
+[2024-09-25 11:41:02,446] INFO in main: Email sender: makoto@team240.net
+Email sender: makoto@team240.net
+[2024-09-25 11:41:02,457] ERROR in app: Exception on /recent-emails [GET]
+Traceback (most recent call last):
+  File "/home/runner/CRM/.pythonlibs/lib/python3.11/site-packages/flask/app.py", line 2529, in wsgi_app
+    response = self.full_dispatch_request()
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/runner/CRM/.pythonlibs/lib/python3.11/site-packages/flask/app.py", line 1825, in full_dispatch_request
+    rv = self.handle_user_exception(e)
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/runner/CRM/.pythonlibs/lib/python3.11/site-packages/flask/app.py", line 1823, in full_dispatch_request
+    rv = self.dispatch_request()
+         ^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/runner/CRM/.pythonlibs/lib/python3.11/site-packages/flask/app.py", line 1799, in dispatch_request
+    return self.ensure_sync(self.view_functions[rule.endpoint])(**view_args)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/runner/CRM/.pythonlibs/lib/python3.11/site-packages/flask_login/utils.py", line 290, in decorated_view
+    return current_app.ensure_sync(func)(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/runner/CRM/routes/main.py", line 38, in recent_emails
+    return render_template('recent_emails.html', emails=emails)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/runner/CRM/.pythonlibs/lib/python3.11/site-packages/flask/templating.py", line 147, in render_template
+    return _render(app, template, context)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/runner/CRM/.pythonlibs/lib/python3.11/site-packages/flask/templating.py", line 130, in _render
+    rv = template.render(context)
+         ^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/runner/CRM/.pythonlibs/lib/python3.11/site-packages/jinja2/environment.py", line 1304, in render
+    self.environment.handle_exception()
+  File "/home/runner/CRM/.pythonlibs/lib/python3.11/site-packages/jinja2/environment.py", line 939, in handle_exception
+    raise rewrite_traceback_stack(source=source)
+  File "/home/runner/CRM/templates/recent_emails.html", line 1, in top-level template code
+    {% extends "base.html" %}
+  File "/home/runner/CRM/templates/base.html", line 42, in top-level template code
+    {% block content %}{% endblock %}
+    ^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/runner/CRM/templates/recent_emails.html", line 19, in block 'content'
+    <td>{{ email.sender.split('<')[0].strip() }} &lt;{{ email.sender.split('<')[1].split('>')[0] }}&gt;</td>
+    ^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/runner/CRM/.pythonlibs/lib/python3.11/site-packages/jinja2/environment.py", line 487, in getattr
+    return getattr(obj, attribute)
+           ^^^^^^^^^^^^^^^^^^^^^^^
+jinja2.exceptions.UndefinedError: list object has no element 1
+Exception on /recent-emails [GET]
+Traceback (most recent call last):
+  File "/home/runner/CRM/.pythonlibs/lib/python3.11/site-packages/flask/app.py", line 2529, in wsgi_app
+    response = self.full_dispatch_request()
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/runner/CRM/.pythonlibs/lib/python3.11/site-packages/flask/app.py", line 1825, in full_dispatch_request
+    rv = self.handle_user_exception(e)
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/runner/CRM/.pythonlibs/lib/python3.11/site-packages/flask/app.py", line 1823, in full_dispatch_request
+    rv = self.dispatch_request()
+         ^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/runner/CRM/.pythonlibs/lib/python3.11/site-packages/flask/app.py", line 1799, in dispatch_request
+    return self.ensure_sync(self.view_functions[rule.endpoint])(**view_args)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/runner/CRM/.pythonlibs/lib/python3.11/site-packages/flask_login/utils.py", line 290, in decorated_view
+    return current_app.ensure_sync(func)(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/runner/CRM/routes/main.py", line 38, in recent_emails
+    return render_template('recent_emails.html', emails=emails)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/runner/CRM/.pythonlibs/lib/python3.11/site-packages/flask/templating.py", line 147, in render_template
+    return _render(app, template, context)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/runner/CRM/.pythonlibs/lib/python3.11/site-packages/flask/templating.py", line 130, in _render
+    rv = template.render(context)
+         ^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/runner/CRM/.pythonlibs/lib/python3.11/site-packages/jinja2/environment.py", line 1304, in render
+    self.environment.handle_exception()
+  File "/home/runner/CRM/.pythonlibs/lib/python3.11/site-packages/jinja2/environment.py", line 939, in handle_exception
+    raise rewrite_traceback_stack(source=source)
+  File "/home/runner/CRM/templates/recent_emails.html", line 1, in top-level template code
+    {% extends "base.html" %}
+  File "/home/runner/CRM/templates/base.html", line 42, in top-level template code
+    {% block content %}{% endblock %}
+    ^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/runner/CRM/templates/recent_emails.html", line 19, in block 'content'
+    <td>{{ email.sender.split('<')[0].strip() }} &lt;{{ email.sender.split('<')[1].split('>')[0] }}&gt;</td>
+    ^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/runner/CRM/.pythonlibs/lib/python3.11/site-packages/jinja2/environment.py", line 487, in getattr
+    return getattr(obj, attribute)
+           ^^^^^^^^^^^^^^^^^^^^^^^
+jinja2.exceptions.UndefinedError: list object has no element 1
+172.31.196.3 - - [25/Sep/2024 11:41:02] "GET /recent-emails HTTP/1.1" 500 -

@@ -114,4 +114,4 @@ if __name__ == '__main__':
         app.logger.info('Starting scheduler')
         scheduler.start()
         app.logger.info('Scheduler started')
-        app.run(host='0.0.0.0', port=5001)  # Changed port to 5001
+        app.run(host='0.0.0.0', port=5000)  # Changed port back to 5000

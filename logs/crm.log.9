@@ -1,113 +1,99 @@
-2024-09-25 11:35:44,396 ERROR: Exception on /recent-emails [GET] [in /home/runner/CRM/.pythonlibs/lib/python3.11/site-packages/flask/app.py:1744]
-Traceback (most recent call last):
-  File "/home/runner/CRM/.pythonlibs/lib/python3.11/site-packages/flask/app.py", line 2529, in wsgi_app
-    response = self.full_dispatch_request()
-               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  File "/home/runner/CRM/.pythonlibs/lib/python3.11/site-packages/flask/app.py", line 1825, in full_dispatch_request
-    rv = self.handle_user_exception(e)
-         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  File "/home/runner/CRM/.pythonlibs/lib/python3.11/site-packages/flask/app.py", line 1823, in full_dispatch_request
-    rv = self.dispatch_request()
-         ^^^^^^^^^^^^^^^^^^^^^^^
-  File "/home/runner/CRM/.pythonlibs/lib/python3.11/site-packages/flask/app.py", line 1799, in dispatch_request
-    return self.ensure_sync(self.view_functions[rule.endpoint])(**view_args)
-           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  File "/home/runner/CRM/.pythonlibs/lib/python3.11/site-packages/flask_login/utils.py", line 290, in decorated_view
-    return current_app.ensure_sync(func)(*args, **kwargs)
-           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  File "/home/runner/CRM/routes/main.py", line 38, in recent_emails
-    return render_template('recent_emails.html', emails=emails)
-           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  File "/home/runner/CRM/.pythonlibs/lib/python3.11/site-packages/flask/templating.py", line 147, in render_template
-    return _render(app, template, context)
-           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  File "/home/runner/CRM/.pythonlibs/lib/python3.11/site-packages/flask/templating.py", line 130, in _render
-    rv = template.render(context)
-         ^^^^^^^^^^^^^^^^^^^^^^^^
-  File "/home/runner/CRM/.pythonlibs/lib/python3.11/site-packages/jinja2/environment.py", line 1304, in render
-    self.environment.handle_exception()
-  File "/home/runner/CRM/.pythonlibs/lib/python3.11/site-packages/jinja2/environment.py", line 939, in handle_exception
-    raise rewrite_traceback_stack(source=source)
-  File "/home/runner/CRM/templates/recent_emails.html", line 1, in top-level template code
-    {% extends "base.html" %}
-  File "/home/runner/CRM/templates/base.html", line 42, in top-level template code
-    {% block content %}{% endblock %}
-    ^^^^^^^^^^^^^^^^^^^^^^^^^
-  File "/home/runner/CRM/templates/recent_emails.html", line 19, in block 'content'
-    <td>{{ email.sender.split('<')[0].strip() }} &lt;{{ email.sender.split('<')[1].split('>')[0] }}&gt;</td>
-    ^^^^^^^^^^^^^^^^^^^^^^^^^
-  File "/home/runner/CRM/.pythonlibs/lib/python3.11/site-packages/jinja2/environment.py", line 487, in getattr
-    return getattr(obj, attribute)
-           ^^^^^^^^^^^^^^^^^^^^^^^
-jinja2.exceptions.UndefinedError: list object has no element 1
-2024-09-25 11:36:04,673 INFO: Email sender: makoto@team240.net [in /home/runner/CRM/routes/main.py:37]
-2024-09-25 11:36:04,673 INFO: Email sender: makoto@team240.net [in /home/runner/CRM/routes/main.py:37]
-2024-09-25 11:36:04,674 INFO: Email sender: makoto@team240.net [in /home/runner/CRM/routes/main.py:37]
-2024-09-25 11:36:04,674 INFO: Email sender: makoto@team240.net [in /home/runner/CRM/routes/main.py:37]
-2024-09-25 11:36:04,674 INFO: Email sender: makoto@team240.net [in /home/runner/CRM/routes/main.py:37]
-2024-09-25 11:36:04,674 INFO: Email sender: makoto@team240.net [in /home/runner/CRM/routes/main.py:37]
-2024-09-25 11:36:04,675 INFO: Email sender: makoto@team240.net [in /home/runner/CRM/routes/main.py:37]
-2024-09-25 11:36:04,675 INFO: Email sender: makoto@team240.net [in /home/runner/CRM/routes/main.py:37]
-2024-09-25 11:36:04,675 INFO: Email sender: makoto@team240.net [in /home/runner/CRM/routes/main.py:37]
-2024-09-25 11:36:04,675 INFO: Email sender: makoto@team240.net [in /home/runner/CRM/routes/main.py:37]
-2024-09-25 11:36:04,675 INFO: Email sender: makoto@team240.net [in /home/runner/CRM/routes/main.py:37]
-2024-09-25 11:36:04,676 INFO: Email sender: makoto@team240.net [in /home/runner/CRM/routes/main.py:37]
-2024-09-25 11:36:04,676 INFO: Email sender: makoto@team240.net [in /home/runner/CRM/routes/main.py:37]
-2024-09-25 11:36:04,676 INFO: Email sender: makoto@team240.net [in /home/runner/CRM/routes/main.py:37]
-2024-09-25 11:36:04,676 INFO: Email sender: makoto@team240.net [in /home/runner/CRM/routes/main.py:37]
-2024-09-25 11:36:04,677 INFO: Email sender: makoto@team240.net [in /home/runner/CRM/routes/main.py:37]
-2024-09-25 11:36:04,677 INFO: Email sender: makoto@team240.net [in /home/runner/CRM/routes/main.py:37]
-2024-09-25 11:36:04,677 INFO: Email sender: makoto@team240.net [in /home/runner/CRM/routes/main.py:37]
-2024-09-25 11:36:04,677 INFO: Email sender: makoto@team240.net [in /home/runner/CRM/routes/main.py:37]
-2024-09-25 11:36:04,677 INFO: Email sender: makoto@team240.net [in /home/runner/CRM/routes/main.py:37]
-2024-09-25 11:36:04,678 INFO: Email sender: makoto@team240.net [in /home/runner/CRM/routes/main.py:37]
-2024-09-25 11:36:04,678 INFO: Email sender: makoto@team240.net [in /home/runner/CRM/routes/main.py:37]
-2024-09-25 11:36:04,678 INFO: Email sender: makoto@team240.net [in /home/runner/CRM/routes/main.py:37]
-2024-09-25 11:36:04,678 INFO: Email sender: makoto@team240.net [in /home/runner/CRM/routes/main.py:37]
-2024-09-25 11:36:04,678 INFO: Email sender: makoto@team240.net [in /home/runner/CRM/routes/main.py:37]
-2024-09-25 11:36:04,678 INFO: Email sender: makoto@team240.net [in /home/runner/CRM/routes/main.py:37]
-2024-09-25 11:36:04,678 INFO: Email sender: makoto@team240.net [in /home/runner/CRM/routes/main.py:37]
-2024-09-25 11:36:04,679 INFO: Email sender: makoto@team240.net [in /home/runner/CRM/routes/main.py:37]
-2024-09-25 11:36:04,679 INFO: Email sender: makoto@team240.net [in /home/runner/CRM/routes/main.py:37]
-2024-09-25 11:36:04,679 INFO: Email sender: makoto@team240.net [in /home/runner/CRM/routes/main.py:37]
-2024-09-25 11:36:04,679 INFO: Email sender: makoto@team240.net [in /home/runner/CRM/routes/main.py:37]
-2024-09-25 11:36:04,679 INFO: Email sender: makoto@team240.net [in /home/runner/CRM/routes/main.py:37]
-2024-09-25 11:36:04,679 INFO: Email sender: makoto@team240.net [in /home/runner/CRM/routes/main.py:37]
-2024-09-25 11:36:04,679 INFO: Email sender: makoto@team240.net [in /home/runner/CRM/routes/main.py:37]
-2024-09-25 11:36:04,679 INFO: Email sender: makoto@team240.net [in /home/runner/CRM/routes/main.py:37]
-2024-09-25 11:36:04,679 INFO: Email sender: makoto@team240.net [in /home/runner/CRM/routes/main.py:37]
-2024-09-25 11:36:04,679 INFO: Email sender: makoto@team240.net [in /home/runner/CRM/routes/main.py:37]
-2024-09-25 11:36:04,680 INFO: Email sender: makoto@team240.net [in /home/runner/CRM/routes/main.py:37]
-2024-09-25 11:36:04,680 INFO: Email sender: makoto@team240.net [in /home/runner/CRM/routes/main.py:37]
-2024-09-25 11:36:04,680 INFO: Email sender: makoto@team240.net [in /home/runner/CRM/routes/main.py:37]
-2024-09-25 11:36:04,680 INFO: Email sender: makoto@team240.net [in /home/runner/CRM/routes/main.py:37]
-2024-09-25 11:36:04,680 INFO: Email sender: makoto@team240.net [in /home/runner/CRM/routes/main.py:37]
-2024-09-25 11:36:04,680 INFO: Email sender: makoto@team240.net [in /home/runner/CRM/routes/main.py:37]
-2024-09-25 11:36:04,680 INFO: Email sender: makoto@team240.net [in /home/runner/CRM/routes/main.py:37]
-2024-09-25 11:36:04,680 INFO: Email sender: makoto@team240.net [in /home/runner/CRM/routes/main.py:37]
-2024-09-25 11:36:04,680 INFO: Email sender: makoto@team240.net [in /home/runner/CRM/routes/main.py:37]
-2024-09-25 11:36:04,681 INFO: Email sender: makoto@team240.net [in /home/runner/CRM/routes/main.py:37]
-2024-09-25 11:36:04,681 INFO: Email sender: makoto@team240.net [in /home/runner/CRM/routes/main.py:37]
-2024-09-25 11:36:04,681 INFO: Email sender: makoto@team240.net [in /home/runner/CRM/routes/main.py:37]
-2024-09-25 11:36:04,681 INFO: Email sender: makoto@team240.net [in /home/runner/CRM/routes/main.py:37]
-2024-09-25 11:36:04,681 INFO: Email sender: makoto@team240.net [in /home/runner/CRM/routes/main.py:37]
-2024-09-25 11:36:04,681 INFO: Email sender: makoto@team240.net [in /home/runner/CRM/routes/main.py:37]
-2024-09-25 11:36:04,681 INFO: Email sender: makoto@team240.net [in /home/runner/CRM/routes/main.py:37]
-2024-09-25 11:36:04,681 INFO: Email sender: makoto@team240.net [in /home/runner/CRM/routes/main.py:37]
-2024-09-25 11:36:04,682 INFO: Email sender: makoto@team240.net [in /home/runner/CRM/routes/main.py:37]
-2024-09-25 11:36:04,682 INFO: Email sender: makoto@team240.net [in /home/runner/CRM/routes/main.py:37]
-2024-09-25 11:36:04,682 INFO: Email sender: makoto@team240.net [in /home/runner/CRM/routes/main.py:37]
-2024-09-25 11:36:04,682 INFO: Email sender: makoto@team240.net [in /home/runner/CRM/routes/main.py:37]
-2024-09-25 11:36:04,682 INFO: Email sender: makoto@team240.net [in /home/runner/CRM/routes/main.py:37]
-2024-09-25 11:36:04,682 INFO: Email sender: makoto@team240.net [in /home/runner/CRM/routes/main.py:37]
-2024-09-25 11:36:04,683 INFO: Email sender: makoto@team240.net [in /home/runner/CRM/routes/main.py:37]
-2024-09-25 11:36:04,683 INFO: Email sender: makoto@team240.net [in /home/runner/CRM/routes/main.py:37]
-2024-09-25 11:36:04,683 INFO: Email sender: makoto@team240.net [in /home/runner/CRM/routes/main.py:37]
-2024-09-25 11:36:04,683 INFO: Email sender: makoto@team240.net [in /home/runner/CRM/routes/main.py:37]
-2024-09-25 11:36:04,683 INFO: Email sender: makoto@team240.net [in /home/runner/CRM/routes/main.py:37]
-2024-09-25 11:36:04,683 INFO: Email sender: makoto@team240.net [in /home/runner/CRM/routes/main.py:37]
-2024-09-25 11:36:04,683 INFO: Email sender: makoto@team240.net [in /home/runner/CRM/routes/main.py:37]
-2024-09-25 11:36:04,683 INFO: Email sender: makoto@team240.net [in /home/runner/CRM/routes/main.py:37]
-2024-09-25 11:36:04,684 INFO: Email sender: makoto@team240.net [in /home/runner/CRM/routes/main.py:37]
-2024-09-25 11:36:04,684 INFO: Email sender: makoto@team240.net [in /home/runner/CRM/routes/main.py:37]
-2024-09-25 11:36:04,684 INFO: Email sender: makoto@team240.net [in /home/runner/CRM/routes/main.py:37]
+2024-09-25 11:48:51,584 INFO: Email sender: makoto@team240.net [in /home/runner/CRM/routes/main.py:37]
+2024-09-25 11:48:51,585 INFO: Email sender: makoto@team240.net [in /home/runner/CRM/routes/main.py:37]
+2024-09-25 11:48:51,585 INFO: Email sender: makoto@team240.net [in /home/runner/CRM/routes/main.py:37]
+2024-09-25 11:48:51,585 INFO: Email sender: makoto@team240.net [in /home/runner/CRM/routes/main.py:37]
+2024-09-25 11:48:51,586 INFO: Email sender: makoto@team240.net [in /home/runner/CRM/routes/main.py:37]
+2024-09-25 11:48:51,586 INFO: Email sender: makoto@team240.net [in /home/runner/CRM/routes/main.py:37]
+2024-09-25 11:48:51,586 INFO: Email sender: makoto@team240.net [in /home/runner/CRM/routes/main.py:37]
+2024-09-25 11:48:51,586 INFO: Email sender: makoto@team240.net [in /home/runner/CRM/routes/main.py:37]
+2024-09-25 11:48:51,586 INFO: Email sender: makoto@team240.net [in /home/runner/CRM/routes/main.py:37]
+2024-09-25 11:48:51,586 INFO: Email sender: makoto@team240.net [in /home/runner/CRM/routes/main.py:37]
+2024-09-25 11:48:51,586 INFO: Email sender: makoto@team240.net [in /home/runner/CRM/routes/main.py:37]
+2024-09-25 11:48:51,587 INFO: Email sender: makoto@team240.net [in /home/runner/CRM/routes/main.py:37]
+2024-09-25 11:48:51,587 INFO: Email sender: makoto@team240.net [in /home/runner/CRM/routes/main.py:37]
+2024-09-25 11:48:51,587 INFO: Email sender: makoto@team240.net [in /home/runner/CRM/routes/main.py:37]
+2024-09-25 11:48:51,587 INFO: Email sender: makoto@team240.net [in /home/runner/CRM/routes/main.py:37]
+2024-09-25 11:48:51,587 INFO: Email sender: makoto@team240.net [in /home/runner/CRM/routes/main.py:37]
+2024-09-25 11:48:51,587 INFO: Email sender: makoto@team240.net [in /home/runner/CRM/routes/main.py:37]
+2024-09-25 11:48:51,587 INFO: Email sender: makoto@team240.net [in /home/runner/CRM/routes/main.py:37]
+2024-09-25 11:48:51,588 INFO: Email sender: makoto@team240.net [in /home/runner/CRM/routes/main.py:37]
+2024-09-25 11:48:51,588 INFO: Email sender: makoto@team240.net [in /home/runner/CRM/routes/main.py:37]
+2024-09-25 11:48:51,588 INFO: Email sender: makoto@team240.net [in /home/runner/CRM/routes/main.py:37]
+2024-09-25 11:48:51,588 INFO: Email sender: makoto@team240.net [in /home/runner/CRM/routes/main.py:37]
+2024-09-25 11:48:51,588 INFO: Email sender: makoto@team240.net [in /home/runner/CRM/routes/main.py:37]
+2024-09-25 11:48:51,588 INFO: Email sender: makoto@team240.net [in /home/runner/CRM/routes/main.py:37]
+2024-09-25 11:48:51,588 INFO: Email sender: makoto@team240.net [in /home/runner/CRM/routes/main.py:37]
+2024-09-25 11:48:51,588 INFO: Email sender: makoto@team240.net [in /home/runner/CRM/routes/main.py:37]
+2024-09-25 11:48:51,588 INFO: Email sender: makoto@team240.net [in /home/runner/CRM/routes/main.py:37]
+2024-09-25 11:48:51,589 INFO: Email sender: makoto@team240.net [in /home/runner/CRM/routes/main.py:37]
+2024-09-25 11:48:51,589 INFO: Email sender: makoto@team240.net [in /home/runner/CRM/routes/main.py:37]
+2024-09-25 11:48:51,589 INFO: Email sender: makoto@team240.net [in /home/runner/CRM/routes/main.py:37]
+2024-09-25 11:48:51,589 INFO: Email sender: makoto@team240.net [in /home/runner/CRM/routes/main.py:37]
+2024-09-25 11:48:51,589 INFO: Email sender: makoto@team240.net [in /home/runner/CRM/routes/main.py:37]
+2024-09-25 11:48:51,589 INFO: Email sender: makoto@team240.net [in /home/runner/CRM/routes/main.py:37]
+2024-09-25 11:48:51,589 INFO: Email sender: makoto@team240.net [in /home/runner/CRM/routes/main.py:37]
+2024-09-25 11:48:51,589 INFO: Email sender: makoto@team240.net [in /home/runner/CRM/routes/main.py:37]
+2024-09-25 11:48:51,590 INFO: Email sender: makoto@team240.net [in /home/runner/CRM/routes/main.py:37]
+2024-09-25 11:48:51,590 INFO: Email sender: makoto@team240.net [in /home/runner/CRM/routes/main.py:37]
+2024-09-25 11:48:51,590 INFO: Email sender: makoto@team240.net [in /home/runner/CRM/routes/main.py:37]
+2024-09-25 11:48:51,590 INFO: Email sender: makoto@team240.net [in /home/runner/CRM/routes/main.py:37]
+2024-09-25 11:48:51,590 INFO: Email sender: makoto@team240.net [in /home/runner/CRM/routes/main.py:37]
+2024-09-25 11:48:51,590 INFO: Email sender: makoto@team240.net [in /home/runner/CRM/routes/main.py:37]
+2024-09-25 11:48:51,590 INFO: Email sender: makoto@team240.net [in /home/runner/CRM/routes/main.py:37]
+2024-09-25 11:48:51,590 INFO: Email sender: makoto@team240.net [in /home/runner/CRM/routes/main.py:37]
+2024-09-25 11:48:51,591 INFO: Email sender: makoto@team240.net [in /home/runner/CRM/routes/main.py:37]
+2024-09-25 11:48:51,591 INFO: Email sender: makoto@team240.net [in /home/runner/CRM/routes/main.py:37]
+2024-09-25 11:48:51,591 INFO: Email sender: makoto@team240.net [in /home/runner/CRM/routes/main.py:37]
+2024-09-25 11:48:51,591 INFO: Email sender: makoto@team240.net [in /home/runner/CRM/routes/main.py:37]
+2024-09-25 11:48:51,591 INFO: Email sender: makoto@team240.net [in /home/runner/CRM/routes/main.py:37]
+2024-09-25 11:48:51,591 INFO: Email sender: makoto@team240.net [in /home/runner/CRM/routes/main.py:37]
+2024-09-25 11:48:51,591 INFO: Email sender: makoto@team240.net [in /home/runner/CRM/routes/main.py:37]
+2024-09-25 11:48:51,591 INFO: Email sender: makoto@team240.net [in /home/runner/CRM/routes/main.py:37]
+2024-09-25 11:48:51,592 INFO: Email sender: makoto@team240.net [in /home/runner/CRM/routes/main.py:37]
+2024-09-25 11:48:51,592 INFO: Email sender: makoto@team240.net [in /home/runner/CRM/routes/main.py:37]
+2024-09-25 11:48:51,592 INFO: Email sender: makoto@team240.net [in /home/runner/CRM/routes/main.py:37]
+2024-09-25 11:48:51,592 INFO: Email sender: makoto@team240.net [in /home/runner/CRM/routes/main.py:37]
+2024-09-25 11:48:51,592 INFO: Email sender: makoto@team240.net [in /home/runner/CRM/routes/main.py:37]
+2024-09-25 11:48:51,592 INFO: Email sender: makoto@team240.net [in /home/runner/CRM/routes/main.py:37]
+2024-09-25 11:48:51,592 INFO: Email sender: makoto@team240.net [in /home/runner/CRM/routes/main.py:37]
+2024-09-25 11:48:51,593 INFO: Email sender: makoto@team240.net [in /home/runner/CRM/routes/main.py:37]
+2024-09-25 11:48:51,593 INFO: Email sender: makoto@team240.net [in /home/runner/CRM/routes/main.py:37]
+2024-09-25 11:48:51,593 INFO: Email sender: makoto@team240.net [in /home/runner/CRM/routes/main.py:37]
+2024-09-25 11:48:51,593 INFO: Email sender: makoto@team240.net [in /home/runner/CRM/routes/main.py:37]
+2024-09-25 11:48:51,593 INFO: Email sender: makoto@team240.net [in /home/runner/CRM/routes/main.py:37]
+2024-09-25 11:48:51,593 INFO: Email sender: makoto@team240.net [in /home/runner/CRM/routes/main.py:37]
+2024-09-25 11:48:51,593 INFO: Email sender: makoto@team240.net [in /home/runner/CRM/routes/main.py:37]
+2024-09-25 11:48:51,593 INFO: Email sender: makoto@team240.net [in /home/runner/CRM/routes/main.py:37]
+2024-09-25 11:48:51,593 INFO: Email sender: makoto@team240.net [in /home/runner/CRM/routes/main.py:37]
+2024-09-25 11:48:51,594 INFO: Email sender: makoto@team240.net [in /home/runner/CRM/routes/main.py:37]
+2024-09-25 11:48:51,594 INFO: Email sender: makoto@team240.net [in /home/runner/CRM/routes/main.py:37]
+2024-09-25 11:48:51,594 INFO: Email sender: makoto@team240.net [in /home/runner/CRM/routes/main.py:37]
+2024-09-25 11:48:51,594 INFO: Email sender: makoto@team240.net [in /home/runner/CRM/routes/main.py:37]
+2024-09-25 11:48:51,594 INFO: Email sender: makoto@team240.net [in /home/runner/CRM/routes/main.py:37]
+2024-09-25 11:48:51,594 INFO: Email sender: makoto@team240.net [in /home/runner/CRM/routes/main.py:37]
+2024-09-25 11:48:51,594 INFO: Email sender: makoto@team240.net [in /home/runner/CRM/routes/main.py:37]
+2024-09-25 11:48:51,594 INFO: Email sender: makoto@team240.net [in /home/runner/CRM/routes/main.py:37]
+2024-09-25 11:48:51,595 INFO: Email sender: makoto@team240.net [in /home/runner/CRM/routes/main.py:37]
+2024-09-25 11:48:51,595 INFO: Email sender: makoto@team240.net [in /home/runner/CRM/routes/main.py:37]
+2024-09-25 11:48:51,595 INFO: Email sender: makoto@team240.net [in /home/runner/CRM/routes/main.py:37]
+2024-09-25 11:48:51,595 INFO: Email sender: makoto@team240.net [in /home/runner/CRM/routes/main.py:37]
+2024-09-25 11:48:51,595 INFO: Email sender: makoto@team240.net [in /home/runner/CRM/routes/main.py:37]
+2024-09-25 11:48:51,595 INFO: Email sender: makoto@team240.net [in /home/runner/CRM/routes/main.py:37]
+2024-09-25 11:48:51,595 INFO: Email sender: makoto@team240.net [in /home/runner/CRM/routes/main.py:37]
+2024-09-25 11:48:51,596 INFO: Email sender: makoto@team240.net [in /home/runner/CRM/routes/main.py:37]
+2024-09-25 11:48:51,596 INFO: Email sender: makoto@team240.net [in /home/runner/CRM/routes/main.py:37]
+2024-09-25 11:48:51,596 INFO: Email sender: makoto@team240.net [in /home/runner/CRM/routes/main.py:37]
+2024-09-25 11:48:51,596 INFO: Email sender: makoto@team240.net [in /home/runner/CRM/routes/main.py:37]
+2024-09-25 11:48:51,596 INFO: Email sender: makoto@team240.net [in /home/runner/CRM/routes/main.py:37]
+2024-09-25 11:48:51,596 INFO: Email sender: makoto@team240.net [in /home/runner/CRM/routes/main.py:37]
+2024-09-25 11:48:51,596 INFO: Email sender: makoto@team240.net [in /home/runner/CRM/routes/main.py:37]
+2024-09-25 11:48:51,596 INFO: Email sender: makoto@team240.net [in /home/runner/CRM/routes/main.py:37]
+2024-09-25 11:48:51,596 INFO: Email sender: makoto@team240.net [in /home/runner/CRM/routes/main.py:37]
+2024-09-25 11:48:51,597 INFO: Email sender: makoto@team240.net [in /home/runner/CRM/routes/main.py:37]
+2024-09-25 11:48:51,597 INFO: Email sender: makoto@team240.net [in /home/runner/CRM/routes/main.py:37]
+2024-09-25 11:48:51,597 INFO: Email sender: makoto@team240.net [in /home/runner/CRM/routes/main.py:37]
+2024-09-25 11:48:51,597 INFO: Email sender: makoto@team240.net [in /home/runner/CRM/routes/main.py:37]
+2024-09-25 11:48:51,597 INFO: Email sender: makoto@team240.net [in /home/runner/CRM/routes/main.py:37]
+2024-09-25 11:48:51,597 INFO: Email sender: makoto@team240.net [in /home/runner/CRM/routes/main.py:37]
+2024-09-25 11:48:51,597 INFO: Email sender: makoto@team240.net [in /home/runner/CRM/routes/main.py:37]
+2024-09-25 11:48:51,597 INFO: Email sender: makoto@team240.net [in /home/runner/CRM/routes/main.py:37]
