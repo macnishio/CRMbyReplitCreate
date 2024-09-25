@@ -6,6 +6,7 @@ from forms import LeadForm
 from analytics import calculate_lead_score, train_lead_scoring_model, predict_lead_score
 from email_utils import send_follow_up_email, send_automated_follow_ups, needs_follow_up
 from datetime import datetime
+from email_receiver import fetch_emails
 
 bp = Blueprint('leads', __name__, url_prefix='/leads')
 
@@ -140,3 +141,11 @@ def trigger_followups():
         current_app.logger.error(f"Error triggering automated follow-ups: {str(e)}")
         flash('An error occurred while triggering automated follow-ups. Please try again.', 'error')
     return redirect(url_for('leads.list_leads'))
+
+@bp.route('/<int:id>/refresh_emails')
+@login_required
+def refresh_lead_emails(id):
+    lead = Lead.query.get_or_404(id)
+    fetch_emails(lead_id=lead.id)
+    flash('Emails refreshed successfully', 'success')
+    return redirect(url_for('leads.lead_detail', id=lead.id))

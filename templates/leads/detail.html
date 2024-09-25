@@ -22,6 +22,7 @@
     </div>
 
     <h2>Associated Emails</h2>
+    <a href="{{ url_for('leads.refresh_lead_emails', id=lead.id) }}" class="button">Refresh Emails</a>
     {% if emails %}
         <table>
             <thead>

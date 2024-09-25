@@ -13,7 +13,7 @@ def connect_to_email_server():
                current_app.config['MAIL_PASSWORD'])
     return mail
 
-def fetch_emails(days_back=30):
+def fetch_emails(days_back=30, lead_id=None):
     mail = connect_to_email_server()
     mail.select('inbox')
 
@@ -22,6 +22,11 @@ def fetch_emails(days_back=30):
     start_date = end_date - timedelta(days=days_back)
     
     date_criterion = f'(SINCE "{start_date.strftime("%d-%b-%Y")}")'
+    
+    if lead_id:
+        lead = Lead.query.get(lead_id)
+        if lead:
+            date_criterion += f' (FROM "{lead.email}")'
     
     current_app.logger.info(f"Fetching emails from {start_date.strftime('%Y-%m-%d')} to {end_date.strftime('%Y-%m-%d')}")
 
@@ -79,14 +84,23 @@ def process_email(sender, subject, content, date):
         else:
             current_app.logger.info(f"Duplicate email skipped for lead: {lead.name}, received at {date}")
     else:
-        current_app.logger.warning(f"Received email from unknown sender: {sender}")
-        unknown_email = UnknownEmail(sender=sender,
-                                     subject=subject,
-                                     content=content,
-                                     received_at=date)
-        db.session.add(unknown_email)
-        db.session.commit()
-        current_app.logger.info(f"Stored email from unknown sender: {sender}")
+        # Check if there's an existing lead with a similar email
+        similar_lead = Lead.query.filter(Lead.email.like(f"%{sender.split('@')[0]}%")).first()
+        if similar_lead:
+            # Associate the email with the similar lead
+            new_email = Email(sender=sender, subject=subject, content=content, received_at=date, lead=similar_lead)
+            db.session.add(new_email)
+            db.session.commit()
+            current_app.logger.info(f"Associated email with similar lead: {similar_lead.name}")
+        else:
+            current_app.logger.warning(f"Received email from unknown sender: {sender}")
+            unknown_email = UnknownEmail(sender=sender,
+                                         subject=subject,
+                                         content=content,
+                                         received_at=date)
+            db.session.add(unknown_email)
+            db.session.commit()
+            current_app.logger.info(f"Stored email from unknown sender: {sender}")
 
 def setup_email_scheduler(app):
     scheduler = APScheduler()
