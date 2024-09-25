@@ -76,6 +76,10 @@ def edit_lead(id):
 def delete_lead(id):
     lead = Lead.query.get_or_404(id)
     try:
+        # First, delete associated emails
+        Email.query.filter_by(lead_id=lead.id).delete()
+        
+        # Then delete the lead
         db.session.delete(lead)
         db.session.commit()
         current_app.logger.info(f"Lead deleted successfully: {id}")
@@ -83,7 +87,7 @@ def delete_lead(id):
     except Exception as e:
         db.session.rollback()
         current_app.logger.error(f"Error deleting lead: {str(e)}")
-        flash('An error occurred while deleting the lead. Please try again.', 'error')
+        flash('An error occurred while deleting the lead. There may be associated data preventing deletion.', 'error')
     return redirect(url_for('leads.list_leads'))
 
 @bp.route('/update-scores')

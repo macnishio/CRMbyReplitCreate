@@ -34,13 +34,13 @@ class Lead(db.Model):
     user_id: Mapped[int] = mapped_column(Integer, ForeignKey('users.id'))
     user: Mapped['User'] = relationship('User', backref='leads')
     score: Mapped[float] = mapped_column(Float, default=0.0)
-    emails: Mapped[list['Email']] = relationship('Email', back_populates='lead')
+    emails: Mapped[list['Email']] = relationship('Email', back_populates='lead', cascade='all, delete-orphan')
 
 class Email(db.Model):
     __tablename__ = 'emails'
     id: Mapped[int] = mapped_column(Integer, primary_key=True)
     sender: Mapped[str] = mapped_column(String(255), nullable=False)
-    sender_name: Mapped[str] = mapped_column(String(255), nullable=True)  # Add this line
+    sender_name: Mapped[str] = mapped_column(String(255), nullable=True)
     subject: Mapped[str] = mapped_column(String(255))
     content: Mapped[str] = mapped_column(Text)
     received_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow)
@@ -109,7 +109,7 @@ class UnknownEmail(db.Model):
     __tablename__ = 'unknown_emails'
     id: Mapped[int] = mapped_column(Integer, primary_key=True)
     sender: Mapped[str] = mapped_column(String(255), nullable=False)
-    sender_name: Mapped[str] = mapped_column(String(255), nullable=True)  # Add this line
+    sender_name: Mapped[str] = mapped_column(String(255), nullable=True)
     subject: Mapped[str] = mapped_column(String(255))
     content: Mapped[str] = mapped_column(Text)
     received_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow)
