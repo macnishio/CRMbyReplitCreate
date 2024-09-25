@@ -10,13 +10,11 @@ from sqlalchemy import func
 from sqlalchemy.exc import DataError
 import re
 
-
 def connect_to_email_server():
     mail = imaplib.IMAP4_SSL(current_app.config['MAIL_SERVER'])
     mail.login(current_app.config['MAIL_USERNAME'],
                current_app.config['MAIL_PASSWORD'])
     return mail
-
 
 def extract_email_address(sender):
     email_pattern = r'<?([\w\.-]+@[\w\.-]+)>?'
@@ -25,7 +23,6 @@ def extract_email_address(sender):
         return match.group(1)
     return sender
 
-
 def extract_sender_name(sender):
     name_pattern = r'^(.*?)\s*<'
     match = re.search(name_pattern, sender)
@@ -33,21 +30,12 @@ def extract_sender_name(sender):
         return match.group(1).strip()
     return None
 
-
 def process_email(sender, subject, content, date):
     sender_email = extract_email_address(sender)
     sender_name = extract_sender_name(sender)
-
-    lead = Lead.query.filter(
-        func.lower(Lead.email) == func.lower(sender_email)).first()
-
-    if not lead:
-        similar_lead = Lead.query.filter(
-            func.lower(
-                Lead.email).like(f"%{sender_email.split('@')[0]}%")).first()
-        if similar_lead:
-            lead = similar_lead
-
+    
+    lead = Lead.query.filter(func.lower(Lead.email) == func.lower(sender_email)).first()
+    
     if lead:
         existing_email = Email.query.filter(
             Email.lead_id == lead.id,
@@ -64,16 +52,11 @@ def process_email(sender, subject, content, date):
                               lead=lead)
             db.session.add(new_email)
             db.session.commit()
-            current_app.logger.info(
-                f"New email processed for lead: {lead.name}, received at {date}"
-            )
+            current_app.logger.info(f"New email processed for lead: {lead.name}, received at {date}")
         else:
-            current_app.logger.info(
-                f"Duplicate email skipped for lead: {lead.name}, received at {date}"
-            )
+            current_app.logger.info(f"Duplicate email skipped for lead: {lead.name}, received at {date}")
     else:
-        current_app.logger.warning(
-            f"Received email from unknown sender: {sender}")
+        current_app.logger.warning(f"Received email from unknown sender: {sender}")
         unknown_email = UnknownEmail(sender=sender_email,
                                      sender_name=sender_name,
                                      subject=subject,
@@ -82,7 +65,6 @@ def process_email(sender, subject, content, date):
         db.session.add(unknown_email)
         db.session.commit()
         current_app.logger.info(f"Stored email from unknown sender: {sender}")
-
 
 def fetch_emails(days_back=30, lead_id=None):
     mail = connect_to_email_server()
@@ -167,7 +149,6 @@ def fetch_emails(days_back=30, lead_id=None):
     current_app.logger.info(
         f"Emails from unknown senders: {UnknownEmail.query.filter(UnknownEmail.received_at >= start_date).count()}"
     )
-
 
 def setup_email_scheduler(app):
     scheduler = APScheduler()
