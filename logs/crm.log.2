@@ -1,117 +1,71 @@
-2024-09-23 06:41:23,731 ERROR: Exception on /leads/2/edit [GET] [in /home/runner/CRM/.pythonlibs/lib/python3.11/site-packages/flask/app.py:838]
-Traceback (most recent call last):
-  File "/home/runner/CRM/.pythonlibs/lib/python3.11/site-packages/flask/app.py", line 1473, in wsgi_app
-    response = self.full_dispatch_request()
-               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  File "/home/runner/CRM/.pythonlibs/lib/python3.11/site-packages/flask/app.py", line 882, in full_dispatch_request
-    rv = self.handle_user_exception(e)
-         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  File "/home/runner/CRM/.pythonlibs/lib/python3.11/site-packages/flask/app.py", line 880, in full_dispatch_request
-    rv = self.dispatch_request()
-         ^^^^^^^^^^^^^^^^^^^^^^^
-  File "/home/runner/CRM/.pythonlibs/lib/python3.11/site-packages/flask/app.py", line 865, in dispatch_request
-    return self.ensure_sync(self.view_functions[rule.endpoint])(**view_args)  # type: ignore[no-any-return]
-           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  File "/home/runner/CRM/.pythonlibs/lib/python3.11/site-packages/flask_login/utils.py", line 290, in decorated_view
-    return current_app.ensure_sync(func)(*args, **kwargs)
-           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  File "/home/runner/CRM/routes/leads.py", line 60, in edit_lead
-    @login_required
-               ^^^^^
-  File "/home/runner/CRM/.pythonlibs/lib/python3.11/site-packages/flask/templating.py", line 150, in render_template
-    return _render(app, template, context)
-           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  File "/home/runner/CRM/.pythonlibs/lib/python3.11/site-packages/flask/templating.py", line 131, in _render
-    rv = template.render(context)
-         ^^^^^^^^^^^^^^^^^^^^^^^^
-  File "/home/runner/CRM/.pythonlibs/lib/python3.11/site-packages/jinja2/environment.py", line 1304, in render
-    self.environment.handle_exception()
-  File "/home/runner/CRM/.pythonlibs/lib/python3.11/site-packages/jinja2/environment.py", line 939, in handle_exception
-    raise rewrite_traceback_stack(source=source)
-  File "/home/runner/CRM/templates/leads/create.html", line 1, in top-level template code
-    {% extends "base.html" %}
-  File "/home/runner/CRM/templates/base.html", line 40, in top-level template code
-    {% block content %}{% endblock %}
-    ^^^^^^^^^^^^^^^^^^^^^^^^^
-  File "/home/runner/CRM/templates/leads/create.html", line 26, in block 'content'
-    {{ form.score.label }}
-  File "/home/runner/CRM/.pythonlibs/lib/python3.11/site-packages/jinja2/environment.py", line 487, in getattr
-    return getattr(obj, attribute)
-           ^^^^^^^^^^^^^^^^^^^^^^^
-jinja2.exceptions.UndefinedError: 'forms.LeadForm object' has no attribute 'score'
-2024-09-23 06:44:17,151 INFO: CRM startup [in /home/runner/CRM/app.py:85]
-2024-09-23 06:44:17,151 INFO: Starting scheduler [in /home/runner/CRM/app.py:92]
-2024-09-23 06:44:17,155 INFO: Scheduler started [in /home/runner/CRM/app.py:94]
-2024-09-23 06:53:18,177 INFO: CRM startup [in /home/runner/CRM/app.py:85]
-2024-09-23 06:53:18,180 INFO: Starting scheduler [in /home/runner/CRM/app.py:92]
-2024-09-23 06:53:18,181 INFO: Scheduler started [in /home/runner/CRM/app.py:94]
-2024-09-23 06:55:10,348 INFO: CRM startup [in /home/runner/CRM/app.py:85]
-2024-09-23 06:55:10,349 INFO: Starting scheduler [in /home/runner/CRM/app.py:92]
-2024-09-23 06:55:10,352 INFO: Scheduler started [in /home/runner/CRM/app.py:94]
-2024-09-23 06:55:19,921 INFO: CRM startup [in /home/runner/CRM/app.py:85]
-2024-09-23 06:55:19,922 INFO: Starting scheduler [in /home/runner/CRM/app.py:92]
-2024-09-23 06:55:19,923 INFO: Scheduler started [in /home/runner/CRM/app.py:94]
-2024-09-23 06:57:26,026 INFO: Data being passed to the reports template: [in /home/runner/CRM/routes/reports.py:52]
-2024-09-23 06:57:26,029 INFO: Lead status: [('New', 3)] [in /home/runner/CRM/routes/reports.py:53]
-2024-09-23 06:57:26,030 INFO: Opportunity stage: [('Prospecting', 1, 2000000.0)] [in /home/runner/CRM/routes/reports.py:54]
-2024-09-23 06:57:26,030 INFO: Account industry: [('サービス業', 1)] [in /home/runner/CRM/routes/reports.py:55]
-2024-09-23 06:57:26,030 INFO: Lead score labels: ['10-19'] [in /home/runner/CRM/routes/reports.py:56]
-2024-09-23 06:57:26,030 INFO: Lead score data: [3] [in /home/runner/CRM/routes/reports.py:57]
-2024-09-23 07:00:33,864 INFO: CRM startup [in /home/runner/CRM/app.py:85]
-2024-09-23 07:00:33,866 INFO: Starting scheduler [in /home/runner/CRM/app.py:92]
-2024-09-23 07:00:33,869 INFO: Scheduler started [in /home/runner/CRM/app.py:94]
-2024-09-23 07:31:59,236 INFO: Data being passed to the reports template: [in /home/runner/CRM/routes/reports.py:52]
-2024-09-23 07:31:59,236 INFO: Lead status: [('New', 3)] [in /home/runner/CRM/routes/reports.py:53]
-2024-09-23 07:31:59,237 INFO: Opportunity stage: [('Prospecting', 1, 2000000.0)] [in /home/runner/CRM/routes/reports.py:54]
-2024-09-23 07:31:59,237 INFO: Account industry: [('サービス業', 1)] [in /home/runner/CRM/routes/reports.py:55]
-2024-09-23 07:31:59,237 INFO: Lead score labels: ['10-19'] [in /home/runner/CRM/routes/reports.py:56]
-2024-09-23 07:31:59,237 INFO: Lead score data: [3] [in /home/runner/CRM/routes/reports.py:57]
-2024-09-23 10:12:43,977 INFO: CRM startup [in /home/runner/CRM/app.py:87]
-2024-09-23 10:13:13,449 INFO: CRM startup [in /home/runner/CRM/app.py:87]
-2024-09-23 10:13:27,779 INFO: CRM startup [in /home/runner/CRM/app.py:87]
-2024-09-23 10:13:35,514 INFO: CRM startup [in /home/runner/CRM/app.py:87]
-2024-09-23 10:13:35,514 INFO: Starting scheduler [in /home/runner/CRM/app.py:94]
-2024-09-23 10:13:35,516 INFO: Scheduler started [in /home/runner/CRM/app.py:96]
-2024-09-23 10:13:42,442 INFO: CRM startup [in /home/runner/CRM/app.py:87]
-2024-09-23 10:13:43,341 INFO: CRM startup [in /home/runner/CRM/app.py:87]
-2024-09-23 10:13:43,640 INFO: CRM startup [in /home/runner/CRM/app.py:87]
-2024-09-23 10:14:12,947 INFO: CRM startup [in /home/runner/CRM/app.py:87]
-2024-09-23 10:14:50,619 INFO: Data being passed to the reports template: [in /home/runner/CRM/routes/reports.py:52]
-2024-09-23 10:14:50,620 INFO: Lead status: [('New', 3)] [in /home/runner/CRM/routes/reports.py:53]
-2024-09-23 10:14:50,620 INFO: Opportunity stage: [('Prospecting', 1, 2000000.0)] [in /home/runner/CRM/routes/reports.py:54]
-2024-09-23 10:14:50,620 INFO: Account industry: [('サービス業', 1)] [in /home/runner/CRM/routes/reports.py:55]
-2024-09-23 10:14:50,620 INFO: Lead score labels: ['10-19'] [in /home/runner/CRM/routes/reports.py:56]
-2024-09-23 10:14:50,620 INFO: Lead score data: [3] [in /home/runner/CRM/routes/reports.py:57]
-2024-09-23 11:05:57,762 INFO: Data being passed to the reports template: [in /home/runner/CRM/routes/reports.py:52]
-2024-09-23 11:05:57,772 INFO: Lead status: [('New', 3)] [in /home/runner/CRM/routes/reports.py:53]
-2024-09-23 11:05:57,772 INFO: Opportunity stage: [('Prospecting', 1, 2000000.0)] [in /home/runner/CRM/routes/reports.py:54]
-2024-09-23 11:05:57,772 INFO: Account industry: [('サービス業', 1)] [in /home/runner/CRM/routes/reports.py:55]
-2024-09-23 11:05:57,772 INFO: Lead score labels: ['10-19'] [in /home/runner/CRM/routes/reports.py:56]
-2024-09-23 11:05:57,772 INFO: Lead score data: [3] [in /home/runner/CRM/routes/reports.py:57]
-2024-09-23 11:06:55,706 INFO: Data being passed to the reports template: [in /home/runner/CRM/routes/reports.py:52]
-2024-09-23 11:06:55,706 INFO: Lead status: [('New', 3)] [in /home/runner/CRM/routes/reports.py:53]
-2024-09-23 11:06:55,706 INFO: Opportunity stage: [('Prospecting', 1, 2000000.0)] [in /home/runner/CRM/routes/reports.py:54]
-2024-09-23 11:06:55,707 INFO: Account industry: [('サービス業', 1)] [in /home/runner/CRM/routes/reports.py:55]
-2024-09-23 11:06:55,707 INFO: Lead score labels: ['10-19'] [in /home/runner/CRM/routes/reports.py:56]
-2024-09-23 11:06:55,707 INFO: Lead score data: [3] [in /home/runner/CRM/routes/reports.py:57]
-2024-09-23 11:10:51,022 INFO: Data being passed to the reports template: [in /home/runner/CRM/routes/reports.py:52]
-2024-09-23 11:10:51,022 INFO: Lead status: [('New', 3)] [in /home/runner/CRM/routes/reports.py:53]
-2024-09-23 11:10:51,022 INFO: Opportunity stage: [('Prospecting', 1, 2000000.0)] [in /home/runner/CRM/routes/reports.py:54]
-2024-09-23 11:10:51,023 INFO: Account industry: [('サービス業', 1)] [in /home/runner/CRM/routes/reports.py:55]
-2024-09-23 11:10:51,023 INFO: Lead score labels: ['10-19'] [in /home/runner/CRM/routes/reports.py:56]
-2024-09-23 11:10:51,023 INFO: Lead score data: [3] [in /home/runner/CRM/routes/reports.py:57]
-2024-09-23 11:11:00,637 INFO: Data being passed to the reports template: [in /home/runner/CRM/routes/reports.py:52]
-2024-09-23 11:11:00,637 INFO: Lead status: [('New', 3)] [in /home/runner/CRM/routes/reports.py:53]
-2024-09-23 11:11:00,638 INFO: Opportunity stage: [('Prospecting', 1, 2000000.0)] [in /home/runner/CRM/routes/reports.py:54]
-2024-09-23 11:11:00,638 INFO: Account industry: [('サービス業', 1)] [in /home/runner/CRM/routes/reports.py:55]
-2024-09-23 11:11:00,638 INFO: Lead score labels: ['10-19'] [in /home/runner/CRM/routes/reports.py:56]
-2024-09-23 11:11:00,639 INFO: Lead score data: [3] [in /home/runner/CRM/routes/reports.py:57]
-2024-09-23 11:11:25,456 INFO: Data being passed to the reports template: [in /home/runner/CRM/routes/reports.py:52]
-2024-09-23 11:11:25,457 INFO: Lead status: [('New', 3)] [in /home/runner/CRM/routes/reports.py:53]
-2024-09-23 11:11:25,457 INFO: Opportunity stage: [('Prospecting', 1, 2000000.0)] [in /home/runner/CRM/routes/reports.py:54]
-2024-09-23 11:11:25,457 INFO: Account industry: [('サービス業', 1)] [in /home/runner/CRM/routes/reports.py:55]
-2024-09-23 11:11:25,457 INFO: Lead score labels: ['10-19'] [in /home/runner/CRM/routes/reports.py:56]
-2024-09-23 11:11:25,457 INFO: Lead score data: [3] [in /home/runner/CRM/routes/reports.py:57]
-2024-09-23 11:15:34,911 INFO: Data being passed to the reports template: [in /home/runner/CRM/routes/reports.py:52]
-2024-09-23 11:15:34,911 INFO: Lead status: [('New', 3)] [in /home/runner/CRM/routes/reports.py:53]
-2024-09-23 11:15:34,912 INFO: Opportunity stage: [('Prospecting', 1, 2000000.0)] [in /home/runner/CRM/routes/reports.py:54]
+2024-09-25 01:43:21,825 WARNING: Received email from unknown sender: =?UTF-8?B?6KW/5bC+IOecn+iogA==?= <makoto@team240.net> [in /home/runner/CRM/email_receiver.py:58]
+2024-09-25 01:43:22,455 WARNING: Received email from unknown sender: =?utf-8?B?6KW/5bC+IOecn+iogA==?= <makoto@team240.net> [in /home/runner/CRM/email_receiver.py:58]
+2024-09-25 01:43:23,172 WARNING: Received email from unknown sender: =?UTF-8?B?44OT44K644Kz44Oz44OV44Kp44O844OI?= <biz-com@wooc.co.jp> [in /home/runner/CRM/email_receiver.py:58]
+2024-09-25 01:43:23,765 WARNING: Received email from unknown sender: notifications@users.zohosites.com [in /home/runner/CRM/email_receiver.py:58]
+2024-09-25 01:43:24,460 WARNING: Received email from unknown sender: =?UTF-8?B?5piO5oWn5p6X?= <darkare0323@gmail.com> [in /home/runner/CRM/email_receiver.py:58]
+2024-09-25 01:43:25,116 WARNING: Received email from unknown sender: noreply-dmarc@zoho.com [in /home/runner/CRM/email_receiver.py:58]
+2024-09-25 01:43:25,702 WARNING: Received email from unknown sender: =?UTF-8?B?R29vZ2xlIOOCq+ODrOODs+ODgOODvA==?= <calendar-notification@google.com> [in /home/runner/CRM/email_receiver.py:58]
+2024-09-25 01:48:03,966 INFO: Checking for new emails [in /home/runner/CRM/email_receiver.py:73]
+2024-09-25 01:48:09,120 WARNING: Received email from unknown sender: SalesIQ <systemgenerated@zohosalesiq.com> [in /home/runner/CRM/email_receiver.py:58]
+2024-09-25 01:48:10,998 INFO: New email processed for lead: 西尾真言 [in /home/runner/CRM/email_receiver.py:56]
+2024-09-25 01:48:11,643 WARNING: Received email from unknown sender: Stripe <support@stripe.com> [in /home/runner/CRM/email_receiver.py:58]
+2024-09-25 01:48:12,786 WARNING: Received email from unknown sender: =?UTF-8?B?6KW/5bC+IOecn+iogA==?= <makoto@team240.net> [in /home/runner/CRM/email_receiver.py:58]
+2024-09-25 01:48:13,411 WARNING: Received email from unknown sender: =?UTF-8?B?5qCq5byP5Lya56S+V09PQ+OAgOODk+OCuuOCs+ODs+ODleOCqeODvOODiA==?= =?UTF-8?B?44O744OT44K644K144O844Kv44Or44OB44O844Og?= <do_not_reply@moneyforward.com> [in /home/runner/CRM/email_receiver.py:58]
+2024-09-25 01:48:14,037 WARNING: Received email from unknown sender: Twilio Support <twilio_support@kddi-web.com> [in /home/runner/CRM/email_receiver.py:58]
+2024-09-25 01:48:15,026 WARNING: Received email from unknown sender: systemgenerated@zohocrm.com [in /home/runner/CRM/email_receiver.py:58]
+2024-09-25 01:48:15,705 WARNING: Received email from unknown sender: noreply@zohosalesiq.com [in /home/runner/CRM/email_receiver.py:58]
+2024-09-25 01:48:16,404 WARNING: Received email from unknown sender: noreply-dmarc@zoho.com [in /home/runner/CRM/email_receiver.py:58]
+2024-09-25 01:48:17,026 WARNING: Received email from unknown sender: =?UTF-8?B?R29vZ2xlIOOCq+ODrOODs+ODgOODvA==?= <calendar-notification@google.com> [in /home/runner/CRM/email_receiver.py:58]
+2024-09-25 01:48:18,885 INFO: New email processed for lead: 西尾真言 [in /home/runner/CRM/email_receiver.py:56]
+2024-09-25 01:48:19,548 WARNING: Received email from unknown sender: =?ISO-2022-JP?B?RU5FT1MgRW5lamV0?=
+ =?ISO-2022-JP?B?GyRCJUolLCU3JV4zJE83TD5LTCEhQHY8ViROOXEbKEI=?=
+ <info@tokutas.jp> [in /home/runner/CRM/email_receiver.py:58]
+2024-09-25 01:48:20,570 WARNING: Received email from unknown sender: =?UTF-8?B?6KW/5bC+IOecn+iogA==?= <makoto@team240.net> [in /home/runner/CRM/email_receiver.py:58]
+2024-09-25 01:48:21,264 WARNING: Received email from unknown sender: =?UTF-8?B?6KW/5bC+IOecn+iogA==?= <makoto@team240.net> [in /home/runner/CRM/email_receiver.py:58]
+2024-09-25 01:48:21,960 WARNING: Received email from unknown sender: =?UTF-8?B?6KW/5bC+IOecn+iogA==?= <makoto@team240.net> [in /home/runner/CRM/email_receiver.py:58]
+2024-09-25 01:48:22,655 WARNING: Received email from unknown sender: =?UTF-8?B?6KW/5bC+IOecn+iogA==?= <makoto@team240.net> [in /home/runner/CRM/email_receiver.py:58]
+2024-09-25 01:48:23,354 WARNING: Received email from unknown sender: =?UTF-8?B?6KW/5bC+IOecn+iogA==?= <makoto@team240.net> [in /home/runner/CRM/email_receiver.py:58]
+2024-09-25 01:48:24,018 WARNING: Received email from unknown sender: =?UTF-8?B?6KW/5bC+IOecn+iogA==?= <makoto@team240.net> [in /home/runner/CRM/email_receiver.py:58]
+2024-09-25 01:48:24,820 WARNING: Received email from unknown sender: =?UTF-8?B?6KW/5bC+IOecn+iogA==?= <makoto@team240.net> [in /home/runner/CRM/email_receiver.py:58]
+2024-09-25 01:48:25,500 WARNING: Received email from unknown sender: =?UTF-8?B?6KW/5bC+IOecn+iogA==?= <makoto@team240.net> [in /home/runner/CRM/email_receiver.py:58]
+2024-09-25 01:48:26,091 WARNING: Received email from unknown sender: notify@zohomarketplace.com [in /home/runner/CRM/email_receiver.py:58]
+2024-09-25 01:48:26,691 WARNING: Received email from unknown sender: Slack <no-reply@slack.com> [in /home/runner/CRM/email_receiver.py:58]
+2024-09-25 01:48:27,286 WARNING: Received email from unknown sender: CallConnect <support@callconnect.jp> [in /home/runner/CRM/email_receiver.py:58]
+2024-09-25 01:48:27,883 WARNING: Received email from unknown sender: "Krishna from Zoho Sites" <support@zohosites.com> [in /home/runner/CRM/email_receiver.py:58]
+2024-09-25 01:48:28,684 WARNING: Received email from unknown sender: Zoho Team <noreply@zohoaccounts.com> [in /home/runner/CRM/email_receiver.py:58]
+2024-09-25 01:53:03,966 INFO: Checking for new emails [in /home/runner/CRM/email_receiver.py:73]
+2024-09-25 01:53:08,899 WARNING: Received email from unknown sender: =?UTF-8?B?6KW/5bC+IOecn+iogA==?= <makoto@team240.net> [in /home/runner/CRM/email_receiver.py:58]
+2024-09-25 01:58:03,966 INFO: Checking for new emails [in /home/runner/CRM/email_receiver.py:73]
+2024-09-25 02:03:03,966 INFO: Checking for new emails [in /home/runner/CRM/email_receiver.py:73]
+2024-09-25 02:08:03,966 INFO: Checking for new emails [in /home/runner/CRM/email_receiver.py:73]
+2024-09-25 02:13:03,966 INFO: Checking for new emails [in /home/runner/CRM/email_receiver.py:73]
+2024-09-25 02:18:03,966 INFO: Checking for new emails [in /home/runner/CRM/email_receiver.py:73]
+2024-09-25 02:23:03,966 INFO: Checking for new emails [in /home/runner/CRM/email_receiver.py:73]
+2024-09-25 02:28:03,966 INFO: Checking for new emails [in /home/runner/CRM/email_receiver.py:73]
+2024-09-25 02:33:03,966 INFO: Checking for new emails [in /home/runner/CRM/email_receiver.py:73]
+2024-09-25 02:33:13,247 INFO: New email processed for lead: 西尾真言 [in /home/runner/CRM/email_receiver.py:56]
+2024-09-25 02:33:15,218 INFO: New email processed for lead: 西尾真言 [in /home/runner/CRM/email_receiver.py:56]
+2024-09-25 02:33:15,944 WARNING: Received email from unknown sender: noreply-dmarc@zoho.com [in /home/runner/CRM/email_receiver.py:58]
+2024-09-25 02:33:16,580 WARNING: Received email from unknown sender: =?UTF-8?B?R29vZ2xlIOOCq+ODrOODs+ODgOODvA==?= <calendar-notification@google.com> [in /home/runner/CRM/email_receiver.py:58]
+2024-09-25 02:33:18,444 INFO: New email processed for lead: 西尾真言 [in /home/runner/CRM/email_receiver.py:56]
+2024-09-25 02:33:19,514 WARNING: Received email from unknown sender: =?UTF-8?B?6KW/5bC+IOecn+iogA==?= <makoto@team240.net> [in /home/runner/CRM/email_receiver.py:58]
+2024-09-25 02:33:20,305 WARNING: Received email from unknown sender: =?UTF-8?B?6KW/5bC+IOecn+iogA==?= <makoto@team240.net> [in /home/runner/CRM/email_receiver.py:58]
+2024-09-25 02:33:21,151 WARNING: Received email from unknown sender: =?UTF-8?B?6KW/5bC+IOecn+iogA==?= <makoto@team240.net> [in /home/runner/CRM/email_receiver.py:58]
+2024-09-25 02:33:21,889 WARNING: Received email from unknown sender: =?UTF-8?B?6KW/5bC+IOecn+iogA==?= <makoto@team240.net> [in /home/runner/CRM/email_receiver.py:58]
+2024-09-25 02:33:22,628 WARNING: Received email from unknown sender: =?UTF-8?B?6KW/5bC+IOecn+iogA==?= <makoto@team240.net> [in /home/runner/CRM/email_receiver.py:58]
+2024-09-25 02:33:23,306 WARNING: Received email from unknown sender: =?UTF-8?B?6KW/5bC+IOecn+iogA==?= <makoto@team240.net> [in /home/runner/CRM/email_receiver.py:58]
+2024-09-25 02:33:23,979 WARNING: Received email from unknown sender: =?UTF-8?B?6KW/5bC+IOecn+iogA==?= <makoto@team240.net> [in /home/runner/CRM/email_receiver.py:58]
+2024-09-25 02:33:24,658 WARNING: Received email from unknown sender: =?UTF-8?B?6KW/5bC+IOecn+iogA==?= <makoto@team240.net> [in /home/runner/CRM/email_receiver.py:58]
+2024-09-25 02:33:25,328 WARNING: Received email from unknown sender: =?UTF-8?B?6KW/5bC+IOecn+iogA==?= <makoto@team240.net> [in /home/runner/CRM/email_receiver.py:58]
+2024-09-25 02:33:26,007 WARNING: Received email from unknown sender: =?UTF-8?B?6KW/5bC+IOecn+iogA==?= <makoto@team240.net> [in /home/runner/CRM/email_receiver.py:58]
+2024-09-25 02:33:26,680 WARNING: Received email from unknown sender: =?UTF-8?B?6KW/5bC+IOecn+iogA==?= <makoto@team240.net> [in /home/runner/CRM/email_receiver.py:58]
+2024-09-25 02:33:27,382 WARNING: Received email from unknown sender: =?UTF-8?B?6KW/5bC+IOecn+iogA==?= <makoto@team240.net> [in /home/runner/CRM/email_receiver.py:58]
+2024-09-25 02:33:28,006 WARNING: Received email from unknown sender: SmartHR <no-reply@smarthr.jp> [in /home/runner/CRM/email_receiver.py:58]
+2024-09-25 02:33:28,610 WARNING: Received email from unknown sender: SmartHR <no-reply@smarthr.jp> [in /home/runner/CRM/email_receiver.py:58]
+2024-09-25 02:33:29,263 WARNING: Received email from unknown sender: SmartHR <no-reply@smarthr.jp> [in /home/runner/CRM/email_receiver.py:58]
+2024-09-25 02:38:03,966 INFO: Checking for new emails [in /home/runner/CRM/email_receiver.py:73]
+2024-09-25 02:38:11,348 INFO: New email processed for lead: 西尾真言 [in /home/runner/CRM/email_receiver.py:56]
+2024-09-25 02:43:03,966 INFO: Checking for new emails [in /home/runner/CRM/email_receiver.py:73]
+2024-09-25 02:43:08,745 WARNING: Received email from unknown sender: tokyo.machida@regus.com [in /home/runner/CRM/email_receiver.py:58]
+2024-09-25 02:43:09,453 WARNING: Received email from unknown sender: noreply-dmarc@zoho.com [in /home/runner/CRM/email_receiver.py:58]
+2024-09-25 02:43:10,076 WARNING: Received email from unknown sender: Zoho Books <no-reply@zohobooks.com> [in /home/runner/CRM/email_receiver.py:58]

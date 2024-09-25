@@ -1,92 +1,68 @@
-2024-09-18 04:40:24,734 ERROR: Traceback (most recent call last):
-  File "/home/runner/CRM/.pythonlibs/lib/python3.11/site-packages/sqlalchemy/engine/base.py", line 1967, in _exec_single_context
-    self.dialect.do_execute(
-  File "/home/runner/CRM/.pythonlibs/lib/python3.11/site-packages/sqlalchemy/engine/default.py", line 941, in do_execute
-    cursor.execute(statement, parameters)
-psycopg2.errors.NotNullViolation: null value in column "lead_id" of relation "opportunity" violates not-null constraint
-DETAIL:  Failing row contains (9, 西尾システムコンサルタントZoho導入支援, 2000000, Prospecting, 2024-09-30 00:00:00, 2024-09-18 04:40:24.278128, 1, 1, null).
-
-
-The above exception was the direct cause of the following exception:
-
-Traceback (most recent call last):
-  File "/home/runner/CRM/routes/opportunities.py", line 35, in create_opportunity
-    db.session.commit()
-  File "/home/runner/CRM/.pythonlibs/lib/python3.11/site-packages/sqlalchemy/orm/scoping.py", line 597, in commit
-    return self._proxied.commit()
-           ^^^^^^^^^^^^^^^^^^^^^^
-  File "/home/runner/CRM/.pythonlibs/lib/python3.11/site-packages/sqlalchemy/orm/session.py", line 2028, in commit
-    trans.commit(_to_root=True)
-  File "<string>", line 2, in commit
-  File "/home/runner/CRM/.pythonlibs/lib/python3.11/site-packages/sqlalchemy/orm/state_changes.py", line 139, in _go
-    ret_value = fn(self, *arg, **kw)
-                ^^^^^^^^^^^^^^^^^^^^
-  File "/home/runner/CRM/.pythonlibs/lib/python3.11/site-packages/sqlalchemy/orm/session.py", line 1313, in commit
-    self._prepare_impl()
-  File "<string>", line 2, in _prepare_impl
-  File "/home/runner/CRM/.pythonlibs/lib/python3.11/site-packages/sqlalchemy/orm/state_changes.py", line 139, in _go
-    ret_value = fn(self, *arg, **kw)
-                ^^^^^^^^^^^^^^^^^^^^
-  File "/home/runner/CRM/.pythonlibs/lib/python3.11/site-packages/sqlalchemy/orm/session.py", line 1288, in _prepare_impl
-    self.session.flush()
-  File "/home/runner/CRM/.pythonlibs/lib/python3.11/site-packages/sqlalchemy/orm/session.py", line 4352, in flush
-    self._flush(objects)
-  File "/home/runner/CRM/.pythonlibs/lib/python3.11/site-packages/sqlalchemy/orm/session.py", line 4487, in _flush
-    with util.safe_reraise():
-  File "/home/runner/CRM/.pythonlibs/lib/python3.11/site-packages/sqlalchemy/util/langhelpers.py", line 146, in __exit__
-    raise exc_value.with_traceback(exc_tb)
-  File "/home/runner/CRM/.pythonlibs/lib/python3.11/site-packages/sqlalchemy/orm/session.py", line 4448, in _flush
-    flush_context.execute()
-  File "/home/runner/CRM/.pythonlibs/lib/python3.11/site-packages/sqlalchemy/orm/unitofwork.py", line 466, in execute
-    rec.execute(self)
-  File "/home/runner/CRM/.pythonlibs/lib/python3.11/site-packages/sqlalchemy/orm/unitofwork.py", line 642, in execute
-    util.preloaded.orm_persistence.save_obj(
-  File "/home/runner/CRM/.pythonlibs/lib/python3.11/site-packages/sqlalchemy/orm/persistence.py", line 93, in save_obj
-    _emit_insert_statements(
-  File "/home/runner/CRM/.pythonlibs/lib/python3.11/site-packages/sqlalchemy/orm/persistence.py", line 1233, in _emit_insert_statements
-    result = connection.execute(
-             ^^^^^^^^^^^^^^^^^^^
-  File "/home/runner/CRM/.pythonlibs/lib/python3.11/site-packages/sqlalchemy/engine/base.py", line 1418, in execute
-    return meth(
-           ^^^^^
-  File "/home/runner/CRM/.pythonlibs/lib/python3.11/site-packages/sqlalchemy/sql/elements.py", line 515, in _execute_on_connection
-    return connection._execute_clauseelement(
-           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  File "/home/runner/CRM/.pythonlibs/lib/python3.11/site-packages/sqlalchemy/engine/base.py", line 1640, in _execute_clauseelement
-    ret = self._execute_context(
-          ^^^^^^^^^^^^^^^^^^^^^^
-  File "/home/runner/CRM/.pythonlibs/lib/python3.11/site-packages/sqlalchemy/engine/base.py", line 1846, in _execute_context
-    return self._exec_single_context(
-           ^^^^^^^^^^^^^^^^^^^^^^^^^^
-  File "/home/runner/CRM/.pythonlibs/lib/python3.11/site-packages/sqlalchemy/engine/base.py", line 1986, in _exec_single_context
-    self._handle_dbapi_exception(
-  File "/home/runner/CRM/.pythonlibs/lib/python3.11/site-packages/sqlalchemy/engine/base.py", line 2355, in _handle_dbapi_exception
-    raise sqlalchemy_exception.with_traceback(exc_info[2]) from e
-  File "/home/runner/CRM/.pythonlibs/lib/python3.11/site-packages/sqlalchemy/engine/base.py", line 1967, in _exec_single_context
-    self.dialect.do_execute(
-  File "/home/runner/CRM/.pythonlibs/lib/python3.11/site-packages/sqlalchemy/engine/default.py", line 941, in do_execute
-    cursor.execute(statement, parameters)
-sqlalchemy.exc.IntegrityError: (psycopg2.errors.NotNullViolation) null value in column "lead_id" of relation "opportunity" violates not-null constraint
-DETAIL:  Failing row contains (9, 西尾システムコンサルタントZoho導入支援, 2000000, Prospecting, 2024-09-30 00:00:00, 2024-09-18 04:40:24.278128, 1, 1, null).
-
-[SQL: INSERT INTO opportunity (name, amount, stage, close_date, created_at, user_id, account_id, lead_id) VALUES (%(name)s, %(amount)s, %(stage)s, %(close_date)s, %(created_at)s, %(user_id)s, %(account_id)s, %(lead_id)s) RETURNING opportunity.id]
-[parameters: {'name': '西尾システムコンサルタントZoho導入支援', 'amount': 2000000.0, 'stage': 'Prospecting', 'close_date': datetime.date(2024, 9, 30), 'created_at': datetime.datetime(2024, 9, 18, 4, 40, 24, 278128), 'user_id': 1, 'account_id': 1, 'lead_id': None}]
-(Background on this error at: https://sqlalche.me/e/20/gkpj)
- [in /home/runner/CRM/routes/opportunities.py:42]
-2024-09-18 04:42:08,172 INFO: CRM startup [in /home/runner/CRM/app.py:88]
-2024-09-18 04:42:08,174 INFO: Starting scheduler [in /home/runner/CRM/app.py:95]
-2024-09-18 04:42:08,175 INFO: Scheduler started [in /home/runner/CRM/app.py:97]
-2024-09-18 04:42:38,775 INFO: CRM startup [in /home/runner/CRM/app.py:62]
-2024-09-18 04:42:38,775 INFO: Starting scheduler [in /home/runner/CRM/app.py:69]
-2024-09-18 04:42:38,777 INFO: Scheduler started [in /home/runner/CRM/app.py:71]
-2024-09-18 04:43:43,784 INFO: Form validation failed: {} [in /home/runner/CRM/routes/opportunities.py:46]
-2024-09-18 04:43:53,766 INFO: Attempting to create opportunity: 西尾システムコンサルタントZoho導入支援 [in /home/runner/CRM/routes/opportunities.py:23]
-2024-09-18 04:43:53,766 INFO: Form data: {'name': '西尾システムコンサルタントZoho導入支援', 'amount': 2000000.0, 'stage': 'Prospecting', 'close_date': datetime.date(2024, 9, 30), 'account': 1, 'submit': True, 'csrf_token': 'IjQ0NjI3ZDVkYTVmYzlkMDQxNTE1NzU2NWRjNTBlNjQwMmFjMmI4OTEi.Zupafw.pa5A_KluSXIiTkMXchWXeIouq2U'} [in /home/runner/CRM/routes/opportunities.py:24]
-2024-09-18 04:43:53,767 INFO: Opportunity object created: {'_sa_instance_state': <sqlalchemy.orm.state.InstanceState object at 0x7fc48d12c170>, 'name': '西尾システムコンサルタントZoho導入支援', 'amount': 2000000.0, 'stage': 'Prospecting', 'close_date': datetime.date(2024, 9, 30), 'account_id': 1, 'user_id': 1} [in /home/runner/CRM/routes/opportunities.py:33]
-2024-09-18 04:43:53,767 INFO: Opportunity added to session [in /home/runner/CRM/routes/opportunities.py:35]
-2024-09-18 04:43:54,226 ERROR: Opportunity creation error: (psycopg2.errors.NotNullViolation) null value in column "lead_id" of relation "opportunity" violates not-null constraint
-DETAIL:  Failing row contains (10, 西尾システムコンサルタントZoho導入支援, 2000000, Prospecting, 2024-09-30 00:00:00, 2024-09-18 04:43:53.769237, 1, 1, null).
-
-[SQL: INSERT INTO opportunity (name, amount, stage, close_date, created_at, user_id, account_id, lead_id) VALUES (%(name)s, %(amount)s, %(stage)s, %(close_date)s, %(created_at)s, %(user_id)s, %(account_id)s, %(lead_id)s) RETURNING opportunity.id]
-[parameters: {'name': '西尾システムコンサルタントZoho導入支援', 'amount': 2000000.0, 'stage': 'Prospecting', 'close_date': datetime.date(2024, 9, 30), 'created_at': datetime.datetime(2024, 9, 18, 4, 43, 53, 769237), 'user_id': 1, 'account_id': 1, 'lead_id': None}]
-(Background on this error at: https://sqlalche.me/e/20/gkpj) [in /home/runner/CRM/routes/opportunities.py:42]
+2024-09-24 22:44:58,597 WARNING: Received email from unknown sender: Zoho Community <community@zoho.co.jp> [in /home/runner/CRM/email_receiver.py:58]
+2024-09-24 22:44:59,219 WARNING: Received email from unknown sender: Zoho Community <community@zoho.co.jp> [in /home/runner/CRM/email_receiver.py:58]
+2024-09-24 22:44:59,827 WARNING: Received email from unknown sender: =?utf-8?B?6KW/5bC+IOecn+iogA==?= <makoto@team240.net> [in /home/runner/CRM/email_receiver.py:58]
+2024-09-24 22:45:00,535 WARNING: Received email from unknown sender: notifications@zohocrm.com [in /home/runner/CRM/email_receiver.py:58]
+2024-09-24 22:45:01,139 WARNING: Received email from unknown sender: info-noreply@sakura.ad.jp [in /home/runner/CRM/email_receiver.py:58]
+2024-09-24 22:45:01,781 WARNING: Received email from unknown sender: notifications@users.zohosites.com [in /home/runner/CRM/email_receiver.py:58]
+2024-09-24 22:45:04,134 INFO: New email processed for lead: 西尾真言 [in /home/runner/CRM/email_receiver.py:56]
+2024-09-24 22:45:04,829 WARNING: Received email from unknown sender: =?UTF-8?B?55yf6KiAIOilv+Wwvg==?= <makoto@team240.net> [in /home/runner/CRM/email_receiver.py:58]
+2024-09-24 22:45:05,552 WARNING: Received email from unknown sender: =?UTF-8?B?55yf6KiAIOilv+Wwvg==?= <makoto@team240.net> [in /home/runner/CRM/email_receiver.py:58]
+2024-09-24 22:45:06,145 WARNING: Received email from unknown sender: info@ichijishienkin.go.jp [in /home/runner/CRM/email_receiver.py:58]
+2024-09-24 22:45:06,735 WARNING: Received email from unknown sender: info@ichijishienkin.go.jp [in /home/runner/CRM/email_receiver.py:58]
+2024-09-24 22:45:07,333 WARNING: Received email from unknown sender: info@ichijishienkin.go.jp [in /home/runner/CRM/email_receiver.py:58]
+2024-09-24 22:45:07,953 WARNING: Received email from unknown sender: =?UTF-8?B?R29vZ2xlIOOCq+ODrOODs+ODgOODvA==?= <calendar-notification@google.com> [in /home/runner/CRM/email_receiver.py:58]
+2024-09-24 22:45:09,845 INFO: New email processed for lead: 西尾真言 [in /home/runner/CRM/email_receiver.py:56]
+2024-09-24 22:45:10,872 WARNING: Received email from unknown sender: Zoho Cares <support@zohoassist.com> [in /home/runner/CRM/email_receiver.py:58]
+2024-09-24 22:45:11,660 WARNING: Received email from unknown sender: =?utf-8?B?6KW/5bC+IOecn+iogA==?= <makoto@team240.net> [in /home/runner/CRM/email_receiver.py:58]
+2024-09-24 22:45:12,255 WARNING: Received email from unknown sender: =?ISO-2022-JP?B?GyRCIVpFbDV+RUVOTyUoJUolOCE8JVEhPCVIJUohPCFbGyhC?=
+ =?ISO-2022-JP?B?GyRCJC8kaSQ3GyhCVEVQQ08=?= web <info@kurashi.tepco.co.jp> [in /home/runner/CRM/email_receiver.py:58]
+2024-09-24 22:45:12,856 WARNING: Received email from unknown sender: =?utf-8?B?44OR44K944Kz44Oz5L+u55CG44Gu6KW/5bC+55yf6KiA?= <makoto@team240.com> [in /home/runner/CRM/email_receiver.py:58]
+2024-09-24 22:45:13,444 WARNING: Received email from unknown sender: makoto nishio <macnishio@gmail.com> [in /home/runner/CRM/email_receiver.py:58]
+2024-09-24 22:45:14,085 WARNING: Received email from unknown sender: makoto nishio <macnishio@gmail.com> [in /home/runner/CRM/email_receiver.py:58]
+2024-09-24 22:45:14,687 WARNING: Received email from unknown sender: =?UTF-8?B?6KW/5bC+IOecn+iogA==?= <mac_nishio@yahoo.co.jp> [in /home/runner/CRM/email_receiver.py:58]
+2024-09-24 22:45:15,276 WARNING: Received email from unknown sender: =?UTF-8?B?6KW/5bC+IOecn+iogA==?= <mac_nishio@yahoo.co.jp> [in /home/runner/CRM/email_receiver.py:58]
+2024-09-24 22:45:15,880 WARNING: Received email from unknown sender: =?UTF-8?B?5piO5oWn5p6X?= <darkare0323@gmail.com> [in /home/runner/CRM/email_receiver.py:58]
+2024-09-24 22:45:16,476 WARNING: Received email from unknown sender: =?utf-8?B?44OR44K944Kz44Oz5L+u55CG44Gu6KW/5bC+55yf6KiA?= <makoto@team240.com> [in /home/runner/CRM/email_receiver.py:58]
+2024-09-24 22:45:17,056 WARNING: Received email from unknown sender: =?UTF-8?B?R29vZ2xlIOOCq+ODrOODs+ODgOODvA==?= <calendar-notification@google.com> [in /home/runner/CRM/email_receiver.py:58]
+2024-09-24 22:45:18,928 INFO: New email processed for lead: 西尾真言 [in /home/runner/CRM/email_receiver.py:56]
+2024-09-24 22:45:19,630 WARNING: Received email from unknown sender: =?UTF-8?B?6KW/5bC+44K344K544OG44Og44Kz44Oz44K144Or44K/44Oz44OI?= <notifications@zohocrm.com> [in /home/runner/CRM/email_receiver.py:58]
+2024-09-24 22:45:20,357 WARNING: Received email from unknown sender: =?UTF-8?B?6KW/5bC+44K344K544OG44Og44Kz44Oz44K144Or44K/44Oz44OI?= <notifications@zohocrm.com> [in /home/runner/CRM/email_receiver.py:58]
+2024-09-24 22:45:21,009 WARNING: Received email from unknown sender: =?UTF-8?B?6KW/5bC+44K344K544OG44Og44Kz44Oz44K144Or44K/44Oz44OI?= <notifications@zohocrm.com> [in /home/runner/CRM/email_receiver.py:58]
+2024-09-24 22:45:21,664 WARNING: Received email from unknown sender: =?UTF-8?B?6KW/5bC+44K344K544OG44Og44Kz44Oz44K144Or44K/44Oz44OI?= <notifications@zohocrm.com> [in /home/runner/CRM/email_receiver.py:58]
+2024-09-24 22:45:22,338 WARNING: Received email from unknown sender: =?UTF-8?B?6KW/5bC+44K344K544OG44Og44Kz44Oz44K144Or44K/44Oz44OI?= <notifications@zohocrm.com> [in /home/runner/CRM/email_receiver.py:58]
+2024-09-24 22:45:22,973 WARNING: Received email from unknown sender: =?UTF-8?B?6KW/5bC+44K344K544OG44Og44Kz44Oz44K144Or44K/44Oz44OI?= <notifications@zohocrm.com> [in /home/runner/CRM/email_receiver.py:58]
+2024-09-24 22:45:23,564 WARNING: Received email from unknown sender: Google Location Sharing <noreply-location-sharing@google.com> [in /home/runner/CRM/email_receiver.py:58]
+2024-09-24 22:45:24,171 WARNING: Received email from unknown sender: =?UTF-8?B?R29vZ2xlIOOCq+ODrOODs+ODgOODvA==?= <calendar-notification@google.com> [in /home/runner/CRM/email_receiver.py:58]
+2024-09-24 22:45:24,842 WARNING: Received email from unknown sender: noreply@zohosalesiq.com [in /home/runner/CRM/email_receiver.py:58]
+2024-09-24 22:45:25,442 WARNING: Received email from unknown sender: Google My Business <googlemybusiness-noreply@google.com> [in /home/runner/CRM/email_receiver.py:58]
+2024-09-24 22:45:26,055 WARNING: Received email from unknown sender: Zoho Books <no-reply@zohobooks.com> [in /home/runner/CRM/email_receiver.py:58]
+2024-09-24 22:45:27,941 INFO: New email processed for lead: 西尾真言 [in /home/runner/CRM/email_receiver.py:56]
+2024-09-24 22:45:28,523 WARNING: Received email from unknown sender: "amazon.co.jp" <account-update@amazon.co.jp> [in /home/runner/CRM/email_receiver.py:58]
+2024-09-24 22:45:29,123 WARNING: Received email from unknown sender: =?iso-2022-jp?B?GyRCJV4lTSE8JVUlKSVvITwlSSUvJWklJiVJN1BIcRsoQg==?=
+ <do_not_reply_expense@moneyforward.com> [in /home/runner/CRM/email_receiver.py:58]
+2024-09-24 22:45:29,717 WARNING: Received email from unknown sender: =?iso-2022-jp?B?GyRCJV4lTSE8JVUlKSVvITwlSSUvJWklJiVJN1BIcRsoQg==?=
+ <do_not_reply_expense@moneyforward.com> [in /home/runner/CRM/email_receiver.py:58]
+2024-09-24 22:45:30,314 WARNING: Received email from unknown sender: =?iso-2022-jp?B?GyRCJV4lTSE8JVUlKSVvITwlSSUvJWklJiVJN1BIcRsoQg==?=
+ <do_not_reply_expense@moneyforward.com> [in /home/runner/CRM/email_receiver.py:58]
+2024-09-24 22:45:30,911 WARNING: Received email from unknown sender: =?iso-2022-jp?B?GyRCJV4lTSE8JVUlKSVvITwlSSUvJWklJiVJN1BIcRsoQg==?=
+ <do_not_reply_expense@moneyforward.com> [in /home/runner/CRM/email_receiver.py:58]
+2024-09-24 22:45:31,517 WARNING: Received email from unknown sender: =?iso-2022-jp?B?GyRCJV4lTSE8JVUlKSVvITwlSSUvJWklJiVJN1BIcRsoQg==?=
+ <do_not_reply_expense@moneyforward.com> [in /home/runner/CRM/email_receiver.py:58]
+2024-09-24 22:45:32,134 WARNING: Received email from unknown sender: =?iso-2022-jp?B?GyRCJV4lTSE8JVUlKSVvITwlSSUvJWklJiVJN1BIcRsoQg==?=
+ <do_not_reply_expense@moneyforward.com> [in /home/runner/CRM/email_receiver.py:58]
+2024-09-24 22:45:32,889 WARNING: Received email from unknown sender: =?UTF-8?B?55yf6KiAIOilv+Wwvg==?= <makoto@team240.net> [in /home/runner/CRM/email_receiver.py:58]
+2024-09-24 22:45:33,584 WARNING: Received email from unknown sender: =?UTF-8?B?55yf6KiAIOilv+Wwvg==?= <makoto@team240.net> [in /home/runner/CRM/email_receiver.py:58]
+2024-09-24 22:45:34,198 WARNING: Received email from unknown sender: =?iso-2022-jp?B?GyRCOjRAbjVeSlgzdDwwMnE8UhsoQg==?= <info-nimotsu@sagawa-exp.co.jp> [in /home/runner/CRM/email_receiver.py:58]
+2024-09-24 22:45:34,812 WARNING: Received email from unknown sender: =?UTF-8?B?R29vZ2xlIOOCq+ODrOODs+ODgOODvA==?= <calendar-notification@google.com> [in /home/runner/CRM/email_receiver.py:58]
+2024-09-24 22:45:36,761 INFO: New email processed for lead: 西尾真言 [in /home/runner/CRM/email_receiver.py:56]
+2024-09-24 22:45:37,498 WARNING: Received email from unknown sender: makoto nishio <macnishio@gmail.com> [in /home/runner/CRM/email_receiver.py:58]
+2024-09-24 22:45:38,099 WARNING: Received email from unknown sender: =?ISO-2022-JP?B?QU9LSSBXT1JLIFNQQUNFGyRCO3Y2SEl0GyhC?=<noreply-aoki_ws@resv.jp> [in /home/runner/CRM/email_receiver.py:58]
+2024-09-24 22:45:38,806 WARNING: Received email from unknown sender: notifications@zohocrm.com [in /home/runner/CRM/email_receiver.py:58]
+2024-09-24 22:45:39,460 WARNING: Received email from unknown sender: notifications@zohocrm.com [in /home/runner/CRM/email_receiver.py:58]
+2024-09-24 22:45:40,126 WARNING: Received email from unknown sender: notifications@zohocrm.com [in /home/runner/CRM/email_receiver.py:58]
+2024-09-24 22:45:40,722 WARNING: Received email from unknown sender: =?UTF-8?B?R29vZ2xlIOOCq+ODrOODs+ODgOODvA==?= <calendar-notification@google.com> [in /home/runner/CRM/email_receiver.py:58]
+2024-09-24 22:45:42,695 INFO: New email processed for lead: 西尾真言 [in /home/runner/CRM/email_receiver.py:56]
+2024-09-24 22:45:43,288 WARNING: Received email from unknown sender: =?iso-2022-jp?B?GyRCJV4lTSE8JVUlKSVvITwlSSUvGyhC?=
+ =?iso-2022-jp?B?GyRCJWklJiVJMnE3VyEmM05Eaj89OXAbKEI=?=
+ <accounting.feedback@moneyforward.com> [in /home/runner/CRM/email_receiver.py:58]
+2024-09-24 22:45:43,885 WARNING: Received email from unknown sender: Aircall Team <noreply@aircall.io> [in /home/runner/CRM/email_receiver.py:58]

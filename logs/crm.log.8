@@ -1,103 +1,67 @@
-2024-09-18 04:52:03,611 ERROR: Exception on /reports/ [GET] [in /home/runner/CRM/.pythonlibs/lib/python3.11/site-packages/flask/app.py:838]
-Traceback (most recent call last):
-  File "/home/runner/CRM/.pythonlibs/lib/python3.11/site-packages/flask/app.py", line 1473, in wsgi_app
-    response = self.full_dispatch_request()
-               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  File "/home/runner/CRM/.pythonlibs/lib/python3.11/site-packages/flask/app.py", line 882, in full_dispatch_request
-    rv = self.handle_user_exception(e)
-         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  File "/home/runner/CRM/.pythonlibs/lib/python3.11/site-packages/flask/app.py", line 880, in full_dispatch_request
-    rv = self.dispatch_request()
-         ^^^^^^^^^^^^^^^^^^^^^^^
-  File "/home/runner/CRM/.pythonlibs/lib/python3.11/site-packages/flask/app.py", line 865, in dispatch_request
-    return self.ensure_sync(self.view_functions[rule.endpoint])(**view_args)  # type: ignore[no-any-return]
-           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  File "/home/runner/CRM/.pythonlibs/lib/python3.11/site-packages/flask_login/utils.py", line 290, in decorated_view
-    return current_app.ensure_sync(func)(*args, **kwargs)
-           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  File "/home/runner/CRM/routes/reports.py", line 13, in index
-    lead_status = db.session.query(Lead.status, func.count(Lead.id)).filter_by(user_id=current_user.id).group_by(Lead.status).all()
-                  ^^
-NameError: name 'db' is not defined
-2024-09-18 07:49:16,282 INFO: CRM startup [in /home/runner/CRM/app.py:64]
-2024-09-18 07:49:16,283 INFO: Starting scheduler [in /home/runner/CRM/app.py:71]
-2024-09-18 07:49:16,284 INFO: Scheduler started [in /home/runner/CRM/app.py:73]
-2024-09-18 08:10:44,034 INFO: CRM startup [in /home/runner/CRM/app.py:64]
-2024-09-18 08:10:44,035 INFO: Starting scheduler [in /home/runner/CRM/app.py:71]
-2024-09-18 08:10:44,037 INFO: Scheduler started [in /home/runner/CRM/app.py:73]
-2024-09-18 08:16:15,295 ERROR: Exception on /leads/ [GET] [in /home/runner/CRM/.pythonlibs/lib/python3.11/site-packages/flask/app.py:838]
-Traceback (most recent call last):
-  File "/home/runner/CRM/.pythonlibs/lib/python3.11/site-packages/sqlalchemy/engine/base.py", line 1967, in _exec_single_context
-    self.dialect.do_execute(
-  File "/home/runner/CRM/.pythonlibs/lib/python3.11/site-packages/sqlalchemy/engine/default.py", line 941, in do_execute
-    cursor.execute(statement, parameters)
-psycopg2.errors.UndefinedColumn: column lead.full_name does not exist
-LINE 1: ...ser_id AS lead_user_id, lead.score AS lead_score, lead.full_...
-                                                             ^
-
-
-The above exception was the direct cause of the following exception:
-
-Traceback (most recent call last):
-  File "/home/runner/CRM/.pythonlibs/lib/python3.11/site-packages/flask/app.py", line 1473, in wsgi_app
-    response = self.full_dispatch_request()
-               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  File "/home/runner/CRM/.pythonlibs/lib/python3.11/site-packages/flask/app.py", line 882, in full_dispatch_request
-    rv = self.handle_user_exception(e)
-         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  File "/home/runner/CRM/.pythonlibs/lib/python3.11/site-packages/flask/app.py", line 880, in full_dispatch_request
-    rv = self.dispatch_request()
-         ^^^^^^^^^^^^^^^^^^^^^^^
-  File "/home/runner/CRM/.pythonlibs/lib/python3.11/site-packages/flask/app.py", line 865, in dispatch_request
-    return self.ensure_sync(self.view_functions[rule.endpoint])(**view_args)  # type: ignore[no-any-return]
-           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  File "/home/runner/CRM/.pythonlibs/lib/python3.11/site-packages/flask_login/utils.py", line 290, in decorated_view
-    return current_app.ensure_sync(func)(*args, **kwargs)
-           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  File "/home/runner/CRM/routes/leads.py", line 16, in list_leads
-    leads = Lead.query.filter_by(user_id=current_user.id).all()
-            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  File "/home/runner/CRM/.pythonlibs/lib/python3.11/site-packages/sqlalchemy/orm/query.py", line 2673, in all
-    return self._iter().all()  # type: ignore
-           ^^^^^^^^^^^^
-  File "/home/runner/CRM/.pythonlibs/lib/python3.11/site-packages/sqlalchemy/orm/query.py", line 2827, in _iter
-    result: Union[ScalarResult[_T], Result[_T]] = self.session.execute(
-                                                  ^^^^^^^^^^^^^^^^^^^^^
-  File "/home/runner/CRM/.pythonlibs/lib/python3.11/site-packages/sqlalchemy/orm/session.py", line 2362, in execute
-    return self._execute_internal(
-           ^^^^^^^^^^^^^^^^^^^^^^^
-  File "/home/runner/CRM/.pythonlibs/lib/python3.11/site-packages/sqlalchemy/orm/session.py", line 2247, in _execute_internal
-    result: Result[Any] = compile_state_cls.orm_execute_statement(
-                          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  File "/home/runner/CRM/.pythonlibs/lib/python3.11/site-packages/sqlalchemy/orm/context.py", line 293, in orm_execute_statement
-    result = conn.execute(
-             ^^^^^^^^^^^^^
-  File "/home/runner/CRM/.pythonlibs/lib/python3.11/site-packages/sqlalchemy/engine/base.py", line 1418, in execute
-    return meth(
-           ^^^^^
-  File "/home/runner/CRM/.pythonlibs/lib/python3.11/site-packages/sqlalchemy/sql/elements.py", line 515, in _execute_on_connection
-    return connection._execute_clauseelement(
-           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  File "/home/runner/CRM/.pythonlibs/lib/python3.11/site-packages/sqlalchemy/engine/base.py", line 1640, in _execute_clauseelement
-    ret = self._execute_context(
-          ^^^^^^^^^^^^^^^^^^^^^^
-  File "/home/runner/CRM/.pythonlibs/lib/python3.11/site-packages/sqlalchemy/engine/base.py", line 1846, in _execute_context
-    return self._exec_single_context(
-           ^^^^^^^^^^^^^^^^^^^^^^^^^^
-  File "/home/runner/CRM/.pythonlibs/lib/python3.11/site-packages/sqlalchemy/engine/base.py", line 1986, in _exec_single_context
-    self._handle_dbapi_exception(
-  File "/home/runner/CRM/.pythonlibs/lib/python3.11/site-packages/sqlalchemy/engine/base.py", line 2355, in _handle_dbapi_exception
-    raise sqlalchemy_exception.with_traceback(exc_info[2]) from e
-  File "/home/runner/CRM/.pythonlibs/lib/python3.11/site-packages/sqlalchemy/engine/base.py", line 1967, in _exec_single_context
-    self.dialect.do_execute(
-  File "/home/runner/CRM/.pythonlibs/lib/python3.11/site-packages/sqlalchemy/engine/default.py", line 941, in do_execute
-    cursor.execute(statement, parameters)
-sqlalchemy.exc.ProgrammingError: (psycopg2.errors.UndefinedColumn) column lead.full_name does not exist
-LINE 1: ...ser_id AS lead_user_id, lead.score AS lead_score, lead.full_...
-                                                             ^
-
-[SQL: SELECT lead.id AS lead_id, lead.name AS lead_name, lead.email AS lead_email, lead.phone AS lead_phone, lead.status AS lead_status, lead.created_at AS lead_created_at, lead.last_contact AS lead_last_contact, lead.last_followup_email AS lead_last_followup_email, lead.last_followup_tracking_id AS lead_last_followup_tracking_id, lead.last_email_opened AS lead_last_email_opened, lead.user_id AS lead_user_id, lead.score AS lead_score, lead.full_name AS lead_full_name, lead.job_title AS lead_job_title, lead.company_name AS lead_company_name, lead.company_domain AS lead_company_domain, lead.company_industry AS lead_company_industry, lead.company_employee_count AS lead_company_employee_count 
-FROM lead 
-WHERE lead.user_id = %(user_id_1)s]
-[parameters: {'user_id_1': 1}]
-(Background on this error at: https://sqlalche.me/e/20/f405)
+2024-09-24 23:18:03,966 INFO: Checking for new emails [in /home/runner/CRM/email_receiver.py:73]
+2024-09-24 23:23:03,966 INFO: Checking for new emails [in /home/runner/CRM/email_receiver.py:73]
+2024-09-24 23:23:10,595 WARNING: Received email from unknown sender: =?UTF-8?B?R29vZ2xlIOOCq+ODrOODs+ODgOODvA==?= <calendar-notification@google.com> [in /home/runner/CRM/email_receiver.py:58]
+2024-09-24 23:23:11,400 WARNING: Received email from unknown sender: noreply@zohosalesiq.com [in /home/runner/CRM/email_receiver.py:58]
+2024-09-24 23:23:11,987 WARNING: Received email from unknown sender: Google My Business <googlemybusiness-noreply@google.com> [in /home/runner/CRM/email_receiver.py:58]
+2024-09-24 23:23:12,573 WARNING: Received email from unknown sender: Zoho Books <no-reply@zohobooks.com> [in /home/runner/CRM/email_receiver.py:58]
+2024-09-24 23:23:15,532 INFO: New email processed for lead: 西尾真言 [in /home/runner/CRM/email_receiver.py:56]
+2024-09-24 23:23:16,110 WARNING: Received email from unknown sender: "tsuhan@nttxstore.jp" <tsuhan@nttxstore.jp> [in /home/runner/CRM/email_receiver.py:58]
+2024-09-24 23:23:16,947 WARNING: Received email from unknown sender: =?UTF-8?B?6KW/5bC+44K344K544OG44Og44Kz44Oz44K144Or44K/44Oz44OI?= <notifications@zohocrm.com> [in /home/runner/CRM/email_receiver.py:58]
+2024-09-24 23:23:17,668 WARNING: Received email from unknown sender: =?UTF-8?B?6KW/5bC+44K344K544OG44Og44Kz44Oz44K144Or44K/44Oz44OI?= <notifications@zohocrm.com> [in /home/runner/CRM/email_receiver.py:58]
+2024-09-24 23:23:18,363 WARNING: Received email from unknown sender: =?UTF-8?B?55yf6KiAIOilv+Wwvg==?= <makoto@team240.net> [in /home/runner/CRM/email_receiver.py:58]
+2024-09-24 23:23:19,130 WARNING: Received email from unknown sender: =?UTF-8?B?55yf6KiAIOilv+Wwvg==?= <makoto@team240.net> [in /home/runner/CRM/email_receiver.py:58]
+2024-09-24 23:28:03,966 INFO: Checking for new emails [in /home/runner/CRM/email_receiver.py:73]
+2024-09-24 23:28:08,903 WARNING: Received email from unknown sender: "Deb at Zapier" <blog@zapier.com> [in /home/runner/CRM/email_receiver.py:58]
+2024-09-24 23:28:09,565 WARNING: Received email from unknown sender: noreply-dmarc@zoho.com [in /home/runner/CRM/email_receiver.py:58]
+2024-09-24 23:28:10,187 WARNING: Received email from unknown sender: G2 <outreach@hello.g2.com> [in /home/runner/CRM/email_receiver.py:58]
+2024-09-24 23:28:12,097 INFO: New email processed for lead: 西尾真言 [in /home/runner/CRM/email_receiver.py:56]
+2024-09-24 23:28:13,912 INFO: New email processed for lead: 西尾真言 [in /home/runner/CRM/email_receiver.py:56]
+2024-09-24 23:28:15,788 INFO: New email processed for lead: 西尾真言 [in /home/runner/CRM/email_receiver.py:56]
+2024-09-24 23:28:16,374 WARNING: Received email from unknown sender: =?UTF-8?B?R29vZ2xlIOOCq+ODrOODs+ODgOODvA==?= <calendar-notification@google.com> [in /home/runner/CRM/email_receiver.py:58]
+2024-09-24 23:28:16,967 WARNING: Received email from unknown sender: =?utf-8?B?6KW/5bC+IOecn+iogA==?= <makoto@team240.net> [in /home/runner/CRM/email_receiver.py:58]
+2024-09-24 23:28:17,567 WARNING: Received email from unknown sender: =?utf-8?B?5re755Sw5Y2a5YWF77yP5Yy755mC5rOV5Lq656S+5Zuj5re755Sw?=
+ =?utf-8?B?44Kw44Or44O844OX?= <hi@soeda.or.jp> [in /home/runner/CRM/email_receiver.py:58]
+2024-09-24 23:28:19,437 INFO: New email processed for lead: 西尾真言 [in /home/runner/CRM/email_receiver.py:56]
+2024-09-24 23:28:20,018 WARNING: Received email from unknown sender: =?utf-8?B?5rW36ICB5ZCN5biC6Jas5Ymk5bir5Lya?= <ebiyaku@estate.ocn.ne.jp> [in /home/runner/CRM/email_receiver.py:58]
+2024-09-24 23:28:20,632 WARNING: Received email from unknown sender: =?utf-8?B?6KW/5bC+IOecn+iogA==?= <makoto@team240.net> [in /home/runner/CRM/email_receiver.py:58]
+2024-09-24 23:28:21,228 WARNING: Received email from unknown sender: =?utf-8?B?5rW36ICB5ZCN5biC6Jas5Ymk5bir5Lya?= <ebiyaku@estate.ocn.ne.jp> [in /home/runner/CRM/email_receiver.py:58]
+2024-09-24 23:28:21,848 WARNING: Received email from unknown sender: =?utf-8?B?6KW/5bC+IOecn+iogA==?= <makoto@team240.net> [in /home/runner/CRM/email_receiver.py:58]
+2024-09-24 23:28:22,436 WARNING: Received email from unknown sender: =?utf-8?B?5rW36ICB5ZCN5biC6Jas5Ymk5bir5Lya?= <ebiyaku@estate.ocn.ne.jp> [in /home/runner/CRM/email_receiver.py:58]
+2024-09-24 23:28:23,014 WARNING: Received email from unknown sender: notifications@zohosign.com [in /home/runner/CRM/email_receiver.py:58]
+2024-09-24 23:28:23,602 WARNING: Received email from unknown sender: =?UTF-8?B?6KW/5bC+44K344K544OG44Og44Kz44Oz44K144Or44K/44Oz44OI?= <makoto@team240.net> [in /home/runner/CRM/email_receiver.py:58]
+2024-09-24 23:28:24,506 WARNING: Received email from unknown sender: =?UTF-8?B?6KW/5bC+44K344K544OG44Og44Kz44Oz44K144Or44K/44Oz44OI?= <makoto@team240.net> [in /home/runner/CRM/email_receiver.py:58]
+2024-09-24 23:28:27,162 INFO: New email processed for lead: 西尾真言 [in /home/runner/CRM/email_receiver.py:56]
+2024-09-24 23:28:28,116 WARNING: Received email from unknown sender: =?UTF-8?B?6KW/5bC+44K344K544OG44Og44Kz44Oz44K144Or44K/44Oz44OI?= <makoto@team240.net> [in /home/runner/CRM/email_receiver.py:58]
+2024-09-24 23:33:03,966 INFO: Checking for new emails [in /home/runner/CRM/email_receiver.py:73]
+2024-09-24 23:38:03,966 INFO: Checking for new emails [in /home/runner/CRM/email_receiver.py:73]
+2024-09-24 23:38:10,670 WARNING: Received email from unknown sender: =?UTF-8?B?R29vZ2xlIOOCq+ODrOODs+ODgOODvA==?= <calendar-notification@google.com> [in /home/runner/CRM/email_receiver.py:58]
+2024-09-24 23:38:11,377 WARNING: Received email from unknown sender: =?UTF-8?B?6KW/5bC+44K344K544OG44Og44Kz44Oz44K144Or44K/44Oz44OI?= <notifications@zohocrm.com> [in /home/runner/CRM/email_receiver.py:58]
+2024-09-24 23:38:12,137 WARNING: Received email from unknown sender: =?UTF-8?B?6KW/5bC+44K344K544OG44Og44Kz44Oz44K144Or44K/44Oz44OI?= <notifications@zohocrm.com> [in /home/runner/CRM/email_receiver.py:58]
+2024-09-24 23:38:15,183 INFO: New email processed for lead: 西尾真言 [in /home/runner/CRM/email_receiver.py:56]
+2024-09-24 23:38:15,773 WARNING: Received email from unknown sender: =?iso-2022-jp?B?GyRCJV4lTSE8JVUlKSVvITwlSSUvGyhC?=
+ =?iso-2022-jp?B?GyRCJWklJiVJMnE3VyEmM05Eaj89OXAbKEI=?=
+ <accounting.feedback@moneyforward.com> [in /home/runner/CRM/email_receiver.py:58]
+2024-09-24 23:38:16,359 WARNING: Received email from unknown sender: Google My Business <googlemybusiness-noreply@google.com> [in /home/runner/CRM/email_receiver.py:58]
+2024-09-24 23:38:16,977 WARNING: Received email from unknown sender: Google My Business <googlemybusiness-noreply@google.com> [in /home/runner/CRM/email_receiver.py:58]
+2024-09-24 23:43:03,966 INFO: Checking for new emails [in /home/runner/CRM/email_receiver.py:73]
+2024-09-24 23:43:08,256 WARNING: Received email from unknown sender: tsuhan@nttxstore.jp [in /home/runner/CRM/email_receiver.py:58]
+2024-09-24 23:43:08,908 WARNING: Received email from unknown sender: noreply-dmarc@zoho.com [in /home/runner/CRM/email_receiver.py:58]
+2024-09-24 23:43:09,505 WARNING: Received email from unknown sender: =?UTF-8?B?R29vZ2xlIOOCq+ODrOODs+ODgOODvA==?= <calendar-notification@google.com> [in /home/runner/CRM/email_receiver.py:58]
+2024-09-24 23:43:11,389 INFO: New email processed for lead: 西尾真言 [in /home/runner/CRM/email_receiver.py:56]
+2024-09-24 23:43:11,958 WARNING: Received email from unknown sender: =?iso-2022-jp?B?GyRCOjRAbjVeSlgzdDwwMnE8UhsoQg==?= <info-nimotsu@sagawa-exp.co.jp> [in /home/runner/CRM/email_receiver.py:58]
+2024-09-24 23:43:12,526 WARNING: Received email from unknown sender: =?iso-2022-jp?B?GyRCOjRAbjVeSlgzdDwwMnE8UhsoQg==?= <info-nimotsu@sagawa-exp.co.jp> [in /home/runner/CRM/email_receiver.py:58]
+2024-09-24 23:43:13,108 WARNING: Received email from unknown sender: =?UTF-8?B?6KW/5bC+IOecn+iogA==?= <makoto@team240.net> [in /home/runner/CRM/email_receiver.py:58]
+2024-09-24 23:43:13,690 WARNING: Received email from unknown sender: =?UTF-8?B?6KW/5bC+IOecn+iogA==?= <makoto@team240.net> [in /home/runner/CRM/email_receiver.py:58]
+2024-09-24 23:48:03,966 INFO: Checking for new emails [in /home/runner/CRM/email_receiver.py:73]
+2024-09-24 23:48:08,657 WARNING: Received email from unknown sender: =?iso-2022-jp?B?GyRCOjRAbjVeSlgzdDwwMnE8UhsoQg==?= <info-nimotsu@sagawa-exp.co.jp> [in /home/runner/CRM/email_receiver.py:58]
+2024-09-24 23:48:09,296 WARNING: Received email from unknown sender: =?iso-2022-jp?B?GyRCOjRAbjVeSlgzdDwwMnE8UhsoQg==?= <info-nimotsu@sagawa-exp.co.jp> [in /home/runner/CRM/email_receiver.py:58]
+2024-09-24 23:48:10,455 WARNING: Received email from unknown sender: =?UTF-8?B?6KW/5bC+IOecn+iogA==?= <makoto@team240.net> [in /home/runner/CRM/email_receiver.py:58]
+2024-09-24 23:48:11,189 WARNING: Received email from unknown sender: =?UTF-8?B?6KW/5bC+IOecn+iogA==?= <makoto@team240.net> [in /home/runner/CRM/email_receiver.py:58]
+2024-09-24 23:48:11,915 WARNING: Received email from unknown sender: =?UTF-8?B?6KW/5bC+IOecn+iogA==?= <makoto@team240.net> [in /home/runner/CRM/email_receiver.py:58]
+2024-09-24 23:48:12,665 WARNING: Received email from unknown sender: =?UTF-8?B?6KW/5bC+IOecn+iogA==?= <makoto@team240.net> [in /home/runner/CRM/email_receiver.py:58]
+2024-09-24 23:48:13,352 WARNING: Received email from unknown sender: =?UTF-8?B?6KW/5bC+IOecn+iogA==?= <makoto@team240.net> [in /home/runner/CRM/email_receiver.py:58]
+2024-09-24 23:48:14,057 WARNING: Received email from unknown sender: =?UTF-8?B?6KW/5bC+IOecn+iogA==?= <makoto@team240.net> [in /home/runner/CRM/email_receiver.py:58]
+2024-09-24 23:48:14,741 WARNING: Received email from unknown sender: =?UTF-8?B?6KW/5bC+IOecn+iogA==?= <makoto@team240.net> [in /home/runner/CRM/email_receiver.py:58]
+2024-09-24 23:48:15,425 WARNING: Received email from unknown sender: =?UTF-8?B?6KW/5bC+IOecn+iogA==?= <makoto@team240.net> [in /home/runner/CRM/email_receiver.py:58]
+2024-09-24 23:48:16,122 WARNING: Received email from unknown sender: =?UTF-8?B?6KW/5bC+IOecn+iogA==?= <makoto@team240.net> [in /home/runner/CRM/email_receiver.py:58]
+2024-09-24 23:48:16,823 WARNING: Received email from unknown sender: =?UTF-8?B?6KW/5bC+IOecn+iogA==?= <makoto@team240.net> [in /home/runner/CRM/email_receiver.py:58]
