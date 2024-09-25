@@ -1,60 +1,43 @@
-2024-09-25 09:10:05,809 INFO: Processing email from =?UTF-8?B?5Yy755mC5rOV5Lq66Iez6Kqg5Lya44Gf44KT44G944G95q2v56eR?=
- =?UTF-8?B?44CA44CM44Gf44KT44G944G95q2v56eR5qeY5ZCR44GR44OR44K944Kz?=
- =?UTF-8?B?44Oz6LK344GE5pu/44GI6Kq/5p+744O75o+Q5qGI44Gu44GU5qGI5YaF?=
- =?UTF-8?B?44CNIOizvOWFpeODu+ioree9ruWVhuWTgeizvOWFpSDpgJrnn6U=?=
- <notifications@zohoprojects.com> sent on 2024-08-26 12:49:43 [in /home/runner/CRM/email_receiver.py:43]
-2024-09-25 09:10:06,040 WARNING: Received email from unknown sender: =?UTF-8?B?5Yy755mC5rOV5Lq66Iez6Kqg5Lya44Gf44KT44G944G95q2v56eR?=
- =?UTF-8?B?44CA44CM44Gf44KT44G944G95q2v56eR5qeY5ZCR44GR44OR44K944Kz?=
- =?UTF-8?B?44Oz6LK344GE5pu/44GI6Kq/5p+744O75o+Q5qGI44Gu44GU5qGI5YaF?=
- =?UTF-8?B?44CNIOizvOWFpeODu+ioree9ruWVhuWTgeizvOWFpSDpgJrnn6U=?=
- <notifications@zohoprojects.com> [in /home/runner/CRM/email_receiver.py:76]
-2024-09-25 09:10:06,419 INFO: Processing email from =?UTF-8?B?5Yy755mC5rOV5Lq66Iez6Kqg5Lya44Gf44KT44G944G95q2v56eR?=
- =?UTF-8?B?44CA44CM44Gf44KT44G944G95q2v56eR5qeY5ZCR44GR44OR44K944Kz?=
- =?UTF-8?B?44Oz6LK344GE5pu/44GI6Kq/5p+744O75o+Q5qGI44Gu44GU5qGI5YaF?=
- =?UTF-8?B?44CNIOizvOWFpeODu+ioree9ruWVhuWTgeizvOWFpSDpgJrnn6U=?=
- <notifications@zohoprojects.com> sent on 2024-08-26 12:49:47 [in /home/runner/CRM/email_receiver.py:43]
-2024-09-25 09:10:06,648 WARNING: Received email from unknown sender: =?UTF-8?B?5Yy755mC5rOV5Lq66Iez6Kqg5Lya44Gf44KT44G944G95q2v56eR?=
- =?UTF-8?B?44CA44CM44Gf44KT44G944G95q2v56eR5qeY5ZCR44GR44OR44K944Kz?=
- =?UTF-8?B?44Oz6LK344GE5pu/44GI6Kq/5p+744O75o+Q5qGI44Gu44GU5qGI5YaF?=
- =?UTF-8?B?44CNIOizvOWFpeODu+ioree9ruWVhuWTgeizvOWFpSDpgJrnn6U=?=
- <notifications@zohoprojects.com> [in /home/runner/CRM/email_receiver.py:76]
-2024-09-25 09:10:07,019 INFO: Processing email from =?UTF-8?B?5Yy755mC5rOV5Lq66Iez6Kqg5Lya44Gf44KT44G944G95q2v56eR?=
- =?UTF-8?B?44CA44CM44Gf44KT44G944G95q2v56eR5qeY5ZCR44GR44OR44K944Kz?=
- =?UTF-8?B?44Oz6LK344GE5pu/44GI6Kq/5p+744O75o+Q5qGI44Gu44GU5qGI5YaF?=
- =?UTF-8?B?44CNIOizvOWFpeODu+ioree9ruWVhuWTgeizvOWFpSDpgJrnn6U=?=
- <notifications@zohoprojects.com> sent on 2024-08-26 12:49:49 [in /home/runner/CRM/email_receiver.py:43]
-2024-09-25 09:10:07,248 WARNING: Received email from unknown sender: =?UTF-8?B?5Yy755mC5rOV5Lq66Iez6Kqg5Lya44Gf44KT44G944G95q2v56eR?=
- =?UTF-8?B?44CA44CM44Gf44KT44G944G95q2v56eR5qeY5ZCR44GR44OR44K944Kz?=
- =?UTF-8?B?44Oz6LK344GE5pu/44GI6Kq/5p+744O75o+Q5qGI44Gu44GU5qGI5YaF?=
- =?UTF-8?B?44CNIOizvOWFpeODu+ioree9ruWVhuWTgeizvOWFpSDpgJrnn6U=?=
- <notifications@zohoprojects.com> [in /home/runner/CRM/email_receiver.py:76]
-2024-09-25 09:10:07,608 INFO: Processing email from =?UTF-8?B?5Yy755mC5rOV5Lq66Iez6Kqg5Lya44Gf44KT44G944G95q2v56eR?=
- =?UTF-8?B?44CA44CM44Gf44KT44G944G95q2v56eR5qeY5ZCR44GR44OR44K944Kz?=
- =?UTF-8?B?44Oz6LK344GE5pu/44GI6Kq/5p+744O75o+Q5qGI44Gu44GU5qGI5YaF?=
- =?UTF-8?B?44CNIOizvOWFpeODu+ioree9ruWVhuWTgeizvOWFpSDpgJrnn6U=?=
- <notifications@zohoprojects.com> sent on 2024-08-26 12:49:55 [in /home/runner/CRM/email_receiver.py:43]
-2024-09-25 09:10:07,838 WARNING: Received email from unknown sender: =?UTF-8?B?5Yy755mC5rOV5Lq66Iez6Kqg5Lya44Gf44KT44G944G95q2v56eR?=
- =?UTF-8?B?44CA44CM44Gf44KT44G944G95q2v56eR5qeY5ZCR44GR44OR44K944Kz?=
- =?UTF-8?B?44Oz6LK344GE5pu/44GI6Kq/5p+744O75o+Q5qGI44Gu44GU5qGI5YaF?=
- =?UTF-8?B?44CNIOizvOWFpeODu+ioree9ruWVhuWTgeizvOWFpSDpgJrnn6U=?=
- <notifications@zohoprojects.com> [in /home/runner/CRM/email_receiver.py:76]
-2024-09-25 09:10:08,209 INFO: Processing email from =?UTF-8?B?5Yy755mC5rOV5Lq66Iez6Kqg5Lya44Gf44KT44G944G95q2v56eR?=
- =?UTF-8?B?44CA44CM44Gf44KT44G944G95q2v56eR5qeY5ZCR44GR44OR44K944Kz?=
- =?UTF-8?B?44Oz6LK344GE5pu/44GI6Kq/5p+744O75o+Q5qGI44Gu44GU5qGI5YaF?=
- =?UTF-8?B?44CNIOizvOWFpeODu+ioree9ruWVhuWTgeizvOWFpSDpgJrnn6U=?=
- <notifications@zohoprojects.com> sent on 2024-08-26 12:49:55 [in /home/runner/CRM/email_receiver.py:43]
-2024-09-25 09:10:08,438 WARNING: Received email from unknown sender: =?UTF-8?B?5Yy755mC5rOV5Lq66Iez6Kqg5Lya44Gf44KT44G944G95q2v56eR?=
- =?UTF-8?B?44CA44CM44Gf44KT44G944G95q2v56eR5qeY5ZCR44GR44OR44K944Kz?=
- =?UTF-8?B?44Oz6LK344GE5pu/44GI6Kq/5p+744O75o+Q5qGI44Gu44GU5qGI5YaF?=
- =?UTF-8?B?44CNIOizvOWFpeODu+ioree9ruWVhuWTgeizvOWFpSDpgJrnn6U=?=
- <notifications@zohoprojects.com> [in /home/runner/CRM/email_receiver.py:76]
-2024-09-25 09:10:08,920 INFO: Processing email from =?UTF-8?B?5Yy755mC5rOV5Lq66Iez6Kqg5Lya44Gf44KT44G944G95q2v56eR?=
- =?UTF-8?B?44CA44CM44Gf44KT44G944G95q2v56eR5qeY5ZCR44GR44OR44K944Kz?=
- =?UTF-8?B?44Oz6LK344GE5pu/44GI6Kq/5p+744O75o+Q5qGI44Gu44GU5qGI5YaF?=
- =?UTF-8?B?44CNIOizvOWFpeODu+ioree9ruWVhuWTgeizvOWFpSDpgJrnn6U=?=
- <notifications@zohoprojects.com> sent on 2024-08-26 12:49:59 [in /home/runner/CRM/email_receiver.py:43]
-2024-09-25 09:10:09,149 WARNING: Received email from unknown sender: =?UTF-8?B?5Yy755mC5rOV5Lq66Iez6Kqg5Lya44Gf44KT44G944G95q2v56eR?=
- =?UTF-8?B?44CA44CM44Gf44KT44G944G95q2v56eR5qeY5ZCR44GR44OR44K944Kz?=
- =?UTF-8?B?44Oz6LK344GE5pu/44GI6Kq/5p+744O75o+Q5qGI44Gu44GU5qGI5YaF?=
- =?UTF-8?B?44CNIOizvOWFpeODu+ioree9ruWVhuWTgeizvOWFpSDpgJrnn6U=?=
- <notifications@zohoprojects.com> [in /home/runner/CRM/email_receiver.py:76]
+2024-09-25 10:07:48,131 INFO: Processing email from =?UTF-8?B?57+U5rOz56S+IEJvb2sgTmV3cw==?=
+ <sebn_support@shoeisha.co.jp> sent on 2024-09-25 07:32:56 [in /home/runner/CRM/email_receiver.py:43]
+2024-09-25 10:07:48,353 WARNING: Received email from unknown sender: =?UTF-8?B?57+U5rOz56S+IEJvb2sgTmV3cw==?=
+ <sebn_support@shoeisha.co.jp> [in /home/runner/CRM/email_receiver.py:76]
+2024-09-25 10:07:48,365 WARNING: Received email from unknown sender: =?UTF-8?B?57+U5rOz56S+IEJvb2sgTmV3cw==?=
+ <sebn_support@shoeisha.co.jp> [in /home/runner/CRM/email_receiver.py:76]
+2024-09-25 10:07:48,769 INFO: Processing email from =?UTF-8?B?5qCq5byP5Lya56S+44Oe44OD44K344Ol44Oe44OI44Oq44OD44Kv44K5?=
+ <info@mashmatrix.com> sent on 2024-09-25 07:40:09 [in /home/runner/CRM/email_receiver.py:43]
+2024-09-25 10:07:48,864 INFO: Processing email from =?UTF-8?B?5qCq5byP5Lya56S+44Oe44OD44K344Ol44Oe44OI44Oq44OD44Kv44K5?=
+ <info@mashmatrix.com> sent on 2024-09-25 07:40:09 [in /home/runner/CRM/email_receiver.py:43]
+2024-09-25 10:07:48,998 WARNING: Received email from unknown sender: =?UTF-8?B?5qCq5byP5Lya56S+44Oe44OD44K344Ol44Oe44OI44Oq44OD44Kv44K5?=
+ <info@mashmatrix.com> [in /home/runner/CRM/email_receiver.py:76]
+2024-09-25 10:07:49,097 WARNING: Received email from unknown sender: =?UTF-8?B?5qCq5byP5Lya56S+44Oe44OD44K344Ol44Oe44OI44Oq44OD44Kv44K5?=
+ <info@mashmatrix.com> [in /home/runner/CRM/email_receiver.py:76]
+2024-09-25 10:07:49,387 INFO: Processing email from notify@zohoconnect.com sent on 2024-09-25 08:10:14 [in /home/runner/CRM/email_receiver.py:43]
+2024-09-25 10:07:49,391 INFO: Processing email from notify@zohoconnect.com sent on 2024-09-25 08:10:14 [in /home/runner/CRM/email_receiver.py:43]
+2024-09-25 10:07:49,615 WARNING: Received email from unknown sender: notify@zohoconnect.com [in /home/runner/CRM/email_receiver.py:76]
+2024-09-25 10:07:49,624 WARNING: Received email from unknown sender: notify@zohoconnect.com [in /home/runner/CRM/email_receiver.py:76]
+2024-09-25 10:07:50,033 INFO: Processing email from notify@zohoconnect.com sent on 2024-09-25 08:13:39 [in /home/runner/CRM/email_receiver.py:43]
+2024-09-25 10:07:50,119 INFO: Processing email from notify@zohoconnect.com sent on 2024-09-25 08:13:39 [in /home/runner/CRM/email_receiver.py:43]
+2024-09-25 10:07:50,261 WARNING: Received email from unknown sender: notify@zohoconnect.com [in /home/runner/CRM/email_receiver.py:76]
+2024-09-25 10:07:50,352 WARNING: Received email from unknown sender: notify@zohoconnect.com [in /home/runner/CRM/email_receiver.py:76]
+2024-09-25 10:07:50,699 INFO: Processing email from =?UTF-8?B?57+U5rOz56S+IEJvb2sgTmV3cw==?=
+ <sebn_support@shoeisha.co.jp> sent on 2024-09-25 08:33:18 [in /home/runner/CRM/email_receiver.py:43]
+2024-09-25 10:07:50,711 INFO: Processing email from =?UTF-8?B?57+U5rOz56S+IEJvb2sgTmV3cw==?=
+ <sebn_support@shoeisha.co.jp> sent on 2024-09-25 08:33:18 [in /home/runner/CRM/email_receiver.py:43]
+2024-09-25 10:07:50,928 WARNING: Received email from unknown sender: =?UTF-8?B?57+U5rOz56S+IEJvb2sgTmV3cw==?=
+ <sebn_support@shoeisha.co.jp> [in /home/runner/CRM/email_receiver.py:76]
+2024-09-25 10:07:50,944 WARNING: Received email from unknown sender: =?UTF-8?B?57+U5rOz56S+IEJvb2sgTmV3cw==?=
+ <sebn_support@shoeisha.co.jp> [in /home/runner/CRM/email_receiver.py:76]
+2024-09-25 10:07:51,359 INFO: Processing email from "=?utf-8?q?Pinterest?=" <recommendations@explore.pinterest.com> sent on 2024-09-25 08:57:51 [in /home/runner/CRM/email_receiver.py:43]
+2024-09-25 10:07:51,436 INFO: Processing email from "=?utf-8?q?Pinterest?=" <recommendations@explore.pinterest.com> sent on 2024-09-25 08:57:51 [in /home/runner/CRM/email_receiver.py:43]
+2024-09-25 10:07:51,587 WARNING: Received email from unknown sender: "=?utf-8?q?Pinterest?=" <recommendations@explore.pinterest.com> [in /home/runner/CRM/email_receiver.py:76]
+2024-09-25 10:07:51,670 WARNING: Received email from unknown sender: "=?utf-8?q?Pinterest?=" <recommendations@explore.pinterest.com> [in /home/runner/CRM/email_receiver.py:76]
+2024-09-25 10:07:52,000 INFO: Processing email from =?UTF-8?B?Q2hhdHdvcms=?= <noreply@chatwork.com> sent on 2024-09-25 09:13:17 [in /home/runner/CRM/email_receiver.py:43]
+2024-09-25 10:07:52,012 INFO: Processing email from =?UTF-8?B?Q2hhdHdvcms=?= <noreply@chatwork.com> sent on 2024-09-25 09:13:17 [in /home/runner/CRM/email_receiver.py:43]
+2024-09-25 10:07:52,230 WARNING: Received email from unknown sender: =?UTF-8?B?Q2hhdHdvcms=?= <noreply@chatwork.com> [in /home/runner/CRM/email_receiver.py:76]
+2024-09-25 10:07:52,245 WARNING: Received email from unknown sender: =?UTF-8?B?Q2hhdHdvcms=?= <noreply@chatwork.com> [in /home/runner/CRM/email_receiver.py:76]
+2024-09-25 10:07:52,662 INFO: Processing email from noreply-dmarc-support@google.com sent on 2024-09-24 23:59:59 [in /home/runner/CRM/email_receiver.py:43]
+2024-09-25 10:07:52,759 INFO: Processing email from noreply-dmarc-support@google.com sent on 2024-09-24 23:59:59 [in /home/runner/CRM/email_receiver.py:43]
+2024-09-25 10:07:52,895 WARNING: Received email from unknown sender: noreply-dmarc-support@google.com [in /home/runner/CRM/email_receiver.py:76]
+2024-09-25 10:07:52,988 WARNING: Received email from unknown sender: noreply-dmarc-support@google.com [in /home/runner/CRM/email_receiver.py:76]
+2024-09-25 10:10:49,911 INFO: CRM startup [in /home/runner/CRM/app.py:109]

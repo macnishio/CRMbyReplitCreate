@@ -128,7 +128,7 @@ agentRequireRestartOnSave = false
 
 [[workflows.workflow.tasks]]
 task = "shell.exec"
-args = "flask db migrate -m 'Add Email model and update Lead relationship'"
+args = "flask db migrate -m 'Add UnknownEmail model'"
 
 [[workflows.workflow]]
 name = "Remove Old Migrations"

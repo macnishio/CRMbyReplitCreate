@@ -2,7 +2,7 @@ import imaplib
 import email
 from email.header import decode_header
 from flask import current_app
-from models import Email, Lead
+from models import Email, Lead, UnknownEmail
 from extensions import db
 from flask_apscheduler import APScheduler
 from datetime import datetime, timedelta
@@ -26,6 +26,9 @@ def fetch_emails(days_back=30):
     current_app.logger.info(f"Fetching emails from {start_date.strftime('%Y-%m-%d')} to {end_date.strftime('%Y-%m-%d')}")
 
     _, search_data = mail.search(None, date_criterion)
+
+    total_emails = len(search_data[0].split())
+    current_app.logger.info(f"Total emails fetched: {total_emails}")
 
     for num in search_data[0].split():
         _, data = mail.fetch(num, '(RFC822)')
@@ -57,6 +60,9 @@ def fetch_emails(days_back=30):
     mail.close()
     mail.logout()
 
+    current_app.logger.info(f"Emails from known leads: {Email.query.filter(Email.received_at >= start_date).count()}")
+    current_app.logger.info(f"Emails from unknown senders: {UnknownEmail.query.filter(UnknownEmail.received_at >= start_date).count()}")
+
 def process_email(sender, subject, content, date):
     lead = Lead.query.filter_by(email=sender).first()
     if lead:
@@ -74,6 +80,13 @@ def process_email(sender, subject, content, date):
             current_app.logger.info(f"Duplicate email skipped for lead: {lead.name}, received at {date}")
     else:
         current_app.logger.warning(f"Received email from unknown sender: {sender}")
+        unknown_email = UnknownEmail(sender=sender,
+                                     subject=subject,
+                                     content=content,
+                                     received_at=date)
+        db.session.add(unknown_email)
+        db.session.commit()
+        current_app.logger.info(f"Stored email from unknown sender: {sender}")
 
 def setup_email_scheduler(app):
     scheduler = APScheduler()
