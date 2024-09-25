@@ -60,7 +60,7 @@ def process_email(sender, subject, content, date):
                               sender_name=sender_name,
                               subject=subject,
                               content=content,
-                              received_at=date,  # Use the original email date
+                              received_at=date,
                               lead=lead)
             db.session.add(new_email)
             db.session.commit()
@@ -134,8 +134,7 @@ def fetch_emails(days_back=30, lead_id=None):
                     try:
                         body = part.get_payload(decode=True).decode(
                             encoding or 'utf-8', errors='ignore')
-                        body = body.replace('\x00',
-                                            '')  # Remove NUL characters
+                        body = body.replace('\x00', '')  # Remove NUL characters
                     except Exception as e:
                         current_app.logger.error(
                             f"Error decoding email body: {str(e)}")

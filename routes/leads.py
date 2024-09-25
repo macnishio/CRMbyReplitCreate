@@ -7,6 +7,7 @@ from analytics import calculate_lead_score, train_lead_scoring_model, predict_le
 from email_utils import send_follow_up_email, send_automated_follow_ups, needs_follow_up
 from datetime import datetime
 from email_receiver import fetch_emails
+from sqlalchemy import func
 
 bp = Blueprint('leads', __name__, url_prefix='/leads')
 
@@ -47,7 +48,7 @@ def create_lead():
 @login_required
 def lead_detail(id):
     lead = Lead.query.get_or_404(id)
-    emails = Email.query.filter_by(lead_id=lead.id).order_by(Email.received_at.desc()).all()
+    emails = Email.query.filter(Email.lead_id == lead.id, func.lower(Email.sender) == func.lower(lead.email)).order_by(Email.received_at.desc()).all()
     return render_template('leads/detail.html', lead=lead, emails=emails)
 
 @bp.route('/<int:id>/edit', methods=['GET', 'POST'])
@@ -146,6 +147,10 @@ def trigger_followups():
 @login_required
 def refresh_lead_emails(id):
     lead = Lead.query.get_or_404(id)
+    # Clear existing emails for this lead
+    Email.query.filter_by(lead_id=lead.id).delete()
+    db.session.commit()
+    # Fetch new emails
     fetch_emails(lead_id=lead.id)
     flash('Emails refreshed successfully', 'success')
     return redirect(url_for('leads.lead_detail', id=lead.id))
