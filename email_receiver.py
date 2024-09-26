@@ -28,7 +28,7 @@ def connect_to_email_server():
         context.verify_mode = ssl.CERT_NONE
         
         # Try different SSL/TLS versions
-        ssl_versions = [ssl.PROTOCOL_TLSv1_2, ssl.PROTOCOL_TLSv1_1, ssl.PROTOCOL_TLSv1]
+        ssl_versions = [ssl.PROTOCOL_TLS, ssl.PROTOCOL_TLSv1_2, ssl.PROTOCOL_TLSv1_1, ssl.PROTOCOL_TLSv1]
         for ssl_version in ssl_versions:
             try:
                 context.options |= ssl_version
