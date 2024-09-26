@@ -1,65 +1,81 @@
-2024-09-26 00:03:37,910 WARNING: Received email from unknown sender: noreply@site24x7.com [in /home/runner/CRM/email_receiver.py:59]
-2024-09-26 00:03:38,436 INFO: Stored email from unknown sender: noreply@site24x7.com [in /home/runner/CRM/email_receiver.py:67]
-2024-09-26 00:03:38,734 INFO: Processing email - Sender: =?iso-2022-jp?B?GyRCJVklLyU/ITwlVyVtJWwlOBsoQg==?= <shopmail@vector.co.jp>, Subject: 【ディスクコピー部門賞】受賞記念【, Original Date: Tue, 27 Aug 2024 06:07:35 +0900 (JST), Parsed Date: 2024-08-26 21:07:35 [in /home/runner/CRM/email_receiver.py:109]
-2024-09-26 00:03:39,455 WARNING: Received email from unknown sender: =?iso-2022-jp?B?GyRCJVklLyU/ITwlVyVtJWwlOBsoQg==?= <shopmail@vector.co.jp> [in /home/runner/CRM/email_receiver.py:59]
-2024-09-26 00:03:39,939 INFO: Stored email from unknown sender: =?iso-2022-jp?B?GyRCJVklLyU/ITwlVyVtJWwlOBsoQg==?= <shopmail@vector.co.jp> [in /home/runner/CRM/email_receiver.py:67]
-2024-09-26 00:03:40,349 INFO: Processing email - Sender: Pinterest <recommendations@discover.pinterest.com>, Subject: Makoto さん、いいセンスをしてますね！, Original Date: Mon, 26 Aug 2024 22:04:04 +0000, Parsed Date: 2024-08-26 22:04:04 [in /home/runner/CRM/email_receiver.py:109]
-2024-09-26 00:03:41,069 WARNING: Received email from unknown sender: Pinterest <recommendations@discover.pinterest.com> [in /home/runner/CRM/email_receiver.py:59]
-2024-09-26 00:03:41,553 INFO: Stored email from unknown sender: Pinterest <recommendations@discover.pinterest.com> [in /home/runner/CRM/email_receiver.py:67]
-2024-09-26 00:03:41,975 INFO: Processing email - Sender: makoto@team240.net, Subject: 「現在在庫有」レポートをご確認ください, Original Date: Mon, 26 Aug 2024 16:00:02 -0700 (PDT), Parsed Date: 2024-08-26 23:00:02 [in /home/runner/CRM/email_receiver.py:109]
-2024-09-26 00:03:42,696 WARNING: Received email from unknown sender: makoto@team240.net [in /home/runner/CRM/email_receiver.py:59]
-2024-09-26 00:03:43,179 INFO: Stored email from unknown sender: makoto@team240.net [in /home/runner/CRM/email_receiver.py:67]
-2024-09-26 00:03:43,488 INFO: Processing email - Sender: =?UTF-8?B?5qCq5byP5Lya56S+44Kz44Oz44OG44OD44Kv44K5IOmAmuefpQ==?=
- <notifications@zohoprojects.com>, Subject: Zoho Projects - 毎日の新着情報, Original Date: Mon, 26 Aug 2024 16:00:04 -0700 (PDT), Parsed Date: 2024-08-26 23:00:04 [in /home/runner/CRM/email_receiver.py:109]
-2024-09-26 00:03:44,208 WARNING: Received email from unknown sender: =?UTF-8?B?5qCq5byP5Lya56S+44Kz44Oz44OG44OD44Kv44K5IOmAmuefpQ==?=
+2024-09-26 00:04:20,005 INFO: Processing email - Sender: =?UTF-8?Q?=E3=83=88=E3=83=BC=E3=83=9E=E3=82=B9=E3=80=80=E3=83=9E=E3=82=B1?=
+ =?UTF-8?Q?=E3=83=B4=E3=82=A9=E3=82=A4_Con?=
+ =?UTF-8?Q?tact_Search_=E9=80=9A=E7=9F=A5?= <notifications@zohoprojects.com>, Subject: [トーマス　マケヴォイ Contact Search] [AY51-T2 Conduct Online Search] タスクが追加されました, Original Date: Mon, 26 Aug 2024 17:42:23 -0700 (PDT), Parsed Date: 2024-08-27 00:42:23 [in /home/runner/CRM/email_receiver.py:109]
+2024-09-26 00:04:20,726 WARNING: Received email from unknown sender: =?UTF-8?Q?=E3=83=88=E3=83=BC=E3=83=9E=E3=82=B9=E3=80=80=E3=83=9E=E3=82=B1?=
+ =?UTF-8?Q?=E3=83=B4=E3=82=A9=E3=82=A4_Con?=
+ =?UTF-8?Q?tact_Search_=E9=80=9A=E7=9F=A5?= <notifications@zohoprojects.com> [in /home/runner/CRM/email_receiver.py:59]
+2024-09-26 00:04:21,210 INFO: Stored email from unknown sender: =?UTF-8?Q?=E3=83=88=E3=83=BC=E3=83=9E=E3=82=B9=E3=80=80=E3=83=9E=E3=82=B1?=
+ =?UTF-8?Q?=E3=83=B4=E3=82=A9=E3=82=A4_Con?=
+ =?UTF-8?Q?tact_Search_=E9=80=9A=E7=9F=A5?= <notifications@zohoprojects.com> [in /home/runner/CRM/email_receiver.py:67]
+2024-09-26 00:04:21,511 INFO: Processing email - Sender: =?UTF-8?Q?=E3=83=88=E3=83=BC=E3=83=9E=E3=82=B9=E3=80=80=E3=83=9E=E3=82=B1?=
+ =?UTF-8?Q?=E3=83=B4=E3=82=A9=E3=82=A4_Con?=
+ =?UTF-8?Q?tact_Search_=E9=80=9A=E7=9F=A5?= <notifications@zohoprojects.com>, Subject: [トーマス　マケヴォイ Contact Search] [AY51-T3 Reach Out to Potential Contacts] タスクが追加されました, Original Date: Mon, 26 Aug 2024 17:42:50 -0700 (PDT), Parsed Date: 2024-08-27 00:42:50 [in /home/runner/CRM/email_receiver.py:109]
+2024-09-26 00:04:22,233 WARNING: Received email from unknown sender: =?UTF-8?Q?=E3=83=88=E3=83=BC=E3=83=9E=E3=82=B9=E3=80=80=E3=83=9E=E3=82=B1?=
+ =?UTF-8?Q?=E3=83=B4=E3=82=A9=E3=82=A4_Con?=
+ =?UTF-8?Q?tact_Search_=E9=80=9A=E7=9F=A5?= <notifications@zohoprojects.com> [in /home/runner/CRM/email_receiver.py:59]
+2024-09-26 00:04:22,716 INFO: Stored email from unknown sender: =?UTF-8?Q?=E3=83=88=E3=83=BC=E3=83=9E=E3=82=B9=E3=80=80=E3=83=9E=E3=82=B1?=
+ =?UTF-8?Q?=E3=83=B4=E3=82=A9=E3=82=A4_Con?=
+ =?UTF-8?Q?tact_Search_=E9=80=9A=E7=9F=A5?= <notifications@zohoprojects.com> [in /home/runner/CRM/email_receiver.py:67]
+2024-09-26 00:04:23,020 INFO: Processing email - Sender: =?UTF-8?Q?=E3=83=88=E3=83=BC=E3=83=9E=E3=82=B9=E3=80=80=E3=83=9E=E3=82=B1?=
+ =?UTF-8?Q?=E3=83=B4=E3=82=A9=E3=82=A4_Con?=
+ =?UTF-8?Q?tact_Search_=E9=80=9A=E7=9F=A5?= <notifications@zohoprojects.com>, Subject: [トーマス　マケヴォイ Contact Search] [AY51-T4 Compile and Report Findings] タスクが追加されました, Original Date: Mon, 26 Aug 2024 17:43:16 -0700 (PDT), Parsed Date: 2024-08-27 00:43:16 [in /home/runner/CRM/email_receiver.py:109]
+2024-09-26 00:04:23,741 WARNING: Received email from unknown sender: =?UTF-8?Q?=E3=83=88=E3=83=BC=E3=83=9E=E3=82=B9=E3=80=80=E3=83=9E=E3=82=B1?=
+ =?UTF-8?Q?=E3=83=B4=E3=82=A9=E3=82=A4_Con?=
+ =?UTF-8?Q?tact_Search_=E9=80=9A=E7=9F=A5?= <notifications@zohoprojects.com> [in /home/runner/CRM/email_receiver.py:59]
+2024-09-26 00:04:24,224 INFO: Stored email from unknown sender: =?UTF-8?Q?=E3=83=88=E3=83=BC=E3=83=9E=E3=82=B9=E3=80=80=E3=83=9E=E3=82=B1?=
+ =?UTF-8?Q?=E3=83=B4=E3=82=A9=E3=82=A4_Con?=
+ =?UTF-8?Q?tact_Search_=E9=80=9A=E7=9F=A5?= <notifications@zohoprojects.com> [in /home/runner/CRM/email_receiver.py:67]
+2024-09-26 00:04:24,528 INFO: Processing email - Sender: =?UTF-8?Q?=E3=83=88=E3=83=BC=E3=83=9E=E3=82=B9=E3=80=80=E3=83=9E=E3=82=B1?=
+ =?UTF-8?Q?=E3=83=B4=E3=82=A9=E3=82=A4_Con?=
+ =?UTF-8?Q?tact_Search_=E9=80=9A=E7=9F=A5?= <notifications@zohoprojects.com>, Subject: [トーマス　マケヴォイ Contact Search] [AY51-T5 Incomplete or Inaccurate Information] タスクが追加されました, Original Date: Mon, 26 Aug 2024 17:43:39 -0700 (PDT), Parsed Date: 2024-08-27 00:43:39 [in /home/runner/CRM/email_receiver.py:109]
+2024-09-26 00:04:25,248 WARNING: Received email from unknown sender: =?UTF-8?Q?=E3=83=88=E3=83=BC=E3=83=9E=E3=82=B9=E3=80=80=E3=83=9E=E3=82=B1?=
+ =?UTF-8?Q?=E3=83=B4=E3=82=A9=E3=82=A4_Con?=
+ =?UTF-8?Q?tact_Search_=E9=80=9A=E7=9F=A5?= <notifications@zohoprojects.com> [in /home/runner/CRM/email_receiver.py:59]
+2024-09-26 00:04:25,732 INFO: Stored email from unknown sender: =?UTF-8?Q?=E3=83=88=E3=83=BC=E3=83=9E=E3=82=B9=E3=80=80=E3=83=9E=E3=82=B1?=
+ =?UTF-8?Q?=E3=83=B4=E3=82=A9=E3=82=A4_Con?=
+ =?UTF-8?Q?tact_Search_=E9=80=9A=E7=9F=A5?= <notifications@zohoprojects.com> [in /home/runner/CRM/email_receiver.py:67]
+2024-09-26 00:04:26,034 INFO: Processing email - Sender: =?UTF-8?Q?=E3=83=88=E3=83=BC=E3=83=9E=E3=82=B9=E3=80=80=E3=83=9E=E3=82=B1?=
+ =?UTF-8?Q?=E3=83=B4=E3=82=A9=E3=82=A4_Con?=
+ =?UTF-8?Q?tact_Search_=E9=80=9A=E7=9F=A5?= <notifications@zohoprojects.com>, Subject: [トーマス　マケヴォイ Contact Search] [AY51-T6 Difficulty in Finding Relevant Data] タスクが追加されました, Original Date: Mon, 26 Aug 2024 17:44:06 -0700 (PDT), Parsed Date: 2024-08-27 00:44:06 [in /home/runner/CRM/email_receiver.py:109]
+2024-09-26 00:04:26,755 WARNING: Received email from unknown sender: =?UTF-8?Q?=E3=83=88=E3=83=BC=E3=83=9E=E3=82=B9=E3=80=80=E3=83=9E=E3=82=B1?=
+ =?UTF-8?Q?=E3=83=B4=E3=82=A9=E3=82=A4_Con?=
+ =?UTF-8?Q?tact_Search_=E9=80=9A=E7=9F=A5?= <notifications@zohoprojects.com> [in /home/runner/CRM/email_receiver.py:59]
+2024-09-26 00:04:27,239 INFO: Stored email from unknown sender: =?UTF-8?Q?=E3=83=88=E3=83=BC=E3=83=9E=E3=82=B9=E3=80=80=E3=83=9E=E3=82=B1?=
+ =?UTF-8?Q?=E3=83=B4=E3=82=A9=E3=82=A4_Con?=
+ =?UTF-8?Q?tact_Search_=E9=80=9A=E7=9F=A5?= <notifications@zohoprojects.com> [in /home/runner/CRM/email_receiver.py:67]
+2024-09-26 00:04:27,541 INFO: Processing email - Sender: =?UTF-8?Q?=E3=83=88=E3=83=BC=E3=83=9E=E3=82=B9=E3=80=80=E3=83=9E=E3=82=B1?=
+ =?UTF-8?Q?=E3=83=B4=E3=82=A9=E3=82=A4_Con?=
+ =?UTF-8?Q?tact_Search_=E9=80=9A=E7=9F=A5?= <notifications@zohoprojects.com>, Subject: [トーマス　マケヴォイ Contact Search] [AY51-T7 Non-responsive Leads] タスクが追加されました, Original Date: Mon, 26 Aug 2024 17:44:38 -0700 (PDT), Parsed Date: 2024-08-27 00:44:38 [in /home/runner/CRM/email_receiver.py:109]
+2024-09-26 00:04:28,262 WARNING: Received email from unknown sender: =?UTF-8?Q?=E3=83=88=E3=83=BC=E3=83=9E=E3=82=B9=E3=80=80=E3=83=9E=E3=82=B1?=
+ =?UTF-8?Q?=E3=83=B4=E3=82=A9=E3=82=A4_Con?=
+ =?UTF-8?Q?tact_Search_=E9=80=9A=E7=9F=A5?= <notifications@zohoprojects.com> [in /home/runner/CRM/email_receiver.py:59]
+2024-09-26 00:04:28,745 INFO: Stored email from unknown sender: =?UTF-8?Q?=E3=83=88=E3=83=BC=E3=83=9E=E3=82=B9=E3=80=80=E3=83=9E=E3=82=B1?=
+ =?UTF-8?Q?=E3=83=B4=E3=82=A9=E3=82=A4_Con?=
+ =?UTF-8?Q?tact_Search_=E9=80=9A=E7=9F=A5?= <notifications@zohoprojects.com> [in /home/runner/CRM/email_receiver.py:67]
+2024-09-26 00:04:29,048 INFO: Processing email - Sender: =?UTF-8?Q?=E3=83=88=E3=83=BC=E3=83=9E=E3=82=B9=E3=80=80=E3=83=9E=E3=82=B1?=
+ =?UTF-8?Q?=E3=83=B4=E3=82=A9=E3=82=A4_Con?=
+ =?UTF-8?Q?tact_Search_=E9=80=9A=E7=9F=A5?= <notifications@zohoprojects.com>, Subject: [トーマス　マケヴォイ Contact Search] [AY51-T8 Privacy and Data Protection Concerns] タスクが追加されました, Original Date: Mon, 26 Aug 2024 17:45:01 -0700 (PDT), Parsed Date: 2024-08-27 00:45:01 [in /home/runner/CRM/email_receiver.py:109]
+2024-09-26 00:04:29,769 WARNING: Received email from unknown sender: =?UTF-8?Q?=E3=83=88=E3=83=BC=E3=83=9E=E3=82=B9=E3=80=80=E3=83=9E=E3=82=B1?=
+ =?UTF-8?Q?=E3=83=B4=E3=82=A9=E3=82=A4_Con?=
+ =?UTF-8?Q?tact_Search_=E9=80=9A=E7=9F=A5?= <notifications@zohoprojects.com> [in /home/runner/CRM/email_receiver.py:59]
+2024-09-26 00:04:30,252 INFO: Stored email from unknown sender: =?UTF-8?Q?=E3=83=88=E3=83=BC=E3=83=9E=E3=82=B9=E3=80=80=E3=83=9E=E3=82=B1?=
+ =?UTF-8?Q?=E3=83=B4=E3=82=A9=E3=82=A4_Con?=
+ =?UTF-8?Q?tact_Search_=E9=80=9A=E7=9F=A5?= <notifications@zohoprojects.com> [in /home/runner/CRM/email_receiver.py:67]
+2024-09-26 00:04:30,561 INFO: Processing email - Sender: =?UTF-8?Q?=E3=83=88=E3=83=BC=E3=83=9E=E3=82=B9_?=
+ =?UTF-8?Q?=E3=83=9E=E3=82=B1=E3=83=B4=E3=82=A9=E3=82=A4?=
+ =?UTF-8?Q?_-_Contact_?= =?UTF-8?Q?Search_and_Analysis_=E9=80=9A=E7=9F=A5?=
+ <notifications@zohoprojects.com>, Subject: [トーマス マケヴォイ - Contact Search and Analysis] [A9OC-T5 Needs Analysis and Proposal Development] タスクのコメントを追加しました, Original Date: Mon, 26 Aug 2024 17:45:44 -0700 (PDT), Parsed Date: 2024-08-27 00:45:44 [in /home/runner/CRM/email_receiver.py:109]
+2024-09-26 00:04:31,282 WARNING: Received email from unknown sender: =?UTF-8?Q?=E3=83=88=E3=83=BC=E3=83=9E=E3=82=B9_?=
+ =?UTF-8?Q?=E3=83=9E=E3=82=B1=E3=83=B4=E3=82=A9=E3=82=A4?=
+ =?UTF-8?Q?_-_Contact_?= =?UTF-8?Q?Search_and_Analysis_=E9=80=9A=E7=9F=A5?=
  <notifications@zohoprojects.com> [in /home/runner/CRM/email_receiver.py:59]
-2024-09-26 00:03:44,931 INFO: Stored email from unknown sender: =?UTF-8?B?5qCq5byP5Lya56S+44Kz44Oz44OG44OD44Kv44K5IOmAmuefpQ==?=
+2024-09-26 00:04:32,004 INFO: Stored email from unknown sender: =?UTF-8?Q?=E3=83=88=E3=83=BC=E3=83=9E=E3=82=B9_?=
+ =?UTF-8?Q?=E3=83=9E=E3=82=B1=E3=83=B4=E3=82=A9=E3=82=A4?=
+ =?UTF-8?Q?_-_Contact_?= =?UTF-8?Q?Search_and_Analysis_=E9=80=9A=E7=9F=A5?=
  <notifications@zohoprojects.com> [in /home/runner/CRM/email_receiver.py:67]
-2024-09-26 00:03:45,406 INFO: Processing email - Sender: noreply@zohocalendar.com, Subject: 日の予定表はこちらです, Original Date: Mon, 26 Aug 2024 16:00:02 -0700 (PDT), Parsed Date: 2024-08-26 23:00:02 [in /home/runner/CRM/email_receiver.py:109]
-2024-09-26 00:03:46,127 WARNING: Received email from unknown sender: noreply@zohocalendar.com [in /home/runner/CRM/email_receiver.py:59]
-2024-09-26 00:03:47,567 INFO: Stored email from unknown sender: noreply@zohocalendar.com [in /home/runner/CRM/email_receiver.py:67]
-2024-09-26 00:03:47,915 INFO: Processing email - Sender: =?UTF-8?B?U3VuKuODnuODvOOCseODhuOCo+ODs+OCsOODgeODvOODoA==?= <marketing@sun-asterisk.com>, Subject: 【期間限定】Sun*の事業開発スタディ～開発組織の強化編～, Original Date: Tue, 27 Aug 2024 08:06:10 +0900, Parsed Date: 2024-08-26 23:06:10 [in /home/runner/CRM/email_receiver.py:109]
-2024-09-26 00:03:48,636 WARNING: Received email from unknown sender: =?UTF-8?B?U3VuKuODnuODvOOCseODhuOCo+ODs+OCsOODgeODvOODoA==?= <marketing@sun-asterisk.com> [in /home/runner/CRM/email_receiver.py:59]
-2024-09-26 00:03:49,120 INFO: Stored email from unknown sender: =?UTF-8?B?U3VuKuODnuODvOOCseODhuOCo+ODs+OCsOODgeODvOODoA==?= <marketing@sun-asterisk.com> [in /home/runner/CRM/email_receiver.py:67]
-2024-09-26 00:03:49,434 INFO: Processing email - Sender: =?UTF-8?B?5bGx5pysIOOBiOOCiuOBiyB8IOODkOOCr+ODqeOCrw==?=
- <hello.bakuraku@layerx.co.jp>, Subject: 【無料配布】累計10,000社の導入企業の知見がつまった業務フロー図をプレゼント！, Original Date: Mon, 26 Aug 2024 17:06:27 -0600, Parsed Date: 2024-08-26 23:06:27 [in /home/runner/CRM/email_receiver.py:109]
-2024-09-26 00:03:50,155 WARNING: Received email from unknown sender: =?UTF-8?B?5bGx5pysIOOBiOOCiuOBiyB8IOODkOOCr+ODqeOCrw==?=
- <hello.bakuraku@layerx.co.jp> [in /home/runner/CRM/email_receiver.py:59]
-2024-09-26 00:03:50,638 INFO: Stored email from unknown sender: =?UTF-8?B?5bGx5pysIOOBiOOCiuOBiyB8IOODkOOCr+ODqeOCrw==?=
- <hello.bakuraku@layerx.co.jp> [in /home/runner/CRM/email_receiver.py:67]
-2024-09-26 00:03:51,048 INFO: Processing email - Sender: =?UTF-8?B?6L+R6Jek5Y2D5aWI576O?= <chinami.kondo@kontecs.com>, Subject: 招待 - 更新: Zoho定例MTG - 2024年 9月 2日 (月) 午後1時 ～ 午後2時 (JST) (Makoto Nishio), Original Date: Mon, 26 Aug 2024 23:08:09 +0000, Parsed Date: 2024-08-26 23:08:09 [in /home/runner/CRM/email_receiver.py:109]
-2024-09-26 00:03:51,769 WARNING: Received email from unknown sender: =?UTF-8?B?6L+R6Jek5Y2D5aWI576O?= <chinami.kondo@kontecs.com> [in /home/runner/CRM/email_receiver.py:59]
-2024-09-26 00:03:52,296 INFO: Stored email from unknown sender: =?UTF-8?B?6L+R6Jek5Y2D5aWI576O?= <chinami.kondo@kontecs.com> [in /home/runner/CRM/email_receiver.py:67]
-2024-09-26 00:03:52,602 INFO: Processing email - Sender: 
-	=?utf-8?q?YEALE_=E9=81=8B=E5=96=B6=E4=BA=8B=E5=8B=99=E5=B1=80_powered_by_?=
-	=?utf-8?q?=E6=A0=AA=E5=BC=8F=E4=BC=9A=E7=A4=BE=E3=82=BB=E3=83=AC=E3=83=96?=
-	=?utf-8?q?=E3=83=AA=E3=83=83=E3=82=AF=E3=82=B9?=
-	<yeale_support@yeale-by-cerebrix.com>, Subject: 本日13時！「営業スキル」を定義する, Original Date: Mon, 26 Aug 2024 23:17:58 +0000 (UTC), Parsed Date: 2024-08-26 23:17:58 [in /home/runner/CRM/email_receiver.py:109]
-2024-09-26 00:03:53,323 WARNING: Received email from unknown sender: 
-	=?utf-8?q?YEALE_=E9=81=8B=E5=96=B6=E4=BA=8B=E5=8B=99=E5=B1=80_powered_by_?=
-	=?utf-8?q?=E6=A0=AA=E5=BC=8F=E4=BC=9A=E7=A4=BE=E3=82=BB=E3=83=AC=E3=83=96?=
-	=?utf-8?q?=E3=83=AA=E3=83=83=E3=82=AF=E3=82=B9?=
-	<yeale_support@yeale-by-cerebrix.com> [in /home/runner/CRM/email_receiver.py:59]
-2024-09-26 00:03:53,830 INFO: Stored email from unknown sender: 
-	=?utf-8?q?YEALE_=E9=81=8B=E5=96=B6=E4=BA=8B=E5=8B=99=E5=B1=80_powered_by_?=
-	=?utf-8?q?=E6=A0=AA=E5=BC=8F=E4=BC=9A=E7=A4=BE=E3=82=BB=E3=83=AC=E3=83=96?=
-	=?utf-8?q?=E3=83=AA=E3=83=83=E3=82=AF=E3=82=B9?=
-	<yeale_support@yeale-by-cerebrix.com> [in /home/runner/CRM/email_receiver.py:67]
-2024-09-26 00:03:54,128 INFO: Processing email - Sender: =?UTF-8?B?Q29kZVppbmXnt6jpm4bpg6g=?= <support@codezine.jp>, Subject: 生成AIの最新トレンドと成功事例を学ぶ Microsoft Azure Bootcamp 9月開催[CodeZine News号外], Original Date: Tue, 27 Aug 2024 08:32:37 +0900, Parsed Date: 2024-08-26 23:32:37 [in /home/runner/CRM/email_receiver.py:109]
-2024-09-26 00:03:54,849 WARNING: Received email from unknown sender: =?UTF-8?B?Q29kZVppbmXnt6jpm4bpg6g=?= <support@codezine.jp> [in /home/runner/CRM/email_receiver.py:59]
-2024-09-26 00:03:55,332 INFO: Stored email from unknown sender: =?UTF-8?B?Q29kZVppbmXnt6jpm4bpg6g=?= <support@codezine.jp> [in /home/runner/CRM/email_receiver.py:67]
-2024-09-26 00:03:55,780 INFO: Processing email - Sender: noreply@site24x7.com, Subject: team240.com は ダウン  シアトル - US, Original Date: Mon, 26 Aug 2024 16:41:18 -0700 (PDT), Parsed Date: 2024-08-26 23:41:18 [in /home/runner/CRM/email_receiver.py:109]
-2024-09-26 00:03:56,502 WARNING: Received email from unknown sender: noreply@site24x7.com [in /home/runner/CRM/email_receiver.py:59]
-2024-09-26 00:03:56,985 INFO: Stored email from unknown sender: noreply@site24x7.com [in /home/runner/CRM/email_receiver.py:67]
-2024-09-26 00:03:57,387 INFO: Processing email - Sender: noreply@site24x7.com, Subject: team240.net は ダウン  シアトル - US, Original Date: Mon, 26 Aug 2024 16:41:18 -0700 (PDT), Parsed Date: 2024-08-26 23:41:18 [in /home/runner/CRM/email_receiver.py:109]
-2024-09-26 00:03:58,108 WARNING: Received email from unknown sender: noreply@site24x7.com [in /home/runner/CRM/email_receiver.py:59]
-2024-09-26 00:03:58,592 INFO: Stored email from unknown sender: noreply@site24x7.com [in /home/runner/CRM/email_receiver.py:67]
-2024-09-26 00:03:59,059 INFO: Processing email - Sender: noreply@site24x7.com, Subject: team240.net は アップ, Original Date: Mon, 26 Aug 2024 16:51:24 -0700 (PDT), Parsed Date: 2024-08-26 23:51:24 [in /home/runner/CRM/email_receiver.py:109]
-2024-09-26 00:03:59,780 WARNING: Received email from unknown sender: noreply@site24x7.com [in /home/runner/CRM/email_receiver.py:59]
-2024-09-26 00:04:00,264 INFO: Stored email from unknown sender: noreply@site24x7.com [in /home/runner/CRM/email_receiver.py:67]
-2024-09-26 00:04:00,758 INFO: Processing email - Sender: noreply@site24x7.com, Subject: team240.com は アップ, Original Date: Mon, 26 Aug 2024 16:51:24 -0700 (PDT), Parsed Date: 2024-08-26 23:51:24 [in /home/runner/CRM/email_receiver.py:109]
-2024-09-26 00:04:01,479 WARNING: Received email from unknown sender: noreply@site24x7.com [in /home/runner/CRM/email_receiver.py:59]
-2024-09-26 00:04:01,962 INFO: Stored email from unknown sender: noreply@site24x7.com [in /home/runner/CRM/email_receiver.py:67]
-2024-09-26 00:04:02,256 INFO: Processing email - Sender: noreply@site24x7.com, Subject: インシデントの概要 : team240.com, Original Date: Mon, 26 Aug 2024 16:51:25 -0700 (PDT), Parsed Date: 2024-08-26 23:51:25 [in /home/runner/CRM/email_receiver.py:109]
-2024-09-26 00:04:02,977 WARNING: Received email from unknown sender: noreply@site24x7.com [in /home/runner/CRM/email_receiver.py:59]
-2024-09-26 00:04:03,504 INFO: Stored email from unknown sender: noreply@site24x7.com [in /home/runner/CRM/email_receiver.py:67]
+2024-09-26 00:04:32,372 INFO: Processing email - Sender: =?UTF-8?Q?=E3=83=88=E3=83=BC=E3=83=9E=E3=82=B9=E3=80=80=E3=83=9E=E3=82=B1?=
+ =?UTF-8?Q?=E3=83=B4=E3=82=A9=E3=82=A4_Con?=
+ =?UTF-8?Q?tact_Search_=E9=80=9A=E7=9F=A5?= <notifications@zohoprojects.com>, Subject: [トーマス　マケヴォイ Contact Search] [AY51-T2 Conduct Online Search] タスクのコメントを追加しました, Original Date: Mon, 26 Aug 2024 17:45:45 -0700 (PDT), Parsed Date: 2024-08-27 00:45:45 [in /home/runner/CRM/email_receiver.py:109]
+2024-09-26 00:04:33,092 WARNING: Received email from unknown sender: =?UTF-8?Q?=E3=83=88=E3=83=BC=E3=83=9E=E3=82=B9=E3=80=80=E3=83=9E=E3=82=B1?=
+ =?UTF-8?Q?=E3=83=B4=E3=82=A9=E3=82=A4_Con?=
+ =?UTF-8?Q?tact_Search_=E9=80=9A=E7=9F=A5?= <notifications@zohoprojects.com> [in /home/runner/CRM/email_receiver.py:59]

@@ -11,8 +11,9 @@ This is a comprehensive Customer Relationship Management (CRM) application built
 - Task management
 - Scheduling
 - Reporting and analytics
-- Email integration for automated follow-ups
-- Mobile-friendly interface
+- Email integration for automated follow-ups and lead tracking
+- Mobile-friendly interface (Progressive Web App)
+- Data enrichment capabilities (prepared for integration with third-party services)
 
 ## Requirements
 - Python 3.9+
@@ -47,6 +48,18 @@ To run the tests, use the following command:
 python -m unittest discover tests
 ```
 
+## Email Integration
+The application now includes email integration for lead tracking and automated follow-ups. Emails are fetched every 30 minutes and associated with existing leads or stored as unknown emails for review.
+
+## Lead Scoring
+An AI-powered lead scoring system has been implemented to help prioritize leads based on various factors. The scoring model is periodically retrained to improve accuracy.
+
+## Mobile Access
+The application has been optimized for mobile devices using a Progressive Web App (PWA) approach, allowing field sales representatives to access and update information on-the-go.
+
+## Data Enrichment
+While not fully implemented, the application includes a foundation for data enrichment using third-party services. This can be extended in the future to provide more comprehensive lead and account information.
+
 ## Contributing
 Please read CONTRIBUTING.md for details on our code of conduct and the process for submitting pull requests.
 
@@ -59,3 +72,5 @@ This project is licensed under the MIT License - see the LICENSE.md file for det
 - Chart.js for data visualization
 - Bootstrap for responsive design
 
+## Support
+For any questions or issues, please open an issue in the GitHub repository or contact the development team.
