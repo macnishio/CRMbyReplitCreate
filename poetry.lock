@@ -424,6 +424,17 @@ files = [
 all = ["flake8 (>=7.1.1)", "mypy (>=1.11.2)", "pytest (>=8.3.2)", "ruff (>=0.6.2)"]
 
 [[package]]
+name = "imap-tools"
+version = "1.0.0"
+description = "Work with email by IMAP"
+optional = false
+python-versions = "*"
+files = [
+    {file = "imap-tools-1.0.0.tar.gz", hash = "sha256:12844f210b13c522c87c46b4daef37745283f0e857b574756270f9579bd532f8"},
+    {file = "imap_tools-1.0.0-py3-none-any.whl", hash = "sha256:dc8684580468a722f9e5c00073eb72ce58cb8c888f391a7eec15f88a9001254f"},
+]
+
+[[package]]
 name = "importlib-resources"
 version = "6.4.5"
 description = "Read resources from Python packages"
@@ -1193,4 +1204,4 @@ email = ["email-validator"]
 [metadata]
 lock-version = "2.0"
 python-versions = "^3.11"
-content-hash = "c6f1d77e28b6041c0dd709f17be2aa87570c38b236c0b113dac2ca8b55a5b8ba"
+content-hash = "afa9d389ee169326ae885337c38ff52e48b2a55bb134fa5949f44df7c8cce59b"
