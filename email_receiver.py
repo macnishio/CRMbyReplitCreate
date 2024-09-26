@@ -1,7 +1,7 @@
 import os
 import email
 from email.header import decode_header
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 from flask import current_app
 from models import Lead, Email, UnknownEmail, EmailFetchTracker
 from extensions import db
@@ -110,8 +110,8 @@ def fetch_emails(minutes_back=5, lead_id=None):
             db.session.add(tracker)
             db.session.commit()
 
-        start_date = tracker.last_fetch_time or datetime.utcnow() - timedelta(minutes=minutes_back)
-        end_date = datetime.utcnow()
+        start_date = tracker.last_fetch_time.replace(tzinfo=timezone.utc) or datetime.now(timezone.utc) - timedelta(minutes=minutes_back)
+        end_date = datetime.now(timezone.utc)
         tracker.last_fetch_time = end_date
         db.session.commit()
 
@@ -135,6 +135,8 @@ def fetch_emails(minutes_back=5, lead_id=None):
                 email_body = msg_data[0][1]
                 email_message = email.message_from_bytes(email_body)
                 email_date = email.utils.parsedate_to_datetime(email_message['Date'])
+                if email_date.tzinfo is None:
+                    email_date = email_date.replace(tzinfo=timezone.utc)
                 
                 if start_date <= email_date <= end_date:
                     subject = email_message["Subject"]

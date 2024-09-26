@@ -1,4 +1,4 @@
-2024-09-26 16:56:37,519 ERROR: Error in fetch_emails: (psycopg2.errors.UndefinedTable) relation "email_fetch_tracker" does not exist
+2024-09-26 17:46:36,188 ERROR: Error in fetch_emails: (psycopg2.errors.UndefinedTable) relation "email_fetch_tracker" does not exist
 LINE 2: FROM email_fetch_tracker 
              ^
 
@@ -7,11 +7,11 @@ FROM email_fetch_tracker
  LIMIT %(param_1)s]
 [parameters: {'param_1': 1}]
 (Background on this error at: https://sqlalche.me/e/20/f405) [in /home/runner/CRM/email_receiver.py:207]
-2024-09-26 17:01:33,443 INFO: Checking for new emails [in /home/runner/CRM/email_receiver.py:235]
-2024-09-26 17:01:33,461 INFO: Attempting to connect to imap.gmail.com:993 with SSL version: 2 [in /home/runner/CRM/email_receiver.py:34]
-2024-09-26 17:01:34,157 INFO: IMAP4_SSL connection established with SSL version: 2 [in /home/runner/CRM/email_receiver.py:36]
-2024-09-26 17:01:34,997 INFO: Successfully logged in to the email server [in /home/runner/CRM/email_receiver.py:38]
-2024-09-26 17:01:36,226 ERROR: Error in fetch_emails: (psycopg2.errors.UndefinedTable) relation "email_fetch_tracker" does not exist
+2024-09-26 17:51:33,443 INFO: Checking for new emails [in /home/runner/CRM/email_receiver.py:235]
+2024-09-26 17:51:33,462 INFO: Attempting to connect to imap.gmail.com:993 with SSL version: 2 [in /home/runner/CRM/email_receiver.py:34]
+2024-09-26 17:51:34,028 INFO: IMAP4_SSL connection established with SSL version: 2 [in /home/runner/CRM/email_receiver.py:36]
+2024-09-26 17:51:35,423 INFO: Successfully logged in to the email server [in /home/runner/CRM/email_receiver.py:38]
+2024-09-26 17:51:38,067 ERROR: Error in fetch_emails: (psycopg2.errors.UndefinedTable) relation "email_fetch_tracker" does not exist
 LINE 2: FROM email_fetch_tracker 
              ^
 
@@ -20,11 +20,10 @@ FROM email_fetch_tracker
  LIMIT %(param_1)s]
 [parameters: {'param_1': 1}]
 (Background on this error at: https://sqlalche.me/e/20/f405) [in /home/runner/CRM/email_receiver.py:207]
-2024-09-26 17:06:33,443 INFO: Checking for new emails [in /home/runner/CRM/email_receiver.py:235]
-2024-09-26 17:06:33,462 INFO: Attempting to connect to imap.gmail.com:993 with SSL version: 2 [in /home/runner/CRM/email_receiver.py:34]
-2024-09-26 17:06:34,026 INFO: IMAP4_SSL connection established with SSL version: 2 [in /home/runner/CRM/email_receiver.py:36]
-2024-09-26 17:06:35,369 INFO: Successfully logged in to the email server [in /home/runner/CRM/email_receiver.py:38]
-2024-09-26 17:06:36,572 ERROR: Error in fetch_emails: (psycopg2.errors.UndefinedTable) relation "email_fetch_tracker" does not exist
+2024-09-26 17:52:44,108 INFO: Attempting to connect to imap.gmail.com:993 with SSL version: 2 [in /home/runner/CRM/email_receiver.py:34]
+2024-09-26 17:52:44,722 INFO: IMAP4_SSL connection established with SSL version: 2 [in /home/runner/CRM/email_receiver.py:36]
+2024-09-26 17:52:45,871 INFO: Successfully logged in to the email server [in /home/runner/CRM/email_receiver.py:38]
+2024-09-26 17:52:46,657 ERROR: Error in fetch_emails: (psycopg2.errors.UndefinedTable) relation "email_fetch_tracker" does not exist
 LINE 2: FROM email_fetch_tracker 
              ^
 
@@ -33,11 +32,24 @@ FROM email_fetch_tracker
  LIMIT %(param_1)s]
 [parameters: {'param_1': 1}]
 (Background on this error at: https://sqlalche.me/e/20/f405) [in /home/runner/CRM/email_receiver.py:207]
-2024-09-26 17:11:33,443 INFO: Checking for new emails [in /home/runner/CRM/email_receiver.py:235]
-2024-09-26 17:11:33,461 INFO: Attempting to connect to imap.gmail.com:993 with SSL version: 2 [in /home/runner/CRM/email_receiver.py:34]
-2024-09-26 17:11:34,121 INFO: IMAP4_SSL connection established with SSL version: 2 [in /home/runner/CRM/email_receiver.py:36]
-2024-09-26 17:11:35,118 INFO: Successfully logged in to the email server [in /home/runner/CRM/email_receiver.py:38]
-2024-09-26 17:11:36,335 ERROR: Error in fetch_emails: (psycopg2.errors.UndefinedTable) relation "email_fetch_tracker" does not exist
+2024-09-26 17:52:47,292 ERROR: Error fetching emails: cannot access local variable 'start_date' where it is not associated with a value [in /home/runner/CRM/routes/main.py:31]
+2024-09-26 17:53:39,164 INFO: Email sender: =?utf-8?B?54iG6Z+z6Ki06Kif6Kq/5p+756CU56m244K744Oz44K/44O8?= <b-choken-c@atbb.ne.jp>, Received at: 2024-09-26 02:08:57 [in /home/runner/CRM/routes/main.py:40]
+2024-09-26 17:53:39,165 INFO: Email sender: =?utf-8?B?54iG6Z+z6Ki06Kif6Kq/5p+756CU56m244K744Oz44K/44O8?= <b-choken-c@atbb.ne.jp>, Received at: 2024-09-26 02:08:57 [in /home/runner/CRM/routes/main.py:40]
+2024-09-26 17:53:39,165 INFO: Email sender: =?utf-8?B?54iG6Z+z6Ki06Kif6Kq/5p+756CU56m244K744Oz44K/44O8?= <b-choken-c@atbb.ne.jp>, Received at: 2024-09-26 02:08:57 [in /home/runner/CRM/routes/main.py:40]
+2024-09-26 17:53:39,165 INFO: Email sender: =?utf-8?B?54iG6Z+z6Ki06Kif6Kq/5p+756CU56m244K744Oz44K/44O8?= <b-choken-c@atbb.ne.jp>, Received at: 2024-09-26 02:08:57 [in /home/runner/CRM/routes/main.py:40]
+2024-09-26 17:53:39,165 INFO: Email sender: =?utf-8?B?54iG6Z+z6Ki06Kif6Kq/5p+756CU56m244K744Oz44K/44O8?= <b-choken-c@atbb.ne.jp>, Received at: 2024-09-26 02:08:57 [in /home/runner/CRM/routes/main.py:40]
+2024-09-26 17:53:39,165 INFO: Email sender: =?utf-8?B?54iG6Z+z6Ki06Kif6Kq/5p+756CU56m244K744Oz44K/44O8?= <b-choken-c@atbb.ne.jp>, Received at: 2024-09-26 02:08:57 [in /home/runner/CRM/routes/main.py:40]
+2024-09-26 17:53:39,165 INFO: Email sender: =?utf-8?B?54iG6Z+z6Ki06Kif6Kq/5p+756CU56m244K744Oz44K/44O8?= <b-choken-c@atbb.ne.jp>, Received at: 2024-09-26 02:08:57 [in /home/runner/CRM/routes/main.py:40]
+2024-09-26 17:53:39,166 INFO: Email sender: =?utf-8?B?54iG6Z+z6Ki06Kif6Kq/5p+756CU56m244K744Oz44K/44O8?= <b-choken-c@atbb.ne.jp>, Received at: 2024-09-26 02:08:57 [in /home/runner/CRM/routes/main.py:40]
+2024-09-26 17:53:39,166 INFO: Email sender: =?utf-8?B?54iG6Z+z6Ki06Kif6Kq/5p+756CU56m244K744Oz44K/44O8?= <b-choken-c@atbb.ne.jp>, Received at: 2024-09-26 02:08:57 [in /home/runner/CRM/routes/main.py:40]
+2024-09-26 17:53:39,166 INFO: Email sender: =?utf-8?B?54iG6Z+z6Ki06Kif6Kq/5p+756CU56m244K744Oz44K/44O8?= <b-choken-c@atbb.ne.jp>, Received at: 2024-09-26 02:08:57 [in /home/runner/CRM/routes/main.py:40]
+2024-09-26 17:53:39,166 INFO: Email sender: =?utf-8?B?54iG6Z+z6Ki06Kif6Kq/5p+756CU56m244K744Oz44K/44O8?= <b-choken-c@atbb.ne.jp>, Received at: 2024-09-26 02:08:57 [in /home/runner/CRM/routes/main.py:40]
+2024-09-26 17:53:39,166 INFO: Email sender: =?utf-8?B?54iG6Z+z6Ki06Kif6Kq/5p+756CU56m244K744Oz44K/44O8?= <b-choken-c@atbb.ne.jp>, Received at: 2024-09-26 02:08:57 [in /home/runner/CRM/routes/main.py:40]
+2024-09-26 17:53:39,166 INFO: Email sender: =?utf-8?B?54iG6Z+z6Ki06Kif6Kq/5p+756CU56m244K744Oz44K/44O8?= <b-choken-c@atbb.ne.jp>, Received at: 2024-09-26 02:08:57 [in /home/runner/CRM/routes/main.py:40]
+2024-09-26 17:54:03,197 INFO: Attempting to connect to imap.gmail.com:993 with SSL version: 2 [in /home/runner/CRM/email_receiver.py:34]
+2024-09-26 17:54:03,898 INFO: IMAP4_SSL connection established with SSL version: 2 [in /home/runner/CRM/email_receiver.py:36]
+2024-09-26 17:54:04,785 INFO: Successfully logged in to the email server [in /home/runner/CRM/email_receiver.py:38]
+2024-09-26 17:54:05,565 ERROR: Error in fetch_emails: (psycopg2.errors.UndefinedTable) relation "email_fetch_tracker" does not exist
 LINE 2: FROM email_fetch_tracker 
              ^
 
@@ -46,85 +58,35 @@ FROM email_fetch_tracker
  LIMIT %(param_1)s]
 [parameters: {'param_1': 1}]
 (Background on this error at: https://sqlalche.me/e/20/f405) [in /home/runner/CRM/email_receiver.py:207]
-2024-09-26 17:16:33,443 INFO: Checking for new emails [in /home/runner/CRM/email_receiver.py:235]
-2024-09-26 17:16:33,461 INFO: Attempting to connect to imap.gmail.com:993 with SSL version: 2 [in /home/runner/CRM/email_receiver.py:34]
-2024-09-26 17:16:34,088 INFO: IMAP4_SSL connection established with SSL version: 2 [in /home/runner/CRM/email_receiver.py:36]
-2024-09-26 17:16:34,778 INFO: Successfully logged in to the email server [in /home/runner/CRM/email_receiver.py:38]
-2024-09-26 17:16:35,934 ERROR: Error in fetch_emails: (psycopg2.errors.UndefinedTable) relation "email_fetch_tracker" does not exist
-LINE 2: FROM email_fetch_tracker 
-             ^
-
-[SQL: SELECT email_fetch_tracker.id AS email_fetch_tracker_id, email_fetch_tracker.last_fetch_time AS email_fetch_tracker_last_fetch_time 
-FROM email_fetch_tracker 
- LIMIT %(param_1)s]
-[parameters: {'param_1': 1}]
-(Background on this error at: https://sqlalche.me/e/20/f405) [in /home/runner/CRM/email_receiver.py:207]
-2024-09-26 17:21:33,443 INFO: Checking for new emails [in /home/runner/CRM/email_receiver.py:235]
-2024-09-26 17:21:33,461 INFO: Attempting to connect to imap.gmail.com:993 with SSL version: 2 [in /home/runner/CRM/email_receiver.py:34]
-2024-09-26 17:21:34,018 INFO: IMAP4_SSL connection established with SSL version: 2 [in /home/runner/CRM/email_receiver.py:36]
-2024-09-26 17:21:34,934 INFO: Successfully logged in to the email server [in /home/runner/CRM/email_receiver.py:38]
-2024-09-26 17:21:36,078 ERROR: Error in fetch_emails: (psycopg2.errors.UndefinedTable) relation "email_fetch_tracker" does not exist
-LINE 2: FROM email_fetch_tracker 
-             ^
-
-[SQL: SELECT email_fetch_tracker.id AS email_fetch_tracker_id, email_fetch_tracker.last_fetch_time AS email_fetch_tracker_last_fetch_time 
-FROM email_fetch_tracker 
- LIMIT %(param_1)s]
-[parameters: {'param_1': 1}]
-(Background on this error at: https://sqlalche.me/e/20/f405) [in /home/runner/CRM/email_receiver.py:207]
-2024-09-26 17:26:33,443 INFO: Checking for new emails [in /home/runner/CRM/email_receiver.py:235]
-2024-09-26 17:26:33,460 INFO: Attempting to connect to imap.gmail.com:993 with SSL version: 2 [in /home/runner/CRM/email_receiver.py:34]
-2024-09-26 17:26:34,177 INFO: IMAP4_SSL connection established with SSL version: 2 [in /home/runner/CRM/email_receiver.py:36]
-2024-09-26 17:26:34,835 INFO: Successfully logged in to the email server [in /home/runner/CRM/email_receiver.py:38]
-2024-09-26 17:26:36,083 ERROR: Error in fetch_emails: (psycopg2.errors.UndefinedTable) relation "email_fetch_tracker" does not exist
-LINE 2: FROM email_fetch_tracker 
-             ^
-
-[SQL: SELECT email_fetch_tracker.id AS email_fetch_tracker_id, email_fetch_tracker.last_fetch_time AS email_fetch_tracker_last_fetch_time 
-FROM email_fetch_tracker 
- LIMIT %(param_1)s]
-[parameters: {'param_1': 1}]
-(Background on this error at: https://sqlalche.me/e/20/f405) [in /home/runner/CRM/email_receiver.py:207]
-2024-09-26 17:31:33,443 INFO: Checking for new emails [in /home/runner/CRM/email_receiver.py:235]
-2024-09-26 17:31:33,461 INFO: Attempting to connect to imap.gmail.com:993 with SSL version: 2 [in /home/runner/CRM/email_receiver.py:34]
-2024-09-26 17:31:34,079 INFO: IMAP4_SSL connection established with SSL version: 2 [in /home/runner/CRM/email_receiver.py:36]
-2024-09-26 17:31:34,858 INFO: Successfully logged in to the email server [in /home/runner/CRM/email_receiver.py:38]
-2024-09-26 17:31:36,121 ERROR: Error in fetch_emails: (psycopg2.errors.UndefinedTable) relation "email_fetch_tracker" does not exist
-LINE 2: FROM email_fetch_tracker 
-             ^
-
-[SQL: SELECT email_fetch_tracker.id AS email_fetch_tracker_id, email_fetch_tracker.last_fetch_time AS email_fetch_tracker_last_fetch_time 
-FROM email_fetch_tracker 
- LIMIT %(param_1)s]
-[parameters: {'param_1': 1}]
-(Background on this error at: https://sqlalche.me/e/20/f405) [in /home/runner/CRM/email_receiver.py:207]
-2024-09-26 17:36:33,443 INFO: Checking for new emails [in /home/runner/CRM/email_receiver.py:235]
-2024-09-26 17:36:33,462 INFO: Attempting to connect to imap.gmail.com:993 with SSL version: 2 [in /home/runner/CRM/email_receiver.py:34]
-2024-09-26 17:36:34,231 INFO: IMAP4_SSL connection established with SSL version: 2 [in /home/runner/CRM/email_receiver.py:36]
-2024-09-26 17:36:35,308 INFO: Successfully logged in to the email server [in /home/runner/CRM/email_receiver.py:38]
-2024-09-26 17:36:36,533 ERROR: Error in fetch_emails: (psycopg2.errors.UndefinedTable) relation "email_fetch_tracker" does not exist
-LINE 2: FROM email_fetch_tracker 
-             ^
-
-[SQL: SELECT email_fetch_tracker.id AS email_fetch_tracker_id, email_fetch_tracker.last_fetch_time AS email_fetch_tracker_last_fetch_time 
-FROM email_fetch_tracker 
- LIMIT %(param_1)s]
-[parameters: {'param_1': 1}]
-(Background on this error at: https://sqlalche.me/e/20/f405) [in /home/runner/CRM/email_receiver.py:207]
-2024-09-26 17:41:33,443 INFO: Checking for new emails [in /home/runner/CRM/email_receiver.py:235]
-2024-09-26 17:41:33,461 INFO: Attempting to connect to imap.gmail.com:993 with SSL version: 2 [in /home/runner/CRM/email_receiver.py:34]
-2024-09-26 17:41:34,084 INFO: IMAP4_SSL connection established with SSL version: 2 [in /home/runner/CRM/email_receiver.py:36]
-2024-09-26 17:41:35,192 INFO: Successfully logged in to the email server [in /home/runner/CRM/email_receiver.py:38]
-2024-09-26 17:41:36,360 ERROR: Error in fetch_emails: (psycopg2.errors.UndefinedTable) relation "email_fetch_tracker" does not exist
-LINE 2: FROM email_fetch_tracker 
-             ^
-
-[SQL: SELECT email_fetch_tracker.id AS email_fetch_tracker_id, email_fetch_tracker.last_fetch_time AS email_fetch_tracker_last_fetch_time 
-FROM email_fetch_tracker 
- LIMIT %(param_1)s]
-[parameters: {'param_1': 1}]
-(Background on this error at: https://sqlalche.me/e/20/f405) [in /home/runner/CRM/email_receiver.py:207]
-2024-09-26 17:46:33,443 INFO: Checking for new emails [in /home/runner/CRM/email_receiver.py:235]
-2024-09-26 17:46:33,461 INFO: Attempting to connect to imap.gmail.com:993 with SSL version: 2 [in /home/runner/CRM/email_receiver.py:34]
-2024-09-26 17:46:34,177 INFO: IMAP4_SSL connection established with SSL version: 2 [in /home/runner/CRM/email_receiver.py:36]
-2024-09-26 17:46:34,983 INFO: Successfully logged in to the email server [in /home/runner/CRM/email_receiver.py:38]
+2024-09-26 17:54:06,172 ERROR: Exception on /leads/13/refresh_emails [GET] [in /home/runner/CRM/.pythonlibs/lib/python3.11/site-packages/flask/app.py:1744]
+Traceback (most recent call last):
+  File "/home/runner/CRM/.pythonlibs/lib/python3.11/site-packages/flask/app.py", line 2529, in wsgi_app
+    response = self.full_dispatch_request()
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/runner/CRM/.pythonlibs/lib/python3.11/site-packages/flask/app.py", line 1825, in full_dispatch_request
+    rv = self.handle_user_exception(e)
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/runner/CRM/.pythonlibs/lib/python3.11/site-packages/flask/app.py", line 1823, in full_dispatch_request
+    rv = self.dispatch_request()
+         ^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/runner/CRM/.pythonlibs/lib/python3.11/site-packages/flask/app.py", line 1799, in dispatch_request
+    return self.ensure_sync(self.view_functions[rule.endpoint])(**view_args)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/runner/CRM/.pythonlibs/lib/python3.11/site-packages/flask_login/utils.py", line 290, in decorated_view
+    return current_app.ensure_sync(func)(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/runner/CRM/routes/leads.py", line 155, in refresh_lead_emails
+    fetch_emails(lead_id=lead.id)
+  File "/home/runner/CRM/email_receiver.py", line 217, in fetch_emails
+    f"Emails from known leads: {Email.query.filter(Email.received_at >= start_date).count()}"
+                                                                        ^^^^^^^^^^
+UnboundLocalError: cannot access local variable 'start_date' where it is not associated with a value
+2024-09-26 17:54:44,342 INFO: CRM startup [in /home/runner/CRM/app.py:101]
+2024-09-26 17:54:44,342 INFO: Starting scheduler [in /home/runner/CRM/app.py:118]
+2024-09-26 17:54:44,343 INFO: Scheduler started [in /home/runner/CRM/app.py:120]
+2024-09-26 17:54:58,980 INFO: CRM startup [in /home/runner/CRM/app.py:101]
+2024-09-26 17:54:59,189 INFO: CRM startup [in /home/runner/CRM/app.py:101]
+2024-09-26 17:55:20,940 INFO: Attempting to connect to imap.gmail.com:993 with SSL version: 2 [in /home/runner/CRM/email_receiver.py:34]
+2024-09-26 17:55:21,603 INFO: IMAP4_SSL connection established with SSL version: 2 [in /home/runner/CRM/email_receiver.py:36]
+2024-09-26 17:55:22,277 INFO: Successfully logged in to the email server [in /home/runner/CRM/email_receiver.py:38]
+2024-09-26 17:55:23,484 ERROR: Error in fetch_emails: 'NoneType' object has no attribute 'strftime' [in /home/runner/CRM/email_receiver.py:207]
