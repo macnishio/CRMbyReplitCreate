@@ -108,9 +108,10 @@ def fetch_emails(minutes_back=5, lead_id=None):
         if not tracker:
             tracker = EmailFetchTracker()
             db.session.add(tracker)
+            db.session.commit()
 
-        start_date = tracker.last_fetch_time
-        end_date = datetime.now()
+        start_date = tracker.last_fetch_time or datetime.utcnow() - timedelta(minutes=minutes_back)
+        end_date = datetime.utcnow()
         tracker.last_fetch_time = end_date
         db.session.commit()
 

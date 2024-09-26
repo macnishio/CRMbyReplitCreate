@@ -1,30 +1,52 @@
-2024-09-26 14:46:12,256 WARNING: Received email from unknown sender: =?UTF-8?B?UVVP44Kr44O844OJUGF544Kt44Oj44Oz44Oa44O844Oz5oOF5aCx?=
- <info_payapp@quocard.net> [in /home/runner/CRM/email_receiver.py:83]
-2024-09-26 14:46:12,719 INFO: Stored email from unknown sender: info_payapp@quocard.net [in /home/runner/CRM/email_receiver.py:97]
-2024-09-26 14:46:13,031 INFO: Processing email - Sender: "=?utf-8?q?Pinterest?=" <recommendations@inspire.pinterest.com>, Subject: Makoto さん、いいセンスをしてますね！, Original Date: Thu, 26 Sep 2024 08:58:19 +0000, Parsed Date: 2024-09-26 08:58:19 [in /home/runner/CRM/email_receiver.py:163]
-2024-09-26 14:46:13,722 WARNING: Received email from unknown sender: "=?utf-8?q?Pinterest?=" <recommendations@inspire.pinterest.com> [in /home/runner/CRM/email_receiver.py:83]
-2024-09-26 14:46:14,183 INFO: Stored email from unknown sender: recommendations@inspire.pinterest.com [in /home/runner/CRM/email_receiver.py:97]
-2024-09-26 14:46:14,485 INFO: Processing email - Sender: =?utf-8?B?44Gz44KF44GG44OI44Op44OZ44Or44Oh44O844Or44Oe44Ks44K444Oz?= <viewtravel@mail.jre-travel.com>, Subject: テーマパークでハロウィンを楽しもう！ユニバーサル・スタジオ・ジャパン周辺ホテル, Original Date: Thu, 26 Sep 2024 18:34:48 +0900, Parsed Date: 2024-09-26 09:34:48 [in /home/runner/CRM/email_receiver.py:163]
-2024-09-26 14:46:15,175 WARNING: Received email from unknown sender: =?utf-8?B?44Gz44KF44GG44OI44Op44OZ44Or44Oh44O844Or44Oe44Ks44K444Oz?= <viewtravel@mail.jre-travel.com> [in /home/runner/CRM/email_receiver.py:83]
-2024-09-26 14:46:15,637 INFO: Stored email from unknown sender: viewtravel@mail.jre-travel.com [in /home/runner/CRM/email_receiver.py:97]
-2024-09-26 14:46:15,974 INFO: Processing email - Sender: <noreply@zohosalesiq.com>, Subject: List of すべての訪問者, Original Date: Thu, 26 Sep 2024 02:45:00 -0700 (PDT), Parsed Date: 2024-09-26 09:45:00 [in /home/runner/CRM/email_receiver.py:163]
-2024-09-26 14:46:16,665 WARNING: Received email from unknown sender: <noreply@zohosalesiq.com> [in /home/runner/CRM/email_receiver.py:83]
-2024-09-26 14:46:17,125 INFO: Stored email from unknown sender: noreply@zohosalesiq.com [in /home/runner/CRM/email_receiver.py:97]
-2024-09-26 14:46:17,486 INFO: Processing email - Sender: noreply-dmarc-support@google.com, Subject: Report domain: team240.net Submitter: google.com Report-ID: 14161089864440117543, Original Date: Wed, 25 Sep 2024 16:59:59 -0700, Parsed Date: 2024-09-25 23:59:59 [in /home/runner/CRM/email_receiver.py:163]
-2024-09-26 14:46:18,176 WARNING: Received email from unknown sender: noreply-dmarc-support@google.com [in /home/runner/CRM/email_receiver.py:83]
-2024-09-26 14:46:18,636 INFO: Stored email from unknown sender: noreply-dmarc-support@google.com [in /home/runner/CRM/email_receiver.py:97]
-2024-09-26 14:46:18,924 INFO: Processing email - Sender: StatusIQ <no-reply@mails.site24x7sp.eu>, Subject: US Zoho Services Availability - Incident, "Zoho Cliq" is Down - 26
- Sep 2024 - Acknowledged, Original Date: Thu, 26 Sep 2024 15:46:01 +0200 (CEST), Parsed Date: 2024-09-26 13:46:01 [in /home/runner/CRM/email_receiver.py:163]
-2024-09-26 14:46:19,614 WARNING: Received email from unknown sender: StatusIQ <no-reply@mails.site24x7sp.eu> [in /home/runner/CRM/email_receiver.py:83]
-2024-09-26 14:46:20,085 INFO: Stored email from unknown sender: no-reply@mails.site24x7sp.eu [in /home/runner/CRM/email_receiver.py:97]
-2024-09-26 14:46:20,386 INFO: Processing email - Sender: StatusIQ <no-reply@mails.site24x7sp.eu>, Subject: US Zoho Services Availability - Incident, "Zoho Cliq" is
- Operational - 26 Sep 2024 - Resolved, Original Date: Thu, 26 Sep 2024 15:48:29 +0200 (CEST), Parsed Date: 2024-09-26 13:48:29 [in /home/runner/CRM/email_receiver.py:163]
-2024-09-26 14:46:21,115 WARNING: Received email from unknown sender: StatusIQ <no-reply@mails.site24x7sp.eu> [in /home/runner/CRM/email_receiver.py:83]
-2024-09-26 14:46:21,577 INFO: Stored email from unknown sender: no-reply@mails.site24x7sp.eu [in /home/runner/CRM/email_receiver.py:97]
-2024-09-26 14:46:22,824 INFO: Emails from known leads: 0 [in /home/runner/CRM/email_receiver.py:211]
-2024-09-26 14:46:23,057 INFO: Emails from unknown senders: 0 [in /home/runner/CRM/email_receiver.py:214]
-2024-09-26 14:46:33,443 INFO: CRM startup [in /home/runner/CRM/app.py:101]
-2024-09-26 14:46:33,445 INFO: Starting scheduler [in /home/runner/CRM/app.py:118]
-2024-09-26 14:46:33,446 INFO: Scheduler started [in /home/runner/CRM/app.py:120]
-2024-09-26 14:46:34,240 INFO: CRM startup [in /home/runner/CRM/app.py:101]
-2024-09-26 14:46:34,424 INFO: CRM startup [in /home/runner/CRM/app.py:101]
+2024-09-26 17:55:24,093 ERROR: Exception on /leads/13/refresh_emails [GET] [in /home/runner/CRM/.pythonlibs/lib/python3.11/site-packages/flask/app.py:1744]
+Traceback (most recent call last):
+  File "/home/runner/CRM/.pythonlibs/lib/python3.11/site-packages/flask/app.py", line 2529, in wsgi_app
+    response = self.full_dispatch_request()
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/runner/CRM/.pythonlibs/lib/python3.11/site-packages/flask/app.py", line 1825, in full_dispatch_request
+    rv = self.handle_user_exception(e)
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/runner/CRM/.pythonlibs/lib/python3.11/site-packages/flask/app.py", line 1823, in full_dispatch_request
+    rv = self.dispatch_request()
+         ^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/runner/CRM/.pythonlibs/lib/python3.11/site-packages/flask/app.py", line 1799, in dispatch_request
+    return self.ensure_sync(self.view_functions[rule.endpoint])(**view_args)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/runner/CRM/.pythonlibs/lib/python3.11/site-packages/flask_login/utils.py", line 290, in decorated_view
+    return current_app.ensure_sync(func)(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/runner/CRM/routes/leads.py", line 155, in refresh_lead_emails
+    fetch_emails(lead_id=lead.id)
+  File "/home/runner/CRM/email_receiver.py", line 217, in fetch_emails
+    f"Emails from known leads: {Email.query.filter(Email.received_at >= start_date).count()}"
+                                                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/runner/CRM/.pythonlibs/lib/python3.11/site-packages/sqlalchemy/sql/operators.py", line 637, in __ge__
+    return self.operate(ge, other)
+           ^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/runner/CRM/.pythonlibs/lib/python3.11/site-packages/sqlalchemy/orm/attributes.py", line 453, in operate
+    return op(self.comparator, *other, **kwargs)  # type: ignore[no-any-return]  # noqa: E501
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/runner/CRM/.pythonlibs/lib/python3.11/site-packages/sqlalchemy/sql/operators.py", line 637, in __ge__
+    return self.operate(ge, other)
+           ^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/runner/CRM/.pythonlibs/lib/python3.11/site-packages/sqlalchemy/orm/properties.py", line 479, in operate
+    return op(self.__clause_element__(), *other, **kwargs)  # type: ignore[no-any-return]  # noqa: E501
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/runner/CRM/.pythonlibs/lib/python3.11/site-packages/sqlalchemy/sql/operators.py", line 637, in __ge__
+    return self.operate(ge, other)
+           ^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/runner/CRM/.pythonlibs/lib/python3.11/site-packages/sqlalchemy/sql/elements.py", line 1513, in operate
+    return op(self.comparator, *other, **kwargs)  # type: ignore[no-any-return]  # noqa: E501
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/runner/CRM/.pythonlibs/lib/python3.11/site-packages/sqlalchemy/sql/operators.py", line 637, in __ge__
+    return self.operate(ge, other)
+           ^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/runner/CRM/.pythonlibs/lib/python3.11/site-packages/sqlalchemy/sql/type_api.py", line 194, in operate
+    return op_fn(self.expr, op, *other, **addtl_kw)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/runner/CRM/.pythonlibs/lib/python3.11/site-packages/sqlalchemy/sql/default_comparator.py", line 115, in _boolean_compare
+    raise exc.ArgumentError(
+sqlalchemy.exc.ArgumentError: Only '=', '!=', 'is_()', 'is_not()', 'is_distinct_from()', 'is_not_distinct_from()' operators can be used with None/True/False
+2024-09-26 17:57:00,350 INFO: CRM startup [in /home/runner/CRM/app.py:101]
+2024-09-26 17:57:00,351 INFO: Starting scheduler [in /home/runner/CRM/app.py:118]
+2024-09-26 17:57:00,352 INFO: Scheduler started [in /home/runner/CRM/app.py:120]
