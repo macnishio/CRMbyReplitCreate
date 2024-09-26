@@ -1,70 +1,62 @@
-import imaplib
+import os
 import email
 from email.header import decode_header
-from flask import current_app
-from models import Email, Lead, UnknownEmail
-from extensions import db
-from flask_apscheduler import APScheduler
 from datetime import datetime, timedelta
-from sqlalchemy import func
+from flask import current_app
+from models import Lead, Email, UnknownEmail
+from extensions import db
+from imap_tools import MailBox, AND
 from sqlalchemy.exc import DataError
-import re
+import imaplib
 
 def connect_to_email_server():
-    mail = imaplib.IMAP4_SSL(current_app.config['MAIL_SERVER'])
-    mail.login(current_app.config['MAIL_USERNAME'],
-               current_app.config['MAIL_PASSWORD'])
-    return mail
+    mail_server = os.environ.get('MAIL_SERVER')
+    mail_port = int(os.environ.get('MAIL_PORT', 993))
+    mail_username = os.environ.get('MAIL_USERNAME')
+    mail_password = os.environ.get('MAIL_PASSWORD')
 
-def extract_email_address(sender):
-    email_pattern = r'<?([\w\.-]+@[\w\.-]+)>?'
-    match = re.search(email_pattern, sender)
-    if match:
-        return match.group(1)
-    return sender
+    try:
+        mail = imaplib.IMAP4_SSL(mail_server, mail_port)
+        mail.login(mail_username, mail_password)
+        return mail
+    except Exception as e:
+        current_app.logger.error(f"Error connecting to email server: {str(e)}")
+        raise
 
-def extract_sender_name(sender):
-    name_pattern = r'^(.*?)\s*<'
-    match = re.search(name_pattern, sender)
-    if match:
-        return match.group(1).strip()
-    return None
+def process_email(sender, subject, body, received_at):
+    sender_name, sender_email = email.utils.parseaddr(sender)
+    lead = Lead.query.filter_by(email=sender_email).first()
 
-def process_email(sender, subject, content, date):
-    sender_email = extract_email_address(sender)
-    sender_name = extract_sender_name(sender)
-    
-    lead = Lead.query.filter(func.lower(Lead.email) == func.lower(sender_email)).first()
-    
     if lead:
-        existing_email = Email.query.filter(
-            Email.lead_id == lead.id,
-            Email.subject == subject,
-            Email.received_at >= date - timedelta(minutes=1),
-            Email.received_at <= date + timedelta(minutes=1)
-        ).first()
-        if not existing_email:
-            new_email = Email(sender=sender_email,
-                              sender_name=sender_name,
-                              subject=subject,
-                              content=content,
-                              received_at=date,
-                              lead=lead)
-            db.session.add(new_email)
-            db.session.commit()
-            current_app.logger.info(f"New email processed for lead: {lead.name}, received at {date}")
-        else:
-            current_app.logger.info(f"Duplicate email skipped for lead: {lead.name}, received at {date}")
+        email_obj = Email(
+            sender=sender_email,
+            sender_name=sender_name,
+            subject=subject,
+            content=body,
+            received_at=received_at,
+            lead=lead
+        )
+        db.session.add(email_obj)
     else:
         current_app.logger.warning(f"Received email from unknown sender: {sender}")
-        unknown_email = UnknownEmail(sender=sender_email,
-                                     sender_name=sender_name,
-                                     subject=subject,
-                                     content=content,
-                                     received_at=date)
+        unknown_email = UnknownEmail(
+            sender=sender_email,
+            sender_name=sender_name,
+            subject=subject,
+            content=body,
+            received_at=received_at
+        )
         db.session.add(unknown_email)
+
+    try:
         db.session.commit()
-        current_app.logger.info(f"Stored email from unknown sender: {sender}")
+        if lead:
+            current_app.logger.info(f"Stored email for lead: {lead.id}")
+        else:
+            current_app.logger.info(f"Stored email from unknown sender: {sender}")
+    except Exception as e:
+        db.session.rollback()
+        current_app.logger.error(f"Error storing email: {str(e)}")
 
 def fetch_emails(days_back=30, lead_id=None):
     mail = connect_to_email_server()

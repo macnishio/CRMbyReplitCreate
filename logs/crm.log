@@ -1,14 +1,60 @@
-2024-09-25 23:57:20,103 INFO: Email sender: =?ISO-2022-JP?B?GyRCOllFRCEhPjQbKEI=?= <fujioka_ah@fujioka-coltd.co.jp>, Received at: 2024-09-24 07:51:02 [in /home/runner/CRM/routes/main.py:37]
-2024-09-25 23:57:20,104 INFO: Email sender: None <kdkww280@yahoo.co.jp>, Received at: 2024-09-22 23:29:29 [in /home/runner/CRM/routes/main.py:37]
-2024-09-25 23:57:20,105 INFO: Email sender: makoto nishio <macnishio@gmail.com>, Received at: 2024-09-17 08:30:07 [in /home/runner/CRM/routes/main.py:37]
-2024-09-25 23:57:20,105 INFO: Email sender: =?ISO-2022-JP?B?GyRCOllFRCEhPjQbKEI=?= <fujioka_ah@fujioka-coltd.co.jp>, Received at: 2024-09-12 00:46:28 [in /home/runner/CRM/routes/main.py:37]
-2024-09-25 23:57:20,105 INFO: Email sender: makoto nishio <macnishio@gmail.com>, Received at: 2024-08-30 06:13:38 [in /home/runner/CRM/routes/main.py:37]
-2024-09-26 00:01:10,022 INFO: CRM startup [in /home/runner/CRM/app.py:97]
-2024-09-26 00:01:10,023 INFO: Starting scheduler [in /home/runner/CRM/app.py:114]
-2024-09-26 00:01:10,025 INFO: Scheduler started [in /home/runner/CRM/app.py:116]
-2024-09-26 00:01:13,623 INFO: CRM startup [in /home/runner/CRM/app.py:97]
-2024-09-26 00:01:13,623 INFO: Starting scheduler [in /home/runner/CRM/app.py:114]
-2024-09-26 00:01:13,624 INFO: Scheduler started [in /home/runner/CRM/app.py:116]
-2024-09-26 00:01:17,196 INFO: CRM startup [in /home/runner/CRM/app.py:97]
-2024-09-26 00:01:17,197 INFO: Starting scheduler [in /home/runner/CRM/app.py:114]
-2024-09-26 00:01:17,197 INFO: Scheduler started [in /home/runner/CRM/app.py:116]
+2024-09-26 00:06:03,673 INFO: Processing email - Sender: =?UTF-8?B?5Yy755mC5rOV5Lq66Iez6Kqg5Lya44Gf44KT44G944G95q2v56eR?=
+ =?UTF-8?B?44CA44CM44Gf44KT44G944G95q2v56eR5qeY5ZCR44GR44OR44K944Kz?=
+ =?UTF-8?B?44Oz6LK344GE5pu/44GI6Kq/5p+744O75o+Q5qGI44Gu44GU5qGI5YaF?=
+ =?UTF-8?B?44CNIOizvOWFpeODu+ioree9ruWVhuWTgeizvOWFpSDpgJrnn6U=?=
+ <notifications@zohoprojects.com>, Subject: [医療法人至誠会たんぽぽ歯科　「たんぽぽ歯科様向けパソコン買い替え調査・提案のご案内」 購入・設置商品購入] - B383-T1 タスク3: 修理の途中経過をお客様に報告する。- タスクを更新しました, Original Date: Mon, 26 Aug 2024 20:08:17 -0700 (PDT), Parsed Date: 2024-08-27 03:08:17 [in /home/runner/CRM/email_receiver.py:109]
+2024-09-26 00:06:04,394 WARNING: Received email from unknown sender: =?UTF-8?B?5Yy755mC5rOV5Lq66Iez6Kqg5Lya44Gf44KT44G944G95q2v56eR?=
+ =?UTF-8?B?44CA44CM44Gf44KT44G944G95q2v56eR5qeY5ZCR44GR44OR44K944Kz?=
+ =?UTF-8?B?44Oz6LK344GE5pu/44GI6Kq/5p+744O75o+Q5qGI44Gu44GU5qGI5YaF?=
+ =?UTF-8?B?44CNIOizvOWFpeODu+ioree9ruWVhuWTgeizvOWFpSDpgJrnn6U=?=
+ <notifications@zohoprojects.com> [in /home/runner/CRM/email_receiver.py:59]
+2024-09-26 00:06:05,116 INFO: Stored email from unknown sender: =?UTF-8?B?5Yy755mC5rOV5Lq66Iez6Kqg5Lya44Gf44KT44G944G95q2v56eR?=
+ =?UTF-8?B?44CA44CM44Gf44KT44G944G95q2v56eR5qeY5ZCR44GR44OR44K944Kz?=
+ =?UTF-8?B?44Oz6LK344GE5pu/44GI6Kq/5p+744O75o+Q5qGI44Gu44GU5qGI5YaF?=
+ =?UTF-8?B?44CNIOizvOWFpeODu+ioree9ruWVhuWTgeizvOWFpSDpgJrnn6U=?=
+ <notifications@zohoprojects.com> [in /home/runner/CRM/email_receiver.py:67]
+2024-09-26 00:06:05,430 INFO: Processing email - Sender: =?UTF-8?B?5Yy755mC5rOV5Lq66Iez6Kqg5Lya44Gf44KT44G944G95q2v56eR?=
+ =?UTF-8?B?44CA44CM44Gf44KT44G944G95q2v56eR5qeY5ZCR44GR44OR44K944Kz?=
+ =?UTF-8?B?44Oz6LK344GE5pu/44GI6Kq/5p+744O75o+Q5qGI44Gu44GU5qGI5YaF?=
+ =?UTF-8?B?44CNIOizvOWFpeODu+ioree9ruWVhuWTgeizvOWFpSDpgJrnn6U=?=
+ <notifications@zohoprojects.com>, Subject: [医療法人至誠会たんぽぽ歯科　「たんぽぽ歯科様向けパソコン買い替え調査・提案のご案内」 購入・設置商品購入] - B383-T2 タスク2: データ保護措置を施しながら、修理を行う。- タスクを更新しました, Original Date: Mon, 26 Aug 2024 20:08:20 -0700 (PDT), Parsed Date: 2024-08-27 03:08:20 [in /home/runner/CRM/email_receiver.py:109]
+2024-09-26 00:06:06,150 WARNING: Received email from unknown sender: =?UTF-8?B?5Yy755mC5rOV5Lq66Iez6Kqg5Lya44Gf44KT44G944G95q2v56eR?=
+ =?UTF-8?B?44CA44CM44Gf44KT44G944G95q2v56eR5qeY5ZCR44GR44OR44K944Kz?=
+ =?UTF-8?B?44Oz6LK344GE5pu/44GI6Kq/5p+744O75o+Q5qGI44Gu44GU5qGI5YaF?=
+ =?UTF-8?B?44CNIOizvOWFpeODu+ioree9ruWVhuWTgeizvOWFpSDpgJrnn6U=?=
+ <notifications@zohoprojects.com> [in /home/runner/CRM/email_receiver.py:59]
+2024-09-26 00:06:06,872 INFO: Stored email from unknown sender: =?UTF-8?B?5Yy755mC5rOV5Lq66Iez6Kqg5Lya44Gf44KT44G944G95q2v56eR?=
+ =?UTF-8?B?44CA44CM44Gf44KT44G944G95q2v56eR5qeY5ZCR44GR44OR44K944Kz?=
+ =?UTF-8?B?44Oz6LK344GE5pu/44GI6Kq/5p+744O75o+Q5qGI44Gu44GU5qGI5YaF?=
+ =?UTF-8?B?44CNIOizvOWFpeODu+ioree9ruWVhuWTgeizvOWFpSDpgJrnn6U=?=
+ <notifications@zohoprojects.com> [in /home/runner/CRM/email_receiver.py:67]
+2024-09-26 00:06:07,190 INFO: Processing email - Sender: =?UTF-8?B?5Yy755mC5rOV5Lq66Iez6Kqg5Lya44Gf44KT44G944G95q2v56eR?=
+ =?UTF-8?B?44CA44CM44Gf44KT44G944G95q2v56eR5qeY5ZCR44GR44OR44K944Kz?=
+ =?UTF-8?B?44Oz6LK344GE5pu/44GI6Kq/5p+744O75o+Q5qGI44Gu44GU5qGI5YaF?=
+ =?UTF-8?B?44CNIOizvOWFpeODu+ioree9ruWVhuWTgeizvOWFpSDpgJrnn6U=?=
+ <notifications@zohoprojects.com>, Subject: [医療法人至誠会たんぽぽ歯科　「たんぽぽ歯科様向けパソコン買い替え調査・提案のご案内」 購入・設置商品購入] - B383-T3 タスク1: 部品が到着次第、修理作業を開始する。- タスクを更新しました, Original Date: Mon, 26 Aug 2024 20:08:23 -0700 (PDT), Parsed Date: 2024-08-27 03:08:23 [in /home/runner/CRM/email_receiver.py:109]
+2024-09-26 00:06:07,911 WARNING: Received email from unknown sender: =?UTF-8?B?5Yy755mC5rOV5Lq66Iez6Kqg5Lya44Gf44KT44G944G95q2v56eR?=
+ =?UTF-8?B?44CA44CM44Gf44KT44G944G95q2v56eR5qeY5ZCR44GR44OR44K944Kz?=
+ =?UTF-8?B?44Oz6LK344GE5pu/44GI6Kq/5p+744O75o+Q5qGI44Gu44GU5qGI5YaF?=
+ =?UTF-8?B?44CNIOizvOWFpeODu+ioree9ruWVhuWTgeizvOWFpSDpgJrnn6U=?=
+ <notifications@zohoprojects.com> [in /home/runner/CRM/email_receiver.py:59]
+2024-09-26 00:06:08,634 INFO: Stored email from unknown sender: =?UTF-8?B?5Yy755mC5rOV5Lq66Iez6Kqg5Lya44Gf44KT44G944G95q2v56eR?=
+ =?UTF-8?B?44CA44CM44Gf44KT44G944G95q2v56eR5qeY5ZCR44GR44OR44K944Kz?=
+ =?UTF-8?B?44Oz6LK344GE5pu/44GI6Kq/5p+744O75o+Q5qGI44Gu44GU5qGI5YaF?=
+ =?UTF-8?B?44CNIOizvOWFpeODu+ioree9ruWVhuWTgeizvOWFpSDpgJrnn6U=?=
+ <notifications@zohoprojects.com> [in /home/runner/CRM/email_receiver.py:67]
+2024-09-26 00:06:08,933 INFO: Processing email - Sender: =?UTF-8?B?5Yy755mC5rOV5Lq66Iez6Kqg5Lya44Gf44KT44G944G95q2v56eR?=
+ =?UTF-8?B?44CA44CM44Gf44KT44G944G95q2v56eR5qeY5ZCR44GR44OR44K944Kz?=
+ =?UTF-8?B?44Oz6LK344GE5pu/44GI6Kq/5p+744O75o+Q5qGI44Gu44GU5qGI5YaF?=
+ =?UTF-8?B?44CNIOizvOWFpeODu+ioree9ruWVhuWTgeizvOWFpSDpgJrnn6U=?=
+ <notifications@zohoprojects.com>, Subject: [医療法人至誠会たんぽぽ歯科　「たんぽぽ歯科様向けパソコン買い替え調査・提案のご案内」 購入・設置商品購入] - B383-T4 タスク1: 修理を完了し、機能テストを実施する。- タスクを更新しました, Original Date: Mon, 26 Aug 2024 20:08:26 -0700 (PDT), Parsed Date: 2024-08-27 03:08:26 [in /home/runner/CRM/email_receiver.py:109]
+2024-09-26 00:06:09,654 WARNING: Received email from unknown sender: =?UTF-8?B?5Yy755mC5rOV5Lq66Iez6Kqg5Lya44Gf44KT44G944G95q2v56eR?=
+ =?UTF-8?B?44CA44CM44Gf44KT44G944G95q2v56eR5qeY5ZCR44GR44OR44K944Kz?=
+ =?UTF-8?B?44Oz6LK344GE5pu/44GI6Kq/5p+744O75o+Q5qGI44Gu44GU5qGI5YaF?=
+ =?UTF-8?B?44CNIOizvOWFpeODu+ioree9ruWVhuWTgeizvOWFpSDpgJrnn6U=?=
+ <notifications@zohoprojects.com> [in /home/runner/CRM/email_receiver.py:59]
+2024-09-26 00:06:10,376 INFO: Stored email from unknown sender: =?UTF-8?B?5Yy755mC5rOV5Lq66Iez6Kqg5Lya44Gf44KT44G944G95q2v56eR?=
+ =?UTF-8?B?44CA44CM44Gf44KT44G944G95q2v56eR5qeY5ZCR44GR44OR44K944Kz?=
+ =?UTF-8?B?44Oz6LK344GE5pu/44GI6Kq/5p+744O75o+Q5qGI44Gu44GU5qGI5YaF?=
+ =?UTF-8?B?44CNIOizvOWFpeODu+ioree9ruWVhuWTgeizvOWFpSDpgJrnn6U=?=
+ <notifications@zohoprojects.com> [in /home/runner/CRM/email_receiver.py:67]
