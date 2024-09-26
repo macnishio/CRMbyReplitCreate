@@ -99,7 +99,7 @@ def process_email(sender, subject, body, received_at):
         db.session.rollback()
         current_app.logger.error(f"Error storing email: {str(e)}")
 
-def fetch_emails(minutes_back=5, lead_id=None):
+def fetch_emails(minutes_back=5, lead_id=None, max_emails=100):
     try:
         mail = connect_to_email_server()
         mail.select('inbox')
@@ -130,6 +130,8 @@ def fetch_emails(minutes_back=5, lead_id=None):
 
         processed_emails = 0
         for num in search_data[0].split():
+            if processed_emails >= max_emails:
+                break
             try:
                 _, msg_data = mail.fetch(num, '(RFC822)')
                 email_body = msg_data[0][1]
@@ -229,11 +231,12 @@ def setup_email_scheduler(app):
     @scheduler.task('interval',
                     id='check_emails',
                     minutes=5,
-                    misfire_grace_time=300)
+                    misfire_grace_time=300,
+                    max_instances=1)
     def check_emails_task():
         with app.app_context():
             app.logger.info("Checking for new emails")
-            fetch_emails(minutes_back=5)
+            fetch_emails(minutes_back=5, max_emails=100)
 
     with app.app_context():
         app.logger.info("Email scheduler set up")
