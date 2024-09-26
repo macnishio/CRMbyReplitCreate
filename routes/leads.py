@@ -161,27 +161,46 @@ def refresh_lead_emails(id):
 def import_csv():
     if request.method == 'POST':
         if 'file' not in request.files:
+            current_app.logger.error("No file part in the request")
             flash('No file part', 'error')
             return redirect(request.url)
         file = request.files['file']
         if file.filename == '':
+            current_app.logger.error("No selected file")
             flash('No selected file', 'error')
             return redirect(request.url)
-        if file and file.filename.endswith('.csv'):
+        if not file.filename.endswith('.csv'):
+            current_app.logger.error("Invalid file type")
+            flash('Invalid file type. Please upload a CSV file.', 'error')
+            return redirect(request.url)
+        
+        try:
             csv_data = file.read().decode('utf-8')
             csv_file = StringIO(csv_data)
             csv_reader = csv.DictReader(csv_file)
+            
             for row in csv_reader:
-                lead = Lead(
-                    name=row['Name'],
-                    email=row['Email'],
-                    phone=row.get('Phone', ''),
-                    user_id=current_user.id
-                )
-                db.session.add(lead)
+                try:
+                    lead = Lead(
+                        name=row.get('Name', row.get('name', '')),
+                        email=row.get('Email', row.get('email', '')),
+                        phone=row.get('Phone', row.get('phone', '')),
+                        user_id=current_user.id
+                    )
+                    db.session.add(lead)
+                except Exception as e:
+                    current_app.logger.error(f"Error processing CSV row: {str(e)}")
+                    flash(f'Error processing row: {str(e)}', 'error')
+                    db.session.rollback()
+                    return redirect(url_for('leads.import_csv'))
+            
             db.session.commit()
+            current_app.logger.info(f"Successfully imported leads from CSV")
             flash('Leads imported successfully', 'success')
             return redirect(url_for('leads.list_leads'))
-        else:
-            flash('Invalid file type. Please upload a CSV file.', 'error')
+        except Exception as e:
+            current_app.logger.error(f"Error importing CSV: {str(e)}")
+            flash(f'An error occurred while importing the CSV: {str(e)}', 'error')
+            return redirect(url_for('leads.import_csv'))
+    
     return render_template('leads/import_csv.html')

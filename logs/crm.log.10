@@ -1,53 +1,58 @@
-2024-09-26 10:48:15,884 WARNING: Received email from unknown sender: =?UTF-8?Q?Any_=E9=80=9A=E7=9F=A5?= <notifications@zohoprojects.com> [in /home/runner/CRM/email_receiver.py:81]
-2024-09-26 10:48:16,603 INFO: Stored email from unknown sender: notifications@zohoprojects.com [in /home/runner/CRM/email_receiver.py:95]
-2024-09-26 10:48:16,905 INFO: Processing email - Sender: =?UTF-8?Q?Project_Any_=E9=80=9A=E7=9F=A5?=
- <notifications@zohoprojects.com>, Subject: [Project Any] [PA1-T6 Negotiation] タスクのコメントを追加しました, Original Date: Wed, 25 Sep 2024 19:15:20 -0700 (PDT), Parsed Date: 2024-09-26 02:15:20 [in /home/runner/CRM/email_receiver.py:161]
-2024-09-26 10:48:17,624 WARNING: Received email from unknown sender: =?UTF-8?Q?Project_Any_=E9=80=9A=E7=9F=A5?=
+2024-09-26 10:52:04,501 INFO: Stored email from unknown sender: notifications@zohoprojects.com [in /home/runner/CRM/email_receiver.py:95]
+2024-09-26 10:52:04,805 INFO: Processing email - Sender: =?UTF-8?Q?Any_=E9=80=9A=E7=9F=A5?= <notifications@zohoprojects.com>, Subject: [Any] [AN4-T5 Negotiation and Agreement] タスクが追加されました, Original Date: Wed, 25 Sep 2024 19:10:05 -0700 (PDT), Parsed Date: 2024-09-26 02:10:05 [in /home/runner/CRM/email_receiver.py:161]
+2024-09-26 10:52:05,524 WARNING: Received email from unknown sender: =?UTF-8?Q?Any_=E9=80=9A=E7=9F=A5?= <notifications@zohoprojects.com> [in /home/runner/CRM/email_receiver.py:81]
+2024-09-26 10:52:06,244 INFO: Stored email from unknown sender: notifications@zohoprojects.com [in /home/runner/CRM/email_receiver.py:95]
+2024-09-26 10:52:06,540 INFO: Processing email - Sender: =?UTF-8?Q?Project_Any_=E9=80=9A=E7=9F=A5?=
+ <notifications@zohoprojects.com>, Subject: [Project Any] [PA1-T6 Negotiation] タスクが追加されました, Original Date: Wed, 25 Sep 2024 19:10:09 -0700 (PDT), Parsed Date: 2024-09-26 02:10:09 [in /home/runner/CRM/email_receiver.py:161]
+2024-09-26 10:52:07,261 WARNING: Received email from unknown sender: =?UTF-8?Q?Project_Any_=E9=80=9A=E7=9F=A5?=
  <notifications@zohoprojects.com> [in /home/runner/CRM/email_receiver.py:81]
-2024-09-26 10:48:18,345 INFO: Stored email from unknown sender: notifications@zohoprojects.com [in /home/runner/CRM/email_receiver.py:95]
-2024-09-26 10:48:18,656 INFO: Processing email - Sender: =?UTF-8?Q?Any_=E9=80=9A=E7=9F=A5?= <notifications@zohoprojects.com>, Subject: [Any] [AN4-T9 Final Review and Handover] タスクのコメントを追加しました, Original Date: Wed, 25 Sep 2024 19:15:22 -0700 (PDT), Parsed Date: 2024-09-26 02:15:22 [in /home/runner/CRM/email_receiver.py:161]
-2024-09-26 10:48:19,373 WARNING: Received email from unknown sender: =?UTF-8?Q?Any_=E9=80=9A=E7=9F=A5?= <notifications@zohoprojects.com> [in /home/runner/CRM/email_receiver.py:81]
-2024-09-26 10:48:20,090 INFO: Stored email from unknown sender: notifications@zohoprojects.com [in /home/runner/CRM/email_receiver.py:95]
-2024-09-26 10:48:20,439 INFO: Processing email - Sender: =?UTF-8?Q?Any_=E9=80=9A=E7=9F=A5?= <notifications@zohoprojects.com>, Subject: [Any] [AN4-T6 Project Planning] タスクのコメントを追加しました, Original Date: Wed, 25 Sep 2024 19:15:22 -0700 (PDT), Parsed Date: 2024-09-26 02:15:22 [in /home/runner/CRM/email_receiver.py:161]
-2024-09-26 10:48:21,158 WARNING: Received email from unknown sender: =?UTF-8?Q?Any_=E9=80=9A=E7=9F=A5?= <notifications@zohoprojects.com> [in /home/runner/CRM/email_receiver.py:81]
-2024-09-26 10:48:21,878 INFO: Stored email from unknown sender: notifications@zohoprojects.com [in /home/runner/CRM/email_receiver.py:95]
-2024-09-26 10:48:22,186 INFO: Processing email - Sender: =?UTF-8?Q?Any_=E9=80=9A=E7=9F=A5?= <notifications@zohoprojects.com>, Subject: [Any] [AN4-T4 Proposal Preparation] タスクのコメントを追加しました, Original Date: Wed, 25 Sep 2024 19:15:21 -0700 (PDT), Parsed Date: 2024-09-26 02:15:21 [in /home/runner/CRM/email_receiver.py:161]
-2024-09-26 10:48:22,904 WARNING: Received email from unknown sender: =?UTF-8?Q?Any_=E9=80=9A=E7=9F=A5?= <notifications@zohoprojects.com> [in /home/runner/CRM/email_receiver.py:81]
-2024-09-26 10:48:23,621 INFO: Stored email from unknown sender: notifications@zohoprojects.com [in /home/runner/CRM/email_receiver.py:95]
-2024-09-26 10:48:23,932 INFO: Processing email - Sender: =?UTF-8?Q?Project_Any_=E9=80=9A=E7=9F=A5?=
- <notifications@zohoprojects.com>, Subject: [Project Any] [PA1-T7 Deal Closure] タスクのコメントを追加しました, Original Date: Wed, 25 Sep 2024 19:15:22 -0700 (PDT), Parsed Date: 2024-09-26 02:15:22 [in /home/runner/CRM/email_receiver.py:161]
-2024-09-26 10:48:24,652 WARNING: Received email from unknown sender: =?UTF-8?Q?Project_Any_=E9=80=9A=E7=9F=A5?=
+2024-09-26 10:52:07,983 INFO: Stored email from unknown sender: notifications@zohoprojects.com [in /home/runner/CRM/email_receiver.py:95]
+2024-09-26 10:52:08,280 INFO: Processing email - Sender: =?UTF-8?Q?Any_=E9=80=9A=E7=9F=A5?= <notifications@zohoprojects.com>, Subject: [Any] [AN4-T6 Project Planning] タスクが追加されました, Original Date: Wed, 25 Sep 2024 19:10:20 -0700 (PDT), Parsed Date: 2024-09-26 02:10:20 [in /home/runner/CRM/email_receiver.py:161]
+2024-09-26 10:52:08,998 WARNING: Received email from unknown sender: =?UTF-8?Q?Any_=E9=80=9A=E7=9F=A5?= <notifications@zohoprojects.com> [in /home/runner/CRM/email_receiver.py:81]
+2024-09-26 10:52:09,719 INFO: Stored email from unknown sender: notifications@zohoprojects.com [in /home/runner/CRM/email_receiver.py:95]
+2024-09-26 10:52:10,016 INFO: Processing email - Sender: =?UTF-8?Q?Project_Any_=E9=80=9A=E7=9F=A5?=
+ <notifications@zohoprojects.com>, Subject: [Project Any] [PA1-T7 Deal Closure] タスクが追加されました, Original Date: Wed, 25 Sep 2024 19:10:29 -0700 (PDT), Parsed Date: 2024-09-26 02:10:29 [in /home/runner/CRM/email_receiver.py:161]
+2024-09-26 10:52:10,737 WARNING: Received email from unknown sender: =?UTF-8?Q?Project_Any_=E9=80=9A=E7=9F=A5?=
  <notifications@zohoprojects.com> [in /home/runner/CRM/email_receiver.py:81]
-2024-09-26 10:48:25,372 INFO: Stored email from unknown sender: notifications@zohoprojects.com [in /home/runner/CRM/email_receiver.py:95]
-2024-09-26 10:48:25,694 INFO: Processing email - Sender: =?UTF-8?Q?Any_=E9=80=9A=E7=9F=A5?= <notifications@zohoprojects.com>, Subject: [Any] [AN4-T5 Negotiation and Agreement] タスクのコメントを追加しました, Original Date: Wed, 25 Sep 2024 19:15:22 -0700 (PDT), Parsed Date: 2024-09-26 02:15:22 [in /home/runner/CRM/email_receiver.py:161]
-2024-09-26 10:48:26,410 WARNING: Received email from unknown sender: =?UTF-8?Q?Any_=E9=80=9A=E7=9F=A5?= <notifications@zohoprojects.com> [in /home/runner/CRM/email_receiver.py:81]
-2024-09-26 10:48:27,128 INFO: Stored email from unknown sender: notifications@zohoprojects.com [in /home/runner/CRM/email_receiver.py:95]
-2024-09-26 10:48:27,484 INFO: Processing email - Sender: =?UTF-8?Q?Any_=E9=80=9A=E7=9F=A5?= <notifications@zohoprojects.com>, Subject: [Any] [AN4-T7 Execution] タスクのコメントを追加しました, Original Date: Wed, 25 Sep 2024 19:15:22 -0700 (PDT), Parsed Date: 2024-09-26 02:15:22 [in /home/runner/CRM/email_receiver.py:161]
-2024-09-26 10:48:28,203 WARNING: Received email from unknown sender: =?UTF-8?Q?Any_=E9=80=9A=E7=9F=A5?= <notifications@zohoprojects.com> [in /home/runner/CRM/email_receiver.py:81]
-2024-09-26 10:48:28,924 INFO: Stored email from unknown sender: notifications@zohoprojects.com [in /home/runner/CRM/email_receiver.py:95]
-2024-09-26 10:48:29,221 INFO: Processing email - Sender: =?UTF-8?Q?Any_=E9=80=9A=E7=9F=A5?= <notifications@zohoprojects.com>, Subject: [Any] [AN4-T11 Client Communication Issues] タスクのコメントを追加しました, Original Date: Wed, 25 Sep 2024 19:15:22 -0700 (PDT), Parsed Date: 2024-09-26 02:15:22 [in /home/runner/CRM/email_receiver.py:161]
-2024-09-26 10:48:29,938 WARNING: Received email from unknown sender: =?UTF-8?Q?Any_=E9=80=9A=E7=9F=A5?= <notifications@zohoprojects.com> [in /home/runner/CRM/email_receiver.py:81]
-2024-09-26 10:48:30,656 INFO: Stored email from unknown sender: notifications@zohoprojects.com [in /home/runner/CRM/email_receiver.py:95]
-2024-09-26 10:48:30,973 INFO: Processing email - Sender: =?UTF-8?Q?Any_=E9=80=9A=E7=9F=A5?= <notifications@zohoprojects.com>, Subject: [Any] [AN4-T10 Post-Project Support] タスクのコメントを追加しました, Original Date: Wed, 25 Sep 2024 19:15:22 -0700 (PDT), Parsed Date: 2024-09-26 02:15:22 [in /home/runner/CRM/email_receiver.py:161]
-2024-09-26 10:48:31,692 WARNING: Received email from unknown sender: =?UTF-8?Q?Any_=E9=80=9A=E7=9F=A5?= <notifications@zohoprojects.com> [in /home/runner/CRM/email_receiver.py:81]
-2024-09-26 10:48:32,413 INFO: Stored email from unknown sender: notifications@zohoprojects.com [in /home/runner/CRM/email_receiver.py:95]
-2024-09-26 10:48:32,724 INFO: Processing email - Sender: =?UTF-8?Q?Project_Any_=E9=80=9A=E7=9F=A5?=
- <notifications@zohoprojects.com>, Subject: [Project Any] [PA1-T8 Client Unavailability] タスクのコメントを追加しました, Original Date: Wed, 25 Sep 2024 19:15:22 -0700 (PDT), Parsed Date: 2024-09-26 02:15:22 [in /home/runner/CRM/email_receiver.py:161]
-2024-09-26 10:48:33,441 WARNING: Received email from unknown sender: =?UTF-8?Q?Project_Any_=E9=80=9A=E7=9F=A5?=
+2024-09-26 10:52:11,459 INFO: Stored email from unknown sender: notifications@zohoprojects.com [in /home/runner/CRM/email_receiver.py:95]
+2024-09-26 10:52:11,762 INFO: Processing email - Sender: =?UTF-8?Q?Any_=E9=80=9A=E7=9F=A5?= <notifications@zohoprojects.com>, Subject: [Any] [AN4-T7 Execution] タスクが追加されました, Original Date: Wed, 25 Sep 2024 19:10:46 -0700 (PDT), Parsed Date: 2024-09-26 02:10:46 [in /home/runner/CRM/email_receiver.py:161]
+2024-09-26 10:52:12,481 WARNING: Received email from unknown sender: =?UTF-8?Q?Any_=E9=80=9A=E7=9F=A5?= <notifications@zohoprojects.com> [in /home/runner/CRM/email_receiver.py:81]
+2024-09-26 10:52:13,201 INFO: Stored email from unknown sender: notifications@zohoprojects.com [in /home/runner/CRM/email_receiver.py:95]
+2024-09-26 10:52:13,500 INFO: Processing email - Sender: =?UTF-8?Q?Project_Any_=E9=80=9A=E7=9F=A5?=
+ <notifications@zohoprojects.com>, Subject: [Project Any] [PA1-T8 Client Unavailability] タスクが追加されました, Original Date: Wed, 25 Sep 2024 19:10:48 -0700 (PDT), Parsed Date: 2024-09-26 02:10:48 [in /home/runner/CRM/email_receiver.py:161]
+2024-09-26 10:52:14,222 WARNING: Received email from unknown sender: =?UTF-8?Q?Project_Any_=E9=80=9A=E7=9F=A5?=
  <notifications@zohoprojects.com> [in /home/runner/CRM/email_receiver.py:81]
-2024-09-26 10:48:34,159 INFO: Stored email from unknown sender: notifications@zohoprojects.com [in /home/runner/CRM/email_receiver.py:95]
-2024-09-26 10:48:34,491 INFO: Processing email - Sender: =?UTF-8?B?6ZW35bKhIOWSjOaaiQ==?= <nagaoka@immedio.io>, Subject: 『展示会施策のROIを最大化させたい！』とお考えでしょうか？：immedio, Original Date: Thu, 26 Sep 2024 11:33:02 +0900, Parsed Date: 2024-09-26 02:33:02 [in /home/runner/CRM/email_receiver.py:161]
-2024-09-26 10:48:35,210 WARNING: Received email from unknown sender: =?UTF-8?B?6ZW35bKhIOWSjOaaiQ==?= <nagaoka@immedio.io> [in /home/runner/CRM/email_receiver.py:81]
-2024-09-26 10:48:35,691 INFO: Stored email from unknown sender: nagaoka@immedio.io [in /home/runner/CRM/email_receiver.py:95]
-2024-09-26 10:48:36,019 INFO: Processing email - Sender: =?utf-8?B?6KW/5bC+IOecn+iogA==?= <makoto@team240.net>, Subject: Re:[## 81121 ##] Re: ご用命後いかがでしょうか？, Original Date: Wed, 25 Sep 2024 19:52:19 -0700, Parsed Date: 2024-09-26 02:52:19 [in /home/runner/CRM/email_receiver.py:161]
-2024-09-26 10:48:36,735 WARNING: Received email from unknown sender: =?utf-8?B?6KW/5bC+IOecn+iogA==?= <makoto@team240.net> [in /home/runner/CRM/email_receiver.py:81]
-2024-09-26 10:48:37,214 INFO: Stored email from unknown sender: makoto@team240.net [in /home/runner/CRM/email_receiver.py:95]
-2024-09-26 10:48:37,528 INFO: Processing email - Sender: =?iso-2022-jp?B?GyRCQWpMTzg2PiY5KTJxNUQ9aiEhOzBOWEMjTGkbKEI=?= <t-miwa@sagamihara-cci.or.jp>, Subject: 【相模原商工会議所】サービス業部会メルマガ�30《きぎょう情報交換会、広域ビジネス交流会等》, Original Date: Thu, 26 Sep 2024 12:00:52 +0900, Parsed Date: 2024-09-26 03:00:52 [in /home/runner/CRM/email_receiver.py:161]
-2024-09-26 10:48:38,247 WARNING: Received email from unknown sender: =?iso-2022-jp?B?GyRCQWpMTzg2PiY5KTJxNUQ9aiEhOzBOWEMjTGkbKEI=?= <t-miwa@sagamihara-cci.or.jp> [in /home/runner/CRM/email_receiver.py:81]
-2024-09-26 10:48:38,729 INFO: Stored email from unknown sender: t-miwa@sagamihara-cci.or.jp [in /home/runner/CRM/email_receiver.py:95]
-2024-09-26 10:48:39,102 INFO: Processing email - Sender: 
- =?ISO-2022-JP?B?SVRtZWRpYSBWaXJ0dWFsIEVYUE8gMjAyNCAbJEIyRhsoQiAbJEIkTiQ0MEZGYhsoQiAtLRskQiUiJSQlRiUjJWElRyUjJSIbKEIgGyRCJSQlWSVzJUglYSE8JWsbKEI=?= <eventnews@ml.itmedia.co.jp>, Subject: iPhone 16が当たる！Amazonギフトカード進呈！いよいよ明日が最終日, Original Date: Thu, 26 Sep 2024 12:24:25 +0900 (JST), Parsed Date: 2024-09-26 03:24:25 [in /home/runner/CRM/email_receiver.py:161]
-2024-09-26 10:48:39,820 WARNING: Received email from unknown sender: 
- =?ISO-2022-JP?B?SVRtZWRpYSBWaXJ0dWFsIEVYUE8gMjAyNCAbJEIyRhsoQiAbJEIkTiQ0MEZGYhsoQiAtLRskQiUiJSQlRiUjJWElRyUjJSIbKEIgGyRCJSQlWSVzJUglYSE8JWsbKEI=?= <eventnews@ml.itmedia.co.jp> [in /home/runner/CRM/email_receiver.py:81]
-2024-09-26 10:48:40,300 INFO: Stored email from unknown sender: eventnews@ml.itmedia.co.jp [in /home/runner/CRM/email_receiver.py:95]
-2024-09-26 10:48:40,623 INFO: Processing email - Sender: "Money Forward" <feedback@moneyforward.com>, Subject: 野村IR【MIR@I】新規会員登録キャンペーン！（マネーフォワードPR）, Original Date: Thu, 26 Sep 2024 04:00:39 +0000, Parsed Date: 2024-09-26 04:00:39 [in /home/runner/CRM/email_receiver.py:161]
+2024-09-26 10:52:14,944 INFO: Stored email from unknown sender: notifications@zohoprojects.com [in /home/runner/CRM/email_receiver.py:95]
+2024-09-26 10:52:15,245 INFO: Processing email - Sender: =?UTF-8?Q?Project_Any_=E9=80=9A=E7=9F=A5?=
+ <notifications@zohoprojects.com>, Subject: [Project Any] [PA1-T9 Proposal Revisions] タスクが追加されました, Original Date: Wed, 25 Sep 2024 19:11:07 -0700 (PDT), Parsed Date: 2024-09-26 02:11:07 [in /home/runner/CRM/email_receiver.py:161]
+2024-09-26 10:52:15,964 WARNING: Received email from unknown sender: =?UTF-8?Q?Project_Any_=E9=80=9A=E7=9F=A5?=
+ <notifications@zohoprojects.com> [in /home/runner/CRM/email_receiver.py:81]
+2024-09-26 10:52:16,685 INFO: Stored email from unknown sender: notifications@zohoprojects.com [in /home/runner/CRM/email_receiver.py:95]
+2024-09-26 10:52:16,987 INFO: Processing email - Sender: =?UTF-8?Q?Any_=E9=80=9A=E7=9F=A5?= <notifications@zohoprojects.com>, Subject: [Any] [AN4-T8 Quality Assurance] タスクが追加されました, Original Date: Wed, 25 Sep 2024 19:11:08 -0700 (PDT), Parsed Date: 2024-09-26 02:11:08 [in /home/runner/CRM/email_receiver.py:161]
+2024-09-26 10:52:17,711 WARNING: Received email from unknown sender: =?UTF-8?Q?Any_=E9=80=9A=E7=9F=A5?= <notifications@zohoprojects.com> [in /home/runner/CRM/email_receiver.py:81]
+2024-09-26 10:52:18,432 INFO: Stored email from unknown sender: notifications@zohoprojects.com [in /home/runner/CRM/email_receiver.py:95]
+2024-09-26 10:52:18,927 INFO: Processing email - Sender: =?utf-8?B?6KW/5bC+IOecn+iogA==?= <makoto@team240.net>, Subject: Re:[## 81218 ##] RE: 爆音訴訟調査研究センター　様　見積書送付のご案内 （（有）西尾システムコンサルタント）, Original Date: Wed, 25 Sep 2024 19:11:02 -0700, Parsed Date: 2024-09-26 02:11:02 [in /home/runner/CRM/email_receiver.py:161]
+2024-09-26 10:52:19,646 WARNING: Received email from unknown sender: =?utf-8?B?6KW/5bC+IOecn+iogA==?= <makoto@team240.net> [in /home/runner/CRM/email_receiver.py:81]
+2024-09-26 10:52:20,127 INFO: Stored email from unknown sender: makoto@team240.net [in /home/runner/CRM/email_receiver.py:95]
+2024-09-26 10:52:20,426 INFO: Processing email - Sender: =?UTF-8?Q?Any_=E9=80=9A=E7=9F=A5?= <notifications@zohoprojects.com>, Subject: [Any] [AN4-T9 Final Review and Handover] タスクが追加されました, Original Date: Wed, 25 Sep 2024 19:11:28 -0700 (PDT), Parsed Date: 2024-09-26 02:11:28 [in /home/runner/CRM/email_receiver.py:161]
+2024-09-26 10:52:21,148 WARNING: Received email from unknown sender: =?UTF-8?Q?Any_=E9=80=9A=E7=9F=A5?= <notifications@zohoprojects.com> [in /home/runner/CRM/email_receiver.py:81]
+2024-09-26 10:52:21,870 INFO: Stored email from unknown sender: notifications@zohoprojects.com [in /home/runner/CRM/email_receiver.py:95]
+2024-09-26 10:52:22,165 INFO: Processing email - Sender: =?UTF-8?Q?Any_=E9=80=9A=E7=9F=A5?= <notifications@zohoprojects.com>, Subject: [Any] [AN4-T10 Post-Project Support] タスクが追加されました, Original Date: Wed, 25 Sep 2024 19:11:46 -0700 (PDT), Parsed Date: 2024-09-26 02:11:46 [in /home/runner/CRM/email_receiver.py:161]
+2024-09-26 10:52:22,884 WARNING: Received email from unknown sender: =?UTF-8?Q?Any_=E9=80=9A=E7=9F=A5?= <notifications@zohoprojects.com> [in /home/runner/CRM/email_receiver.py:81]
+2024-09-26 10:52:23,604 INFO: Stored email from unknown sender: notifications@zohoprojects.com [in /home/runner/CRM/email_receiver.py:95]
+2024-09-26 10:52:23,909 INFO: Processing email - Sender: =?UTF-8?B?RFjjg6Hjg4fjgqPjgqLjg7tET09SU+e3qOmbhumDqA==?=
+ <doors_news@brainpad.co.jp>, Subject: 顧客データ×商品データで「顧客理解」を深める／ビューカード流DXをチェック, Original Date: Wed, 25 Sep 2024 20:12:10 -0600, Parsed Date: 2024-09-26 02:12:10 [in /home/runner/CRM/email_receiver.py:161]
+2024-09-26 10:52:24,631 WARNING: Received email from unknown sender: =?UTF-8?B?RFjjg6Hjg4fjgqPjgqLjg7tET09SU+e3qOmbhumDqA==?=
+ <doors_news@brainpad.co.jp> [in /home/runner/CRM/email_receiver.py:81]
+2024-09-26 10:52:25,113 INFO: Stored email from unknown sender: doors_news@brainpad.co.jp [in /home/runner/CRM/email_receiver.py:95]
+2024-09-26 10:52:25,414 INFO: Processing email - Sender: =?UTF-8?Q?Project_Any_=E9=80=9A=E7=9F=A5?=
+ <notifications@zohoprojects.com>, Subject: [Project Any] [PA1-T1 Implementation] タスクのコメントを追加しました, Original Date: Wed, 25 Sep 2024 19:12:11 -0700 (PDT), Parsed Date: 2024-09-26 02:12:11 [in /home/runner/CRM/email_receiver.py:161]
+2024-09-26 10:52:26,133 WARNING: Received email from unknown sender: =?UTF-8?Q?Project_Any_=E9=80=9A=E7=9F=A5?=
+ <notifications@zohoprojects.com> [in /home/runner/CRM/email_receiver.py:81]
+2024-09-26 10:52:26,853 INFO: Stored email from unknown sender: notifications@zohoprojects.com [in /home/runner/CRM/email_receiver.py:95]
+2024-09-26 10:52:27,155 INFO: Processing email - Sender: =?UTF-8?Q?Any_=E9=80=9A=E7=9F=A5?= <notifications@zohoprojects.com>, Subject: [Any] [AN2-T4 Quality Assurance] タスクのコメントを追加しました, Original Date: Wed, 25 Sep 2024 19:12:11 -0700 (PDT), Parsed Date: 2024-09-26 02:12:11 [in /home/runner/CRM/email_receiver.py:161]
+2024-09-26 10:52:27,878 WARNING: Received email from unknown sender: =?UTF-8?Q?Any_=E9=80=9A=E7=9F=A5?= <notifications@zohoprojects.com> [in /home/runner/CRM/email_receiver.py:81]
+2024-09-26 10:52:28,600 INFO: Stored email from unknown sender: notifications@zohoprojects.com [in /home/runner/CRM/email_receiver.py:95]
+2024-09-26 10:52:28,897 INFO: Processing email - Sender: =?UTF-8?Q?Any_=E9=80=9A=E7=9F=A5?= <notifications@zohoprojects.com>, Subject: [Any] [AN4-T11 Client Communication Issues] タスクが追加されました, Original Date: Wed, 25 Sep 2024 19:12:11 -0700 (PDT), Parsed Date: 2024-09-26 02:12:11 [in /home/runner/CRM/email_receiver.py:161]
+2024-09-26 10:52:29,616 WARNING: Received email from unknown sender: =?UTF-8?Q?Any_=E9=80=9A=E7=9F=A5?= <notifications@zohoprojects.com> [in /home/runner/CRM/email_receiver.py:81]
+2024-09-26 10:52:30,337 INFO: Stored email from unknown sender: notifications@zohoprojects.com [in /home/runner/CRM/email_receiver.py:95]
