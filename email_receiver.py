@@ -115,94 +115,91 @@ def fetch_emails(minutes_back=5, lead_id=None):
         tracker.last_fetch_time = end_date
         db.session.commit()
 
-        date_criterion = f'(SINCE "{start_date.strftime("%d-%b-%Y %H:%M:%S")}")'
-
-        if lead_id:
-            lead = Lead.query.get(lead_id)
-            if lead:
-                date_criterion += f' (FROM "{lead.email}")'
-
         current_app.logger.info(
             f"Fetching emails from {start_date.strftime('%Y-%m-%d %H:%M:%S')} to {end_date.strftime('%Y-%m-%d %H:%M:%S')}"
         )
 
-        _, search_data = mail.search(None, date_criterion)
+        try:
+            _, search_data = mail.search(None, 'ALL')
+        except imaplib.IMAP4.error as e:
+            current_app.logger.error(f"Error in IMAP SEARCH command: {str(e)}")
+            return
 
         total_emails = len(search_data[0].split())
-        current_app.logger.info(f"Total emails fetched: {total_emails}")
+        current_app.logger.info(f"Total emails found: {total_emails}")
 
+        processed_emails = 0
         for num in search_data[0].split():
             try:
-                _, data = mail.fetch(num, '(RFC822)')
-                _, bytes_data = data[0]
+                _, msg_data = mail.fetch(num, '(RFC822)')
+                email_body = msg_data[0][1]
+                email_message = email.message_from_bytes(email_body)
+                email_date = email.utils.parsedate_to_datetime(email_message['Date'])
+                
+                if start_date <= email_date <= end_date:
+                    subject = email_message["Subject"]
+                    if subject:
+                        subject_parts = decode_header(subject)
+                        decoded_subject = ""
+                        for content, charset in subject_parts:
+                            if isinstance(content, bytes):
+                                if charset is None:
+                                    detected = chardet.detect(content)
+                                    charset = detected['encoding']
+                                try:
+                                    decoded_subject += content.decode(
+                                        charset or 'utf-8', errors='replace')
+                                except (UnicodeDecodeError, LookupError):
+                                    decoded_subject += content.decode(
+                                        'utf-8', errors='replace')
+                            else:
+                                decoded_subject += content
+                        subject = decoded_subject
+                    else:
+                        subject = "No Subject"
 
-                email_message = email.message_from_bytes(bytes_data)
-                subject = email_message["Subject"]
-                if subject:
-                    subject_parts = decode_header(subject)
-                    decoded_subject = ""
-                    for content, charset in subject_parts:
-                        if isinstance(content, bytes):
-                            if charset is None:
-                                detected = chardet.detect(content)
-                                charset = detected['encoding']
-                            try:
-                                decoded_subject += content.decode(
-                                    charset or 'utf-8', errors='replace')
-                            except (UnicodeDecodeError, LookupError):
-                                decoded_subject += content.decode(
-                                    'utf-8', errors='replace')
-                        else:
-                            decoded_subject += content
-                    subject = decoded_subject
-                else:
-                    subject = "No Subject"
+                    sender = email_message["From"]
+                    
+                    current_app.logger.info(
+                        f"Processing email - Sender: {sender}, Subject: {subject}, Date: {email_date.strftime('%Y-%m-%d %H:%M:%S')}"
+                    )
 
-                sender = email_message["From"]
-                date_tuple = email.utils.parsedate_tz(email_message["Date"])
-                if date_tuple:
-                    local_date = datetime.fromtimestamp(
-                        email.utils.mktime_tz(date_tuple))
-                else:
-                    local_date = datetime.utcnow()
+                    body = ""
+                    if email_message.is_multipart():
+                        for part in email_message.walk():
+                            if part.get_content_type() == "text/plain":
+                                try:
+                                    payload = part.get_payload(decode=True)
+                                    if payload:
+                                        body = payload.decode(
+                                            part.get_content_charset() or 'utf-8',
+                                            errors='ignore')
+                                        body = body.replace('\x00', '')
+                                except Exception as e:
+                                    current_app.logger.error(
+                                        f"Error decoding email body: {str(e)}")
+                                    body = "Error: Unable to decode email content"
+                                break
+                    else:
+                        try:
+                            payload = email_message.get_payload(decode=True)
+                            if payload:
+                                body = payload.decode(
+                                    email_message.get_content_charset() or 'utf-8',
+                                    errors='ignore')
+                                body = body.replace('\x00', '')
+                        except Exception as e:
+                            current_app.logger.error(
+                                f"Error decoding email body: {str(e)}")
+                            body = "Error: Unable to decode email content"
 
-                current_app.logger.info(
-                    f"Processing email - Sender: {sender}, Subject: {subject}, Original Date: {email_message['Date']}, Parsed Date: {local_date.strftime('%Y-%m-%d %H:%M:%S')}"
-                )
-
-                body = ""
-                if email_message.is_multipart():
-                    for part in email_message.walk():
-                        if part.get_content_type() == "text/plain":
-                            try:
-                                payload = part.get_payload(decode=True)
-                                if payload:
-                                    body = payload.decode(
-                                        part.get_content_charset() or 'utf-8',
-                                        errors='ignore')
-                                    body = body.replace('\x00', '')
-                            except Exception as e:
-                                current_app.logger.error(
-                                    f"Error decoding email body: {str(e)}")
-                                body = "Error: Unable to decode email content"
-                            break
-                else:
-                    try:
-                        payload = email_message.get_payload(decode=True)
-                        if payload:
-                            body = payload.decode(
-                                email_message.get_content_charset() or 'utf-8',
-                                errors='ignore')
-                            body = body.replace('\x00', '')
-                    except Exception as e:
-                        current_app.logger.error(
-                            f"Error decoding email body: {str(e)}")
-                        body = "Error: Unable to decode email content"
-
-                process_email(sender, subject, body, local_date)
+                    process_email(sender, subject, body, email_date)
+                    processed_emails += 1
             except Exception as e:
                 current_app.logger.error(
                     f"Error processing email {num}: {str(e)}")
+
+        current_app.logger.info(f"Processed {processed_emails} out of {total_emails} emails")
 
     except Exception as e:
         current_app.logger.error(f"Error in fetch_emails: {str(e)}")
