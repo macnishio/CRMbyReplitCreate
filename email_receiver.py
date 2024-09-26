@@ -26,7 +26,6 @@ def connect_to_email_server():
         context = ssl.create_default_context()
         context.check_hostname = False
         context.verify_mode = ssl.CERT_NONE
-        context.set_ciphers('DEFAULT@SECLEVEL=1')
         
         # Explicitly set SSL/TLS versions
         context.options |= (

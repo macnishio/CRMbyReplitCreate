@@ -1,59 +1,73 @@
-2024-09-26 05:37:31,012 WARNING: Received email from unknown sender: LinkShare =?ISO-2022-JP?B?GyRCJUslZSE8JTkbKEI=?= <aff-support@linkshare.com> [in /home/runner/CRM/email_receiver.py:66]
-2024-09-26 05:37:31,483 INFO: Stored email from unknown sender: aff-support@linkshare.com [in /home/runner/CRM/email_receiver.py:80]
-2024-09-26 05:37:31,875 INFO: Processing email - Sender: =?UTF-8?B?Q29kZVppbmXnt6jpm4bpg6g=?= <support@codezine.jp>, Subject: ワークショップ形式でアーキテクチャ設計の基本を学ぶ[CodeZine News号外], Original Date: Thu, 26 Sep 2024 14:06:12 +0900, Parsed Date: 2024-09-26 05:06:12 [in /home/runner/CRM/email_receiver.py:149]
-2024-09-26 05:37:32,567 WARNING: Received email from unknown sender: =?UTF-8?B?Q29kZVppbmXnt6jpm4bpg6g=?= <support@codezine.jp> [in /home/runner/CRM/email_receiver.py:66]
-2024-09-26 05:37:33,031 INFO: Stored email from unknown sender: support@codezine.jp [in /home/runner/CRM/email_receiver.py:80]
-2024-09-26 05:37:34,315 INFO: Emails from known leads: 0 [in /home/runner/CRM/email_receiver.py:197]
-2024-09-26 05:37:34,550 INFO: Emails from unknown senders: 0 [in /home/runner/CRM/email_receiver.py:200]
-2024-09-26 05:37:57,950 INFO: Email sender: =?utf-8?B?54iG6Z+z6Ki06Kif6Kq/5p+756CU56m244K744Oz44K/44O8?= <b-choken-c@atbb.ne.jp>, Received at: 2024-09-26 02:08:57 [in /home/runner/CRM/routes/main.py:37]
-2024-09-26 05:37:57,950 INFO: Email sender: =?utf-8?B?54iG6Z+z6Ki06Kif6Kq/5p+756CU56m244K744Oz44K/44O8?= <b-choken-c@atbb.ne.jp>, Received at: 2024-09-26 02:08:57 [in /home/runner/CRM/routes/main.py:37]
-2024-09-26 05:37:57,951 INFO: Email sender: =?utf-8?B?54iG6Z+z6Ki06Kif6Kq/5p+756CU56m244K744Oz44K/44O8?= <b-choken-c@atbb.ne.jp>, Received at: 2024-09-26 02:08:57 [in /home/runner/CRM/routes/main.py:37]
-2024-09-26 05:37:57,951 INFO: Email sender: =?utf-8?B?54iG6Z+z6Ki06Kif6Kq/5p+756CU56m244K744Oz44K/44O8?= <b-choken-c@atbb.ne.jp>, Received at: 2024-09-26 02:08:57 [in /home/runner/CRM/routes/main.py:37]
-2024-09-26 05:37:57,951 INFO: Email sender: =?utf-8?B?54iG6Z+z6Ki06Kif6Kq/5p+756CU56m244K744Oz44K/44O8?= <b-choken-c@atbb.ne.jp>, Received at: 2024-09-26 02:08:57 [in /home/runner/CRM/routes/main.py:37]
-2024-09-26 05:37:57,951 INFO: Email sender: =?utf-8?B?54iG6Z+z6Ki06Kif6Kq/5p+756CU56m244K744Oz44K/44O8?= <b-choken-c@atbb.ne.jp>, Received at: 2024-09-26 02:08:57 [in /home/runner/CRM/routes/main.py:37]
-2024-09-26 05:37:57,951 INFO: Email sender: =?utf-8?B?54iG6Z+z6Ki06Kif6Kq/5p+756CU56m244K744Oz44K/44O8?= <b-choken-c@atbb.ne.jp>, Received at: 2024-09-26 02:08:57 [in /home/runner/CRM/routes/main.py:37]
-2024-09-26 05:37:57,952 INFO: Email sender: =?utf-8?B?54iG6Z+z6Ki06Kif6Kq/5p+756CU56m244K744Oz44K/44O8?= <b-choken-c@atbb.ne.jp>, Received at: 2024-09-26 02:08:57 [in /home/runner/CRM/routes/main.py:37]
-2024-09-26 05:37:57,952 INFO: Email sender: =?utf-8?B?54iG6Z+z6Ki06Kif6Kq/5p+756CU56m244K744Oz44K/44O8?= <b-choken-c@atbb.ne.jp>, Received at: 2024-09-26 02:08:57 [in /home/runner/CRM/routes/main.py:37]
-2024-09-26 05:37:57,952 INFO: Email sender: =?utf-8?B?54iG6Z+z6Ki06Kif6Kq/5p+756CU56m244K744Oz44K/44O8?= <b-choken-c@atbb.ne.jp>, Received at: 2024-09-26 02:08:57 [in /home/runner/CRM/routes/main.py:37]
-2024-09-26 05:37:57,952 INFO: Email sender: =?utf-8?B?54iG6Z+z6Ki06Kif6Kq/5p+756CU56m244K744Oz44K/44O8?= <b-choken-c@atbb.ne.jp>, Received at: 2024-09-26 02:08:57 [in /home/runner/CRM/routes/main.py:37]
-2024-09-26 05:37:57,952 INFO: Email sender: =?utf-8?B?54iG6Z+z6Ki06Kif6Kq/5p+756CU56m244K744Oz44K/44O8?= <b-choken-c@atbb.ne.jp>, Received at: 2024-09-26 02:08:57 [in /home/runner/CRM/routes/main.py:37]
-2024-09-26 08:59:12,552 INFO: CRM startup [in /home/runner/CRM/app.py:101]
-2024-09-26 08:59:12,553 INFO: Starting scheduler [in /home/runner/CRM/app.py:118]
-2024-09-26 08:59:12,554 INFO: Scheduler started [in /home/runner/CRM/app.py:120]
-2024-09-26 09:00:21,736 INFO: CRM startup [in /home/runner/CRM/app.py:101]
-2024-09-26 09:00:21,737 INFO: Starting scheduler [in /home/runner/CRM/app.py:118]
-2024-09-26 09:00:21,738 INFO: Scheduler started [in /home/runner/CRM/app.py:120]
-2024-09-26 09:01:59,261 INFO: CRM startup [in /home/runner/CRM/app.py:101]
-2024-09-26 09:01:59,261 INFO: Starting scheduler [in /home/runner/CRM/app.py:118]
-2024-09-26 09:01:59,262 INFO: Scheduler started [in /home/runner/CRM/app.py:120]
-2024-09-26 09:06:59,261 INFO: Checking for new emails [in /home/runner/CRM/email_receiver.py:224]
-2024-09-26 09:06:59,279 INFO: Attempting to connect to imap.gmail.com:993 [in /home/runner/CRM/email_receiver.py:31]
-2024-09-26 09:06:59,993 INFO: IMAP4_SSL connection established [in /home/runner/CRM/email_receiver.py:33]
-2024-09-26 09:07:00,686 INFO: Successfully logged in to the email server [in /home/runner/CRM/email_receiver.py:36]
-2024-09-26 09:07:01,235 INFO: Fetching emails from 2024-09-26 09:02:01 to 2024-09-26 09:07:01 [in /home/runner/CRM/email_receiver.py:113]
-2024-09-26 09:07:01,543 INFO: Total emails fetched: 140 [in /home/runner/CRM/email_receiver.py:120]
-2024-09-26 09:07:01,857 INFO: Processing email - Sender: "noreply@wooc.co.jp" <noreply@wooc.co.jp>, Subject: 【BIZcomfort】ご請求内容のお知らせ, Original Date: Wed, 25 Sep 2024 15:48:17 +0000 (UTC), Parsed Date: 2024-09-25 15:48:17 [in /home/runner/CRM/email_receiver.py:157]
-2024-09-26 09:07:02,583 WARNING: Received email from unknown sender: "noreply@wooc.co.jp" <noreply@wooc.co.jp> [in /home/runner/CRM/email_receiver.py:77]
-2024-09-26 09:07:03,118 INFO: Stored email from unknown sender: noreply@wooc.co.jp [in /home/runner/CRM/email_receiver.py:91]
-2024-09-26 09:07:03,527 INFO: Processing email - Sender: "ManageEngine" <ems-communications@manageengine.com>, Subject: ManageEngine UEMS Newsletter - September 2024, Original Date: Wed, 25 Sep 2024 09:48:06 -0700 (PDT), Parsed Date: 2024-09-25 16:48:06 [in /home/runner/CRM/email_receiver.py:157]
-2024-09-26 09:07:04,247 WARNING: Received email from unknown sender: "ManageEngine" <ems-communications@manageengine.com> [in /home/runner/CRM/email_receiver.py:77]
-2024-09-26 09:07:04,734 INFO: Stored email from unknown sender: ems-communications@manageengine.com [in /home/runner/CRM/email_receiver.py:91]
-2024-09-26 09:07:05,125 INFO: Processing email - Sender: Google AI Studio <googleaistudio-noreply@google.com>, Subject: Makoto: Gemini updates, improved performance, reduced costs, and more, Original Date: Wed, 25 Sep 2024 10:36:21 -0700, Parsed Date: 2024-09-25 17:36:21 [in /home/runner/CRM/email_receiver.py:157]
-2024-09-26 09:07:05,845 WARNING: Received email from unknown sender: Google AI Studio <googleaistudio-noreply@google.com> [in /home/runner/CRM/email_receiver.py:77]
-2024-09-26 09:07:06,327 INFO: Stored email from unknown sender: googleaistudio-noreply@google.com [in /home/runner/CRM/email_receiver.py:91]
-2024-09-26 09:07:06,650 INFO: Processing email - Sender: "noreply@wooc.co.jp" <noreply@wooc.co.jp>, Subject: 【BIZcomfort】ご請求内容のお知らせ, Original Date: Wed, 25 Sep 2024 19:49:15 +0000 (UTC), Parsed Date: 2024-09-25 19:49:15 [in /home/runner/CRM/email_receiver.py:157]
-2024-09-26 09:07:07,370 WARNING: Received email from unknown sender: "noreply@wooc.co.jp" <noreply@wooc.co.jp> [in /home/runner/CRM/email_receiver.py:77]
-2024-09-26 09:07:07,903 INFO: Stored email from unknown sender: noreply@wooc.co.jp [in /home/runner/CRM/email_receiver.py:91]
-2024-09-26 09:07:08,251 INFO: Processing email - Sender: IFTTT <mail@ifttt.com>, Subject: 🍂 Fall-tastic smart home Applets🍂, Original Date: Wed, 25 Sep 2024 20:16:44 +0000 (UTC), Parsed Date: 2024-09-25 20:16:44 [in /home/runner/CRM/email_receiver.py:157]
-2024-09-26 09:07:08,972 WARNING: Received email from unknown sender: IFTTT <mail@ifttt.com> [in /home/runner/CRM/email_receiver.py:77]
-2024-09-26 09:07:09,457 INFO: Stored email from unknown sender: mail@ifttt.com [in /home/runner/CRM/email_receiver.py:91]
-2024-09-26 09:07:09,780 INFO: Processing email - Sender: =?UTF-8?B?R29vZ2xlIOOCq+ODrOODs+ODgOODvA==?= <calendar-notification@google.com>, Subject: Makoto Nishio さんの今日の予定リスト（午前 5 時現在）, Original Date: Wed, 25 Sep 2024 20:50:54 +0000, Parsed Date: 2024-09-25 20:50:54 [in /home/runner/CRM/email_receiver.py:157]
-2024-09-26 09:07:10,500 WARNING: Received email from unknown sender: =?UTF-8?B?R29vZ2xlIOOCq+ODrOODs+ODgOODvA==?= <calendar-notification@google.com> [in /home/runner/CRM/email_receiver.py:77]
-2024-09-26 09:07:10,981 INFO: Stored email from unknown sender: calendar-notification@google.com [in /home/runner/CRM/email_receiver.py:91]
-2024-09-26 09:07:11,380 INFO: Processing email - Sender: Amazon Business <no-reply@business.amazon.co.jp>, Subject: ビジネスアカウントを保護する, Original Date: Wed, 25 Sep 2024 21:11:46 +0000, Parsed Date: 2024-09-25 21:11:46 [in /home/runner/CRM/email_receiver.py:157]
-2024-09-26 09:07:12,099 WARNING: Received email from unknown sender: Amazon Business <no-reply@business.amazon.co.jp> [in /home/runner/CRM/email_receiver.py:77]
-2024-09-26 09:07:12,821 INFO: Stored email from unknown sender: no-reply@business.amazon.co.jp [in /home/runner/CRM/email_receiver.py:91]
-2024-09-26 09:07:13,203 INFO: Processing email - Sender: =?iso-2022-jp?B?GyRCJVklLyU/ITwlVyVtJWwlOBsoQg==?= <shopmail@vector.co.jp>, Subject: 【9/29(日)まで】27％OFF【8,650円】カスペルスキープラス 3年版！鉄壁セキュリティソフトが大特価！【ベクターPCショップ】, Original Date: Thu, 26 Sep 2024 06:08:33 +0900 (JST), Parsed Date: 2024-09-25 21:08:33 [in /home/runner/CRM/email_receiver.py:157]
-2024-09-26 09:07:13,922 WARNING: Received email from unknown sender: =?iso-2022-jp?B?GyRCJVklLyU/ITwlVyVtJWwlOBsoQg==?= <shopmail@vector.co.jp> [in /home/runner/CRM/email_receiver.py:77]
-2024-09-26 09:07:14,404 INFO: Stored email from unknown sender: shopmail@vector.co.jp [in /home/runner/CRM/email_receiver.py:91]
-2024-09-26 09:07:15,309 INFO: Processing email - Sender: =?UTF-8?B?55yf6KiAIOilv+Wwvg==?= <makoto@team240.net>, Subject: 新しい下書き（おおさわシステムメンテナンス）の確認をお願いします, Original Date: Wed, 25 Sep 2024 14:19:40 -0700 (PDT), Parsed Date: 2024-09-25 21:19:40 [in /home/runner/CRM/email_receiver.py:157]
+2024-09-26 10:20:15,319 WARNING: Received email from unknown sender: =?UTF-8?Q?Resolve_Virus_Issue_and_Repl?=
+ =?UTF-8?Q?ace_Computer_for_Ishii-san_=E9=80=9A=E7=9F=A5?=
+ <notifications@zohoprojects.com> [in /home/runner/CRM/email_receiver.py:82]
+2024-09-26 10:20:16,024 INFO: Stored email from unknown sender: notifications@zohoprojects.com [in /home/runner/CRM/email_receiver.py:96]
+2024-09-26 10:20:16,336 INFO: Processing email - Sender: =?UTF-8?B?55+z5LqV44GV44KT44Gu44Gf44KB44Gr?=
+ =?UTF-8?B?44Km44Kk44Or44K55ZWP6aGM44KS6Kej?=
+ =?UTF-8?B?5rG644GX44CB44Kz44Oz44OU44Ol44O8?=
+ =?UTF-8?B?44K/44KS5Lqk5o+b44GZ44KLIOmAmuefpQ==?=
+ <notifications@zohoprojects.com>, Subject: [石井さんのためにウイルス問題を解決し、コンピュータを交換する] [RV1-T10 旧パソコン初期化納品] タスクのコメントを追加しました, Original Date: Wed, 25 Sep 2024 22:37:33 -0700 (PDT), Parsed Date: 2024-09-26 05:37:33 [in /home/runner/CRM/email_receiver.py:162]
+2024-09-26 10:20:17,057 WARNING: Received email from unknown sender: =?UTF-8?B?55+z5LqV44GV44KT44Gu44Gf44KB44Gr?=
+ =?UTF-8?B?44Km44Kk44Or44K55ZWP6aGM44KS6Kej?=
+ =?UTF-8?B?5rG644GX44CB44Kz44Oz44OU44Ol44O8?=
+ =?UTF-8?B?44K/44KS5Lqk5o+b44GZ44KLIOmAmuefpQ==?=
+ <notifications@zohoprojects.com> [in /home/runner/CRM/email_receiver.py:82]
+2024-09-26 10:20:17,893 INFO: Stored email from unknown sender: notifications@zohoprojects.com [in /home/runner/CRM/email_receiver.py:96]
+2024-09-26 10:20:18,218 INFO: Processing email - Sender: =?UTF-8?B?Qml6L1ppbmXnt6jpm4bpg6g=?= <support@bizzine.jp>, Subject: 10/16★HubSpotら登壇！マーケ×営業連携で成果を出す、レベニューの考え方[Biz/Zine News 号外], Original Date: Thu, 26 Sep 2024 14:38:21 +0900, Parsed Date: 2024-09-26 05:38:21 [in /home/runner/CRM/email_receiver.py:162]
+2024-09-26 10:20:18,921 WARNING: Received email from unknown sender: =?UTF-8?B?Qml6L1ppbmXnt6jpm4bpg6g=?= <support@bizzine.jp> [in /home/runner/CRM/email_receiver.py:82]
+2024-09-26 10:20:19,391 INFO: Stored email from unknown sender: support@bizzine.jp [in /home/runner/CRM/email_receiver.py:96]
+2024-09-26 10:20:19,689 INFO: Processing email - Sender: "Money Forward" <feedback@moneyforward.com>, Subject: 【特別なご案内】遺伝子検査キット最大約70％OFF！ 32,780円→9,900円（マネーフォワードPR）, Original Date: Thu, 26 Sep 2024 06:33:19 +0000, Parsed Date: 2024-09-26 06:33:19 [in /home/runner/CRM/email_receiver.py:162]
+2024-09-26 10:20:20,410 WARNING: Received email from unknown sender: "Money Forward" <feedback@moneyforward.com> [in /home/runner/CRM/email_receiver.py:82]
+2024-09-26 10:20:20,935 INFO: Stored email from unknown sender: feedback@moneyforward.com [in /home/runner/CRM/email_receiver.py:96]
+2024-09-26 10:20:21,234 INFO: Processing email - Sender: ETCIO The Morning Report<newsletter@etcio.com>, Subject: AI hardware, software market may touch $990 bn by 2027  | CAG plans its own AI for fast writing of audit reports, Original Date: Thu, 26 Sep 2024 11:45:58 +0530 (IST), Parsed Date: 2024-09-26 06:15:58 [in /home/runner/CRM/email_receiver.py:162]
+2024-09-26 10:20:21,937 WARNING: Received email from unknown sender: ETCIO The Morning Report<newsletter@etcio.com> [in /home/runner/CRM/email_receiver.py:82]
+2024-09-26 10:20:22,642 INFO: Stored email from unknown sender: newsletter@etcio.com [in /home/runner/CRM/email_receiver.py:96]
+2024-09-26 10:20:23,401 INFO: Processing email - Sender: 
+	=?utf-8?q?=E3=82=AB=E3=83=81=E3=82=A2=E3=83=AB=E3=82=B5=E3=83=9D=E3=83=BC?=
+	=?utf-8?q?=E3=83=88=E4=BA=8B=E5=8B=99=E5=B1=80?=
+	<entry@kachiaru-support.lingcorp.co.jp>, Subject: 【特典付ご招待】カチアルサポート_DX EXPO出展（10/1～10/3）, Original Date: Thu, 26 Sep 2024 07:03:04 +0000 (UTC), Parsed Date: 2024-09-26 07:03:04 [in /home/runner/CRM/email_receiver.py:162]
+2024-09-26 10:20:24,121 WARNING: Received email from unknown sender: 
+	=?utf-8?q?=E3=82=AB=E3=83=81=E3=82=A2=E3=83=AB=E3=82=B5=E3=83=9D=E3=83=BC?=
+	=?utf-8?q?=E3=83=88=E4=BA=8B=E5=8B=99=E5=B1=80?=
+	<entry@kachiaru-support.lingcorp.co.jp> [in /home/runner/CRM/email_receiver.py:82]
+2024-09-26 10:20:24,603 INFO: Stored email from unknown sender: entry@kachiaru-support.lingcorp.co.jp [in /home/runner/CRM/email_receiver.py:96]
+2024-09-26 10:20:24,897 INFO: Processing email - Sender: 
+	=?utf-8?q?YEALE_=E9=81=8B=E5=96=B6=E4=BA=8B=E5=8B=99=E5=B1=80_powered_by_?=
+	=?utf-8?q?=E6=A0=AA=E5=BC=8F=E4=BC=9A=E7=A4=BE=E3=82=BB=E3=83=AC=E3=83=96?=
+	=?utf-8?q?=E3=83=AA=E3=83=83=E3=82=AF=E3=82=B9?=
+	<yeale_support@yeale-by-cerebrix.com>, Subject: AIにはゆずれない「人がやるべき仕事」, Original Date: Thu, 26 Sep 2024 07:23:00 +0000 (UTC), Parsed Date: 2024-09-26 07:23:00 [in /home/runner/CRM/email_receiver.py:162]
+2024-09-26 10:20:25,601 WARNING: Received email from unknown sender: 
+	=?utf-8?q?YEALE_=E9=81=8B=E5=96=B6=E4=BA=8B=E5=8B=99=E5=B1=80_powered_by_?=
+	=?utf-8?q?=E6=A0=AA=E5=BC=8F=E4=BC=9A=E7=A4=BE=E3=82=BB=E3=83=AC=E3=83=96?=
+	=?utf-8?q?=E3=83=AA=E3=83=83=E3=82=AF=E3=82=B9?=
+	<yeale_support@yeale-by-cerebrix.com> [in /home/runner/CRM/email_receiver.py:82]
+2024-09-26 10:20:26,071 INFO: Stored email from unknown sender: yeale_support@yeale-by-cerebrix.com [in /home/runner/CRM/email_receiver.py:96]
+2024-09-26 10:20:26,374 INFO: Processing email - Sender: =?UTF-8?B?44K744Os44OW44Oq44OD44Kv44K5IOWesOmHjuS4i+OBleOChOOBiw==?=
+ <sayaka.tonoshita@cerebrix.jp>, Subject: ウェビナーの本質, Original Date: Thu, 26 Sep 2024 01:25:44 -0600, Parsed Date: 2024-09-26 07:25:44 [in /home/runner/CRM/email_receiver.py:162]
+2024-09-26 10:20:27,095 WARNING: Received email from unknown sender: =?UTF-8?B?44K744Os44OW44Oq44OD44Kv44K5IOWesOmHjuS4i+OBleOChOOBiw==?=
+ <sayaka.tonoshita@cerebrix.jp> [in /home/runner/CRM/email_receiver.py:82]
+2024-09-26 10:20:27,577 INFO: Stored email from unknown sender: sayaka.tonoshita@cerebrix.jp [in /home/runner/CRM/email_receiver.py:96]
+2024-09-26 10:20:27,879 INFO: Processing email - Sender: 
+	Salesforce Trailblazer Community <trailblazercommunity-notif@salesforce.com>, Subject: * カスタマーサクセス日本  * に関する今日の Salesforce Trailblazer Community ダイジェスト, Original Date: Thu, 26 Sep 2024 07:27:50 +0000 (GMT), Parsed Date: 2024-09-26 07:27:50 [in /home/runner/CRM/email_receiver.py:162]
+2024-09-26 10:20:28,582 WARNING: Received email from unknown sender: 
+	Salesforce Trailblazer Community <trailblazercommunity-notif@salesforce.com> [in /home/runner/CRM/email_receiver.py:82]
+2024-09-26 10:20:29,052 INFO: Stored email from unknown sender: trailblazercommunity-notif@salesforce.com [in /home/runner/CRM/email_receiver.py:96]
+2024-09-26 10:20:29,345 INFO: Processing email - Sender: notify@zohoconnect.com, Subject: Junya Nakanoさんがグループ「Zoho ワークアウト（旧もくもく会）関連」で投票を開始しました, Original Date: Thu, 26 Sep 2024 00:56:33 -0700 (PDT), Parsed Date: 2024-09-26 07:56:33 [in /home/runner/CRM/email_receiver.py:162]
+2024-09-26 10:20:30,066 WARNING: Received email from unknown sender: notify@zohoconnect.com [in /home/runner/CRM/email_receiver.py:82]
+2024-09-26 10:20:30,549 INFO: Stored email from unknown sender: notify@zohoconnect.com [in /home/runner/CRM/email_receiver.py:96]
+2024-09-26 10:20:30,850 INFO: Processing email - Sender: =?utf-8?q?ITreview__=E4=BA=8B=E5=8B=99=E5=B1=80?= <info@itreview.jp>, Subject: 9月末までの特典を見逃すな！ITreviewで開催中のレビューキャンペーンを一挙にご紹介, Original Date: Thu, 26 Sep 2024 08:04:13 +0000 (UTC), Parsed Date: 2024-09-26 08:04:13 [in /home/runner/CRM/email_receiver.py:162]
+2024-09-26 10:20:31,554 WARNING: Received email from unknown sender: =?utf-8?q?ITreview__=E4=BA=8B=E5=8B=99=E5=B1=80?= <info@itreview.jp> [in /home/runner/CRM/email_receiver.py:82]
+2024-09-26 10:20:32,025 INFO: Stored email from unknown sender: info@itreview.jp [in /home/runner/CRM/email_receiver.py:96]
+2024-09-26 10:20:32,318 INFO: Processing email - Sender: =?UTF-8?B?44CQ57+U5rOz56S+44Gu6YCa6LKp44CRU0VzaG9w?=
+ <contactus@seshop.com>, Subject: 近日開催の人気セミナーをご紹介！アーキテクチャ設計実践講座ほか, Original Date: Thu, 26 Sep 2024 17:09:08 +0900, Parsed Date: 2024-09-26 08:09:08 [in /home/runner/CRM/email_receiver.py:162]
+2024-09-26 10:20:33,039 WARNING: Received email from unknown sender: =?UTF-8?B?44CQ57+U5rOz56S+44Gu6YCa6LKp44CRU0VzaG9w?=
+ <contactus@seshop.com> [in /home/runner/CRM/email_receiver.py:82]
+2024-09-26 10:20:33,521 INFO: Stored email from unknown sender: contactus@seshop.com [in /home/runner/CRM/email_receiver.py:96]
+2024-09-26 10:20:33,823 INFO: Processing email - Sender: notify@zohoconnect.com, Subject: あなたが参加している投票に二紀 鈴田さんがコメントしました, Original Date: Thu, 26 Sep 2024 01:09:40 -0700 (PDT), Parsed Date: 2024-09-26 08:09:40 [in /home/runner/CRM/email_receiver.py:162]
+2024-09-26 10:20:34,526 WARNING: Received email from unknown sender: notify@zohoconnect.com [in /home/runner/CRM/email_receiver.py:82]
+2024-09-26 10:20:34,997 INFO: Stored email from unknown sender: notify@zohoconnect.com [in /home/runner/CRM/email_receiver.py:96]
+2024-09-26 10:20:35,294 INFO: Processing email - Sender: =?utf-8?q?Musubu=E3=82=AB=E3=82=B9=E3=82=BF=E3=83=9E=E3=83=BC=E3=82=B5?=
+	=?utf-8?q?=E3=83=9D=E3=83=BC=E3=83=88?= <sales@baseconnect.in>, Subject: 【重要】「Musubu」メール配信機能の提供停止のお知らせ（2025年1月8日（水）21時）, Original Date: Thu, 26 Sep 2024 06:11:55 +0000 (UTC), Parsed Date: 2024-09-26 06:11:55 [in /home/runner/CRM/email_receiver.py:162]
+2024-09-26 10:20:36,015 WARNING: Received email from unknown sender: =?utf-8?q?Musubu=E3=82=AB=E3=82=B9=E3=82=BF=E3=83=9E=E3=83=BC=E3=82=B5?=
+	=?utf-8?q?=E3=83=9D=E3=83=BC=E3=83=88?= <sales@baseconnect.in> [in /home/runner/CRM/email_receiver.py:82]
+2024-09-26 10:20:36,498 INFO: Stored email from unknown sender: sales@baseconnect.in [in /home/runner/CRM/email_receiver.py:96]
