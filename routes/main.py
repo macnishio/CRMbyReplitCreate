@@ -25,13 +25,13 @@ def manual_fetch_emails():
         if request.method == 'POST':
             time_range = int(request.form.get('time_range', 30))
             fetch_emails(minutes_back=time_range)
-            flash(f'Emails from the last {time_range} minutes fetched successfully', 'success')
+            flash(f'過去{time_range}分間のメールを正常に取得しました', 'success')
             return redirect(url_for('main.index'))
         else:
             return render_template('fetch_emails_confirm.html')
     except Exception as e:
-        current_app.logger.error(f"Error fetching emails: {str(e)}")
-        flash('An error occurred while fetching emails. Please try again.', 'error')
+        current_app.logger.error(f"メール取得中にエラーが発生しました: {str(e)}")
+        flash('メールの取得中にエラーが発生しました。もう一度お試しください。', 'error')
     return redirect(url_for('main.index'))
 
 @bp.route('/recent-emails')

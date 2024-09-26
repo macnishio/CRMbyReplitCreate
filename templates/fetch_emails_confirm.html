@@ -1,10 +1,10 @@
 {% extends "base.html" %}
 
-{% block title %}Confirm Email Fetch{% endblock %}
+{% block title %}メール取得の確認{% endblock %}
 
 {% block content %}
-<h1>Confirm Email Fetch</h1>
-<p>Please select the time range for fetching emails:</p>
+<h1>メール取得の確認</h1>
+<p>メールを取得する時間範囲を選択してください：</p>
 <form action="{{ url_for('main.manual_fetch_emails') }}" method="POST">
     <select name="time_range" required>
         <option value="30">30分以内のメール</option>
@@ -14,7 +14,7 @@
         <option value="720">12時間以内のメール</option>
         <option value="1440">24時間以内のメール</option>
     </select>
-    <button type="submit" class="btn btn-primary">Fetch Emails</button>
+    <button type="submit" class="btn btn-primary">メールを取得</button>
 </form>
-<a href="{{ url_for('main.index') }}" class="btn btn-secondary">Cancel</a>
+<a href="{{ url_for('main.index') }}" class="btn btn-secondary">キャンセル</a>
 {% endblock %}
