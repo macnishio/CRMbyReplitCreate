@@ -1,0 +1,11 @@
+{% extends "base.html" %}
+
+{% block title %}Import Leads from CSV{% endblock %}
+
+{% block content %}
+    <h1>Import Leads from CSV</h1>
+    <form method="POST" enctype="multipart/form-data">
+        <input type="file" name="file" accept=".csv">
+        <input type="submit" value="Import">
+    </form>
+{% endblock %}

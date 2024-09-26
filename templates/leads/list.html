@@ -5,7 +5,7 @@
 {% block content %}
     <h1>Leads</h1>
     <a href="{{ url_for('leads.create_lead') }}" class="button">Create New Lead</a>
-    <a href="{{ url_for('leads.trigger_followups') }}" class="button">Trigger Automated Follow-ups</a>
+    <a href="{{ url_for('leads.import_csv') }}" class="button">Import Leads from CSV</a>
     <table>
         <thead>
             <tr>
@@ -14,9 +14,6 @@
                 <th>Phone</th>
                 <th>Status</th>
                 <th>Score</th>
-                <th>Last Contact</th>
-                <th>Last Follow-up Email</th>
-                <th>Needs Follow-up</th>
                 <th>Actions</th>
             </tr>
         </thead>
@@ -27,17 +24,16 @@
                     <td>{{ lead.email }}</td>
                     <td>{{ lead.phone }}</td>
                     <td>{{ lead.status }}</td>
-                    <td>{{ lead.score|round(2) }}</td>
-                    <td>{{ lead.last_contact.strftime('%Y-%m-%d %H:%M:%S') }}</td>
-                    <td>{{ lead.last_followup_email.strftime('%Y-%m-%d %H:%M:%S') if lead.last_followup_email else 'N/A' }}</td>
-                    <td>{{ 'Yes' if lead.needs_follow_up else 'No' }}</td>
+                    <td>{{ lead.score }}</td>
                     <td>
                         <a href="{{ url_for('leads.lead_detail', id=lead.id) }}">View</a>
                         <a href="{{ url_for('leads.edit_lead', id=lead.id) }}">Edit</a>
-                        <a href="{{ url_for('leads.send_individual_follow_up', id=lead.id) }}">Send Follow-up</a>
                         <form action="{{ url_for('leads.delete_lead', id=lead.id) }}" method="POST" style="display: inline;">
                             <input type="submit" value="Delete" onclick="return confirm('Are you sure?');">
                         </form>
+                        {% if lead.needs_follow_up %}
+                            <a href="{{ url_for('leads.send_individual_follow_up', id=lead.id) }}">Send Follow-up</a>
+                        {% endif %}
                     </td>
                 </tr>
             {% endfor %}

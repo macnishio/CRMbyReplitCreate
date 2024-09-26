@@ -1,4 +1,4 @@
-from flask import Blueprint, render_template, redirect, url_for, flash, current_app
+from flask import Blueprint, render_template, redirect, url_for, flash, current_app, request
 from flask_login import login_required, current_user
 from extensions import db
 from models import Lead, Email
@@ -8,6 +8,8 @@ from email_utils import send_follow_up_email, send_automated_follow_ups, needs_f
 from datetime import datetime
 from email_receiver import fetch_emails
 from sqlalchemy import func
+import csv
+from io import StringIO
 
 bp = Blueprint('leads', __name__, url_prefix='/leads')
 
@@ -76,10 +78,7 @@ def edit_lead(id):
 def delete_lead(id):
     lead = Lead.query.get_or_404(id)
     try:
-        # First, delete associated emails
         Email.query.filter_by(lead_id=lead.id).delete()
-        
-        # Then delete the lead
         db.session.delete(lead)
         db.session.commit()
         current_app.logger.info(f"Lead deleted successfully: {id}")
@@ -151,10 +150,38 @@ def trigger_followups():
 @login_required
 def refresh_lead_emails(id):
     lead = Lead.query.get_or_404(id)
-    # Clear existing emails for this lead
     Email.query.filter_by(lead_id=lead.id).delete()
     db.session.commit()
-    # Fetch new emails
     fetch_emails(lead_id=lead.id)
     flash('Emails refreshed successfully', 'success')
     return redirect(url_for('leads.lead_detail', id=lead.id))
+
+@bp.route('/import_csv', methods=['GET', 'POST'])
+@login_required
+def import_csv():
+    if request.method == 'POST':
+        if 'file' not in request.files:
+            flash('No file part', 'error')
+            return redirect(request.url)
+        file = request.files['file']
+        if file.filename == '':
+            flash('No selected file', 'error')
+            return redirect(request.url)
+        if file and file.filename.endswith('.csv'):
+            csv_data = file.read().decode('utf-8')
+            csv_file = StringIO(csv_data)
+            csv_reader = csv.DictReader(csv_file)
+            for row in csv_reader:
+                lead = Lead(
+                    name=row['Name'],
+                    email=row['Email'],
+                    phone=row.get('Phone', ''),
+                    user_id=current_user.id
+                )
+                db.session.add(lead)
+            db.session.commit()
+            flash('Leads imported successfully', 'success')
+            return redirect(url_for('leads.list_leads'))
+        else:
+            flash('Invalid file type. Please upload a CSV file.', 'error')
+    return render_template('leads/import_csv.html')
