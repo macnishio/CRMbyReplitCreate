@@ -9,6 +9,7 @@ from flask_limiter.util import get_remote_address
 import logging
 from logging.handlers import RotatingFileHandler
 from extensions import db, mail, scheduler, cache
+from email_receiver import setup_email_scheduler
 
 # Load environment variables
 load_dotenv()
@@ -84,6 +85,9 @@ def create_app():
     scheduler.add_job(id='send_automated_follow_ups', func=send_automated_follow_ups, trigger='interval', hours=24)
     app.logger.info("Scheduled automated follow-ups job")
 
+    # Set up email scheduler
+    setup_email_scheduler(app)
+
     # Set up logging
     if not app.debug:
         if not os.path.exists('logs'):
@@ -114,4 +118,4 @@ if __name__ == '__main__':
         app.logger.info('Starting scheduler')
         scheduler.start()
         app.logger.info('Scheduler started')
-        app.run(host='0.0.0.0', port=5000)  # Changed port back to 5000
+        app.run(host='0.0.0.0', port=5000)

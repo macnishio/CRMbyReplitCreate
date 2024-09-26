@@ -58,15 +58,15 @@ def process_email(sender, subject, body, received_at):
         db.session.rollback()
         current_app.logger.error(f"Error storing email: {str(e)}")
 
-def fetch_emails(days_back=30, lead_id=None):
+def fetch_emails(minutes_back=5, lead_id=None):
     mail = connect_to_email_server()
     mail.select('inbox')
 
     # Calculate the date range
     end_date = datetime.now()
-    start_date = end_date - timedelta(days=days_back)
+    start_date = end_date - timedelta(minutes=minutes_back)
 
-    date_criterion = f'(SINCE "{start_date.strftime("%d-%b-%Y")}")'
+    date_criterion = f'(SINCE "{start_date.strftime("%d-%b-%Y %H:%M:%S")}")'
 
     if lead_id:
         lead = Lead.query.get(lead_id)
@@ -74,7 +74,7 @@ def fetch_emails(days_back=30, lead_id=None):
             date_criterion += f' (FROM "{lead.email}")'
 
     current_app.logger.info(
-        f"Fetching emails from {start_date.strftime('%Y-%m-%d')} to {end_date.strftime('%Y-%m-%d')}"
+        f"Fetching emails from {start_date.strftime('%Y-%m-%d %H:%M:%S')} to {end_date.strftime('%Y-%m-%d %H:%M:%S')}"
     )
 
     _, search_data = mail.search(None, date_criterion)
@@ -143,14 +143,15 @@ def fetch_emails(days_back=30, lead_id=None):
     )
 
 def setup_email_scheduler(app):
+    from flask_apscheduler import APScheduler
     scheduler = APScheduler()
     scheduler.init_app(app)
     scheduler.start()
 
     @scheduler.task('interval',
                     id='check_emails',
-                    minutes=30,
-                    misfire_grace_time=900)
+                    minutes=5,
+                    misfire_grace_time=300)
     def check_emails_task():
         with app.app_context():
             app.logger.info("Checking for new emails")
