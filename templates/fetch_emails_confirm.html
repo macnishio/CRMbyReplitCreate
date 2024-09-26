@@ -4,8 +4,16 @@
 
 {% block content %}
 <h1>Confirm Email Fetch</h1>
-<p>Are you sure you want to fetch emails?</p>
+<p>Please select the time range for fetching emails:</p>
 <form action="{{ url_for('main.manual_fetch_emails') }}" method="POST">
+    <select name="time_range" required>
+        <option value="30">30分以内のメール</option>
+        <option value="60">1時間以内のメール</option>
+        <option value="240">4時間以内のメール</option>
+        <option value="480">8時間以内のメール</option>
+        <option value="720">12時間以内のメール</option>
+        <option value="1440">24時間以内のメール</option>
+    </select>
     <button type="submit" class="btn btn-primary">Fetch Emails</button>
 </form>
 <a href="{{ url_for('main.index') }}" class="btn btn-secondary">Cancel</a>

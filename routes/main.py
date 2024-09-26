@@ -23,8 +23,10 @@ def dashboard():
 def manual_fetch_emails():
     try:
         if request.method == 'POST':
-            fetch_emails(minutes_back=5)
-            flash('Emails fetched successfully', 'success')
+            time_range = int(request.form.get('time_range', 30))
+            fetch_emails(minutes_back=time_range)
+            flash(f'Emails from the last {time_range} minutes fetched successfully', 'success')
+            return redirect(url_for('main.index'))
         else:
             return render_template('fetch_emails_confirm.html')
     except Exception as e:

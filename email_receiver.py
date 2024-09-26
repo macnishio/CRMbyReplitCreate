@@ -99,7 +99,7 @@ def process_email(sender, subject, body, received_at):
         db.session.rollback()
         current_app.logger.error(f"Error storing email: {str(e)}")
 
-def fetch_emails(minutes_back=5, lead_id=None, max_emails=100):
+def fetch_emails(minutes_back=1440, lead_id=None, max_emails=100):
     try:
         mail = connect_to_email_server()
         mail.select('inbox')
@@ -120,7 +120,8 @@ def fetch_emails(minutes_back=5, lead_id=None, max_emails=100):
         )
 
         try:
-            _, search_data = mail.search(None, 'ALL')
+            search_criteria = f'(SINCE "{start_date.strftime("%d-%b-%Y")}")'
+            _, search_data = mail.search(None, search_criteria)
         except imaplib.IMAP4.error as e:
             current_app.logger.error(f"Error in IMAP SEARCH command: {str(e)}")
             return
@@ -236,7 +237,7 @@ def setup_email_scheduler(app):
     def check_emails_task():
         with app.app_context():
             app.logger.info("Checking for new emails")
-            fetch_emails(minutes_back=5, max_emails=100)
+            fetch_emails(minutes_back=1440, max_emails=100)
 
     with app.app_context():
         app.logger.info("Email scheduler set up")
