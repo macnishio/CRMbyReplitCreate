@@ -175,12 +175,18 @@ def import_csv():
             return redirect(request.url)
         
         try:
-            csv_data = file.read().decode('utf-8')
+            csv_data = file.read()
+            try:
+                csv_data = csv_data.decode('utf-8-sig')
+            except UnicodeDecodeError:
+                csv_data = csv_data.decode('shift-jis')
+            
             csv_file = StringIO(csv_data)
             csv_reader = csv.DictReader(csv_file)
             
             leads_added = 0
             for row in csv_reader:
+                current_app.logger.info(f"Processing row: {row}")
                 try:
                     lead = Lead(
                         name=row.get('Name', row.get('name', '')).strip(),
@@ -193,6 +199,7 @@ def import_csv():
                         continue
                     db.session.add(lead)
                     leads_added += 1
+                    current_app.logger.info(f"Created lead: {lead.name}, {lead.email}, {lead.phone}")
                 except Exception as e:
                     current_app.logger.error(f"Error processing CSV row: {str(e)}")
                     current_app.logger.error(f"Problematic row: {row}")
