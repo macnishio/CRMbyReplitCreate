@@ -23,7 +23,7 @@ def dashboard():
 def manual_fetch_emails():
     try:
         time_range = int(request.form.get('time_range', 30))
-        fetch_emails(minutes_back=time_range)
+        fetch_emails(time_range=time_range)
         flash(f'過去{time_range}分間のメールを正常に取得しました', 'success')
     except Exception as e:
         current_app.logger.error(f"メール取得中にエラーが発生しました: {str(e)}")

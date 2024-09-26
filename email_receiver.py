@@ -99,24 +99,16 @@ def process_email(sender, subject, body, received_at):
         db.session.rollback()
         current_app.logger.error(f"Error storing email: {str(e)}")
 
-def fetch_emails(minutes_back=1440, lead_id=None, max_emails=100):
+def fetch_emails(time_range=30, lead_id=None, max_emails=100):
     try:
         mail = connect_to_email_server()
         mail.select('inbox')
 
-        tracker = EmailFetchTracker.query.first()
-        if not tracker:
-            tracker = EmailFetchTracker()
-            db.session.add(tracker)
-            db.session.commit()
-
-        start_date = tracker.last_fetch_time.replace(tzinfo=timezone.utc) or datetime.now(timezone.utc) - timedelta(minutes=minutes_back)
         end_date = datetime.now(timezone.utc)
-        tracker.last_fetch_time = end_date
-        db.session.commit()
+        start_date = end_date - timedelta(minutes=time_range)
 
         current_app.logger.info(
-            f"Fetching emails from {start_date.strftime('%Y-%m-%d %H:%M:%S')} to {end_date.strftime('%Y-%m-%d %H:%M:%S')}"
+            f"Fetching emails for the last {time_range} minutes (from {start_date.strftime('%Y-%m-%d %H:%M:%S')} to {end_date.strftime('%Y-%m-%d %H:%M:%S')})"
         )
 
         try:
@@ -237,7 +229,7 @@ def setup_email_scheduler(app):
     def check_emails_task():
         with app.app_context():
             app.logger.info("Checking for new emails")
-            fetch_emails(minutes_back=1440, max_emails=100)
+            fetch_emails(time_range=30, max_emails=100)
 
     with app.app_context():
         app.logger.info("Email scheduler set up")
