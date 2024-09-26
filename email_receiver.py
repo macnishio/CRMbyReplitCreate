@@ -27,7 +27,13 @@ def connect_to_email_server():
         context.check_hostname = False
         context.verify_mode = ssl.CERT_NONE
         
-        ssl_versions = [ssl.PROTOCOL_TLS, ssl.PROTOCOL_TLSv1_2, ssl.PROTOCOL_TLSv1_1, ssl.PROTOCOL_TLSv1]
+        # Add more SSL options
+        context.options |= ssl.OP_NO_SSLv2
+        context.options |= ssl.OP_NO_SSLv3
+        context.options |= ssl.OP_NO_TLSv1
+        context.options |= ssl.OP_NO_TLSv1_1
+        
+        ssl_versions = [ssl.PROTOCOL_TLS, ssl.PROTOCOL_TLSv1_2]
         for ssl_version in ssl_versions:
             try:
                 context.options |= ssl_version
