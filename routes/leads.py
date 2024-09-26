@@ -227,7 +227,11 @@ def import_csv():
 @login_required
 def delete_empty_names():
     try:
-        deleted_count = Lead.query.filter(Lead.name == '').delete()
+        leads_to_delete = Lead.query.filter(Lead.name == '').all()
+        deleted_count = 0
+        for lead in leads_to_delete:
+            db.session.delete(lead)
+            deleted_count += 1
         db.session.commit()
         current_app.logger.info(f"Deleted {deleted_count} leads with empty names")
         flash(f'Successfully deleted {deleted_count} leads with empty names', 'success')
