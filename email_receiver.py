@@ -28,7 +28,8 @@ def connect_to_email_server():
         context.verify_mode = ssl.CERT_NONE
         
         # Try different SSL/TLS versions
-        for ssl_version in [ssl.PROTOCOL_TLSv1_2, ssl.PROTOCOL_TLSv1_1, ssl.PROTOCOL_TLSv1]:
+        ssl_versions = [ssl.PROTOCOL_TLSv1_2, ssl.PROTOCOL_TLSv1_1, ssl.PROTOCOL_TLSv1]
+        for ssl_version in ssl_versions:
             try:
                 context.options |= ssl_version
                 current_app.logger.info(f"Attempting to connect to {mail_server}:{mail_port} with SSL version: {ssl_version}")
@@ -41,9 +42,9 @@ def connect_to_email_server():
                 current_app.logger.warning(f"SSL Error with version {ssl_version}: {str(e)}")
                 context.options &= ~ssl_version
                 continue
-    except imaplib.IMAP4.error as e:
-        current_app.logger.error(f"IMAP Error: {str(e)}")
-        raise
+            except imaplib.IMAP4.error as e:
+                current_app.logger.error(f"IMAP Error: {str(e)}")
+                continue
     except Exception as e:
         current_app.logger.error(f"Unexpected error connecting to email server: {str(e)}")
         raise

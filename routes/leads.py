@@ -179,24 +179,35 @@ def import_csv():
             csv_file = StringIO(csv_data)
             csv_reader = csv.DictReader(csv_file)
             
+            leads_added = 0
             for row in csv_reader:
                 try:
                     lead = Lead(
-                        name=row.get('Name', row.get('name', '')),
-                        email=row.get('Email', row.get('email', '')),
-                        phone=row.get('Phone', row.get('phone', '')),
+                        name=row.get('Name', row.get('name', '')).strip(),
+                        email=row.get('Email', row.get('email', '')).strip(),
+                        phone=row.get('Phone', row.get('phone', '')).strip(),
                         user_id=current_user.id
                     )
+                    if not lead.name:
+                        current_app.logger.warning(f"Empty name field in row: {row}")
+                        continue
                     db.session.add(lead)
+                    leads_added += 1
                 except Exception as e:
                     current_app.logger.error(f"Error processing CSV row: {str(e)}")
+                    current_app.logger.error(f"Problematic row: {row}")
                     flash(f'Error processing row: {str(e)}', 'error')
                     db.session.rollback()
                     return redirect(url_for('leads.import_csv'))
             
-            db.session.commit()
-            current_app.logger.info(f"Successfully imported leads from CSV")
-            flash('Leads imported successfully', 'success')
+            if leads_added > 0:
+                db.session.commit()
+                current_app.logger.info(f"Successfully imported {leads_added} leads from CSV")
+                flash(f'Successfully imported {leads_added} leads', 'success')
+            else:
+                current_app.logger.warning("No valid leads found in the CSV file")
+                flash('No valid leads found in the CSV file. Please check the file format.', 'warning')
+            
             return redirect(url_for('leads.list_leads'))
         except Exception as e:
             current_app.logger.error(f"Error importing CSV: {str(e)}")
