@@ -222,3 +222,17 @@ def import_csv():
             return redirect(url_for('leads.import_csv'))
     
     return render_template('leads/import_csv.html')
+
+@bp.route('/delete_empty_names', methods=['POST'])
+@login_required
+def delete_empty_names():
+    try:
+        deleted_count = Lead.query.filter(Lead.name == '').delete()
+        db.session.commit()
+        current_app.logger.info(f"Deleted {deleted_count} leads with empty names")
+        flash(f'Successfully deleted {deleted_count} leads with empty names', 'success')
+    except Exception as e:
+        db.session.rollback()
+        current_app.logger.error(f"Error deleting leads with empty names: {str(e)}")
+        flash('An error occurred while deleting leads with empty names', 'error')
+    return redirect(url_for('leads.list_leads'))
