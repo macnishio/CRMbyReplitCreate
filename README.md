@@ -24,7 +24,7 @@ This is a comprehensive Customer Relationship Management (CRM) application built
 1. Clone the repository
 2. Create a virtual environment: `python -m venv venv`
 3. Activate the virtual environment:
-   - On Windows: `venv\Scripts\activate`
+   - On Windows: `venv\Scriptsctivate`
    - On macOS and Linux: `source venv/bin/activate`
 4. Install the required packages: `pip install -r requirements.txt`
 5. Set up your environment variables in a `.env` file (see `.env.example` for required variables)
@@ -49,7 +49,7 @@ python -m unittest discover tests
 ```
 
 ## Email Integration
-The application now includes email integration for lead tracking and automated follow-ups. Emails are fetched every 30 minutes and associated with existing leads or stored as unknown emails for review.
+The application includes email integration for lead tracking and automated follow-ups. Emails are fetched every 30 minutes and associated with existing leads or stored as unknown emails for review.
 
 ## Lead Scoring
 An AI-powered lead scoring system has been implemented to help prioritize leads based on various factors. The scoring model is periodically retrained to improve accuracy.
