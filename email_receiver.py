@@ -3,7 +3,7 @@ import email
 from email.header import decode_header
 from datetime import datetime, timedelta
 from flask import current_app
-from models import Lead, Email, UnknownEmail
+from models import Lead, Email, UnknownEmail, EmailFetchTracker
 from extensions import db
 from sqlalchemy.exc import DataError
 import imaplib
@@ -27,7 +27,6 @@ def connect_to_email_server():
         context.check_hostname = False
         context.verify_mode = ssl.CERT_NONE
         
-        # Try different SSL/TLS versions
         ssl_versions = [ssl.PROTOCOL_TLS, ssl.PROTOCOL_TLSv1_2, ssl.PROTOCOL_TLSv1_1, ssl.PROTOCOL_TLSv1]
         for ssl_version in ssl_versions:
             try:
@@ -105,11 +104,17 @@ def fetch_emails(minutes_back=5, lead_id=None):
         mail = connect_to_email_server()
         mail.select('inbox')
 
-        end_date = datetime.now()
-        start_date = end_date - timedelta(minutes=minutes_back)
-        start_date_str = start_date.strftime("%d-%b-%Y")
+        tracker = EmailFetchTracker.query.first()
+        if not tracker:
+            tracker = EmailFetchTracker()
+            db.session.add(tracker)
 
-        date_criterion = f'(SINCE "{start_date_str}")'
+        start_date = tracker.last_fetch_time
+        end_date = datetime.now()
+        tracker.last_fetch_time = end_date
+        db.session.commit()
+
+        date_criterion = f'(SINCE "{start_date.strftime("%d-%b-%Y %H:%M:%S")}")'
 
         if lead_id:
             lead = Lead.query.get(lead_id)
@@ -228,7 +233,7 @@ def setup_email_scheduler(app):
     def check_emails_task():
         with app.app_context():
             app.logger.info("Checking for new emails")
-            fetch_emails()
+            fetch_emails(minutes_back=5)
 
     with app.app_context():
         app.logger.info("Email scheduler set up")

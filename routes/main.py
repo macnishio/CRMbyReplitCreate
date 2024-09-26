@@ -23,10 +23,9 @@ def dashboard():
 def manual_fetch_emails():
     try:
         if request.method == 'POST':
-            fetch_emails()
+            fetch_emails(minutes_back=5)
             flash('Emails fetched successfully', 'success')
         else:
-            # For GET requests, we'll just show a confirmation page
             return render_template('fetch_emails_confirm.html')
     except Exception as e:
         current_app.logger.error(f"Error fetching emails: {str(e)}")
@@ -40,5 +39,3 @@ def recent_emails():
     for email in emails:
         current_app.logger.info(f"Email sender: {email.sender_name} <{email.sender}>, Received at: {email.received_at}")
     return render_template('recent_emails.html', emails=emails)
-
-# Other routes are handled by their respective blueprints

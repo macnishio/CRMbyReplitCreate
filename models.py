@@ -113,3 +113,8 @@ class UnknownEmail(db.Model):
     subject: Mapped[str] = mapped_column(String(255))
     content: Mapped[str] = mapped_column(Text)
     received_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow)
+
+class EmailFetchTracker(db.Model):
+    __tablename__ = 'email_fetch_tracker'
+    id: Mapped[int] = mapped_column(Integer, primary_key=True)
+    last_fetch_time: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow)
