@@ -27,27 +27,28 @@ def connect_to_email_server():
         context.check_hostname = False
         context.verify_mode = ssl.CERT_NONE
         
-        # Explicitly set SSL/TLS versions
-        context.options |= (
-            ssl.OP_NO_SSLv2 | ssl.OP_NO_SSLv3 | ssl.OP_NO_TLSv1 | ssl.OP_NO_TLSv1_1
-        )
-
-        current_app.logger.info(f"Attempting to connect to {mail_server}:{mail_port}")
-        mail = imaplib.IMAP4_SSL(mail_server, mail_port, ssl_context=context)
-        current_app.logger.info("IMAP4_SSL connection established")
-
-        mail.login(mail_username, mail_password)
-        current_app.logger.info("Successfully logged in to the email server")
-        return mail
-    except ssl.SSLError as e:
-        current_app.logger.error(f"SSL Error: {str(e)}")
-        raise
+        # Try different SSL/TLS versions
+        for ssl_version in [ssl.PROTOCOL_TLSv1_2, ssl.PROTOCOL_TLSv1_1, ssl.PROTOCOL_TLSv1]:
+            try:
+                context.options |= ssl_version
+                current_app.logger.info(f"Attempting to connect to {mail_server}:{mail_port} with SSL version: {ssl_version}")
+                mail = imaplib.IMAP4_SSL(mail_server, mail_port, ssl_context=context)
+                current_app.logger.info(f"IMAP4_SSL connection established with SSL version: {ssl_version}")
+                mail.login(mail_username, mail_password)
+                current_app.logger.info("Successfully logged in to the email server")
+                return mail
+            except ssl.SSLError as e:
+                current_app.logger.warning(f"SSL Error with version {ssl_version}: {str(e)}")
+                context.options &= ~ssl_version
+                continue
     except imaplib.IMAP4.error as e:
         current_app.logger.error(f"IMAP Error: {str(e)}")
         raise
     except Exception as e:
         current_app.logger.error(f"Unexpected error connecting to email server: {str(e)}")
         raise
+
+    raise Exception("Unable to establish a secure connection with any SSL/TLS version")
 
 def extract_email_address(sender):
     decoded_sender = email.header.decode_header(sender)
