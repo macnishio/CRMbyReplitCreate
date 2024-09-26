@@ -27,6 +27,7 @@ def connect_to_email_server():
         context.check_hostname = False
         context.verify_mode = ssl.CERT_NONE
         context.set_ciphers('DEFAULT@SECLEVEL=1')
+        context.options |= ssl.OP_NO_TLSv1 | ssl.OP_NO_TLSv1_1  # Disable TLS 1.0 and 1.1
 
         current_app.logger.info(f"Attempting to connect to {mail_server}:{mail_port}")
         mail = imaplib.IMAP4_SSL(mail_server, mail_port, ssl_context=context)
