@@ -1,103 +1,84 @@
-2024-09-26 17:55:24,093 ERROR: Exception on /leads/13/refresh_emails [GET] [in /home/runner/CRM/.pythonlibs/lib/python3.11/site-packages/flask/app.py:1744]
-Traceback (most recent call last):
-  File "/home/runner/CRM/.pythonlibs/lib/python3.11/site-packages/flask/app.py", line 2529, in wsgi_app
-    response = self.full_dispatch_request()
-               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  File "/home/runner/CRM/.pythonlibs/lib/python3.11/site-packages/flask/app.py", line 1825, in full_dispatch_request
-    rv = self.handle_user_exception(e)
-         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  File "/home/runner/CRM/.pythonlibs/lib/python3.11/site-packages/flask/app.py", line 1823, in full_dispatch_request
-    rv = self.dispatch_request()
-         ^^^^^^^^^^^^^^^^^^^^^^^
-  File "/home/runner/CRM/.pythonlibs/lib/python3.11/site-packages/flask/app.py", line 1799, in dispatch_request
-    return self.ensure_sync(self.view_functions[rule.endpoint])(**view_args)
-           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  File "/home/runner/CRM/.pythonlibs/lib/python3.11/site-packages/flask_login/utils.py", line 290, in decorated_view
-    return current_app.ensure_sync(func)(*args, **kwargs)
-           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  File "/home/runner/CRM/routes/leads.py", line 155, in refresh_lead_emails
-    fetch_emails(lead_id=lead.id)
-  File "/home/runner/CRM/email_receiver.py", line 217, in fetch_emails
-    f"Emails from known leads: {Email.query.filter(Email.received_at >= start_date).count()}"
-                                                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  File "/home/runner/CRM/.pythonlibs/lib/python3.11/site-packages/sqlalchemy/sql/operators.py", line 637, in __ge__
-    return self.operate(ge, other)
-           ^^^^^^^^^^^^^^^^^^^^^^^
-  File "/home/runner/CRM/.pythonlibs/lib/python3.11/site-packages/sqlalchemy/orm/attributes.py", line 453, in operate
-    return op(self.comparator, *other, **kwargs)  # type: ignore[no-any-return]  # noqa: E501
-           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  File "/home/runner/CRM/.pythonlibs/lib/python3.11/site-packages/sqlalchemy/sql/operators.py", line 637, in __ge__
-    return self.operate(ge, other)
-           ^^^^^^^^^^^^^^^^^^^^^^^
-  File "/home/runner/CRM/.pythonlibs/lib/python3.11/site-packages/sqlalchemy/orm/properties.py", line 479, in operate
-    return op(self.__clause_element__(), *other, **kwargs)  # type: ignore[no-any-return]  # noqa: E501
-           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  File "/home/runner/CRM/.pythonlibs/lib/python3.11/site-packages/sqlalchemy/sql/operators.py", line 637, in __ge__
-    return self.operate(ge, other)
-           ^^^^^^^^^^^^^^^^^^^^^^^
-  File "/home/runner/CRM/.pythonlibs/lib/python3.11/site-packages/sqlalchemy/sql/elements.py", line 1513, in operate
-    return op(self.comparator, *other, **kwargs)  # type: ignore[no-any-return]  # noqa: E501
-           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  File "/home/runner/CRM/.pythonlibs/lib/python3.11/site-packages/sqlalchemy/sql/operators.py", line 637, in __ge__
-    return self.operate(ge, other)
-           ^^^^^^^^^^^^^^^^^^^^^^^
-  File "/home/runner/CRM/.pythonlibs/lib/python3.11/site-packages/sqlalchemy/sql/type_api.py", line 194, in operate
-    return op_fn(self.expr, op, *other, **addtl_kw)
-           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  File "/home/runner/CRM/.pythonlibs/lib/python3.11/site-packages/sqlalchemy/sql/default_comparator.py", line 115, in _boolean_compare
-    raise exc.ArgumentError(
-sqlalchemy.exc.ArgumentError: Only '=', '!=', 'is_()', 'is_not()', 'is_distinct_from()', 'is_not_distinct_from()' operators can be used with None/True/False
-2024-09-26 17:57:00,350 INFO: CRM startup [in /home/runner/CRM/app.py:101]
-2024-09-26 17:57:00,351 INFO: Starting scheduler [in /home/runner/CRM/app.py:118]
-2024-09-26 17:57:00,352 INFO: Scheduler started [in /home/runner/CRM/app.py:120]
-2024-09-26 18:02:00,350 INFO: Checking for new emails [in /home/runner/CRM/email_receiver.py:236]
-2024-09-26 18:02:00,371 INFO: Attempting to connect to imap.gmail.com:993 with SSL version: 2 [in /home/runner/CRM/email_receiver.py:34]
-2024-09-26 18:02:00,936 INFO: IMAP4_SSL connection established with SSL version: 2 [in /home/runner/CRM/email_receiver.py:36]
-2024-09-26 18:02:01,983 INFO: Successfully logged in to the email server [in /home/runner/CRM/email_receiver.py:38]
-2024-09-26 18:02:03,695 INFO: Fetching emails from 2024-09-26 17:55:23 to 2024-09-26 18:02:03 [in /home/runner/CRM/email_receiver.py:125]
-2024-09-26 18:02:03,965 ERROR: Error in fetch_emails: SEARCH command error: BAD [b'Could not parse command'] [in /home/runner/CRM/email_receiver.py:208]
-2024-09-26 18:02:05,487 INFO: Emails from known leads: 0 [in /home/runner/CRM/email_receiver.py:217]
-2024-09-26 18:02:05,732 INFO: Emails from unknown senders: 0 [in /home/runner/CRM/email_receiver.py:220]
-2024-09-26 18:07:00,350 INFO: Checking for new emails [in /home/runner/CRM/email_receiver.py:236]
-2024-09-26 18:07:00,369 INFO: Attempting to connect to imap.gmail.com:993 with SSL version: 2 [in /home/runner/CRM/email_receiver.py:34]
-2024-09-26 18:07:01,031 INFO: IMAP4_SSL connection established with SSL version: 2 [in /home/runner/CRM/email_receiver.py:36]
-2024-09-26 18:07:01,751 INFO: Successfully logged in to the email server [in /home/runner/CRM/email_receiver.py:38]
-2024-09-26 18:07:03,510 INFO: Fetching emails from 2024-09-26 18:02:03 to 2024-09-26 18:07:03 [in /home/runner/CRM/email_receiver.py:125]
-2024-09-26 18:07:03,801 ERROR: Error in fetch_emails: SEARCH command error: BAD [b'Could not parse command'] [in /home/runner/CRM/email_receiver.py:208]
-2024-09-26 18:07:05,110 INFO: Emails from known leads: 0 [in /home/runner/CRM/email_receiver.py:217]
-2024-09-26 18:07:05,354 INFO: Emails from unknown senders: 0 [in /home/runner/CRM/email_receiver.py:220]
-2024-09-26 18:12:00,350 INFO: Checking for new emails [in /home/runner/CRM/email_receiver.py:236]
-2024-09-26 18:12:00,369 INFO: Attempting to connect to imap.gmail.com:993 with SSL version: 2 [in /home/runner/CRM/email_receiver.py:34]
-2024-09-26 18:12:01,022 INFO: IMAP4_SSL connection established with SSL version: 2 [in /home/runner/CRM/email_receiver.py:36]
-2024-09-26 18:12:01,707 INFO: Successfully logged in to the email server [in /home/runner/CRM/email_receiver.py:38]
-2024-09-26 18:12:03,406 INFO: Fetching emails from 2024-09-26 18:07:03 to 2024-09-26 18:12:02 [in /home/runner/CRM/email_receiver.py:125]
-2024-09-26 18:12:03,687 ERROR: Error in fetch_emails: SEARCH command error: BAD [b'Could not parse command'] [in /home/runner/CRM/email_receiver.py:208]
-2024-09-26 18:12:04,988 INFO: Emails from known leads: 0 [in /home/runner/CRM/email_receiver.py:217]
-2024-09-26 18:12:05,231 INFO: Emails from unknown senders: 0 [in /home/runner/CRM/email_receiver.py:220]
-2024-09-26 18:17:00,350 INFO: Checking for new emails [in /home/runner/CRM/email_receiver.py:236]
-2024-09-26 18:17:00,369 INFO: Attempting to connect to imap.gmail.com:993 with SSL version: 2 [in /home/runner/CRM/email_receiver.py:34]
-2024-09-26 18:17:00,990 INFO: IMAP4_SSL connection established with SSL version: 2 [in /home/runner/CRM/email_receiver.py:36]
-2024-09-26 18:17:02,021 INFO: Successfully logged in to the email server [in /home/runner/CRM/email_receiver.py:38]
-2024-09-26 18:17:03,810 INFO: Fetching emails from 2024-09-26 18:12:02 to 2024-09-26 18:17:03 [in /home/runner/CRM/email_receiver.py:125]
-2024-09-26 18:17:04,093 ERROR: Error in fetch_emails: SEARCH command error: BAD [b'Could not parse command'] [in /home/runner/CRM/email_receiver.py:208]
-2024-09-26 18:17:05,446 INFO: Emails from known leads: 0 [in /home/runner/CRM/email_receiver.py:217]
-2024-09-26 18:17:05,690 INFO: Emails from unknown senders: 0 [in /home/runner/CRM/email_receiver.py:220]
-2024-09-26 18:22:00,350 INFO: Checking for new emails [in /home/runner/CRM/email_receiver.py:236]
-2024-09-26 18:22:00,369 INFO: Attempting to connect to imap.gmail.com:993 with SSL version: 2 [in /home/runner/CRM/email_receiver.py:34]
-2024-09-26 18:22:01,117 INFO: IMAP4_SSL connection established with SSL version: 2 [in /home/runner/CRM/email_receiver.py:36]
-2024-09-26 18:22:01,963 INFO: Successfully logged in to the email server [in /home/runner/CRM/email_receiver.py:38]
-2024-09-26 18:22:03,963 INFO: Fetching emails from 2024-09-26 18:17:03 to 2024-09-26 18:22:03 [in /home/runner/CRM/email_receiver.py:125]
-2024-09-26 18:22:04,279 ERROR: Error in fetch_emails: SEARCH command error: BAD [b'Could not parse command'] [in /home/runner/CRM/email_receiver.py:208]
-2024-09-26 18:22:06,115 INFO: Emails from known leads: 0 [in /home/runner/CRM/email_receiver.py:217]
-2024-09-26 18:22:06,360 INFO: Emails from unknown senders: 0 [in /home/runner/CRM/email_receiver.py:220]
-2024-09-26 18:27:00,350 INFO: Checking for new emails [in /home/runner/CRM/email_receiver.py:236]
-2024-09-26 18:27:00,380 INFO: Attempting to connect to imap.gmail.com:993 with SSL version: 2 [in /home/runner/CRM/email_receiver.py:34]
-2024-09-26 18:27:01,038 INFO: IMAP4_SSL connection established with SSL version: 2 [in /home/runner/CRM/email_receiver.py:36]
-2024-09-26 18:27:01,793 INFO: Successfully logged in to the email server [in /home/runner/CRM/email_receiver.py:38]
-2024-09-26 18:27:03,527 INFO: Fetching emails from 2024-09-26 18:22:03 to 2024-09-26 18:27:03 [in /home/runner/CRM/email_receiver.py:125]
-2024-09-26 18:27:03,824 ERROR: Error in fetch_emails: SEARCH command error: BAD [b'Could not parse command'] [in /home/runner/CRM/email_receiver.py:208]
-2024-09-26 18:27:05,129 INFO: Emails from known leads: 0 [in /home/runner/CRM/email_receiver.py:217]
-2024-09-26 18:27:05,381 INFO: Emails from unknown senders: 0 [in /home/runner/CRM/email_receiver.py:220]
-2024-09-26 18:32:00,350 INFO: Checking for new emails [in /home/runner/CRM/email_receiver.py:236]
-2024-09-26 18:32:00,370 INFO: Attempting to connect to imap.gmail.com:993 with SSL version: 2 [in /home/runner/CRM/email_receiver.py:34]
-2024-09-26 18:32:00,991 INFO: IMAP4_SSL connection established with SSL version: 2 [in /home/runner/CRM/email_receiver.py:36]
+2024-09-26 19:22:05,251 INFO: Emails from known leads: 0 [in /home/runner/CRM/email_receiver.py:217]
+2024-09-26 19:22:05,504 INFO: Emails from unknown senders: 0 [in /home/runner/CRM/email_receiver.py:220]
+2024-09-26 19:27:00,350 INFO: Checking for new emails [in /home/runner/CRM/email_receiver.py:236]
+2024-09-26 19:27:00,369 INFO: Attempting to connect to imap.gmail.com:993 with SSL version: 2 [in /home/runner/CRM/email_receiver.py:34]
+2024-09-26 19:27:00,993 INFO: IMAP4_SSL connection established with SSL version: 2 [in /home/runner/CRM/email_receiver.py:36]
+2024-09-26 19:27:02,183 INFO: Successfully logged in to the email server [in /home/runner/CRM/email_receiver.py:38]
+2024-09-26 19:27:03,989 INFO: Fetching emails from 2024-09-26 19:22:03 to 2024-09-26 19:27:03 [in /home/runner/CRM/email_receiver.py:125]
+2024-09-26 19:27:04,279 ERROR: Error in fetch_emails: SEARCH command error: BAD [b'Could not parse command'] [in /home/runner/CRM/email_receiver.py:208]
+2024-09-26 19:27:05,651 INFO: Emails from known leads: 0 [in /home/runner/CRM/email_receiver.py:217]
+2024-09-26 19:27:05,901 INFO: Emails from unknown senders: 0 [in /home/runner/CRM/email_receiver.py:220]
+2024-09-26 19:32:00,350 INFO: Checking for new emails [in /home/runner/CRM/email_receiver.py:236]
+2024-09-26 19:32:00,369 INFO: Attempting to connect to imap.gmail.com:993 with SSL version: 2 [in /home/runner/CRM/email_receiver.py:34]
+2024-09-26 19:32:00,987 INFO: IMAP4_SSL connection established with SSL version: 2 [in /home/runner/CRM/email_receiver.py:36]
+2024-09-26 19:32:02,159 INFO: Successfully logged in to the email server [in /home/runner/CRM/email_receiver.py:38]
+2024-09-26 19:32:03,841 INFO: Fetching emails from 2024-09-26 19:27:03 to 2024-09-26 19:32:03 [in /home/runner/CRM/email_receiver.py:125]
+2024-09-26 19:32:04,200 ERROR: Error in fetch_emails: SEARCH command error: BAD [b'Could not parse command'] [in /home/runner/CRM/email_receiver.py:208]
+2024-09-26 19:32:05,545 INFO: Emails from known leads: 0 [in /home/runner/CRM/email_receiver.py:217]
+2024-09-26 19:32:05,776 INFO: Emails from unknown senders: 0 [in /home/runner/CRM/email_receiver.py:220]
+2024-09-26 19:37:00,350 INFO: Checking for new emails [in /home/runner/CRM/email_receiver.py:236]
+2024-09-26 19:37:00,369 INFO: Attempting to connect to imap.gmail.com:993 with SSL version: 2 [in /home/runner/CRM/email_receiver.py:34]
+2024-09-26 19:37:00,983 INFO: IMAP4_SSL connection established with SSL version: 2 [in /home/runner/CRM/email_receiver.py:36]
+2024-09-26 19:37:02,267 INFO: Successfully logged in to the email server [in /home/runner/CRM/email_receiver.py:38]
+2024-09-26 19:37:04,085 INFO: Fetching emails from 2024-09-26 19:32:03 to 2024-09-26 19:37:03 [in /home/runner/CRM/email_receiver.py:125]
+2024-09-26 19:37:04,363 ERROR: Error in fetch_emails: SEARCH command error: BAD [b'Could not parse command'] [in /home/runner/CRM/email_receiver.py:208]
+2024-09-26 19:37:05,704 INFO: Emails from known leads: 0 [in /home/runner/CRM/email_receiver.py:217]
+2024-09-26 19:37:05,954 INFO: Emails from unknown senders: 0 [in /home/runner/CRM/email_receiver.py:220]
+2024-09-26 19:42:00,350 INFO: Checking for new emails [in /home/runner/CRM/email_receiver.py:236]
+2024-09-26 19:42:00,369 INFO: Attempting to connect to imap.gmail.com:993 with SSL version: 2 [in /home/runner/CRM/email_receiver.py:34]
+2024-09-26 19:42:00,983 INFO: IMAP4_SSL connection established with SSL version: 2 [in /home/runner/CRM/email_receiver.py:36]
+2024-09-26 19:42:01,920 INFO: Successfully logged in to the email server [in /home/runner/CRM/email_receiver.py:38]
+2024-09-26 19:42:03,619 INFO: Fetching emails from 2024-09-26 19:37:03 to 2024-09-26 19:42:03 [in /home/runner/CRM/email_receiver.py:125]
+2024-09-26 19:42:04,334 ERROR: Error in fetch_emails: SEARCH command error: BAD [b'Could not parse command'] [in /home/runner/CRM/email_receiver.py:208]
+2024-09-26 19:42:05,621 INFO: Emails from known leads: 0 [in /home/runner/CRM/email_receiver.py:217]
+2024-09-26 19:42:05,871 INFO: Emails from unknown senders: 0 [in /home/runner/CRM/email_receiver.py:220]
+2024-09-26 19:47:00,350 INFO: Checking for new emails [in /home/runner/CRM/email_receiver.py:236]
+2024-09-26 19:47:00,368 INFO: Attempting to connect to imap.gmail.com:993 with SSL version: 2 [in /home/runner/CRM/email_receiver.py:34]
+2024-09-26 19:47:01,067 INFO: IMAP4_SSL connection established with SSL version: 2 [in /home/runner/CRM/email_receiver.py:36]
+2024-09-26 19:47:01,895 INFO: Successfully logged in to the email server [in /home/runner/CRM/email_receiver.py:38]
+2024-09-26 19:47:03,621 INFO: Fetching emails from 2024-09-26 19:42:03 to 2024-09-26 19:47:03 [in /home/runner/CRM/email_receiver.py:125]
+2024-09-26 19:47:03,910 ERROR: Error in fetch_emails: SEARCH command error: BAD [b'Could not parse command'] [in /home/runner/CRM/email_receiver.py:208]
+2024-09-26 19:47:05,221 INFO: Emails from known leads: 0 [in /home/runner/CRM/email_receiver.py:217]
+2024-09-26 19:47:05,472 INFO: Emails from unknown senders: 0 [in /home/runner/CRM/email_receiver.py:220]
+2024-09-26 19:52:00,350 INFO: Checking for new emails [in /home/runner/CRM/email_receiver.py:236]
+2024-09-26 19:52:00,369 INFO: Attempting to connect to imap.gmail.com:993 with SSL version: 2 [in /home/runner/CRM/email_receiver.py:34]
+2024-09-26 19:52:01,127 INFO: IMAP4_SSL connection established with SSL version: 2 [in /home/runner/CRM/email_receiver.py:36]
+2024-09-26 19:52:01,925 INFO: Successfully logged in to the email server [in /home/runner/CRM/email_receiver.py:38]
+2024-09-26 19:52:03,540 INFO: Fetching emails from 2024-09-26 19:47:03 to 2024-09-26 19:52:03 [in /home/runner/CRM/email_receiver.py:125]
+2024-09-26 19:52:03,822 ERROR: Error in fetch_emails: SEARCH command error: BAD [b'Could not parse command'] [in /home/runner/CRM/email_receiver.py:208]
+2024-09-26 19:52:05,081 INFO: Emails from known leads: 0 [in /home/runner/CRM/email_receiver.py:217]
+2024-09-26 19:52:05,315 INFO: Emails from unknown senders: 0 [in /home/runner/CRM/email_receiver.py:220]
+2024-09-26 19:57:00,350 INFO: Checking for new emails [in /home/runner/CRM/email_receiver.py:236]
+2024-09-26 19:57:00,369 INFO: Attempting to connect to imap.gmail.com:993 with SSL version: 2 [in /home/runner/CRM/email_receiver.py:34]
+2024-09-26 19:57:00,994 INFO: IMAP4_SSL connection established with SSL version: 2 [in /home/runner/CRM/email_receiver.py:36]
+2024-09-26 19:57:02,217 INFO: Successfully logged in to the email server [in /home/runner/CRM/email_receiver.py:38]
+2024-09-26 19:57:03,890 INFO: Fetching emails from 2024-09-26 19:52:03 to 2024-09-26 19:57:03 [in /home/runner/CRM/email_receiver.py:125]
+2024-09-26 19:57:04,182 ERROR: Error in fetch_emails: SEARCH command error: BAD [b'Could not parse command'] [in /home/runner/CRM/email_receiver.py:208]
+2024-09-26 19:57:05,458 INFO: Emails from known leads: 0 [in /home/runner/CRM/email_receiver.py:217]
+2024-09-26 19:57:05,692 INFO: Emails from unknown senders: 0 [in /home/runner/CRM/email_receiver.py:220]
+2024-09-26 20:02:00,350 INFO: Checking for new emails [in /home/runner/CRM/email_receiver.py:236]
+2024-09-26 20:02:00,369 INFO: Attempting to connect to imap.gmail.com:993 with SSL version: 2 [in /home/runner/CRM/email_receiver.py:34]
+2024-09-26 20:02:01,089 INFO: IMAP4_SSL connection established with SSL version: 2 [in /home/runner/CRM/email_receiver.py:36]
+2024-09-26 20:02:01,894 INFO: Successfully logged in to the email server [in /home/runner/CRM/email_receiver.py:38]
+2024-09-26 20:02:03,594 INFO: Fetching emails from 2024-09-26 19:57:03 to 2024-09-26 20:02:03 [in /home/runner/CRM/email_receiver.py:125]
+2024-09-26 20:02:03,883 ERROR: Error in fetch_emails: SEARCH command error: BAD [b'Could not parse command'] [in /home/runner/CRM/email_receiver.py:208]
+2024-09-26 20:02:06,399 INFO: Emails from known leads: 0 [in /home/runner/CRM/email_receiver.py:217]
+2024-09-26 20:02:06,628 INFO: Emails from unknown senders: 0 [in /home/runner/CRM/email_receiver.py:220]
+2024-09-26 20:07:00,350 INFO: Checking for new emails [in /home/runner/CRM/email_receiver.py:236]
+2024-09-26 20:07:00,369 INFO: Attempting to connect to imap.gmail.com:993 with SSL version: 2 [in /home/runner/CRM/email_receiver.py:34]
+2024-09-26 20:07:01,073 INFO: IMAP4_SSL connection established with SSL version: 2 [in /home/runner/CRM/email_receiver.py:36]
+2024-09-26 20:07:01,898 INFO: Successfully logged in to the email server [in /home/runner/CRM/email_receiver.py:38]
+2024-09-26 20:07:03,489 INFO: Fetching emails from 2024-09-26 20:02:03 to 2024-09-26 20:07:03 [in /home/runner/CRM/email_receiver.py:125]
+2024-09-26 20:07:03,768 ERROR: Error in fetch_emails: SEARCH command error: BAD [b'Could not parse command'] [in /home/runner/CRM/email_receiver.py:208]
+2024-09-26 20:07:05,002 INFO: Emails from known leads: 0 [in /home/runner/CRM/email_receiver.py:217]
+2024-09-26 20:07:05,231 INFO: Emails from unknown senders: 0 [in /home/runner/CRM/email_receiver.py:220]
+2024-09-26 20:12:00,350 INFO: Checking for new emails [in /home/runner/CRM/email_receiver.py:236]
+2024-09-26 20:12:00,369 INFO: Attempting to connect to imap.gmail.com:993 with SSL version: 2 [in /home/runner/CRM/email_receiver.py:34]
+2024-09-26 20:12:00,988 INFO: IMAP4_SSL connection established with SSL version: 2 [in /home/runner/CRM/email_receiver.py:36]
+2024-09-26 20:12:01,876 INFO: Successfully logged in to the email server [in /home/runner/CRM/email_receiver.py:38]
+2024-09-26 20:12:03,658 INFO: Fetching emails from 2024-09-26 20:07:03 to 2024-09-26 20:12:03 [in /home/runner/CRM/email_receiver.py:125]
+2024-09-26 20:12:04,589 ERROR: Error in fetch_emails: SEARCH command error: BAD [b'Could not parse command'] [in /home/runner/CRM/email_receiver.py:208]
+2024-09-26 20:12:05,838 INFO: Emails from known leads: 0 [in /home/runner/CRM/email_receiver.py:217]
+2024-09-26 20:12:06,072 INFO: Emails from unknown senders: 0 [in /home/runner/CRM/email_receiver.py:220]
+2024-09-26 20:17:00,350 INFO: Checking for new emails [in /home/runner/CRM/email_receiver.py:236]
+2024-09-26 20:17:00,368 INFO: Attempting to connect to imap.gmail.com:993 with SSL version: 2 [in /home/runner/CRM/email_receiver.py:34]
