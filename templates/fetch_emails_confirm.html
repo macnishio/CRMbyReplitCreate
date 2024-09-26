@@ -1,0 +1,12 @@
+{% extends "base.html" %}
+
+{% block title %}Confirm Email Fetch{% endblock %}
+
+{% block content %}
+<h1>Confirm Email Fetch</h1>
+<p>Are you sure you want to fetch emails?</p>
+<form action="{{ url_for('main.manual_fetch_emails') }}" method="POST">
+    <button type="submit" class="btn btn-primary">Fetch Emails</button>
+</form>
+<a href="{{ url_for('main.index') }}" class="btn btn-secondary">Cancel</a>
+{% endblock %}

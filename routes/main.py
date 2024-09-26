@@ -1,4 +1,4 @@
-from flask import Blueprint, jsonify, render_template, redirect, url_for, flash, current_app
+from flask import Blueprint, jsonify, render_template, redirect, url_for, flash, current_app, request
 from flask_login import login_required
 from email_receiver import fetch_emails
 from models import Email
@@ -18,12 +18,16 @@ def health_check():
 def dashboard():
     return render_template('dashboard.html')
 
-@bp.route('/fetch-emails', methods=['POST'])
+@bp.route('/fetch-emails', methods=['GET', 'POST'])
 @login_required
 def manual_fetch_emails():
     try:
-        fetch_emails()
-        flash('Emails fetched successfully', 'success')
+        if request.method == 'POST':
+            fetch_emails()
+            flash('Emails fetched successfully', 'success')
+        else:
+            # For GET requests, we'll just show a confirmation page
+            return render_template('fetch_emails_confirm.html')
     except Exception as e:
         current_app.logger.error(f"Error fetching emails: {str(e)}")
         flash('An error occurred while fetching emails. Please try again.', 'error')
