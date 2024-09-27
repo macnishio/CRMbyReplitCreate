@@ -76,7 +76,7 @@ agentRequireRestartOnSave = false
 
 [[workflows.workflow.tasks]]
 task = "shell.exec"
-args = "flask db current"
+args = "ls -l migrations/versions"
 
 [[workflows.workflow]]
 name = "Apply Migrations"
@@ -136,7 +136,7 @@ agentRequireRestartOnSave = false
 
 [[workflows.workflow.tasks]]
 task = "shell.exec"
-args = "flask db migrate -m 'Add cascade delete to Lead-Email relationship'"
+args = "flask db migrate -m 'Change status to stage in Opportunity model'"
 
 [[workflows.workflow]]
 name = "Remove Old Migrations"
@@ -180,7 +180,7 @@ agentRequireRestartOnSave = false
 
 [[workflows.workflow.tasks]]
 task = "shell.exec"
-args = "flask db migrate -m 'Add relationships between Lead and Opportunity, Schedule, Task'"
+args = "flask db migrate -m 'Change status to stage in Opportunity model'"
 
 [deployment]
 run = ["sh", "-c", "python app.py"]

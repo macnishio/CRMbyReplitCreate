@@ -1,9 +1,11 @@
+from flask import current_app
 from flask import Blueprint, render_template, redirect, url_for, flash, request
 from urllib.parse import urlparse
 from flask_login import login_user, logout_user, login_required, current_user
 from extensions import db
 from models import User
 from forms import LoginForm, RegistrationForm
+
 
 def create_auth_blueprint():
     bp = Blueprint('auth', __name__)
@@ -36,10 +38,11 @@ def create_auth_blueprint():
             return redirect(url_for('main.index'))
         form = RegistrationForm()
         if form.validate_on_submit():
-            user = User(username=form.username.data, email=form.email.data)
-            user.set_password(form.password.data)
-            db.session.add(user)
-            db.session.commit()
+            with current_app.app_context():
+                user = User(username=form.username.data, email=form.email.data)
+                user.set_password(form.password.data)
+                db.session.add(user)
+                db.session.commit()
             flash('Congratulations, you are now a registered user!')
             return redirect(url_for('auth.login'))
         return render_template('register.html', title='Register', form=form)
@@ -47,7 +50,12 @@ def create_auth_blueprint():
     @bp.route('/user/<username>')
     @login_required
     def user(username):
-        user = User.query.filter_by(username=username).first_or_404()
+        with current_app.app_context():
+            user = User.query.filter_by(username=username).first_or_404()
         return render_template('user.html', user=user)
 
     return bp
+
+
+# この行を追加
+bp = create_auth_blueprint()

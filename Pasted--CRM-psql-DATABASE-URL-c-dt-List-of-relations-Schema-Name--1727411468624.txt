@@ -1,0 +1,86 @@
+~/CRM$ psql $DATABASE_URL -c "\dt" 
+                  List of relations
+ Schema |        Name         | Type  |    Owner     
+--------+---------------------+-------+--------------
+ public | accounts            | table | neondb_owner
+ public | alembic_version     | table | neondb_owner
+ public | email_fetch_tracker | table | neondb_owner
+ public | emails              | table | neondb_owner
+ public | leads               | table | neondb_owner
+ public | opportunities       | table | neondb_owner
+ public | schedules           | table | neondb_owner
+ public | tasks               | table | neondb_owner
+ public | unknown_emails      | table | neondb_owner
+ public | users               | table | neondb_owner
+(10 rows)
+
+~/CRM$ flask db current
+OpenBLAS blas_thread_init: pthread_create failed for thread 2 of 12: Resource temporarily unavailable
+OpenBLAS blas_thread_init: RLIMIT_NPROC -1 current, -1 max
+OpenBLAS blas_thread_init: pthread_create failed for thread 3 of 12: Resource temporarily unavailable
+OpenBLAS blas_thread_init: RLIMIT_NPROC -1 current, -1 max
+OpenBLAS blas_thread_init: pthread_create failed for thread 4 of 12: Resource temporarily unavailable
+OpenBLAS blas_thread_init: RLIMIT_NPROC -1 current, -1 max
+OpenBLAS blas_thread_init: pthread_create failed for thread 5 of 12: Resource temporarily unavailable
+OpenBLAS blas_thread_init: RLIMIT_NPROC -1 current, -1 max
+OpenBLAS blas_thread_init: pthread_create failed for thread 6 of 12: Resource temporarily unavailable
+OpenBLAS blas_thread_init: RLIMIT_NPROC -1 current, -1 max
+OpenBLAS blas_thread_init: pthread_create failed for thread 7 of 12: Resource temporarily unavailable
+OpenBLAS blas_thread_init: RLIMIT_NPROC -1 current, -1 max
+OpenBLAS blas_thread_init: pthread_create failed for thread 8 of 12: Resource temporarily unavailable
+OpenBLAS blas_thread_init: RLIMIT_NPROC -1 current, -1 max
+OpenBLAS blas_thread_init: pthread_create failed for thread 9 of 12: Resource temporarily unavailable
+OpenBLAS blas_thread_init: RLIMIT_NPROC -1 current, -1 max
+OpenBLAS blas_thread_init: pthread_create failed for thread 10 of 12: Resource temporarily unavailable
+OpenBLAS blas_thread_init: RLIMIT_NPROC -1 current, -1 max
+OpenBLAS blas_thread_init: pthread_create failed for thread 11 of 12: Resource temporarily unavailable
+OpenBLAS blas_thread_init: RLIMIT_NPROC -1 current, -1 max
+Traceback (most recent call last):
+  File "<frozen importlib._bootstrap>", line 1165, in _find_and_load
+KeyboardInterrupt
+Error: While importing 'app', an ImportError was raised:
+
+Traceback (most recent call last):
+  File "/home/runner/CRM/.pythonlibs/lib/python3.11/site-packages/flask/cli.py", line 218, in locate_app
+    __import__(module_name)
+  File "/home/runner/CRM/app.py", line 114, in <module>
+    app = create_app()
+          ^^^^^^^^^^^^
+  File "/home/runner/CRM/app.py", line 69, in create_app
+    from routes import main, auth, leads, opportunities, accounts, reports, tracking, mobile, schedules, tasks
+  File "/home/runner/CRM/routes/leads.py", line 6, in <module>
+    from analytics import calculate_lead_score, train_lead_scoring_model, predict_lead_score
+  File "/home/runner/CRM/analytics.py", line 2, in <module>
+    from sklearn.preprocessing import StandardScaler
+  File "/home/runner/CRM/.pythonlibs/lib/python3.11/site-packages/sklearn/__init__.py", line 83, in <module>
+    from .base import clone
+  File "/home/runner/CRM/.pythonlibs/lib/python3.11/site-packages/sklearn/base.py", line 19, in <module>
+    from .utils import _IS_32BIT
+  File "/home/runner/CRM/.pythonlibs/lib/python3.11/site-packages/sklearn/utils/__init__.py", line 15, in <module>
+    from scipy.sparse import issparse
+  File "/home/runner/CRM/.pythonlibs/lib/python3.11/site-packages/scipy/sparse/__init__.py", line 307, in <module>
+    from . import csgraph
+  File "/home/runner/CRM/.pythonlibs/lib/python3.11/site-packages/scipy/sparse/csgraph/__init__.py", line 187, in <module>
+    from ._laplacian import laplacian
+  File "/home/runner/CRM/.pythonlibs/lib/python3.11/site-packages/scipy/sparse/csgraph/_laplacian.py", line 7, in <module>
+    from scipy.sparse.linalg import LinearOperator
+  File "/home/runner/CRM/.pythonlibs/lib/python3.11/site-packages/scipy/sparse/linalg/__init__.py", line 129, in <module>
+    from ._isolve import *
+  File "/home/runner/CRM/.pythonlibs/lib/python3.11/site-packages/scipy/sparse/linalg/_isolve/__init__.py", line 4, in <module>
+    from .iterative import *
+  File "/home/runner/CRM/.pythonlibs/lib/python3.11/site-packages/scipy/sparse/linalg/_isolve/iterative.py", line 5, in <module>
+    from scipy.linalg import get_lapack_funcs
+  File "/home/runner/CRM/.pythonlibs/lib/python3.11/site-packages/scipy/linalg/__init__.py", line 203, in <module>
+    from ._misc import *
+  File "/home/runner/CRM/.pythonlibs/lib/python3.11/site-packages/scipy/linalg/_misc.py", line 3, in <module>
+    from .blas import get_blas_funcs
+  File "/home/runner/CRM/.pythonlibs/lib/python3.11/site-packages/scipy/linalg/blas.py", line 213, in <module>
+    from scipy.linalg import _fblas
+ImportError: numpy._core.multiarray failed to import
+
+
+Usage: flask [OPTIONS] COMMAND [ARGS]...
+Try 'flask --help' for help.
+
+Error: No such command 'db'.
+Segmentation fault (core dumped)

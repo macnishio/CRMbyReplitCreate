@@ -9,6 +9,7 @@ import traceback
 
 bp = Blueprint('auth', __name__)
 
+
 @bp.route('/login', methods=['GET', 'POST'])
 def login():
     if current_user.is_authenticated:
@@ -26,10 +27,12 @@ def login():
         return redirect(next_page)
     return render_template('login.html', title='Sign In', form=form)
 
+
 @bp.route('/logout')
 def logout():
     logout_user()
     return redirect(url_for('main.index'))
+
 
 @bp.route('/register', methods=['GET', 'POST'])
 def register():
@@ -38,7 +41,9 @@ def register():
     form = RegistrationForm()
     if form.validate_on_submit():
         try:
-            user = User(username=form.username.data, email=form.email.data)
+            user = User(username=form.username.data,
+                        email=form.email.data,
+                        role='user')  # role を追加
             user.set_password(form.password.data)
             db.session.add(user)
             commit_with_retry()
@@ -50,6 +55,7 @@ def register():
             current_app.logger.error(traceback.format_exc())
             flash('An error occurred during registration. Please try again.')
     return render_template('register.html', title='Register', form=form)
+
 
 @retry_on_exception()
 def commit_with_retry():

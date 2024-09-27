@@ -1,12 +1,12 @@
 from flask_sqlalchemy import SQLAlchemy
+from flask_migrate import Migrate
+from flask_login import LoginManager
 from flask_mail import Mail
-from flask_apscheduler import APScheduler
-from flask_caching import Cache
-from sqlalchemy.ext.declarative import declarative_base
+from flask_limiter import Limiter
+from flask_limiter.util import get_remote_address
 
-Base = declarative_base()
-
-db = SQLAlchemy(model_class=Base)
+db = SQLAlchemy()
+migrate = Migrate()
+login_manager = LoginManager()
 mail = Mail()
-scheduler = APScheduler()
-cache = Cache()
+limiter = Limiter(key_func=get_remote_address)

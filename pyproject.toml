@@ -28,6 +28,7 @@ flask-limiter = "3.5.0"
 flask-caching = "2.0.2"
 imap-tools = "1.0.0"
 anthropic = "^0.34.2"
+chardet = "^5.2.0"
 
 
 [build-system]

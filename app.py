@@ -1,69 +1,33 @@
 import os
-from flask import Flask, render_template
-from flask_login import LoginManager
+from flask import Flask
+from flask_sqlalchemy import SQLAlchemy
 from flask_migrate import Migrate
-from flask_talisman import Talisman
-from dotenv import load_dotenv
+from flask_login import LoginManager
+from flask_mail import Mail
 from flask_limiter import Limiter
 from flask_limiter.util import get_remote_address
-import logging
-from logging.handlers import RotatingFileHandler
-from extensions import db, mail, scheduler, cache
+from config import config
+from extensions import db, migrate, login_manager, mail, limiter
 from email_receiver import setup_email_scheduler
+import logging
 
-# Load environment variables
-load_dotenv()
-
-def create_app():
-    from models import User
-    from config import config
-    from email_utils import send_automated_follow_ups
-
+def create_app(config_name='default'):
     app = Flask(__name__)
+    app.config.from_object(config[config_name])
+    config[config_name].init_app(app)
 
-    # Use the correct configuration based on the environment
-    env = 'production' if os.environ.get('FLASK_DEBUG') != 'True' else 'development'
-    app.config.from_object(config[env])
-    config[env].init_app(app)
+    # Set up logging
+    logging.basicConfig(level=app.config['LOG_LEVEL'])
 
     # Initialize extensions
     db.init_app(app)
-    mail.init_app(app)
-    
-    # Modify scheduler initialization to disable the API
-    app.config['SCHEDULER_API_ENABLED'] = False
-    scheduler.init_app(app)
-    
-    cache.init_app(app)
-
-    # Initialize Limiter with in-memory storage
-    limiter = Limiter(
-        get_remote_address,
-        app=app,
-        default_limits=["200 per day", "50 per hour"],
-        storage_uri="memory://"
-    )
-
-    # Initialize Talisman
-    csp = {
-        'default-src': "'self'",
-        'script-src': "'self' 'unsafe-inline' https://cdn.jsdelivr.net",
-        'style-src': "'self' 'unsafe-inline'",
-        'img-src': "'self' data:",
-        'font-src': "'self'",
-        'form-action': "'self'",
-        'frame-ancestors': "'none'",
-    }
-    Talisman(app, content_security_policy=csp, force_https=True)
-
-    # Set up LoginManager
-    login_manager = LoginManager()
-    login_manager.login_view = 'auth.login'
+    migrate.init_app(app, db)
     login_manager.init_app(app)
+    mail.init_app(app)
+    limiter.init_app(app)
 
-    @login_manager.user_loader
-    def load_user(user_id):
-        return db.session.get(User, int(user_id))
+    # Debug logging for database URL
+    app.logger.debug(f"Database URL: {app.config['SQLALCHEMY_DATABASE_URI'].split('@')[0]}@[REDACTED]")
 
     # Register blueprints
     from routes import main, auth, leads, opportunities, accounts, reports, tracking, mobile, schedules, tasks
@@ -78,44 +42,17 @@ def create_app():
     app.register_blueprint(schedules.bp)
     app.register_blueprint(tasks.bp)
 
-    # Set up database migrations
-    migrate = Migrate(app, db)
-
-    # Set up automated follow-up scheduler job
-    scheduler.add_job(id='send_automated_follow_ups', func=send_automated_follow_ups, trigger='interval', hours=24)
-    app.logger.info("Scheduled automated follow-ups job")
-
     # Set up email scheduler
-    setup_email_scheduler(app)
-
-    # Set up logging
-    if not app.debug:
-        if not os.path.exists('logs'):
-            os.mkdir('logs')
-        file_handler = RotatingFileHandler('logs/crm.log', maxBytes=10240, backupCount=10)
-        file_handler.setFormatter(logging.Formatter(
-            '%(asctime)s %(levelname)s: %(message)s [in %(pathname)s:%(lineno)d]'))
-        file_handler.setLevel(logging.INFO)
-        app.logger.addHandler(file_handler)
-        app.logger.setLevel(logging.INFO)
-        app.logger.info('CRM startup')
-
-    @app.route('/dashboard')
-    def dashboard():
-        # Create dummy data or fetch actual data
-        leads = 100
-        opportunities = 50
-        accounts = 30
-        return render_template('dashboard.html', leads=leads, opportunities=opportunities, accounts=accounts)
+    with app.app_context():
+        setup_email_scheduler(app)
 
     return app
 
-# Create application instance
-app = create_app()
+@login_manager.user_loader
+def load_user(user_id):
+    from models import User
+    return db.session.get(User, int(user_id))
 
 if __name__ == '__main__':
-    with app.app_context():
-        app.logger.info('Starting scheduler')
-        scheduler.start()
-        app.logger.info('Scheduler started')
-        app.run(host='0.0.0.0', port=5000)
+    app = create_app()
+    app.run(host='0.0.0.0', port=5000)
