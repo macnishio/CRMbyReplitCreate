@@ -180,7 +180,7 @@ agentRequireRestartOnSave = false
 
 [[workflows.workflow.tasks]]
 task = "shell.exec"
-args = "flask db migrate -m 'Add EmailFetchTracker model'"
+args = "flask db migrate -m 'Add relationships between Lead and Opportunity, Schedule, Task'"
 
 [deployment]
 run = ["sh", "-c", "python app.py"]

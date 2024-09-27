@@ -1,26 +1,97 @@
-2024-09-26 23:44:59,506 INFO: Email sender: =?UTF-8?B?Wm9obyDjgrPjg5/jg6Xjg4vjg4bjgqM=?= <community@zoho.co.jp>, Received at: 2024-09-26 01:02:03 [in /home/runner/CRM/routes/main.py:38]
-2024-09-26 23:44:59,510 INFO: Email sender: =?UTF-8?B?Wm9obyDjgrPjg5/jg6Xjg4vjg4bjgqM=?= <community@zoho.co.jp>, Received at: 2024-09-26 01:01:47 [in /home/runner/CRM/routes/main.py:38]
-2024-09-26 23:44:59,511 INFO: Email sender:  <notifications@zohocrm.com>, Received at: 2024-09-26 00:36:49 [in /home/runner/CRM/routes/main.py:38]
-2024-09-26 23:44:59,511 INFO: Email sender: =?UTF-8?B?6ZW35bKhIOWSjOaaiQ==?= <nagaoka@immedio.io>, Received at: 2024-09-25 23:58:41 [in /home/runner/CRM/routes/main.py:38]
-2024-09-26 23:45:37,509 INFO: CRM startup [in /home/runner/CRM/app.py:101]
-2024-09-26 23:45:37,510 INFO: Starting scheduler [in /home/runner/CRM/app.py:118]
-2024-09-26 23:45:37,510 INFO: Scheduler started [in /home/runner/CRM/app.py:120]
-2024-09-26 23:46:30,014 INFO: Attempting to connect to imap.gmail.com:993 with SSL version: 2 [in /home/runner/CRM/email_receiver.py:40]
-2024-09-26 23:46:30,756 INFO: IMAP4_SSL connection established with SSL version: 2 [in /home/runner/CRM/email_receiver.py:42]
-2024-09-26 23:46:31,585 INFO: Successfully logged in to the email server [in /home/runner/CRM/email_receiver.py:44]
-2024-09-26 23:46:32,050 INFO: Fetching emails for the last 30 minutes (from 2024-09-26 23:16:32 to 2024-09-26 23:46:32) [in /home/runner/CRM/email_receiver.py:116]
-2024-09-26 23:46:32,341 INFO: Total emails found: 158 [in /home/runner/CRM/email_receiver.py:128]
-2024-09-26 23:47:28,120 INFO: Processing email - Sender: =?ISO-2022-JP?B?GyRCJV4lOCU7JV9CZUk9GyhCIBskQjt7RURNOjBsGyhC?= <tera@webinar-b.jp>, Subject: 本日と来週のウェビナー番組表, Date: 2024-09-27 08:25:38 [in /home/runner/CRM/email_receiver.py:166]
-2024-09-26 23:47:28,366 WARNING: Received email from unknown sender: =?ISO-2022-JP?B?GyRCJV4lOCU7JV9CZUk9GyhCIBskQjt7RURNOjBsGyhC?= <tera@webinar-b.jp> [in /home/runner/CRM/email_receiver.py:88]
-2024-09-26 23:47:28,875 INFO: Stored email from unknown sender: tera@webinar-b.jp [in /home/runner/CRM/email_receiver.py:102]
-2024-09-26 23:47:29,179 INFO: Processing email - Sender: 
- =?ISO-2022-JP?B?SVRtZWRpYSBWaXJ0dWFsIEVYUE8gMjAyNCAbJEIyRhsoQiAbJEIkTiQ0MEZGYhsoQiAtLRskQiUiJSQlRiUjJWElRyUjJSIbKEIgGyRCJSQlWSVzJUglYSE8JWsbKEI=?= <eventnews@ml.itmedia.co.jp>, Subject: 視聴数ランキング TOP 10/人気コンテンツ（〜9/27集計分）, Date: 2024-09-27 08:30:12 [in /home/runner/CRM/email_receiver.py:166]
-2024-09-26 23:47:29,902 WARNING: Received email from unknown sender: 
- =?ISO-2022-JP?B?SVRtZWRpYSBWaXJ0dWFsIEVYUE8gMjAyNCAbJEIyRhsoQiAbJEIkTiQ0MEZGYhsoQiAtLRskQiUiJSQlRiUjJWElRyUjJSIbKEIgGyRCJSQlWSVzJUglYSE8JWsbKEI=?= <eventnews@ml.itmedia.co.jp> [in /home/runner/CRM/email_receiver.py:88]
-2024-09-26 23:47:30,387 INFO: Stored email from unknown sender: eventnews@ml.itmedia.co.jp [in /home/runner/CRM/email_receiver.py:102]
-2024-09-26 23:47:30,702 INFO: Processing email - Sender: =?UTF-8?B?54m5UOOCteODneODvOODiA==?= <noreply@earth-car.com>, Subject: 【特P】駐車場予約のお知らせ, Date: 2024-09-26 23:37:52 [in /home/runner/CRM/email_receiver.py:166]
-2024-09-26 23:47:31,425 WARNING: Received email from unknown sender: =?UTF-8?B?54m5UOOCteODneODvOODiA==?= <noreply@earth-car.com> [in /home/runner/CRM/email_receiver.py:88]
-2024-09-26 23:47:31,950 INFO: Stored email from unknown sender: noreply@earth-car.com [in /home/runner/CRM/email_receiver.py:102]
-2024-09-26 23:47:31,951 INFO: Processed 3 out of 158 emails [in /home/runner/CRM/email_receiver.py:205]
-2024-09-26 23:47:33,383 INFO: Emails from known leads: 0 [in /home/runner/CRM/email_receiver.py:217]
-2024-09-26 23:47:33,628 INFO: Emails from unknown senders: 13 [in /home/runner/CRM/email_receiver.py:220]
+2024-09-27 03:59:38,485 ERROR: Exception on / [GET] [in /home/runner/CRM/.pythonlibs/lib/python3.11/site-packages/flask/app.py:1744]
+Traceback (most recent call last):
+  File "/home/runner/CRM/.pythonlibs/lib/python3.11/site-packages/sqlalchemy/engine/base.py", line 1967, in _exec_single_context
+    self.dialect.do_execute(
+  File "/home/runner/CRM/.pythonlibs/lib/python3.11/site-packages/sqlalchemy/engine/default.py", line 941, in do_execute
+    cursor.execute(statement, parameters)
+psycopg2.errors.UndefinedTable: relation "user" does not exist
+LINE 2: FROM "user" 
+             ^
+
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "/home/runner/CRM/.pythonlibs/lib/python3.11/site-packages/flask/app.py", line 2529, in wsgi_app
+    response = self.full_dispatch_request()
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/runner/CRM/.pythonlibs/lib/python3.11/site-packages/flask/app.py", line 1825, in full_dispatch_request
+    rv = self.handle_user_exception(e)
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/runner/CRM/.pythonlibs/lib/python3.11/site-packages/flask/app.py", line 1823, in full_dispatch_request
+    rv = self.dispatch_request()
+         ^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/runner/CRM/.pythonlibs/lib/python3.11/site-packages/flask/app.py", line 1799, in dispatch_request
+    return self.ensure_sync(self.view_functions[rule.endpoint])(**view_args)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/runner/CRM/routes/main.py", line 10, in index
+    return render_template('home.html')
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/runner/CRM/.pythonlibs/lib/python3.11/site-packages/flask/templating.py", line 147, in render_template
+    return _render(app, template, context)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/runner/CRM/.pythonlibs/lib/python3.11/site-packages/flask/templating.py", line 128, in _render
+    app.update_template_context(context)
+  File "/home/runner/CRM/.pythonlibs/lib/python3.11/site-packages/flask/app.py", line 997, in update_template_context
+    context.update(func())
+                   ^^^^^^
+  File "/home/runner/CRM/.pythonlibs/lib/python3.11/site-packages/flask_login/utils.py", line 407, in _user_context_processor
+    return dict(current_user=_get_user())
+                             ^^^^^^^^^^^
+  File "/home/runner/CRM/.pythonlibs/lib/python3.11/site-packages/flask_login/utils.py", line 372, in _get_user
+    current_app.login_manager._load_user()
+  File "/home/runner/CRM/.pythonlibs/lib/python3.11/site-packages/flask_login/login_manager.py", line 364, in _load_user
+    user = self._user_callback(user_id)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/runner/CRM/app.py", line 66, in load_user
+    return db.session.get(User, int(user_id))
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/runner/CRM/.pythonlibs/lib/python3.11/site-packages/sqlalchemy/orm/scoping.py", line 1060, in get
+    return self._proxied.get(
+           ^^^^^^^^^^^^^^^^^^
+  File "/home/runner/CRM/.pythonlibs/lib/python3.11/site-packages/sqlalchemy/orm/session.py", line 3693, in get
+    return self._get_impl(
+           ^^^^^^^^^^^^^^^
+  File "/home/runner/CRM/.pythonlibs/lib/python3.11/site-packages/sqlalchemy/orm/session.py", line 3873, in _get_impl
+    return db_load_fn(
+           ^^^^^^^^^^^
+  File "/home/runner/CRM/.pythonlibs/lib/python3.11/site-packages/sqlalchemy/orm/loading.py", line 694, in load_on_pk_identity
+    session.execute(
+  File "/home/runner/CRM/.pythonlibs/lib/python3.11/site-packages/sqlalchemy/orm/session.py", line 2362, in execute
+    return self._execute_internal(
+           ^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/runner/CRM/.pythonlibs/lib/python3.11/site-packages/sqlalchemy/orm/session.py", line 2247, in _execute_internal
+    result: Result[Any] = compile_state_cls.orm_execute_statement(
+                          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/runner/CRM/.pythonlibs/lib/python3.11/site-packages/sqlalchemy/orm/context.py", line 305, in orm_execute_statement
+    result = conn.execute(
+             ^^^^^^^^^^^^^
+  File "/home/runner/CRM/.pythonlibs/lib/python3.11/site-packages/sqlalchemy/engine/base.py", line 1418, in execute
+    return meth(
+           ^^^^^
+  File "/home/runner/CRM/.pythonlibs/lib/python3.11/site-packages/sqlalchemy/sql/elements.py", line 515, in _execute_on_connection
+    return connection._execute_clauseelement(
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/runner/CRM/.pythonlibs/lib/python3.11/site-packages/sqlalchemy/engine/base.py", line 1640, in _execute_clauseelement
+    ret = self._execute_context(
+          ^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/runner/CRM/.pythonlibs/lib/python3.11/site-packages/sqlalchemy/engine/base.py", line 1846, in _execute_context
+    return self._exec_single_context(
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/runner/CRM/.pythonlibs/lib/python3.11/site-packages/sqlalchemy/engine/base.py", line 1986, in _exec_single_context
+    self._handle_dbapi_exception(
+  File "/home/runner/CRM/.pythonlibs/lib/python3.11/site-packages/sqlalchemy/engine/base.py", line 2355, in _handle_dbapi_exception
+    raise sqlalchemy_exception.with_traceback(exc_info[2]) from e
+  File "/home/runner/CRM/.pythonlibs/lib/python3.11/site-packages/sqlalchemy/engine/base.py", line 1967, in _exec_single_context
+    self.dialect.do_execute(
+  File "/home/runner/CRM/.pythonlibs/lib/python3.11/site-packages/sqlalchemy/engine/default.py", line 941, in do_execute
+    cursor.execute(statement, parameters)
+sqlalchemy.exc.ProgrammingError: (psycopg2.errors.UndefinedTable) relation "user" does not exist
+LINE 2: FROM "user" 
+             ^
+
+[SQL: SELECT "user".id AS user_id, "user".username AS user_username, "user".email AS user_email, "user".password_hash AS user_password_hash 
+FROM "user" 
+WHERE "user".id = %(pk_1)s]
+[parameters: {'pk_1': 1}]
+(Background on this error at: https://sqlalche.me/e/20/f405)

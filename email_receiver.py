@@ -3,13 +3,14 @@ import email
 from email.header import decode_header
 from datetime import datetime, timedelta, timezone
 from flask import current_app
-from models import Lead, Email, UnknownEmail, EmailFetchTracker
+from models import Lead, Email, UnknownEmail, EmailFetchTracker, Opportunity, Schedule, Task
 from extensions import db
 from sqlalchemy.exc import DataError
 import imaplib
 import ssl
 import re
 import chardet
+from ai_analysis import analyze_email, parse_ai_response
 
 def connect_to_email_server():
     mail_server = os.environ.get('RECEIVE_MAIL_SERVER')
@@ -27,7 +28,6 @@ def connect_to_email_server():
         context.check_hostname = False
         context.verify_mode = ssl.CERT_NONE
         
-        # Add more SSL options
         context.options |= ssl.OP_NO_SSLv2
         context.options |= ssl.OP_NO_SSLv3
         context.options |= ssl.OP_NO_TLSv1
@@ -84,6 +84,22 @@ def process_email(sender, subject, body, received_at):
                           received_at=received_at,
                           lead=lead)
         db.session.add(email_obj)
+
+        ai_response = analyze_email(subject, body)
+        opportunities, schedules, tasks = parse_ai_response(ai_response)
+
+        for opp in opportunities:
+            new_opp = Opportunity(name=opp, lead=lead, user=lead.user)
+            db.session.add(new_opp)
+
+        for sched in schedules:
+            new_sched = Schedule(title=sched, lead=lead, user=lead.user)
+            db.session.add(new_sched)
+
+        for task in tasks:
+            new_task = Task(title=task, lead=lead, user=lead.user)
+            db.session.add(new_task)
+
     else:
         current_app.logger.warning(
             f"Received email from unknown sender: {sender}")

@@ -45,6 +45,8 @@ class Config:
     REDIS_URL = os.environ.get('REDIS_URL') or 'redis://localhost:6379/0'
     CACHE_TYPE = "redis"
     CACHE_REDIS_URL = REDIS_URL
+    # Claude AI Configuration
+    CLAUDE_API_KEY = os.environ.get('CLAUDE_API_KEY')
 
     @staticmethod
     def init_app(app):

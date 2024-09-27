@@ -1,89 +1,88 @@
-2024-09-26 23:10:24,752 INFO: Total emails found: 155 [in /home/runner/CRM/email_receiver.py:130]
-2024-09-26 23:10:35,569 INFO: Email sender:  <makoto@team240.net>, Received at: 2024-09-26 23:00:02 [in /home/runner/CRM/routes/main.py:42]
-2024-09-26 23:10:44,633 INFO: CRM startup [in /home/runner/CRM/app.py:101]
-2024-09-26 23:10:44,634 INFO: Starting scheduler [in /home/runner/CRM/app.py:118]
-2024-09-26 23:10:44,635 INFO: Scheduler started [in /home/runner/CRM/app.py:120]
-2024-09-26 23:11:17,729 INFO: Attempting to connect to imap.gmail.com:993 with SSL version: 2 [in /home/runner/CRM/email_receiver.py:34]
-2024-09-26 23:11:18,399 INFO: IMAP4_SSL connection established with SSL version: 2 [in /home/runner/CRM/email_receiver.py:36]
-2024-09-26 23:11:19,379 INFO: Successfully logged in to the email server [in /home/runner/CRM/email_receiver.py:38]
-2024-09-26 23:11:20,560 INFO: Fetching emails from 2024-09-26 23:10:23 to 2024-09-26 23:11:20 [in /home/runner/CRM/email_receiver.py:118]
-2024-09-26 23:11:20,863 INFO: Total emails found: 155 [in /home/runner/CRM/email_receiver.py:130]
-2024-09-26 23:11:43,954 INFO: Email sender:  <makoto@team240.net>, Received at: 2024-09-26 23:00:02 [in /home/runner/CRM/routes/main.py:42]
-2024-09-26 23:12:08,833 INFO: Processed 0 out of 155 emails [in /home/runner/CRM/email_receiver.py:207]
-2024-09-26 23:12:10,084 INFO: Emails from known leads: 0 [in /home/runner/CRM/email_receiver.py:219]
-2024-09-26 23:12:10,319 INFO: Emails from unknown senders: 0 [in /home/runner/CRM/email_receiver.py:222]
-2024-09-26 23:15:44,633 INFO: Checking for new emails [in /home/runner/CRM/email_receiver.py:239]
-2024-09-26 23:15:44,651 INFO: Attempting to connect to imap.gmail.com:993 with SSL version: 2 [in /home/runner/CRM/email_receiver.py:34]
-2024-09-26 23:15:45,277 INFO: IMAP4_SSL connection established with SSL version: 2 [in /home/runner/CRM/email_receiver.py:36]
-2024-09-26 23:15:46,209 INFO: Successfully logged in to the email server [in /home/runner/CRM/email_receiver.py:38]
-2024-09-26 23:15:47,820 INFO: Fetching emails from 2024-09-26 23:11:20 to 2024-09-26 23:15:47 [in /home/runner/CRM/email_receiver.py:118]
-2024-09-26 23:15:48,105 INFO: Total emails found: 155 [in /home/runner/CRM/email_receiver.py:130]
-2024-09-26 23:15:49,418 INFO: CRM startup [in /home/runner/CRM/app.py:101]
-2024-09-26 23:15:49,419 INFO: Starting scheduler [in /home/runner/CRM/app.py:118]
-2024-09-26 23:15:49,420 INFO: Scheduler started [in /home/runner/CRM/app.py:120]
-2024-09-26 23:20:49,418 INFO: Checking for new emails [in /home/runner/CRM/email_receiver.py:239]
-2024-09-26 23:20:49,438 INFO: Attempting to connect to imap.gmail.com:993 with SSL version: 2 [in /home/runner/CRM/email_receiver.py:34]
-2024-09-26 23:20:50,057 INFO: IMAP4_SSL connection established with SSL version: 2 [in /home/runner/CRM/email_receiver.py:36]
-2024-09-26 23:20:50,741 INFO: Successfully logged in to the email server [in /home/runner/CRM/email_receiver.py:38]
-2024-09-26 23:20:52,408 INFO: Fetching emails from 2024-09-26 23:15:47 to 2024-09-26 23:20:51 [in /home/runner/CRM/email_receiver.py:118]
-2024-09-26 23:20:52,699 INFO: Total emails found: 155 [in /home/runner/CRM/email_receiver.py:130]
-2024-09-26 23:21:39,372 INFO: Processed 0 out of 155 emails [in /home/runner/CRM/email_receiver.py:207]
-2024-09-26 23:21:40,647 INFO: Emails from known leads: 0 [in /home/runner/CRM/email_receiver.py:219]
-2024-09-26 23:21:40,893 INFO: Emails from unknown senders: 0 [in /home/runner/CRM/email_receiver.py:222]
-2024-09-26 23:22:51,006 INFO: Attempting to connect to imap.gmail.com:993 with SSL version: 2 [in /home/runner/CRM/email_receiver.py:34]
-2024-09-26 23:22:51,622 INFO: IMAP4_SSL connection established with SSL version: 2 [in /home/runner/CRM/email_receiver.py:36]
-2024-09-26 23:22:52,625 INFO: Successfully logged in to the email server [in /home/runner/CRM/email_receiver.py:38]
-2024-09-26 23:22:53,833 INFO: Fetching emails from 2024-09-26 23:20:51 to 2024-09-26 23:22:53 [in /home/runner/CRM/email_receiver.py:118]
-2024-09-26 23:22:54,123 INFO: Total emails found: 155 [in /home/runner/CRM/email_receiver.py:130]
-2024-09-26 23:23:40,765 INFO: Processed 0 out of 155 emails [in /home/runner/CRM/email_receiver.py:207]
-2024-09-26 23:23:41,772 INFO: Attempting to connect to imap.gmail.com:993 with SSL version: 2 [in /home/runner/CRM/email_receiver.py:34]
-2024-09-26 23:23:42,533 INFO: IMAP4_SSL connection established with SSL version: 2 [in /home/runner/CRM/email_receiver.py:36]
-2024-09-26 23:23:43,174 INFO: Emails from known leads: 0 [in /home/runner/CRM/email_receiver.py:219]
-2024-09-26 23:23:43,242 INFO: Successfully logged in to the email server [in /home/runner/CRM/email_receiver.py:38]
-2024-09-26 23:23:43,407 INFO: Emails from unknown senders: 0 [in /home/runner/CRM/email_receiver.py:222]
-2024-09-26 23:23:44,437 INFO: Fetching emails from 2024-09-26 23:22:53 to 2024-09-26 23:23:43 [in /home/runner/CRM/email_receiver.py:118]
-2024-09-26 23:23:44,734 INFO: Total emails found: 155 [in /home/runner/CRM/email_receiver.py:130]
-2024-09-26 23:23:53,397 INFO: Attempting to connect to imap.gmail.com:993 with SSL version: 2 [in /home/runner/CRM/email_receiver.py:34]
-2024-09-26 23:23:54,021 INFO: IMAP4_SSL connection established with SSL version: 2 [in /home/runner/CRM/email_receiver.py:36]
-2024-09-26 23:23:54,990 INFO: Successfully logged in to the email server [in /home/runner/CRM/email_receiver.py:38]
-2024-09-26 23:23:56,132 INFO: Fetching emails from 2024-09-26 23:23:43 to 2024-09-26 23:23:55 [in /home/runner/CRM/email_receiver.py:118]
-2024-09-26 23:23:56,416 INFO: Total emails found: 155 [in /home/runner/CRM/email_receiver.py:130]
-2024-09-26 23:24:30,174 INFO: CRM startup [in /home/runner/CRM/app.py:101]
-2024-09-26 23:24:30,174 INFO: Starting scheduler [in /home/runner/CRM/app.py:118]
-2024-09-26 23:24:30,175 INFO: Scheduler started [in /home/runner/CRM/app.py:120]
-2024-09-26 23:25:00,842 INFO: Attempting to connect to imap.gmail.com:993 with SSL version: 2 [in /home/runner/CRM/email_receiver.py:34]
-2024-09-26 23:25:01,462 INFO: IMAP4_SSL connection established with SSL version: 2 [in /home/runner/CRM/email_receiver.py:36]
-2024-09-26 23:25:02,675 INFO: Successfully logged in to the email server [in /home/runner/CRM/email_receiver.py:38]
-2024-09-26 23:25:03,969 INFO: Fetching emails from 2024-09-26 23:23:55 to 2024-09-26 23:25:03 [in /home/runner/CRM/email_receiver.py:118]
-2024-09-26 23:25:04,276 INFO: Total emails found: 155 [in /home/runner/CRM/email_receiver.py:130]
-2024-09-26 23:25:17,376 INFO: Attempting to connect to imap.gmail.com:993 with SSL version: 2 [in /home/runner/CRM/email_receiver.py:34]
-2024-09-26 23:25:18,030 INFO: IMAP4_SSL connection established with SSL version: 2 [in /home/runner/CRM/email_receiver.py:36]
-2024-09-26 23:25:18,689 INFO: Successfully logged in to the email server [in /home/runner/CRM/email_receiver.py:38]
-2024-09-26 23:25:19,893 INFO: Fetching emails from 2024-09-26 23:25:03 to 2024-09-26 23:25:19 [in /home/runner/CRM/email_receiver.py:118]
-2024-09-26 23:25:20,190 INFO: Total emails found: 155 [in /home/runner/CRM/email_receiver.py:130]
-2024-09-26 23:25:26,191 INFO: Attempting to connect to imap.gmail.com:993 with SSL version: 2 [in /home/runner/CRM/email_receiver.py:34]
-2024-09-26 23:25:26,951 INFO: IMAP4_SSL connection established with SSL version: 2 [in /home/runner/CRM/email_receiver.py:36]
-2024-09-26 23:25:27,631 INFO: Successfully logged in to the email server [in /home/runner/CRM/email_receiver.py:38]
-2024-09-26 23:25:28,803 INFO: Fetching emails from 2024-09-26 23:25:19 to 2024-09-26 23:25:28 [in /home/runner/CRM/email_receiver.py:118]
-2024-09-26 23:25:29,099 INFO: Total emails found: 155 [in /home/runner/CRM/email_receiver.py:130]
-2024-09-26 23:25:35,554 INFO: Attempting to connect to imap.gmail.com:993 with SSL version: 2 [in /home/runner/CRM/email_receiver.py:34]
-2024-09-26 23:25:36,272 INFO: IMAP4_SSL connection established with SSL version: 2 [in /home/runner/CRM/email_receiver.py:36]
-2024-09-26 23:25:37,077 INFO: Successfully logged in to the email server [in /home/runner/CRM/email_receiver.py:38]
-2024-09-26 23:25:38,257 INFO: Fetching emails from 2024-09-26 23:25:28 to 2024-09-26 23:25:37 [in /home/runner/CRM/email_receiver.py:118]
-2024-09-26 23:25:38,555 INFO: Total emails found: 155 [in /home/runner/CRM/email_receiver.py:130]
-2024-09-26 23:25:50,986 INFO: Processed 0 out of 155 emails [in /home/runner/CRM/email_receiver.py:207]
-2024-09-26 23:25:52,207 INFO: Emails from known leads: 0 [in /home/runner/CRM/email_receiver.py:219]
-2024-09-26 23:25:52,446 INFO: Emails from unknown senders: 0 [in /home/runner/CRM/email_receiver.py:222]
-2024-09-26 23:26:07,951 INFO: Processed 0 out of 155 emails [in /home/runner/CRM/email_receiver.py:207]
-2024-09-26 23:26:09,199 INFO: Emails from known leads: 0 [in /home/runner/CRM/email_receiver.py:219]
-2024-09-26 23:26:09,433 INFO: Emails from unknown senders: 0 [in /home/runner/CRM/email_receiver.py:222]
-2024-09-26 23:26:17,316 INFO: Processed 0 out of 155 emails [in /home/runner/CRM/email_receiver.py:207]
-2024-09-26 23:26:18,569 INFO: Emails from known leads: 0 [in /home/runner/CRM/email_receiver.py:219]
-2024-09-26 23:26:18,803 INFO: Emails from unknown senders: 0 [in /home/runner/CRM/email_receiver.py:222]
-2024-09-26 23:26:27,995 INFO: Processed 0 out of 155 emails [in /home/runner/CRM/email_receiver.py:207]
-2024-09-26 23:26:29,258 INFO: Emails from known leads: 0 [in /home/runner/CRM/email_receiver.py:219]
-2024-09-26 23:26:29,492 INFO: Emails from unknown senders: 0 [in /home/runner/CRM/email_receiver.py:222]
-2024-09-26 23:26:36,448 INFO: Email sender:  <makoto@team240.net>, Received at: 2024-09-26 23:00:02 [in /home/runner/CRM/routes/main.py:38]
-2024-09-26 23:26:59,263 INFO: Attempting to connect to imap.gmail.com:993 with SSL version: 2 [in /home/runner/CRM/email_receiver.py:34]
-2024-09-26 23:26:59,925 INFO: IMAP4_SSL connection established with SSL version: 2 [in /home/runner/CRM/email_receiver.py:36]
-2024-09-26 23:27:00,632 INFO: Successfully logged in to the email server [in /home/runner/CRM/email_receiver.py:38]
+2024-09-27 01:51:33,362 INFO: Processing email - Sender: =?UTF-8?B?6Z2S5pyo56S+5Lya5L+d6Zm65Yq05YuZ5aOr5LqL5YuZ5omAIC0=?=
+ =?UTF-8?B?IOODkeOCveOCs+ODs+S/rueQhuOCteODvOODk+OCuSDpgJrnn6U=?=
+ <notifications@zohoprojects.com>, Subject: [青木社会保険労務士事務所 - パソコン修理サービス] [B1U5-T2 Remote Diagnostics] タスクのコメントを追加しました, Date: 2024-09-26 18:27:24 [in /home/runner/CRM/email_receiver.py:166]
+2024-09-27 01:51:34,080 WARNING: Received email from unknown sender: =?UTF-8?B?6Z2S5pyo56S+5Lya5L+d6Zm65Yq05YuZ5aOr5LqL5YuZ5omAIC0=?=
+ =?UTF-8?B?IOODkeOCveOCs+ODs+S/rueQhuOCteODvOODk+OCuSDpgJrnn6U=?=
+ <notifications@zohoprojects.com> [in /home/runner/CRM/email_receiver.py:88]
+2024-09-27 01:51:34,796 INFO: Stored email from unknown sender: notifications@zohoprojects.com [in /home/runner/CRM/email_receiver.py:102]
+2024-09-27 01:51:35,111 INFO: Processing email - Sender: =?UTF-8?Q?Deal_associated_with_invo?=
+ =?UTF-8?Q?ice_401243000054288123_=E9=80=9A=E7=9F=A5?=
+ <notifications@zohoprojects.com>, Subject: [Deal associated with invoice 401243000054288123] [DA2-T1 Initial Client Meeting] タスクのコメントを追加しました, Date: 2024-09-26 18:27:23 [in /home/runner/CRM/email_receiver.py:166]
+2024-09-27 01:51:35,799 WARNING: Received email from unknown sender: =?UTF-8?Q?Deal_associated_with_invo?=
+ =?UTF-8?Q?ice_401243000054288123_=E9=80=9A=E7=9F=A5?=
+ <notifications@zohoprojects.com> [in /home/runner/CRM/email_receiver.py:88]
+2024-09-27 01:51:36,487 INFO: Stored email from unknown sender: notifications@zohoprojects.com [in /home/runner/CRM/email_receiver.py:102]
+2024-09-27 01:51:36,794 INFO: Processing email - Sender: =?UTF-8?Q?Deal_associated_with_invo?=
+ =?UTF-8?Q?ice_401243000054288123_=E9=80=9A=E7=9F=A5?=
+ <notifications@zohoprojects.com>, Subject: [Deal associated with invoice 401243000054288123] [DA2-T4 Execution of Deliverables] タスクのコメントを追加しました, Date: 2024-09-26 18:27:24 [in /home/runner/CRM/email_receiver.py:166]
+2024-09-27 01:51:37,509 WARNING: Received email from unknown sender: =?UTF-8?Q?Deal_associated_with_invo?=
+ =?UTF-8?Q?ice_401243000054288123_=E9=80=9A=E7=9F=A5?=
+ <notifications@zohoprojects.com> [in /home/runner/CRM/email_receiver.py:88]
+2024-09-27 01:51:38,225 INFO: Stored email from unknown sender: notifications@zohoprojects.com [in /home/runner/CRM/email_receiver.py:102]
+2024-09-27 01:51:38,532 INFO: Processing email - Sender: =?UTF-8?Q?=E5=95=86=E8=AB=87=E5=90=8D_=60204557100?=
+ =?UTF-8?Q?0125275012=60_=E9=80=9A=E7=9F=A5?=
+ <notifications@zohoprojects.com>, Subject: [商談名 `2045571000125275012`] [A9E8-T2 Project Planning] タスクのコメントを追加しました, Date: 2024-09-26 18:27:24 [in /home/runner/CRM/email_receiver.py:166]
+2024-09-27 01:51:39,220 WARNING: Received email from unknown sender: =?UTF-8?Q?=E5=95=86=E8=AB=87=E5=90=8D_=60204557100?=
+ =?UTF-8?Q?0125275012=60_=E9=80=9A=E7=9F=A5?=
+ <notifications@zohoprojects.com> [in /home/runner/CRM/email_receiver.py:88]
+2024-09-27 01:51:39,908 INFO: Stored email from unknown sender: notifications@zohoprojects.com [in /home/runner/CRM/email_receiver.py:102]
+2024-09-27 01:51:40,238 INFO: Processing email - Sender: =?UTF-8?Q?=E5=95=86=E8=AB=87=E5=90=8D_=60204557100?=
+ =?UTF-8?Q?0125275012=60_=E9=80=9A=E7=9F=A5?=
+ <notifications@zohoprojects.com>, Subject: [商談名 `2045571000125275012`] [A9E8-T1 Initial Client Meeting] タスクのコメントを追加しました, Date: 2024-09-26 18:27:23 [in /home/runner/CRM/email_receiver.py:166]
+2024-09-27 01:51:40,953 WARNING: Received email from unknown sender: =?UTF-8?Q?=E5=95=86=E8=AB=87=E5=90=8D_=60204557100?=
+ =?UTF-8?Q?0125275012=60_=E9=80=9A=E7=9F=A5?=
+ <notifications@zohoprojects.com> [in /home/runner/CRM/email_receiver.py:88]
+2024-09-27 01:51:41,669 INFO: Stored email from unknown sender: notifications@zohoprojects.com [in /home/runner/CRM/email_receiver.py:102]
+2024-09-27 01:51:41,974 INFO: Processing email - Sender: =?UTF-8?Q?=E5=95=86=E8=AB=87=E5=90=8D_=60204557100?=
+ =?UTF-8?Q?0125275012=60_=E9=80=9A=E7=9F=A5?=
+ <notifications@zohoprojects.com>, Subject: [商談名 `2045571000125275012`] [A9E8-T7 Finalization and Closure] タスクのコメントを追加しました, Date: 2024-09-26 18:27:25 [in /home/runner/CRM/email_receiver.py:166]
+2024-09-27 01:51:42,662 WARNING: Received email from unknown sender: =?UTF-8?Q?=E5=95=86=E8=AB=87=E5=90=8D_=60204557100?=
+ =?UTF-8?Q?0125275012=60_=E9=80=9A=E7=9F=A5?=
+ <notifications@zohoprojects.com> [in /home/runner/CRM/email_receiver.py:88]
+2024-09-27 01:51:43,350 INFO: Stored email from unknown sender: notifications@zohoprojects.com [in /home/runner/CRM/email_receiver.py:102]
+2024-09-27 01:51:43,652 INFO: Processing email - Sender: =?UTF-8?B?6Z2S5pyo56S+5Lya5L+d6Zm65Yq05YuZ5aOr5LqL5YuZ5omAIC0=?=
+ =?UTF-8?B?IOODkeOCveOCs+ODs+S/rueQhuOCteODvOODk+OCuSDpgJrnn6U=?=
+ <notifications@zohoprojects.com>, Subject: [青木社会保険労務士事務所 - パソコン修理サービス] [B1U5-T5 Document Potential Issues] タスクのコメントを追加しました, Date: 2024-09-26 18:27:23 [in /home/runner/CRM/email_receiver.py:166]
+2024-09-27 01:51:44,384 WARNING: Received email from unknown sender: =?UTF-8?B?6Z2S5pyo56S+5Lya5L+d6Zm65Yq05YuZ5aOr5LqL5YuZ5omAIC0=?=
+ =?UTF-8?B?IOODkeOCveOCs+ODs+S/rueQhuOCteODvOODk+OCuSDpgJrnn6U=?=
+ <notifications@zohoprojects.com> [in /home/runner/CRM/email_receiver.py:88]
+2024-09-27 01:51:45,100 INFO: Stored email from unknown sender: notifications@zohoprojects.com [in /home/runner/CRM/email_receiver.py:102]
+2024-09-27 01:51:45,408 INFO: Processing email - Sender: =?UTF-8?Q?=E5=95=86=E8=AB=87=E5=90=8D_=60204557100?=
+ =?UTF-8?Q?0125275012=60_=E9=80=9A=E7=9F=A5?=
+ <notifications@zohoprojects.com>, Subject: [商談名 `2045571000125275012`] [A9E8-T9 Client Communication] タスクのコメントを追加しました, Date: 2024-09-26 18:30:38 [in /home/runner/CRM/email_receiver.py:166]
+2024-09-27 01:51:46,096 WARNING: Received email from unknown sender: =?UTF-8?Q?=E5=95=86=E8=AB=87=E5=90=8D_=60204557100?=
+ =?UTF-8?Q?0125275012=60_=E9=80=9A=E7=9F=A5?=
+ <notifications@zohoprojects.com> [in /home/runner/CRM/email_receiver.py:88]
+2024-09-27 01:51:46,785 INFO: Stored email from unknown sender: notifications@zohoprojects.com [in /home/runner/CRM/email_receiver.py:102]
+2024-09-27 01:51:47,109 INFO: Processing email - Sender: =?UTF-8?B?6ZW35bKhIOWSjOaaiQ==?= <nagaoka@immedio.io>, Subject: 【toCマーケターの方必見！】NOT A HOTELに学ぶ、超プロダクトアウトを実現するマーケティング目線でのWEBサイト作りとは？, Date: 2024-09-27 10:33:11 [in /home/runner/CRM/email_receiver.py:166]
+2024-09-27 01:51:48,989 INFO: Stored email for lead: 8335 [in /home/runner/CRM/email_receiver.py:100]
+2024-09-27 01:51:48,990 INFO: Processed 51 out of 81 emails [in /home/runner/CRM/email_receiver.py:205]
+2024-09-27 01:51:49,824 INFO: Emails from known leads: 3 [in /home/runner/CRM/email_receiver.py:217]
+2024-09-27 01:51:50,057 INFO: Emails from unknown senders: 464 [in /home/runner/CRM/email_receiver.py:220]
+2024-09-27 01:55:03,796 INFO: Checking for new emails [in /home/runner/CRM/email_receiver.py:237]
+2024-09-27 01:55:03,815 INFO: Attempting to connect to imap.gmail.com:993 with SSL version: 2 [in /home/runner/CRM/email_receiver.py:40]
+2024-09-27 01:55:04,539 INFO: IMAP4_SSL connection established with SSL version: 2 [in /home/runner/CRM/email_receiver.py:42]
+2024-09-27 01:55:05,415 INFO: Successfully logged in to the email server [in /home/runner/CRM/email_receiver.py:44]
+2024-09-27 01:55:05,965 INFO: Fetching emails for the last 30 minutes (from 2024-09-27 01:25:05 to 2024-09-27 01:55:05) [in /home/runner/CRM/email_receiver.py:116]
+2024-09-27 01:55:06,315 INFO: Total emails found: 81 [in /home/runner/CRM/email_receiver.py:128]
+2024-09-27 01:55:26,972 INFO: Processing email - Sender: =?UTF-8?Q?Deal_associated_with_invo?=
+ =?UTF-8?Q?ice_401243000054288123_=E9=80=9A=E7=9F=A5?=
+ <notifications@zohoprojects.com>, Subject: [Deal associated with invoice 401243000054288123] [DA2-T5 Quality Assurance] タスクのコメントを追加しました, Date: 2024-09-26 18:27:24 [in /home/runner/CRM/email_receiver.py:166]
+2024-09-27 01:55:27,686 WARNING: Received email from unknown sender: =?UTF-8?Q?Deal_associated_with_invo?=
+ =?UTF-8?Q?ice_401243000054288123_=E9=80=9A=E7=9F=A5?=
+ <notifications@zohoprojects.com> [in /home/runner/CRM/email_receiver.py:88]
+2024-09-27 01:55:28,400 INFO: Stored email from unknown sender: notifications@zohoprojects.com [in /home/runner/CRM/email_receiver.py:102]
+2024-09-27 01:55:28,697 INFO: Processing email - Sender: =?UTF-8?Q?=E5=95=86=E8=AB=87=E5=90=8D_=60204557100?=
+ =?UTF-8?Q?0125275012=60_=E9=80=9A=E7=9F=A5?=
+ <notifications@zohoprojects.com>, Subject: [商談名 `2045571000125275012`] [A9E8-T8 Resource Availability] タスクのコメントを追加しました, Date: 2024-09-26 18:27:23 [in /home/runner/CRM/email_receiver.py:166]
+2024-09-27 01:55:29,385 WARNING: Received email from unknown sender: =?UTF-8?Q?=E5=95=86=E8=AB=87=E5=90=8D_=60204557100?=
+ =?UTF-8?Q?0125275012=60_=E9=80=9A=E7=9F=A5?=
+ <notifications@zohoprojects.com> [in /home/runner/CRM/email_receiver.py:88]
+2024-09-27 01:55:30,074 INFO: Stored email from unknown sender: notifications@zohoprojects.com [in /home/runner/CRM/email_receiver.py:102]
+2024-09-27 01:55:30,368 INFO: Processing email - Sender: =?UTF-8?Q?Deal_associated_with_invo?=
+ =?UTF-8?Q?ice_401243000054288123_=E9=80=9A=E7=9F=A5?=
+ <notifications@zohoprojects.com>, Subject: [Deal associated with invoice 401243000054288123] [DA2-T6 Final Review and Handover] タスクのコメントを追加しました, Date: 2024-09-26 18:27:23 [in /home/runner/CRM/email_receiver.py:166]
+2024-09-27 01:55:31,082 WARNING: Received email from unknown sender: =?UTF-8?Q?Deal_associated_with_invo?=
+ =?UTF-8?Q?ice_401243000054288123_=E9=80=9A=E7=9F=A5?=
+ <notifications@zohoprojects.com> [in /home/runner/CRM/email_receiver.py:88]
+2024-09-27 01:55:31,796 INFO: Stored email from unknown sender: notifications@zohoprojects.com [in /home/runner/CRM/email_receiver.py:102]
