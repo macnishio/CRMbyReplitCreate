@@ -28,12 +28,9 @@ def connect_to_email_server():
         context.check_hostname = False
         context.verify_mode = ssl.CERT_NONE
         
-        context.options |= ssl.OP_NO_SSLv2
-        context.options |= ssl.OP_NO_SSLv3
-        context.options |= ssl.OP_NO_TLSv1
-        context.options |= ssl.OP_NO_TLSv1_1
+        context.options |= ssl.OP_NO_SSLv2 | ssl.OP_NO_SSLv3 | ssl.OP_NO_TLSv1 | ssl.OP_NO_TLSv1_1
         
-        ssl_versions = [ssl.PROTOCOL_TLS, ssl.PROTOCOL_TLSv1_2]
+        ssl_versions = [ssl.PROTOCOL_TLS, ssl.PROTOCOL_TLSv1_2, ssl.PROTOCOL_TLSv1_3]
         for ssl_version in ssl_versions:
             try:
                 context.options |= ssl_version
@@ -86,8 +83,11 @@ def process_email(sender, subject, body, received_at):
         db.session.add(email_obj)
 
         current_app.logger.info(f"Analyzing email from {sender_email}")
+        current_app.logger.debug(f"CLAUDE_API_KEY present in config: {'CLAUDE_API_KEY' in current_app.config}")
+        if 'CLAUDE_API_KEY' in current_app.config:
+            current_app.logger.debug(f"CLAUDE_API_KEY starts with: {current_app.config['CLAUDE_API_KEY'][:5]}...")
         ai_response = analyze_email(subject, body)
-        current_app.logger.info(f"AI response received: {ai_response[:100]}...")  # Log the first 100 characters of the response
+        current_app.logger.info(f"AI response received: {ai_response[:100]}...")
 
         if ai_response.startswith("Error:"):
             current_app.logger.error(f"AI analysis failed: {ai_response}")

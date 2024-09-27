@@ -37,6 +37,13 @@ def create_app(config_name='default'):
     else:
         app.logger.error("CLAUDE_API_KEY is missing from environment variables")
 
+    # Ensure CLAUDE_API_KEY is set in app.config
+    app.config['CLAUDE_API_KEY'] = os.environ.get('CLAUDE_API_KEY')
+    if app.config['CLAUDE_API_KEY']:
+        app.logger.info("CLAUDE_API_KEY is set in app.config")
+    else:
+        app.logger.error("CLAUDE_API_KEY is not set in app.config")
+
     # Register blueprints
     from routes import main, auth, leads, opportunities, accounts, reports, tracking, mobile, schedules, tasks
     app.register_blueprint(main.bp)

@@ -1,0 +1,35 @@
+INFO:werkzeug:172.31.196.6 - - [27/Sep/2024 23:22:58] "GET /static/css/styles.css HTTP/1.1" 304 -
+INFO:werkzeug:172.31.196.6 - - [27/Sep/2024 23:22:58] "GET /static/js/main.js HTTP/1.1" 304 -
+INFO:werkzeug:WARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.
+ * Running on all addresses (0.0.0.0)
+ * Running on http://127.0.0.1:5000
+ * Running on http://172.31.196.6:5000
+INFO:werkzeug:Press CTRL+C to quit
+INFO:werkzeug:172.31.196.6 - - [27/Sep/2024 22:59:40] "GET /dashboard HTTP/1.1" 200 -
+INFO:werkzeug:172.31.196.6 - - [27/Sep/2024 22:59:41] "GET /static/js/dashboard.js HTTP/1.1" 404 -
+INFO:werkzeug:172.31.196.6 - - [27/Sep/2024 22:59:41] "GET /static/css/styles.css HTTP/1.1" 304 -
+INFO:werkzeug:172.31.196.6 - - [27/Sep/2024 22:59:41] "GET /static/js/main.js HTTP/1.1" 304 -
+INFO:apscheduler.executors.default:Running job "setup_email_scheduler.<locals>.check_emails_task (trigger: interval[0:05:00], next run at: 2024-09-27 23:04:34 UTC)" (scheduled at 2024-09-27 23:04:34.962491+00:00)
+INFO:app:Checking for new emails
+INFO:app:Attempting to connect to imap.gmail.com:993 with SSL version: 2
+INFO:app:IMAP4_SSL connection established with SSL version: 2
+INFO:app:Successfully logged in to the email server
+INFO:app:Fetching emails for the last 30 minutes (from 2024-09-27 22:34:36 to 2024-09-27 23:04:36)
+INFO:app:Total emails found: 129
+INFO:app:Processing email - Sender: "=?utf-8?q?Pinterest?=" <recommendations@inspire.pinterest.com>, Subject: 「Makoto」に関連するピン, Date: 2024-09-27 22:39:03
+WARNING:app:Received email from unknown sender: "=?utf-8?q?Pinterest?=" <recommendations@inspire.pinterest.com>
+INFO:app:Stored email from unknown sender: recommendations@inspire.pinterest.com
+INFO:app:Processing email - Sender: makoto@team240.net, Subject: 「現在在庫有」レポートをご確認ください, Date: 2024-09-27 16:00:01
+ERROR:app:Error processing email b'83063': "Could not resolve authentication method. Expected either api_key or auth_token to be set. Or for one of the `X-Api-Key` or `Authorization` headers to be explicitly omitted"
+INFO:app:Processing email - Sender: noreply@zohocalendar.com, Subject: 日の予定表はこちらです, Date: 2024-09-27 16:00:01
+WARNING:app:Received email from unknown sender: noreply@zohocalendar.com
+INFO:app:Stored email from unknown sender: noreply@zohocalendar.com
+INFO:app:Processing email - Sender: =?UTF-8?B?5qCq5byP5Lya56S+44Kz44Oz44OG44OD44Kv44K5IOmAmuefpQ==?=
+ <notifications@zohoprojects.com>, Subject: Zoho Projects - 毎日の新着情報, Date: 2024-09-27 16:00:05
+WARNING:app:Received email from unknown sender: =?UTF-8?B?5qCq5byP5Lya56S+44Kz44Oz44OG44OD44Kv44K5IOmAmuefpQ==?=
+ <notifications@zohoprojects.com>
+INFO:app:Stored email from unknown sender: notifications@zohoprojects.com
+INFO:app:Processed 3 out of 129 emails
+INFO:app:Emails from known leads: 1
+INFO:app:Emails from unknown senders: 4
+INFO:apscheduler.executors.default:Job "setup_email_scheduler.<locals>.check_emails_task (trigger: interval[0:05:00], next run at: 2024-09-27 23:09:34 UTC)" executed successfully

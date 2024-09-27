@@ -1,4 +1,4 @@
-import anthropic
+from anthropic import Anthropic
 from flask import current_app
 import logging
 
@@ -10,37 +10,24 @@ def analyze_email(subject, content):
             return "Error: CLAUDE_API_KEY is not set"
 
         current_app.logger.info(f"Attempting to create Anthropic client with API key starting with: {api_key[:5]}...")
-        client = anthropic.Client(api_key=api_key)
+        client = Anthropic(api_key=api_key)
         current_app.logger.info("Anthropic client created successfully")
 
-        prompt = f"""Analyze the following email and provide suggestions for opportunities, schedules, and tasks:
-
-Subject: {subject}
-
-Content: {content}
-
-Please provide your analysis in the following format:
-Opportunities:
-1.
-2.
-
-Schedules:
-1.
-2.
-
-Tasks:
-1.
-2."""
+        system_message = "You are an AI assistant that analyzes emails and provides suggestions for opportunities, schedules, and tasks."
+        
+        prompt = f"\n\nHuman: Analyze the following email and provide suggestions for opportunities, schedules, and tasks:\n\nSubject: {subject}\n\nContent: {content}\n\nPlease provide your analysis in the following format:\nOpportunities:\n1.\n2.\n\nSchedules:\n1.\n2.\n\nTasks:\n1.\n2.\n\nAssistant:"
 
         current_app.logger.info("Sending request to Anthropic API")
         response = client.completions.create(
-            prompt=prompt,
+            prompt=system_message + prompt,
             model="claude-2",
-            max_tokens_to_sample=300,
+            max_tokens_to_sample=1000,
+            temperature=0.7,
         )
         current_app.logger.info("Received response from Anthropic API")
 
         return response.completion
+
     except Exception as e:
         current_app.logger.error(f"Error in analyze_email: {str(e)}")
         return f"Error: {str(e)}"
