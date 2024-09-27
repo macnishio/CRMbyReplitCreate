@@ -1,12 +1,13 @@
-from flask_sqlalchemy import SQLAlchemy
+# models.py
+
+from extensions import db
 from flask_login import UserMixin
 from werkzeug.security import generate_password_hash, check_password_hash
 from datetime import datetime
 from sqlalchemy.orm import Mapped, mapped_column
 from typing import List
-from sqlalchemy import Integer, String, DateTime, Float, ForeignKey, Text
-
-db = SQLAlchemy()
+from sqlalchemy import Integer, String, DateTime, Float, ForeignKey, Text, Boolean
+from typing import List, Optional 
 
 class User(UserMixin, db.Model):
     __tablename__ = 'users'
@@ -15,6 +16,8 @@ class User(UserMixin, db.Model):
     email: Mapped[str] = mapped_column(String(120), unique=True, nullable=False)
     password_hash: Mapped[str] = mapped_column(String(128))
     role: Mapped[str] = mapped_column(String(20), nullable=False, default='user')
+
+    # リレーションシップ
     leads: Mapped[List["Lead"]] = db.relationship('Lead', backref='user', lazy='dynamic')
     opportunities: Mapped[List["Opportunity"]] = db.relationship('Opportunity', backref='user', lazy='dynamic')
     accounts: Mapped[List["Account"]] = db.relationship('Account', backref='user', lazy='dynamic')
@@ -29,13 +32,16 @@ class Lead(db.Model):
     __tablename__ = 'leads'
     id: Mapped[int] = mapped_column(Integer, primary_key=True)
     name: Mapped[str] = mapped_column(String(100), nullable=False)
-    email: Mapped[str] = mapped_column(String(120), unique=True, nullable=False)
-    phone: Mapped[str] = mapped_column(String(20))
-    status: Mapped[str] = mapped_column(String(20))
-    score: Mapped[float] = mapped_column(Float)
+    email: Mapped[Optional[str]] = mapped_column(String(120), nullable=True)
+    phone: Mapped[Optional[str]] = mapped_column(String(20), nullable=True)
+    status: Mapped[str] = mapped_column(String(20), nullable=False, default='New')
+    score: Mapped[float] = mapped_column(Float, nullable=False, default=0.0)
     user_id: Mapped[int] = mapped_column(Integer, ForeignKey('users.id'), nullable=False)
     created_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow)
     last_contact: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow)
+    last_followup_email: Mapped[Optional[datetime]] = mapped_column(DateTime, nullable=True)
+
+    # リレーションシップ
     emails: Mapped[List["Email"]] = db.relationship('Email', backref='lead', lazy='dynamic')
     opportunities: Mapped[List["Opportunity"]] = db.relationship('Opportunity', back_populates='lead', cascade='all, delete-orphan')
     schedules: Mapped[List["Schedule"]] = db.relationship('Schedule', back_populates='lead', cascade='all, delete-orphan')
@@ -64,11 +70,13 @@ class Opportunity(db.Model):
     __tablename__ = 'opportunities'
     id: Mapped[int] = mapped_column(Integer, primary_key=True)
     name: Mapped[str] = mapped_column(String(100), nullable=False)
-    stage: Mapped[str] = mapped_column(String(20))  # Changed from 'status' to 'stage'
+    stage: Mapped[str] = mapped_column(String(20))
     amount: Mapped[float] = mapped_column(Float)
     close_date: Mapped[datetime] = mapped_column(DateTime)
     user_id: Mapped[int] = mapped_column(Integer, ForeignKey('users.id'), nullable=False)
     lead_id: Mapped[int] = mapped_column(Integer, ForeignKey('leads.id'), nullable=False)
+
+    # リレーションシップ
     lead: Mapped["Lead"] = db.relationship('Lead', back_populates='opportunities')
 
 class Account(db.Model):
@@ -88,6 +96,8 @@ class Schedule(db.Model):
     end_time: Mapped[datetime] = mapped_column(DateTime, nullable=False)
     user_id: Mapped[int] = mapped_column(Integer, ForeignKey('users.id'), nullable=False)
     lead_id: Mapped[int] = mapped_column(Integer, ForeignKey('leads.id'), nullable=False)
+
+    # リレーションシップ
     lead: Mapped["Lead"] = db.relationship('Lead', back_populates='schedules')
 
 class Task(db.Model):
@@ -97,8 +107,11 @@ class Task(db.Model):
     description: Mapped[str] = mapped_column(Text)
     due_date: Mapped[datetime] = mapped_column(DateTime)
     status: Mapped[str] = mapped_column(String(20))
+    completed: Mapped[bool] = mapped_column(Boolean, default=False)  # New field
     user_id: Mapped[int] = mapped_column(Integer, ForeignKey('users.id'), nullable=False)
     lead_id: Mapped[int] = mapped_column(Integer, ForeignKey('leads.id'), nullable=False)
+
+    # リレーションシップ
     lead: Mapped["Lead"] = db.relationship('Lead', back_populates='tasks')
 
 class EmailFetchTracker(db.Model):

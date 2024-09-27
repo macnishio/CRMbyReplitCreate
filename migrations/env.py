@@ -4,6 +4,11 @@ from logging.config import fileConfig
 from flask import current_app
 
 from alembic import context
+import sys
+import os
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
+from models import *
+
 
 # this is the Alembic Config object, which provides
 # access to the values within the .ini file in use.

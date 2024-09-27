@@ -1,61 +1,117 @@
-from flask import current_app
-from flask import Blueprint, render_template, redirect, url_for, flash, request
-from urllib.parse import urlparse
-from flask_login import login_user, logout_user, login_required, current_user
-from extensions import db
-from models import User
-from forms import LoginForm, RegistrationForm
+import os
+from flask import Flask, render_template
+from flask_login import LoginManager
+from flask_migrate import Migrate
+from flask_talisman import Talisman
+from dotenv import load_dotenv
+from flask_limiter import Limiter
+from flask_limiter.util import get_remote_address
+import logging
+from logging.handlers import RotatingFileHandler
+from extensions import db, mail, scheduler, cache, init_app
+from email_receiver import setup_email_scheduler
+from routes.auth import bp as auth_bp
+
+logging.basicConfig(level=logging.DEBUG)
+load_dotenv()
 
 
-def create_auth_blueprint():
-    bp = Blueprint('auth', __name__)
+def create_app():
+    from models import User
+    from config import config
+    from email_utils import send_automated_follow_ups
 
-    @bp.route('/login', methods=['GET', 'POST'])
-    def login():
-        if current_user.is_authenticated:
-            return redirect(url_for('main.index'))
-        form = LoginForm()
-        if form.validate_on_submit():
-            user = User.query.filter_by(username=form.username.data).first()
-            if user is None or not user.check_password(form.password.data):
-                flash('Invalid username or password')
-                return redirect(url_for('auth.login'))
-            login_user(user)
-            next_page = request.args.get('next')
-            if not next_page or urlparse(next_page).netloc != '':
-                next_page = url_for('main.index')
-            return redirect(next_page)
-        return render_template('login.html', title='Sign In', form=form)
+    app = Flask(__name__)
+    app.config['SQLALCHEMY_ECHO'] = True
+    env = 'production' if os.environ.get('FLASK_DEBUG') != 'True' else 'development'
+    app.config.from_object(config[env])
+    config[env].init_app(app)
 
-    @bp.route('/logout')
-    def logout():
-        logout_user()
-        return redirect(url_for('main.index'))
+    init_app(app)  # 拡張機能の初期化を一括で行う
 
-    @bp.route('/register', methods=['GET', 'POST'])
-    def register():
-        if current_user.is_authenticated:
-            return redirect(url_for('main.index'))
-        form = RegistrationForm()
-        if form.validate_on_submit():
-            with current_app.app_context():
-                user = User(username=form.username.data, email=form.email.data)
-                user.set_password(form.password.data)
-                db.session.add(user)
-                db.session.commit()
-            flash('Congratulations, you are now a registered user!')
-            return redirect(url_for('auth.login'))
-        return render_template('register.html', title='Register', form=form)
+    app.config['SCHEDULER_API_ENABLED'] = False
 
-    @bp.route('/user/<username>')
-    @login_required
-    def user(username):
-        with current_app.app_context():
-            user = User.query.filter_by(username=username).first_or_404()
-        return render_template('user.html', user=user)
+    limiter = Limiter(get_remote_address,
+                      app=app,
+                      default_limits=["200 per day", "50 per hour"],
+                      storage_uri="memory://")
 
-    return bp
+    csp = {
+        'default-src': "'self'",
+        'script-src': "'self' 'unsafe-inline' https://cdn.jsdelivr.net",
+        'style-src': "'self' 'unsafe-inline'",
+        'img-src': "'self' data:",
+        'font-src': "'self'",
+        'form-action': "'self'",
+        'frame-ancestors': "'none'",
+    }
+    Talisman(app, content_security_policy=csp, force_https=True)
+
+    login_manager = LoginManager()
+    login_manager.login_view = 'auth.login'
+    login_manager.init_app(app)
+
+    @login_manager.user_loader
+    def load_user(user_id):
+        return db.session.get(User, int(user_id))
+
+    from routes import main, leads, opportunities, accounts, reports, tracking, mobile, schedules, tasks
+
+    app.register_blueprint(main.bp)
+    app.register_blueprint(auth_bp)
+    app.register_blueprint(leads.bp)
+    app.register_blueprint(opportunities.bp)
+    app.register_blueprint(accounts.bp)
+    app.register_blueprint(reports.bp)
+    app.register_blueprint(tracking.bp)
+    app.register_blueprint(mobile.bp)
+    app.register_blueprint(schedules.bp)
+    app.register_blueprint(tasks.bp)
+
+    migrate = Migrate(app, db)  # 必要に応じてextensions.py内で初期化
+
+    scheduler.add_job(id='send_automated_follow_ups',
+                      func=send_automated_follow_ups,
+                      trigger='interval',
+                      hours=24)
+    app.logger.info("Scheduled automated follow-ups job")
+
+    setup_email_scheduler(app)
+
+    if not app.debug:
+        if not os.path.exists('logs'):
+            os.mkdir('logs')
+        file_handler = RotatingFileHandler('logs/crm.log',
+                                           maxBytes=10240,
+                                           backupCount=10)
+        file_handler.setFormatter(
+            logging.Formatter(
+                '%(asctime)s %(levelname)s: %(message)s [in %(pathname)s:%(lineno)d]'
+            ))
+        file_handler.setLevel(logging.INFO)
+        app.logger.addHandler(file_handler)
+        app.logger.setLevel(logging.INFO)
+        app.logger.info('CRM startup')
+
+    @app.route('/dashboard')
+    def dashboard():
+        leads = 100
+        opportunities = 50
+        accounts = 30
+        return render_template('dashboard.html',
+                               leads=leads,
+                               opportunities=opportunities,
+                               accounts=accounts)
+
+    return app
 
 
-# この行を追加
-bp = create_auth_blueprint()
+app = create_app()
+
+if __name__ == '__main__':
+    with app.app_context():
+        app.logger.info('Starting scheduler')
+        scheduler.start()
+        app.logger.info('Scheduler started')
+
+    app.run(host='0.0.0.0', port=5000)

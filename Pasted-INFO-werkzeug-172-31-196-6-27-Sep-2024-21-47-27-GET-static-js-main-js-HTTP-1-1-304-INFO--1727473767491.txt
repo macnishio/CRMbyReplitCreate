@@ -1,0 +1,37 @@
+INFO:werkzeug:172.31.196.6 - - [27/Sep/2024 21:47:27] "GET /static/js/main.js HTTP/1.1" 304 -
+INFO:apscheduler.executors.default:Running job "setup_email_scheduler.<locals>.check_emails_task (trigger: interval[0:05:00], next run at: 2024-09-27 21:53:09 UTC)" (scheduled at 2024-09-27 21:48:09.029028+00:00)
+INFO:app:Checking for new emails
+INFO:app:Attempting to connect to imap.gmail.com:993 with SSL version: 2
+INFO:app:IMAP4_SSL connection established with SSL version: 2
+INFO:app:Successfully logged in to the email server
+INFO:app:Fetching emails for the last 30 minutes (from 2024-09-27 21:18:11 to 2024-09-27 21:48:11)
+INFO:app:Total emails found: 124
+DEBUG:app:Lead status data: [('New', 2092)]
+DEBUG:app:Opportunity stage data: []
+DEBUG:app:Account industry data: []
+DEBUG:app:Lead score distribution: [(0.0, 2092)]
+ERROR:app:Exception on /reports/ [GET]
+Traceback (most recent call last):
+  File "/home/runner/CRM/.pythonlibs/lib/python3.11/site-packages/flask/app.py", line 2529, in wsgi_app
+    response = self.full_dispatch_request()
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/runner/CRM/.pythonlibs/lib/python3.11/site-packages/flask/app.py", line 1825, in full_dispatch_request
+    rv = self.handle_user_exception(e)
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/runner/CRM/.pythonlibs/lib/python3.11/site-packages/flask/app.py", line 1823, in full_dispatch_request
+    rv = self.dispatch_request()
+         ^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/runner/CRM/.pythonlibs/lib/python3.11/site-packages/flask/app.py", line 1799, in dispatch_request
+    return self.ensure_sync(self.view_functions[rule.endpoint])(**view_args)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/runner/CRM/.pythonlibs/lib/python3.11/site-packages/flask_login/utils.py", line 290, in decorated_view
+    return current_app.ensure_sync(func)(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/runner/CRM/routes/reports.py", line 44, in index
+    task_status = db.session.query(Task.completed, func.count(Task.id)).filter_by(user_id=current_user.id).group_by(Task.completed).all()
+                                   ^^^^^^^^^^^^^^
+AttributeError: type object 'Task' has no attribute 'completed'
+INFO:werkzeug:172.31.196.6 - - [27/Sep/2024 21:48:30] "GET /reports/ HTTP/1.1" 500 -
+INFO:werkzeug:172.31.196.6 - - [27/Sep/2024 21:48:37] "GET /recent-emails HTTP/1.1" 200 -
+INFO:werkzeug:172.31.196.6 - - [27/Sep/2024 21:48:37] "GET /static/css/styles.css HTTP/1.1" 304 -
+INFO:werkzeug:172.31.196.6 - - [27/Sep/2024 21:48:37] "GET /static/js/main.js HTTP/1.1" 304 -

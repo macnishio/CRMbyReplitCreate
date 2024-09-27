@@ -188,27 +188,45 @@ def import_csv():
             for row in csv_reader:
                 current_app.logger.info(f"Processing row: {row}")
                 try:
+                    name = row.get('Name', row.get('name', '')).strip()
+                    if not name:
+                        current_app.logger.warning(f"Empty name field in row: {row}")
+                        continue  # 名前がない行はスキップ
+
+                    email = row.get('Email', row.get('email', '')).strip() or None
+                    phone = row.get('Phone', row.get('phone', '')).strip() or None
+                    status = row.get('Status', row.get('status', 'New')).strip() or 'New'
+                    score = row.get('Score', row.get('score', 0.0))
+                    try:
+                        score = float(score)
+                    except ValueError:
+                        score = 0.0
+
                     lead = Lead(
-                        name=row.get('Name', row.get('name', '')).strip(),
-                        email=row.get('Email', row.get('email', '')).strip(),
-                        phone=row.get('Phone', row.get('phone', '')).strip(),
+                        name=name,
+                        email=email,
+                        phone=phone,
+                        status=status,
+                        score=score,
                         user_id=current_user.id
                     )
-                    if not lead.name:
-                        current_app.logger.warning(f"Empty name field in row: {row}")
-                        continue
                     db.session.add(lead)
+                    db.session.commit()
                     leads_added += 1
-                    current_app.logger.info(f"Created lead: {lead.name}, {lead.email}, {lead.phone}")
+                    current_app.logger.info(f"Added lead: {lead.name}, {lead.email}, {lead.phone}")
+                except IntegrityError as e:
+                    db.session.rollback()
+                    current_app.logger.error(f"Integrity error for row: {row}, error: {str(e)}")
+                    flash(f'Duplicate email found or other integrity error: {str(e)}', 'error')
+                    continue  # エラーが発生した行はスキップ
                 except Exception as e:
+                    db.session.rollback()
                     current_app.logger.error(f"Error processing CSV row: {str(e)}")
                     current_app.logger.error(f"Problematic row: {row}")
                     flash(f'Error processing row: {str(e)}', 'error')
-                    db.session.rollback()
-                    return redirect(url_for('leads.import_csv'))
-            
+                    continue  # エラーが発生した行はスキップ
+                
             if leads_added > 0:
-                db.session.commit()
                 current_app.logger.info(f"Successfully imported {leads_added} leads from CSV")
                 flash(f'Successfully imported {leads_added} leads', 'success')
             else:
@@ -222,7 +240,6 @@ def import_csv():
             return redirect(url_for('leads.import_csv'))
     
     return render_template('leads/import_csv.html')
-
 @bp.route('/delete_empty_names', methods=['POST'])
 @login_required
 def delete_empty_names():
