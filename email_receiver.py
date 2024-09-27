@@ -85,20 +85,29 @@ def process_email(sender, subject, body, received_at):
                           lead=lead)
         db.session.add(email_obj)
 
+        current_app.logger.info(f"Analyzing email from {sender_email}")
         ai_response = analyze_email(subject, body)
-        opportunities, schedules, tasks = parse_ai_response(ai_response)
+        current_app.logger.info(f"AI response received: {ai_response[:100]}...")  # Log the first 100 characters of the response
 
-        for opp in opportunities:
-            new_opp = Opportunity(name=opp, lead=lead, user=lead.user)
-            db.session.add(new_opp)
+        if ai_response.startswith("Error:"):
+            current_app.logger.error(f"AI analysis failed: {ai_response}")
+        else:
+            opportunities, schedules, tasks = parse_ai_response(ai_response)
 
-        for sched in schedules:
-            new_sched = Schedule(title=sched, lead=lead, user=lead.user)
-            db.session.add(new_sched)
+            for opp in opportunities:
+                new_opp = Opportunity(name=opp, lead=lead, user=lead.user)
+                db.session.add(new_opp)
+                current_app.logger.info(f"New opportunity created: {opp}")
 
-        for task in tasks:
-            new_task = Task(title=task, lead=lead, user=lead.user)
-            db.session.add(new_task)
+            for sched in schedules:
+                new_sched = Schedule(title=sched, lead=lead, user=lead.user)
+                db.session.add(new_sched)
+                current_app.logger.info(f"New schedule created: {sched}")
+
+            for task in tasks:
+                new_task = Task(title=task, lead=lead, user=lead.user)
+                db.session.add(new_task)
+                current_app.logger.info(f"New task created: {task}")
 
     else:
         current_app.logger.warning(

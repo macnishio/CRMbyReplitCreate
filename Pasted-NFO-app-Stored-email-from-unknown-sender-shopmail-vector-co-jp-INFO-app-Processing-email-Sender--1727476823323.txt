@@ -1,0 +1,20 @@
+NFO:app:Stored email from unknown sender: shopmail@vector.co.jp
+INFO:app:Processing email - Sender: =?UTF-8?B?55yf6KiAIOilv+Wwvg==?= <makoto@team240.net>, Subject: 新しい下書き（パソコンサポート＿）の確認をお願いします, Date: 2024-09-27 14:21:43
+ERROR:app:Error processing email b'83055': "Could not resolve authentication method. Expected either api_key or auth_token to be set. Or for one of the `X-Api-Key` or `Authorization` headers to be explicitly omitted"
+INFO:app:Processing email - Sender: =?UTF-8?B?55yf6KiAIOilv+Wwvg==?= <makoto@team240.net>, Subject: 新しい下書き（レンタルサーバーVPS＿）の確認をお願いします, Date: 2024-09-27 14:21:42
+ERROR:app:Error processing email b'83056': "Could not resolve authentication method. Expected either api_key or auth_token to be set. Or for one of the `X-Api-Key` or `Authorization` headers to be explicitly omitted"
+INFO:app:Processing email - Sender: =?UTF-8?B?55yf6KiAIOilv+Wwvg==?= <makoto@team240.net>, Subject: 新しい下書き（海老名市歯科医師会　毎月繰り返し請求＿）の確認をお願いします, Date: 2024-09-27 14:21:45
+ERROR:app:Error processing email b'83057': "Could not resolve authentication method. Expected either api_key or auth_token to be set. Or for one of the `X-Api-Key` or `Authorization` headers to be explicitly omitted"
+INFO:app:Processing email - Sender: =?UTF-8?B?55yf6KiAIOilv+Wwvg==?= <makoto@team240.net>, Subject: 新しい下書き（WEBサーバー月額使用料＿）の確認をお願いします, Date: 2024-09-27 14:21:40
+ERROR:app:Error processing email b'83058': "Could not resolve authentication method. Expected either api_key or auth_token to be set. Or for one of the `X-Api-Key` or `Authorization` headers to be explicitly omitted"
+INFO:app:Processing email - Sender: =?UTF-8?B?55yf6KiAIOilv+Wwvg==?= <makoto@team240.net>, Subject: 新しい下書き（海老名市薬剤師会　月間サポート＿）の確認をお願いします, Date: 2024-09-27 14:21:46
+ERROR:app:Error processing email b'83059': "Could not resolve authentication method. Expected either api_key or auth_token to be set. Or for one of the `X-Api-Key` or `Authorization` headers to be explicitly omitted"
+INFO:app:Processing email - Sender: =?UTF-8?B?55yf6KiAIOilv+Wwvg==?= <makoto@team240.net>, Subject: 新しい下書き（第五次厚木爆音訴訟原告団）の確認をお願いします, Date: 2024-09-27 14:21:48
+ERROR:app:Error processing email b'83060': "Could not resolve authentication method. Expected either api_key or auth_token to be set. Or for one of the `X-Api-Key` or `Authorization` headers to be explicitly omitted"
+INFO:app:Processing email - Sender: =?UTF-8?B?Q29kZVppbmXnt6jpm4bpg6g=?= <support@codezine.jp>, Subject: PDF版電子書籍50％ポイント還元中！IT技術書などエンジニア向け書籍も対象 [CodeZine News号外], Date: 2024-09-28 07:09:20
+WARNING:app:Received email from unknown sender: =?UTF-8?B?Q29kZVppbmXnt6jpm4bpg6g=?= <support@codezine.jp>
+INFO:app:Stored email from unknown sender: support@codezine.jp
+INFO:app:Processed 4 out of 125 emails
+INFO:app:Emails from known leads: 6
+INFO:app:Emails from unknown senders: 29
+INFO:werkzeug:172.31.196.6 - - [27/Sep/2024 22:39:40] "POST /fetch-emails HTTP/1.1" 302 -

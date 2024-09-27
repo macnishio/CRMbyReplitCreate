@@ -1,9 +1,19 @@
 import anthropic
 from flask import current_app
+import logging
 
 def analyze_email(subject, content):
-    client = anthropic.Client(api_key=current_app.config['CLAUDE_API_KEY'])
-    prompt = f"""Analyze the following email and provide suggestions for opportunities, schedules, and tasks:
+    try:
+        api_key = current_app.config['CLAUDE_API_KEY']
+        if not api_key:
+            current_app.logger.error("CLAUDE_API_KEY is not set in the configuration")
+            return "Error: CLAUDE_API_KEY is not set"
+
+        current_app.logger.info(f"Attempting to create Anthropic client with API key starting with: {api_key[:5]}...")
+        client = anthropic.Client(api_key=api_key)
+        current_app.logger.info("Anthropic client created successfully")
+
+        prompt = f"""Analyze the following email and provide suggestions for opportunities, schedules, and tasks:
 
 Subject: {subject}
 
@@ -22,13 +32,18 @@ Tasks:
 1.
 2."""
 
-    response = client.completions.create(
-        prompt=prompt,
-        model="claude-2",
-        max_tokens_to_sample=300,
-    )
+        current_app.logger.info("Sending request to Anthropic API")
+        response = client.completions.create(
+            prompt=prompt,
+            model="claude-2",
+            max_tokens_to_sample=300,
+        )
+        current_app.logger.info("Received response from Anthropic API")
 
-    return response.completion
+        return response.completion
+    except Exception as e:
+        current_app.logger.error(f"Error in analyze_email: {str(e)}")
+        return f"Error: {str(e)}"
 
 def parse_ai_response(response):
     opportunities = []

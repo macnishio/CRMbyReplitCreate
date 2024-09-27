@@ -29,6 +29,14 @@ def create_app(config_name='default'):
     # Debug logging for database URL
     app.logger.debug(f"Database URL: {app.config['SQLALCHEMY_DATABASE_URI'].split('@')[0]}@[REDACTED]")
 
+    # Debug logging for CLAUDE_API_KEY presence
+    if 'CLAUDE_API_KEY' in os.environ:
+        app.logger.info("CLAUDE_API_KEY is present in environment variables")
+        # Log the first few characters of the key for verification (never log the full key)
+        app.logger.debug(f"CLAUDE_API_KEY starts with: {os.environ['CLAUDE_API_KEY'][:5]}...")
+    else:
+        app.logger.error("CLAUDE_API_KEY is missing from environment variables")
+
     # Register blueprints
     from routes import main, auth, leads, opportunities, accounts, reports, tracking, mobile, schedules, tasks
     app.register_blueprint(main.bp)
