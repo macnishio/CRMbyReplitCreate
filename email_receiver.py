@@ -27,10 +27,10 @@ def connect_to_email_server():
         context = ssl.create_default_context()
         context.check_hostname = False
         context.verify_mode = ssl.CERT_NONE
-        
+
         context.options |= ssl.OP_NO_SSLv2 | ssl.OP_NO_SSLv3 | ssl.OP_NO_TLSv1 | ssl.OP_NO_TLSv1_1
-        
-        ssl_versions = [ssl.PROTOCOL_TLS, ssl.PROTOCOL_TLSv1_2, ssl.PROTOCOL_TLSv1_3]
+
+        ssl_versions = [ssl.PROTOCOL_TLS, ssl.PROTOCOL_TLSv1_2]
         for ssl_version in ssl_versions:
             try:
                 context.options |= ssl_version
@@ -139,12 +139,13 @@ def process_email(sender, subject, body, received_at):
         current_app.logger.error(f"Error storing email: {str(e)}")
 
 def fetch_emails(time_range=30, lead_id=None, max_emails=100):
+    mail = None
+    start_date = datetime.now(timezone.utc) - timedelta(minutes=time_range)
+    end_date = datetime.now(timezone.utc)
+
     try:
         mail = connect_to_email_server()
         mail.select('inbox')
-
-        end_date = datetime.now(timezone.utc)
-        start_date = end_date - timedelta(minutes=time_range)
 
         current_app.logger.info(
             f"Fetching emails for the last {time_range} minutes (from {start_date.strftime('%Y-%m-%d %H:%M:%S')} to {end_date.strftime('%Y-%m-%d %H:%M:%S')})"
@@ -171,64 +172,16 @@ def fetch_emails(time_range=30, lead_id=None, max_emails=100):
                 email_date = email.utils.parsedate_to_datetime(email_message['Date'])
                 if email_date.tzinfo is None:
                     email_date = email_date.replace(tzinfo=timezone.utc)
-                
-                if start_date <= email_date <= end_date:
-                    subject = email_message["Subject"]
-                    if subject:
-                        subject_parts = decode_header(subject)
-                        decoded_subject = ""
-                        for content, charset in subject_parts:
-                            if isinstance(content, bytes):
-                                if charset is None:
-                                    detected = chardet.detect(content)
-                                    charset = detected['encoding']
-                                try:
-                                    decoded_subject += content.decode(
-                                        charset or 'utf-8', errors='replace')
-                                except (UnicodeDecodeError, LookupError):
-                                    decoded_subject += content.decode(
-                                        'utf-8', errors='replace')
-                            else:
-                                decoded_subject += content
-                        subject = decoded_subject
-                    else:
-                        subject = "No Subject"
 
+                if start_date <= email_date <= end_date:
+                    subject = decode_email_header(email_message["Subject"])
                     sender = email_message["From"]
-                    
+
                     current_app.logger.info(
                         f"Processing email - Sender: {sender}, Subject: {subject}, Date: {email_date.strftime('%Y-%m-%d %H:%M:%S')}"
                     )
 
-                    body = ""
-                    if email_message.is_multipart():
-                        for part in email_message.walk():
-                            if part.get_content_type() == "text/plain":
-                                try:
-                                    payload = part.get_payload(decode=True)
-                                    if payload:
-                                        body = payload.decode(
-                                            part.get_content_charset() or 'utf-8',
-                                            errors='ignore')
-                                        body = body.replace('\x00', '')
-                                except Exception as e:
-                                    current_app.logger.error(
-                                        f"Error decoding email body: {str(e)}")
-                                    body = "Error: Unable to decode email content"
-                                break
-                    else:
-                        try:
-                            payload = email_message.get_payload(decode=True)
-                            if payload:
-                                body = payload.decode(
-                                    email_message.get_content_charset() or 'utf-8',
-                                    errors='ignore')
-                                body = body.replace('\x00', '')
-                        except Exception as e:
-                            current_app.logger.error(
-                                f"Error decoding email body: {str(e)}")
-                            body = "Error: Unable to decode email content"
-
+                    body = get_email_body(email_message)
                     process_email(sender, subject, body, email_date)
                     processed_emails += 1
             except Exception as e:
@@ -240,13 +193,51 @@ def fetch_emails(time_range=30, lead_id=None, max_emails=100):
     except Exception as e:
         current_app.logger.error(f"Error in fetch_emails: {str(e)}")
     finally:
-        try:
-            mail.close()
-            mail.logout()
-        except Exception as e:
-            current_app.logger.error(
-                f"Error closing mail connection: {str(e)}")
+        if mail:
+            try:
+                mail.close()
+                mail.logout()
+            except Exception as e:
+                current_app.logger.error(
+                    f"Error closing mail connection: {str(e)}")
 
+    log_email_stats(start_date)
+
+def decode_email_header(header):
+    if header:
+        decoded_header = decode_header(header)
+        return ''.join([
+            (content.decode(charset or 'utf-8', errors='replace') if isinstance(content, bytes) else content)
+            for content, charset in decoded_header
+        ])
+    return "No Subject"
+
+def get_email_body(email_message):
+    body = ""
+    if email_message.is_multipart():
+        for part in email_message.walk():
+            if part.get_content_type() == "text/plain":
+                try:
+                    payload = part.get_payload(decode=True)
+                    if payload:
+                        body = payload.decode(part.get_content_charset() or 'utf-8', errors='ignore')
+                        body = body.replace('\x00', '')
+                except Exception as e:
+                    current_app.logger.error(f"Error decoding email body: {str(e)}")
+                    body = "Error: Unable to decode email content"
+                break
+    else:
+        try:
+            payload = email_message.get_payload(decode=True)
+            if payload:
+                body = payload.decode(email_message.get_content_charset() or 'utf-8', errors='ignore')
+                body = body.replace('\x00', '')
+        except Exception as e:
+            current_app.logger.error(f"Error decoding email body: {str(e)}")
+            body = "Error: Unable to decode email content"
+    return body
+
+def log_email_stats(start_date):
     current_app.logger.info(
         f"Emails from known leads: {Email.query.filter(Email.received_at >= start_date).count()}"
     )
