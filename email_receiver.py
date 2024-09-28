@@ -3,7 +3,7 @@ import email
 from email.header import decode_header
 from datetime import datetime, timedelta, timezone
 from flask import current_app
-from models import Lead, Email, UnknownEmail, EmailFetchTracker, Opportunity, Schedule, Task
+from models import Lead, Email, UnknownEmail, EmailFetchTracker, Opportunity, Schedule, Task, User
 from extensions import db
 from sqlalchemy.exc import DataError
 import imaplib
@@ -74,9 +74,14 @@ def process_email(sender, subject, body, received_at):
     lead = Lead.query.filter_by(email=sender_email).first()
 
     if not lead:
-        lead = Lead(name=sender_name, email=sender_email)
-        db.session.add(lead)
-        current_app.logger.info(f"Created new lead: {sender_name} <{sender_email}>")
+        default_user = User.query.first()  # Get the first user as a default
+        if default_user:
+            lead = Lead(name=sender_name, email=sender_email, user_id=default_user.id)
+            db.session.add(lead)
+            current_app.logger.info(f"Created new lead: {sender_name} <{sender_email}> with default user_id: {default_user.id}")
+        else:
+            current_app.logger.error("No default user found. Unable to create lead.")
+            return
 
     email_obj = Email(sender=sender_email,
                       sender_name=sender_name,
