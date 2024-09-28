@@ -73,70 +73,60 @@ def process_email(sender, subject, body, received_at):
     sender_email = extract_email_address(sender)
     lead = Lead.query.filter_by(email=sender_email).first()
 
-    if lead:
-        email_obj = Email(sender=sender_email,
-                          sender_name=sender_name,
-                          subject=subject,
-                          content=body,
-                          received_at=received_at,
-                          lead=lead)
-        db.session.add(email_obj)
+    if not lead:
+        lead = Lead(name=sender_name, email=sender_email)
+        db.session.add(lead)
+        current_app.logger.info(f"Created new lead: {sender_name} <{sender_email}>")
 
-        current_app.logger.info(f"Analyzing email from {sender_email}")
-        current_app.logger.debug(f"CLAUDE_API_KEY present in config: {'CLAUDE_API_KEY' in current_app.config}")
-        if 'CLAUDE_API_KEY' in current_app.config:
-            current_app.logger.debug(f"CLAUDE_API_KEY starts with: {current_app.config['CLAUDE_API_KEY'][:5]}...")
-        else:
-            current_app.logger.error("CLAUDE_API_KEY is not set in the application config")
-            return
+    email_obj = Email(sender=sender_email,
+                      sender_name=sender_name,
+                      subject=subject,
+                      content=body,
+                      received_at=received_at,
+                      lead=lead)
+    db.session.add(email_obj)
 
-        try:
-            ai_response = analyze_email(subject, body)
-            current_app.logger.info(f"AI response received: {ai_response[:100]}...")
-
-            if ai_response.startswith("Error:"):
-                current_app.logger.error(f"AI analysis failed: {ai_response}")
-            else:
-                opportunities, schedules, tasks = parse_ai_response(ai_response)
-
-                for opp in opportunities:
-                    new_opp = Opportunity(name=opp, lead=lead, user=lead.user)
-                    db.session.add(new_opp)
-                    current_app.logger.info(f"New opportunity created: {opp}")
-
-                for sched in schedules:
-                    new_sched = Schedule(title=sched, lead=lead, user=lead.user)
-                    db.session.add(new_sched)
-                    current_app.logger.info(f"New schedule created: {sched}")
-
-                for task in tasks:
-                    new_task = Task(title=task, lead=lead, user=lead.user)
-                    db.session.add(new_task)
-                    current_app.logger.info(f"New task created: {task}")
-
-        except Exception as e:
-            current_app.logger.error(f"Error in AI analysis: {str(e)}")
-
+    current_app.logger.info(f"Analyzing email from {sender_email}")
+    current_app.logger.debug(f"CLAUDE_API_KEY present in config: {'CLAUDE_API_KEY' in current_app.config}")
+    if 'CLAUDE_API_KEY' in current_app.config:
+        current_app.logger.debug(f"CLAUDE_API_KEY starts with: {current_app.config['CLAUDE_API_KEY'][:5]}...")
     else:
-        current_app.logger.warning(
-            f"Received email from unknown sender: {sender}")
-        unknown_email = UnknownEmail(sender=sender_email,
-                                     sender_name=sender_name,
-                                     subject=subject,
-                                     content=body,
-                                     received_at=received_at)
-        db.session.add(unknown_email)
+        current_app.logger.error("CLAUDE_API_KEY is not set in the application config")
+        return
+
+    try:
+        ai_response = analyze_email(subject, body)
+        current_app.logger.info(f"AI response received: {ai_response[:100]}...")
+
+        if ai_response.startswith("Error:"):
+            current_app.logger.error(f"AI analysis failed: {ai_response}")
+        else:
+            opportunities, schedules, tasks = parse_ai_response(ai_response)
+
+            for opp in opportunities:
+                new_opp = Opportunity(name=opp, lead=lead, user=lead.user)
+                db.session.add(new_opp)
+                current_app.logger.info(f"New opportunity created: {opp}")
+
+            for sched in schedules:
+                new_sched = Schedule(title=sched, lead=lead, user=lead.user)
+                db.session.add(new_sched)
+                current_app.logger.info(f"New schedule created: {sched}")
+
+            for task in tasks:
+                new_task = Task(title=task, lead=lead, user=lead.user)
+                db.session.add(new_task)
+                current_app.logger.info(f"New task created: {task}")
+
+    except Exception as e:
+        current_app.logger.error(f"Error in AI analysis: {str(e)}")
 
     try:
         db.session.commit()
-        if lead:
-            current_app.logger.info(f"Stored email for lead: {lead.id}")
-        else:
-            current_app.logger.info(
-                f"Stored email from unknown sender: {sender_email}")
+        current_app.logger.info(f"Stored email and related items for lead: {lead.id}")
     except Exception as e:
         db.session.rollback()
-        current_app.logger.error(f"Error storing email: {str(e)}")
+        current_app.logger.error(f"Error storing email and related items: {str(e)}")
 
 def fetch_emails(time_range=30, lead_id=None, max_emails=100):
     mail = None
