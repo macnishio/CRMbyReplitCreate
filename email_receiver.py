@@ -104,19 +104,28 @@ def process_email(sender, subject, body, received_at):
             opportunities, schedules, tasks = parse_ai_response(ai_response)
 
             for opp in opportunities:
-                new_opp = Opportunity(name=opp, lead=lead, user=lead.user)
-                db.session.add(new_opp)
-                current_app.logger.info(f"New opportunity created: {opp}")
+                try:
+                    new_opp = Opportunity(name=opp, stage='New', lead=lead, user_id=lead.user_id)
+                    db.session.add(new_opp)
+                    current_app.logger.info(f"New opportunity created: {opp}")
+                except Exception as e:
+                    current_app.logger.error(f"Error creating opportunity: {str(e)}")
 
             for sched in schedules:
-                new_sched = Schedule(title=sched, lead=lead, user=lead.user)
-                db.session.add(new_sched)
-                current_app.logger.info(f"New schedule created: {sched}")
+                try:
+                    new_sched = Schedule(title=sched, lead=lead, user_id=lead.user_id)
+                    db.session.add(new_sched)
+                    current_app.logger.info(f"New schedule created: {sched}")
+                except Exception as e:
+                    current_app.logger.error(f"Error creating schedule: {str(e)}")
 
             for task in tasks:
-                new_task = Task(title=task, lead=lead, user=lead.user)
-                db.session.add(new_task)
-                current_app.logger.info(f"New task created: {task}")
+                try:
+                    new_task = Task(title=task, lead=lead, user_id=lead.user_id)
+                    db.session.add(new_task)
+                    current_app.logger.info(f"New task created: {task}")
+                except Exception as e:
+                    current_app.logger.error(f"Error creating task: {str(e)}")
 
     except Exception as e:
         current_app.logger.error(f"Error in AI analysis: {str(e)}")

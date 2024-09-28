@@ -25,7 +25,7 @@ def analyze_email(subject, content):
         response = client.completions.create(
             prompt=system_message + prompt,
             model="claude-2",
-            max_tokens_to_sample=1000,
+            max_tokens_to_sample=4000,
             temperature=0.7,
         )
         current_app.logger.info("Received response from Anthropic API")

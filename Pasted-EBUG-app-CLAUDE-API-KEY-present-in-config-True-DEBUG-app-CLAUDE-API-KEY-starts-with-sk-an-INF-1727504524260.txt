@@ -1,0 +1,30 @@
+EBUG:app:CLAUDE_API_KEY present in config: True
+DEBUG:app:CLAUDE_API_KEY starts with: sk-an...
+INFO:app:Attempting to create Anthropic client with API key starting with: sk-an...
+INFO:app:Anthropic client created successfully
+INFO:app:Sending request to Anthropic API
+INFO:httpx:HTTP Request: POST https://api.anthropic.com/v1/complete "HTTP/1.1 200 OK"
+INFO:app:Received response from Anthropic API
+INFO:app:AI response received:  はい、メールを分析しました。
+
+Opportunities:
+1. 本日の出発についての情報があるので、これを利用して何か計画を立てられるかもしれない
+2. 登録のリンクとLINEの問い合わせ先があ...
+INFO:app:New opportunity created: 本日の出発についての情報があるので、これを利用して何か計画を立てられるかもしれない
+INFO:app:New opportunity created: 登録のリンクとLINEの問い合わせ先があるので、さらなる情報を取得できる
+ERROR:app:Error in AI analysis: 'user' is an invalid keyword argument for Schedule
+/home/runner/CRM/email_receiver.py:125: SAWarning: Object of type <Schedule> not in session, add operation along 'Lead.schedules' will not proceed
+  db.session.commit()
+ERROR:app:Error storing email and related items: (psycopg2.errors.NotNullViolation) null value in column "stage" of relation "opportunities" violates not-null constraint
+DETAIL:  Failing row contains (3, 本日の出発についての情報があるので、これを..., null, null, null, 1, 1464).
+
+[SQL: INSERT INTO opportunities (name, stage, amount, close_date, user_id, lead_id) SELECT p0::VARCHAR, p1::VARCHAR, p2::FLOAT, p3::TIMESTAMP WITHOUT TIME ZONE, p4::INTEGER, p5::INTEGER FROM (VALUES (%(name__0)s, %(stage__0)s, %(amount__0)s, %(close_date__ ... 161 characters truncated ...  p3, p4, p5, sen_counter) ORDER BY sen_counter RETURNING opportunities.id, opportunities.id AS id__1]
+[parameters: {'user_id__0': 1, 'stage__0': None, 'lead_id__0': 1464, 'name__0': '本日の出発についての情報があるので、これを利用して何か計画を立てられるかもしれない', 'amount__0': None, 'close_date__0': None, 'user_id__1': 1, 'stage__1': None, 'lead_id__1': 1464, 'name__1': '登録のリンクとLINEの問い合わせ先があるので、さらなる情報を取得できる', 'amount__1': None, 'close_date__1': None}]
+(Background on this error at: https://sqlalche.me/e/20/gkpj)
+INFO:app:Processed 1 out of 37 emails
+INFO:app:Emails from known leads: 3
+INFO:app:Emails from unknown senders: 0
+INFO:werkzeug:172.31.196.27 - - [28/Sep/2024 06:21:22] "POST /fetch-emails HTTP/1.1" 302 -
+INFO:werkzeug:172.31.196.27 - - [28/Sep/2024 06:21:23] "GET / HTTP/1.1" 200 -
+INFO:werkzeug:172.31.196.27 - - [28/Sep/2024 06:21:23] "GET /static/css/styles.css HTTP/1.1" 304 -
+INFO:werkzeug:172.31.196.27 - - [28/Sep/2024 06:21:24] "GET /static/js/main.js HTTP/1.1" 304 -
