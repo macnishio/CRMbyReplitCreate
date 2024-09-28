@@ -1,14 +1,43 @@
-{% extends "base.html" %}
-
-{% block title %}Home{% endblock %}
-
-{% block content %}
-    <h1>Welcome to the CRM Application</h1>
-    <p>This is your central hub for managing customer relationships.</p>
-    <div class="quick-links">
-        <a href="{{ url_for('leads.list_leads') }}" class="button">Manage Leads</a>
-        <a href="{{ url_for('opportunities.list_opportunities') }}" class="button">Track Opportunities</a>
-        <a href="{{ url_for('accounts.list_accounts') }}" class="button">View Accounts</a>
-        <a href="{{ url_for('reports.index') }}" class="button">Generate Reports</a>
-    </div>
-{% endblock %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ title }}</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">
+</head>
+<body>
+    <header>
+        <h1>Welcome to Our Powerful Salesforce-inspired CRM</h1>
+    </header>
+    <main>
+        <section class="hero">
+            <h2>Transform Your Sales Process</h2>
+            <p>Experience the next level of customer relationship management with our cutting-edge CRM solution.</p>
+        </section>
+        <section>
+            <h2>Key Features:</h2>
+            <ul>
+                <li>Intelligent Lead Management</li>
+                <li>Advanced Opportunity Tracking</li>
+                <li>Comprehensive Account Management</li>
+                <li>Seamless Email Integration</li>
+                <li>AI-powered Analytics and Insights</li>
+                <li>Mobile App for Field Sales Excellence</li>
+            </ul>
+        </section>
+        <section>
+            <h2>Get Started Today</h2>
+            <p>Join thousands of successful businesses that have revolutionized their sales process. Start your journey to increased productivity and sales growth!</p>
+            <div class="cta-buttons">
+                <a href="{{ url_for('auth.login') }}" class="button primary">Login</a>
+                <a href="{{ url_for('auth.register') }}" class="button secondary">Register Now</a>
+            </div>
+        </section>
+    </main>
+    <footer>
+        <p>&copy; 2024 Salesforce-inspired CRM. Empowering sales teams worldwide.</p>
+    </footer>
+    <script src="{{ url_for('static', filename='js/main.js') }}"></script>
+</body>
+</html>

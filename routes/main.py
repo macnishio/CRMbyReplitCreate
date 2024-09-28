@@ -1,4 +1,4 @@
-from flask import Blueprint, jsonify, current_app
+from flask import Blueprint, render_template, current_app, jsonify
 from flask_login import login_required
 from ai_analysis import analyze_email
 import os
@@ -7,7 +7,7 @@ bp = Blueprint('main', __name__)
 
 @bp.route('/')
 def index():
-    return 'Welcome to the CRM'
+    return render_template('index.html', title='Transform Your Sales Process | Salesforce-inspired CRM')
 
 @bp.route('/dashboard')
 @login_required
