@@ -1,42 +1,57 @@
-{% extends "base.html" %}
-
-{% block title %}Schedules{% endblock %}
-
-{% block content %}
-    <h1>Schedules</h1>
-    <a href="{{ url_for('schedules.create_schedule') }}" class="button">Create New Schedule</a>
-    <table>
-        <thead>
-            <tr>
-                <th>Title</th>
-                <th>Start Time</th>
-                <th>End Time</th>
-                <th>User</th>
-                <th>Account</th>
-                <th>Lead</th>
-                <th>Opportunity</th>
-                <th>Actions</th>
-            </tr>
-        </thead>
-        <tbody>
-            {% for schedule in schedules %}
-                <tr>
-                    <td>{{ schedule.title }}</td>
-                    <td>{{ schedule.start_time.strftime('%Y-%m-%d %H:%M') }}</td>
-                    <td>{{ schedule.end_time.strftime('%Y-%m-%d %H:%M') }}</td>
-                    <td>{{ schedule.user.username }}</td>
-                    <td>{{ schedule.account.name if schedule.account else 'N/A' }}</td>
-                    <td>{{ schedule.lead.name if schedule.lead else 'N/A' }}</td>
-                    <td>{{ schedule.opportunity.name if schedule.opportunity else 'N/A' }}</td>
-                    <td>
-                        <a href="{{ url_for('schedules.schedule_detail', id=schedule.id) }}">View</a>
-                        <a href="{{ url_for('schedules.edit_schedule', id=schedule.id) }}">Edit</a>
-                        <form action="{{ url_for('schedules.delete_schedule', id=schedule.id) }}" method="POST" style="display: inline;">
-                            <input type="submit" value="Delete" onclick="return confirm('Are you sure?');">
-                        </form>
-                    </td>
-                </tr>
-            {% endfor %}
-        </tbody>
-    </table>
+{% extends "base.html" %} {% block title %}Schedules{% endblock %} {% block
+content %}
+<h1>Schedules</h1>
+<a href="{{ url_for('schedules.create_schedule') }}" class="button"
+    >Create New Schedule</a
+>
+<table>
+    <thead>
+        <tr>
+            <th>Title</th>
+            <th>Start Time</th>
+            <th>End Time</th>
+            <th>User</th>
+            <th>Account</th>
+            <th>Lead</th>
+            <th>Opportunity</th>
+            <th>Actions</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for schedule in schedules %}
+        <tr>
+            <td>{{ schedule.title }}</td>
+            <td>{{ schedule.start_time.strftime('%Y-%m-%d %H:%M') }}</td>
+            <td>{{ schedule.end_time.strftime('%Y-%m-%d %H:%M') }}</td>
+            <td>{{ schedule.lead.name if schedule.lead else 'N/A' }}</td>
+            <td>{{ schedule.lead.name if schedule.lead else 'N/A' }}</td>
+            <td>
+                {{ schedule.opportunity.name if schedule.opportunity else 'N/A'
+                }}
+            </td>
+            <td>
+                <a
+                    href="{{ url_for('schedules.schedule_detail', id=schedule.id) }}"
+                    >View</a
+                >
+                <a
+                    href="{{ url_for('schedules.edit_schedule', id=schedule.id) }}"
+                    >Edit</a
+                >
+                <form
+                    action="{{ url_for('schedules.delete_schedule', id=schedule.id) }}"
+                    method="POST"
+                    style="display: inline"
+                >
+                    <input
+                        type="submit"
+                        value="Delete"
+                        onclick="return confirm('Are you sure?');"
+                    />
+                </form>
+            </td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
 {% endblock %}

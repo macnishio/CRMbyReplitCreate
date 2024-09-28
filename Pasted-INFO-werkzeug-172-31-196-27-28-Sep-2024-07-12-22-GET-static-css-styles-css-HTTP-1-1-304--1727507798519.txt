@@ -1,0 +1,76 @@
+INFO:werkzeug:172.31.196.27 - - [28/Sep/2024 07:12:22] "GET /static/css/styles.css HTTP/1.1" 304 -
+INFO:app:Attempting to connect to imap.gmail.com:993 with SSL version: 2
+INFO:app:IMAP4_SSL connection established with SSL version: 2
+INFO:app:Successfully logged in to the email server
+INFO:app:Fetching emails for the last 60 minutes (from 2024-09-28 06:12:30 to 2024-09-28 07:12:30)
+INFO:app:Total emails found: 38
+INFO:app:Processing email - Sender: ETCIO The Morning Report<newsletter@etcio.com>, Subject: Yes, energy-guzzling AI can help greening | Small companies can now chase India's giant AI dreams, Date: 2024-09-28 12:11:24
+INFO:app:Analyzing email from newsletter@etcio.com
+DEBUG:app:CLAUDE_API_KEY present in config: True
+DEBUG:app:CLAUDE_API_KEY starts with: sk-an...
+INFO:app:Attempting to create Anthropic client with API key starting with: sk-an...
+INFO:app:Anthropic client created successfully
+INFO:app:Sending request to Anthropic API
+INFO:httpx:HTTP Request: POST https://api.anthropic.com/v1/complete "HTTP/1.1 200 OK"
+INFO:app:Received response from Anthropic API
+INFO:app:AI response received:  このメールには、以下のような機会、スケジュール、タスクが含まれていると分析しました。
+
+Opportunities:
+1. AIを活用したサービスや製品の提供機会がある
+2. 金融サービス業界でのA...
+INFO:app:New opportunity created: AIを活用したサービスや製品の提供機会がある
+INFO:app:New opportunity created: 金融サービス業界でのAI活用需要が高まっている
+INFO:app:New schedule created: 特にスケジュールに関する情報は見つかりませんでした
+INFO:app:New task created: AI人材の確保やインフラ整備などの課題への対応が必要
+INFO:app:New task created: 顧客体験や個人化サービスの向上にAIを活用すること
+INFO:app:Stored email and related items for lead: 2103
+INFO:app:Processed 1 out of 38 emails
+INFO:app:Emails from known leads: 2
+INFO:app:Emails from unknown senders: 0
+INFO:werkzeug:172.31.196.27 - - [28/Sep/2024 07:13:03] "POST /fetch-emails HTTP/1.1" 302 -
+INFO:werkzeug:172.31.196.27 - - [28/Sep/2024 07:13:04] "GET / HTTP/1.1" 200 -
+INFO:werkzeug:172.31.196.27 - - [28/Sep/2024 07:13:05] "GET /static/css/styles.css HTTP/1.1" 304 -
+INFO:werkzeug:172.31.196.27 - - [28/Sep/2024 07:13:05] "GET /static/js/main.js HTTP/1.1" 304 -
+ERROR:app:Exception on /opportunities/ [GET]
+Traceback (most recent call last):
+  File "/home/runner/CRM/.pythonlibs/lib/python3.11/site-packages/flask/app.py", line 2529, in wsgi_app
+    response = self.full_dispatch_request()
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/runner/CRM/.pythonlibs/lib/python3.11/site-packages/flask/app.py", line 1825, in full_dispatch_request
+    rv = self.handle_user_exception(e)
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/runner/CRM/.pythonlibs/lib/python3.11/site-packages/flask/app.py", line 1823, in full_dispatch_request
+    rv = self.dispatch_request()
+         ^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/runner/CRM/.pythonlibs/lib/python3.11/site-packages/flask/app.py", line 1799, in dispatch_request
+    return self.ensure_sync(self.view_functions[rule.endpoint])(**view_args)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/runner/CRM/.pythonlibs/lib/python3.11/site-packages/flask_login/utils.py", line 290, in decorated_view
+    return current_app.ensure_sync(func)(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/runner/CRM/routes/opportunities.py", line 14, in list_opportunities
+    return render_template('opportunities/list.html', opportunities=opportunities)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/runner/CRM/.pythonlibs/lib/python3.11/site-packages/flask/templating.py", line 147, in render_template
+    return _render(app, template, context)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/runner/CRM/.pythonlibs/lib/python3.11/site-packages/flask/templating.py", line 130, in _render
+    rv = template.render(context)
+         ^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/runner/CRM/.pythonlibs/lib/python3.11/site-packages/jinja2/environment.py", line 1304, in render
+    self.environment.handle_exception()
+  File "/home/runner/CRM/.pythonlibs/lib/python3.11/site-packages/jinja2/environment.py", line 939, in handle_exception
+    raise rewrite_traceback_stack(source=source)
+  File "/home/runner/CRM/templates/opportunities/list.html", line 1, in top-level template code
+    {% extends "base.html" %}
+  File "/home/runner/CRM/templates/base.html", line 42, in top-level template code
+    {% block content %}{% endblock %}
+    ^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/runner/CRM/templates/opportunities/list.html", line 26, in block 'content'
+    <td>{{ opportunity.account.name }}</td>
+    ^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/runner/CRM/.pythonlibs/lib/python3.11/site-packages/jinja2/environment.py", line 487, in getattr
+    return getattr(obj, attribute)
+           ^^^^^^^^^^^^^^^^^^^^^^^
+jinja2.exceptions.UndefinedError: 'models.Opportunity object' has no attribute 'account'
+INFO:werkzeug:172.31.196.27 - - [28/Sep/2024 07:13:33] "GET /opportunities/ HTTP/1.1" 500 -
