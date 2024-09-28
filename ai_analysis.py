@@ -1,4 +1,4 @@
-from anthropic import Anthropic
+from anthropic import Anthropic, HUMAN_PROMPT, AI_PROMPT
 from flask import current_app
 import logging
 
@@ -15,19 +15,22 @@ def analyze_email(subject, content):
 
         system_message = "You are an AI assistant that analyzes emails and provides suggestions for opportunities, schedules, and tasks."
         
-        prompt = f"\n\nHuman: Analyze the following email and provide suggestions for opportunities, schedules, and tasks:\n\nSubject: {subject}\n\nContent: {content}\n\nPlease provide your analysis in the following format:\nOpportunities:\n1.\n2.\n\nSchedules:\n1.\n2.\n\nTasks:\n1.\n2.\n\nAssistant:"
+        messages = [
+            {"role": "system", "content": system_message},
+            {"role": "human", "content": f"回答はすべて日本語でお願いします。Analyze the following email and provide suggestions for opportunities, schedules, and tasks:\n\nSubject: {subject}\n\nContent: {content}\n\nPlease provide your analysis in the following format:\nOpportunities:\n1.\n2.\n\nSchedules:\n1.\n2.\n\nTasks:\n1.\n2."}
+        ]
 
         current_app.logger.info("Sending request to Anthropic API")
-        response = client.completions.create(
-            prompt=system_message + prompt,
-            model="claude-2",
-            max_tokens_to_sample=1000,
-            temperature=0.7,
+        response = client.messages.create(
+            model="claude-3-sonnet-20240620",
+            max_tokens=4096,
+            temperature=1.0,
+            system=system_message,
+            messages=messages
         )
         current_app.logger.info("Received response from Anthropic API")
 
-        return response.completion
-
+        return response.content[0].text
     except Exception as e:
         current_app.logger.error(f"Error in analyze_email: {str(e)}")
         return f"Error: {str(e)}"

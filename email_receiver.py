@@ -86,28 +86,36 @@ def process_email(sender, subject, body, received_at):
         current_app.logger.debug(f"CLAUDE_API_KEY present in config: {'CLAUDE_API_KEY' in current_app.config}")
         if 'CLAUDE_API_KEY' in current_app.config:
             current_app.logger.debug(f"CLAUDE_API_KEY starts with: {current_app.config['CLAUDE_API_KEY'][:5]}...")
-        ai_response = analyze_email(subject, body)
-        current_app.logger.info(f"AI response received: {ai_response[:100]}...")
-
-        if ai_response.startswith("Error:"):
-            current_app.logger.error(f"AI analysis failed: {ai_response}")
         else:
-            opportunities, schedules, tasks = parse_ai_response(ai_response)
+            current_app.logger.error("CLAUDE_API_KEY is not set in the application config")
+            return
 
-            for opp in opportunities:
-                new_opp = Opportunity(name=opp, lead=lead, user=lead.user)
-                db.session.add(new_opp)
-                current_app.logger.info(f"New opportunity created: {opp}")
+        try:
+            ai_response = analyze_email(subject, body)
+            current_app.logger.info(f"AI response received: {ai_response[:100]}...")
 
-            for sched in schedules:
-                new_sched = Schedule(title=sched, lead=lead, user=lead.user)
-                db.session.add(new_sched)
-                current_app.logger.info(f"New schedule created: {sched}")
+            if ai_response.startswith("Error:"):
+                current_app.logger.error(f"AI analysis failed: {ai_response}")
+            else:
+                opportunities, schedules, tasks = parse_ai_response(ai_response)
 
-            for task in tasks:
-                new_task = Task(title=task, lead=lead, user=lead.user)
-                db.session.add(new_task)
-                current_app.logger.info(f"New task created: {task}")
+                for opp in opportunities:
+                    new_opp = Opportunity(name=opp, lead=lead, user=lead.user)
+                    db.session.add(new_opp)
+                    current_app.logger.info(f"New opportunity created: {opp}")
+
+                for sched in schedules:
+                    new_sched = Schedule(title=sched, lead=lead, user=lead.user)
+                    db.session.add(new_sched)
+                    current_app.logger.info(f"New schedule created: {sched}")
+
+                for task in tasks:
+                    new_task = Task(title=task, lead=lead, user=lead.user)
+                    db.session.add(new_task)
+                    current_app.logger.info(f"New task created: {task}")
+
+        except Exception as e:
+            current_app.logger.error(f"Error in AI analysis: {str(e)}")
 
     else:
         current_app.logger.warning(
