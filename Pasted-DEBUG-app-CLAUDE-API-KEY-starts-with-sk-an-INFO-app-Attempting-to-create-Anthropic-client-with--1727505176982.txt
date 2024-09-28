@@ -1,0 +1,29 @@
+DEBUG:app:CLAUDE_API_KEY starts with: sk-an...
+INFO:app:Attempting to create Anthropic client with API key starting with: sk-an...
+INFO:app:Anthropic client created successfully
+INFO:app:Sending request to Anthropic API
+INFO:httpx:HTTP Request: POST https://api.anthropic.com/v1/complete "HTTP/1.1 200 OK"
+INFO:app:Received response from Anthropic API
+INFO:app:AI response received:  はい、メールを分析しました。
+
+Opportunities:
+1. 本日の出発に関する情報があるため、移動や旅行の機会がある
+2. 登録のリンクがあるため、サービス利用登録の機会がある
+
+Sched...
+INFO:app:New opportunity created: 本日の出発に関する情報があるため、移動や旅行の機会がある
+INFO:app:New opportunity created: 登録のリンクがあるため、サービス利用登録の機会がある
+INFO:app:New schedule created: 本日2024年9月28日16時に出発することが記載されている
+INFO:app:New schedule created: 
+INFO:app:New task created: 登録リンクからサービスへの登録をする
+INFO:app:New task created: 必要に応じてLINEからお問い合わせする
+ERROR:app:Error storing email and related items: (psycopg2.errors.NotNullViolation) null value in column "amount" of relation "opportunities" violates not-null constraint
+DETAIL:  Failing row contains (4, 本日の出発に関する情報があるため、移動や旅..., New, null, null, 1, 1464).
+
+[SQL: INSERT INTO opportunities (name, stage, amount, close_date, user_id, lead_id) SELECT p0::VARCHAR, p1::VARCHAR, p2::FLOAT, p3::TIMESTAMP WITHOUT TIME ZONE, p4::INTEGER, p5::INTEGER FROM (VALUES (%(name__0)s, %(stage__0)s, %(amount__0)s, %(close_date__ ... 161 characters truncated ...  p3, p4, p5, sen_counter) ORDER BY sen_counter RETURNING opportunities.id, opportunities.id AS id__1]
+[parameters: {'close_date__0': None, 'name__0': '本日の出発に関する情報があるため、移動や旅行の機会がある', 'lead_id__0': 1464, 'stage__0': 'New', 'amount__0': None, 'user_id__0': 1, 'close_date__1': None, 'name__1': '登録のリンクがあるため、サービス利用登録の機会がある', 'lead_id__1': 1464, 'stage__1': 'New', 'amount__1': None, 'user_id__1': 1}]
+(Background on this error at: https://sqlalche.me/e/20/gkpj)
+INFO:app:Processed 1 out of 37 emails
+INFO:app:Emails from known leads: 4
+INFO:app:Emails from unknown senders: 0
+INFO:werkzeug:172.31.196.27 - - [28/Sep/2024 06:31:46] "POST /fetch-emails HTTP/1.1" 302 -

@@ -105,7 +105,14 @@ def process_email(sender, subject, body, received_at):
 
             for opp in opportunities:
                 try:
-                    new_opp = Opportunity(name=opp, stage='New', lead=lead, user_id=lead.user_id)
+                    new_opp = Opportunity(
+                        name=opp,
+                        stage='New',
+                        amount=0.0,
+                        close_date=datetime.utcnow() + timedelta(days=30),
+                        lead=lead,
+                        user_id=lead.user_id
+                    )
                     db.session.add(new_opp)
                     current_app.logger.info(f"New opportunity created: {opp}")
                 except Exception as e:
@@ -113,7 +120,14 @@ def process_email(sender, subject, body, received_at):
 
             for sched in schedules:
                 try:
-                    new_sched = Schedule(title=sched, lead=lead, user_id=lead.user_id)
+                    new_sched = Schedule(
+                        title=sched,
+                        description='',
+                        start_time=datetime.utcnow(),
+                        end_time=datetime.utcnow() + timedelta(hours=1),
+                        lead=lead,
+                        user_id=lead.user_id
+                    )
                     db.session.add(new_sched)
                     current_app.logger.info(f"New schedule created: {sched}")
                 except Exception as e:
@@ -121,7 +135,14 @@ def process_email(sender, subject, body, received_at):
 
             for task in tasks:
                 try:
-                    new_task = Task(title=task, lead=lead, user_id=lead.user_id)
+                    new_task = Task(
+                        title=task,
+                        description='',
+                        due_date=datetime.utcnow() + timedelta(days=7),
+                        status='New',
+                        lead=lead,
+                        user_id=lead.user_id
+                    )
                     db.session.add(new_task)
                     current_app.logger.info(f"New task created: {task}")
                 except Exception as e:
