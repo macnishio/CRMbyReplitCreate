@@ -1,15 +1,26 @@
 from anthropic import Anthropic
 from flask import current_app
 import logging
+from models import UserSettings
 
+def get_user_settings(user_id):
+    return UserSettings.query.filter_by(user_id=user_id).first()
 
-def analyze_email(subject, content):
+def analyze_email(subject, content, user_id=None):
     try:
-        api_key = current_app.config['CLAUDE_API_KEY']
+        api_key = None
+        if user_id:
+            user_settings = get_user_settings(user_id)
+            if user_settings:
+                api_key = user_settings.claude_api_key
+
+        # Fallback to environment variable if no user settings
         if not api_key:
-            current_app.logger.error(
-                "CLAUDE_API_KEY is not set in the configuration")
-            return "Error: CLAUDE_API_KEY is not set"
+            api_key = current_app.config['CLAUDE_API_KEY']
+
+        if not api_key:
+            current_app.logger.error("No Claude API key available")
+            return "Error: No Claude API key available"
 
         current_app.logger.info(
             f"Attempting to create Anthropic client with API key starting with: {api_key[:5]}..."
@@ -35,7 +46,6 @@ def analyze_email(subject, content):
     except Exception as e:
         current_app.logger.error(f"Error in analyze_email: {str(e)}")
         return f"Error: {str(e)}"
-
 
 def parse_ai_response(response):
     opportunities = []

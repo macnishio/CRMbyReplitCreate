@@ -6,6 +6,9 @@ from sqlalchemy.orm import Mapped, mapped_column
 from typing import List
 from sqlalchemy import Integer, String, DateTime, Float, ForeignKey, Text, Boolean
 from typing import List, Optional 
+import base64
+from cryptography.fernet import Fernet
+from flask import current_app
 
 class User(UserMixin, db.Model):
     __tablename__ = 'users'
@@ -19,12 +22,68 @@ class User(UserMixin, db.Model):
     leads: Mapped[List["Lead"]] = db.relationship('Lead', backref='user', lazy='dynamic')
     opportunities: Mapped[List["Opportunity"]] = db.relationship('Opportunity', backref='user', lazy='dynamic')
     accounts: Mapped[List["Account"]] = db.relationship('Account', backref='user', lazy='dynamic')
+    settings: Mapped["UserSettings"] = db.relationship("UserSettings", backref="user", uselist=False)
 
     def set_password(self, password):
         self.password_hash = generate_password_hash(password)
 
     def check_password(self, password):
         return check_password_hash(self.password_hash, password)
+
+class UserSettings(db.Model):
+    __tablename__ = 'user_settings'
+    id: Mapped[int] = mapped_column(Integer, primary_key=True)
+    user_id: Mapped[int] = mapped_column(Integer, ForeignKey('users.id'), nullable=False, unique=True)
+    mail_server: Mapped[str] = mapped_column(String(120))
+    mail_port: Mapped[int] = mapped_column(Integer)
+    mail_use_tls: Mapped[bool] = mapped_column(Boolean, default=True)
+    mail_username: Mapped[str] = mapped_column(String(120))
+    _mail_password: Mapped[str] = mapped_column('mail_password', String(255))
+    _claude_api_key: Mapped[str] = mapped_column('claude_api_key', String(255))
+    _clearbit_api_key: Mapped[str] = mapped_column('clearbit_api_key', String(255))
+    created_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow)
+    updated_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+
+    def _get_encryption_key(self):
+        key = current_app.config['SECRET_KEY']
+        # Ensure the key is 32 bytes long for Fernet
+        return base64.urlsafe_b64encode(key.ljust(32)[:32].encode())
+
+    def _encrypt(self, data):
+        if not data:
+            return None
+        f = Fernet(self._get_encryption_key())
+        return f.encrypt(data.encode()).decode()
+
+    def _decrypt(self, data):
+        if not data:
+            return None
+        f = Fernet(self._get_encryption_key())
+        return f.decrypt(data.encode()).decode()
+
+    @property
+    def mail_password(self):
+        return self._decrypt(self._mail_password) if self._mail_password else None
+
+    @mail_password.setter
+    def mail_password(self, value):
+        self._mail_password = self._encrypt(value) if value else None
+
+    @property
+    def claude_api_key(self):
+        return self._decrypt(self._claude_api_key) if self._claude_api_key else None
+
+    @claude_api_key.setter
+    def claude_api_key(self, value):
+        self._claude_api_key = self._encrypt(value) if value else None
+
+    @property
+    def clearbit_api_key(self):
+        return self._decrypt(self._clearbit_api_key) if self._clearbit_api_key else None
+
+    @clearbit_api_key.setter
+    def clearbit_api_key(self, value):
+        self._clearbit_api_key = self._encrypt(value) if value else None
 
 class Lead(db.Model):
     __tablename__ = 'leads'
@@ -105,7 +164,7 @@ class Task(db.Model):
     description: Mapped[str] = mapped_column(Text)
     due_date: Mapped[datetime] = mapped_column(DateTime)
     status: Mapped[str] = mapped_column(String(20))
-    completed: Mapped[bool] = mapped_column(Boolean, default=False)  # New field
+    completed: Mapped[bool] = mapped_column(Boolean, default=False)
     user_id: Mapped[int] = mapped_column(Integer, ForeignKey('users.id'), nullable=False)
     lead_id: Mapped[int] = mapped_column(Integer, ForeignKey('leads.id'), nullable=False)
 
