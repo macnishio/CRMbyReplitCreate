@@ -4,6 +4,7 @@ from email_receiver import fetch_emails
 from models import Email, Lead, Opportunity, Task
 from sqlalchemy import func
 from datetime import datetime, timedelta
+from extensions import db  # Add this line to import the db object
 
 bp = Blueprint('main', __name__)
 

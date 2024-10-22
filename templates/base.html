@@ -10,7 +10,34 @@
     {% block extra_head %}{% endblock %}
 </head>
 <body>
-    {% block content %}{% endblock %}
+    <div class="dashboard-container">
+        <header class="header">
+            <div class="logo">CRM System</div>
+            <div class="user-profile">
+                <span>ようこそ、{{ current_user.username }}さん</span>
+                <img src="{{ url_for('static', filename='images/default-avatar.png') }}" alt="User Avatar" class="avatar">
+            </div>
+        </header>
+        <nav class="sidebar">
+            <ul>
+                <li><a href="{{ url_for('main.dashboard') }}"><i class="fas fa-tachometer-alt"></i> ダッシュボード</a></li>
+                <li><a href="{{ url_for('leads.list_leads') }}"><i class="fas fa-user-friends"></i> リード</a></li>
+                <li><a href="{{ url_for('reports.index') }}"><i class="fas fa-chart-bar"></i> 報告</a></li>
+                <li><a href="#"><i class="fas fa-yen-sign"></i> 売上</a></li>
+                <li><a href="#"><i class="fas fa-briefcase"></i> 案件</a></li>
+                <li><a href="#"><i class="fas fa-bullhorn"></i> キャンペーン</a></li>
+                <li><a href="{{ url_for('tasks.list_tasks') }}"><i class="fas fa-tasks"></i> タスク</a></li>
+                <li><a href="{{ url_for('schedules.list_schedules') }}"><i class="fas fa-calendar-alt"></i> スケジュール</a></li>
+                <li><a href="#"><i class="fas fa-cog"></i> 設定</a></li>
+            </ul>
+        </nav>
+        <main class="main-content">
+            {% block content %}{% endblock %}
+        </main>
+        <footer class="footer">
+            <p>&copy; 2024 CRM System. All rights reserved.</p>
+        </footer>
+    </div>
     <script src="{{ url_for('static', filename='js/main.js') }}"></script>
     {% block extra_scripts %}{% endblock %}
 </body>
