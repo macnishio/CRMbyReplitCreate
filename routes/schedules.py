@@ -1,4 +1,4 @@
-from flask import Blueprint, render_template, redirect, url_for, flash, current_app
+from flask import Blueprint, render_template, redirect, url_for, flash, current_app, request
 from flask_login import login_required, current_user
 from extensions import db
 from models import Schedule, User, Account, Lead, Opportunity
@@ -13,9 +13,9 @@ def list_schedules():
     schedules = Schedule.query.filter_by(user_id=current_user.id).all()
     return render_template('schedules/list_schedules.html', schedules=schedules)
 
-@bp.route('/create', methods=['GET', 'POST'])
+@bp.route('/add', methods=['GET', 'POST'])
 @login_required
-def create_schedule():
+def add_schedule():
     form = ScheduleForm()
     form.user_id.choices = [(user.id, user.username) for user in User.query.all()]
     form.account_id.choices = [(0, 'None')] + [(account.id, account.name) for account in Account.query.all()]
@@ -29,7 +29,7 @@ def create_schedule():
                 description=form.description.data,
                 start_time=form.start_time.data,
                 end_time=form.end_time.data,
-                user_id=form.user_id.data,
+                user_id=current_user.id,
                 account_id=form.account_id.data if form.account_id.data != 0 else None,
                 lead_id=form.lead_id.data if form.lead_id.data != 0 else None,
                 opportunity_id=form.opportunity_id.data if form.opportunity_id.data != 0 else None
@@ -37,16 +37,16 @@ def create_schedule():
             db.session.add(schedule)
             db.session.commit()
             current_app.logger.info(f"Schedule created: {schedule}")
-            flash('Schedule created successfully')
+            flash('スケジュールが正常に作成されました', 'success')
             return redirect(url_for('schedules.list_schedules'))
         except Exception as e:
             db.session.rollback()
             current_app.logger.error(f"Error creating schedule: {str(e)}")
-            flash('An error occurred while creating the schedule. Please try again.')
+            flash('スケジュールの作成中にエラーが発生しました。もう一度お試しください。', 'error')
     else:
         current_app.logger.info(f"Form validation failed: {form.errors}")
     
-    return render_template('schedules/create.html', form=form)
+    return render_template('schedules/add_schedule.html', form=form)
 
 @bp.route('/<int:id>')
 @login_required
@@ -72,12 +72,12 @@ def edit_schedule(id):
             schedule.opportunity_id = form.opportunity_id.data if form.opportunity_id.data != 0 else None
             db.session.commit()
             current_app.logger.info(f"Schedule updated: {schedule}")
-            flash('Schedule updated successfully')
+            flash('スケジュールが正常に更新されました', 'success')
             return redirect(url_for('schedules.schedule_detail', id=schedule.id))
         except Exception as e:
             db.session.rollback()
             current_app.logger.error(f"Error updating schedule: {str(e)}")
-            flash('An error occurred while updating the schedule. Please try again.')
+            flash('スケジュールの更新中にエラーが発生しました。もう一度お試しください。', 'error')
     else:
         current_app.logger.info(f"Form validation failed: {form.errors}")
     
@@ -91,9 +91,9 @@ def delete_schedule(id):
         db.session.delete(schedule)
         db.session.commit()
         current_app.logger.info(f"Schedule deleted: {schedule}")
-        flash('Schedule deleted successfully')
+        flash('スケジュールが正常に削除されました', 'success')
     except Exception as e:
         db.session.rollback()
         current_app.logger.error(f"Error deleting schedule: {str(e)}")
-        flash('An error occurred while deleting the schedule. Please try again.')
+        flash('スケジュールの削除中にエラーが発生しました。もう一度お試しください。', 'error')
     return redirect(url_for('schedules.list_schedules'))
