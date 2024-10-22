@@ -2,26 +2,22 @@
 {% block title %}ダッシュボード{% endblock %}
 {% block content %}
 <h1>ダッシュボード</h1>
-<div class="metric-cards">
-    <div class="metric-card">
-        <i class="fas fa-user"></i>
+<div class="dashboard-metrics">
+    <div class="metric">
         <h2>新規リード</h2>
-        <p class="metric-value">{{ new_leads_count }}</p>
+        <p>{{ new_leads_count }}</p>
     </div>
-    <div class="metric-card">
-        <i class="fas fa-chart-line"></i>
+    <div class="metric">
         <h2>進行中の商談</h2>
-        <p class="metric-value">{{ ongoing_opportunities_count }}</p>
+        <p>{{ ongoing_opportunities_count }}</p>
     </div>
-    <div class="metric-card">
-        <i class="fas fa-yen-sign"></i>
+    <div class="metric">
         <h2>今月の売上</h2>
-        <p class="metric-value">¥{{ "{:,}".format(this_month_revenue) }}</p>
+        <p>¥{{ "{:,}".format(this_month_revenue) }}</p>
     </div>
-    <div class="metric-card">
-        <i class="fas fa-check-circle"></i>
+    <div class="metric">
         <h2>完了タスク</h2>
-        <p class="metric-value">{{ completed_tasks_count }}</p>
+        <p>{{ completed_tasks_count }}</p>
     </div>
 </div>
 <section class="recent-activity">
