@@ -116,15 +116,22 @@ body {
     }
 }
 
-/* Existing opportunity card styles */
-.opportunity-grid {
+/* Card Grid Styles */
+.opportunity-grid,
+.lead-grid,
+.schedule-grid,
+.task-grid {
     display: grid;
     grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
     gap: 20px;
     padding: 20px;
 }
 
-.opportunity-card {
+/* Card Styles */
+.opportunity-card,
+.lead-card,
+.schedule-card,
+.task-card {
     background-color: #fff;
     border-radius: 8px;
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
@@ -132,16 +139,25 @@ body {
     transition: transform 0.3s ease;
 }
 
-.opportunity-card:hover {
+.opportunity-card:hover,
+.lead-card:hover,
+.schedule-card:hover,
+.task-card:hover {
     transform: translateY(-5px);
 }
 
-.opportunity-card h2 {
+.opportunity-card h2,
+.lead-card h2,
+.schedule-card h2,
+.task-card h2 {
     font-size: 18px;
     margin-bottom: 10px;
 }
 
-.opportunity-card p {
+.opportunity-card p,
+.lead-card p,
+.schedule-card p,
+.task-card p {
     margin-bottom: 5px;
 }
 
@@ -172,4 +188,27 @@ body {
     display: inline-block;
     margin-top: 20px;
     margin-left: 20px;
+}
+
+/* Specific card styles */
+.lead-card {
+    border-left: 5px solid #3498db;
+}
+
+.schedule-card {
+    border-left: 5px solid #f39c12;
+}
+
+.task-card {
+    border-left: 5px solid #2ecc71;
+}
+
+.task-card .completed {
+    color: #27ae60;
+    font-weight: bold;
+}
+
+.task-card .not-completed {
+    color: #e74c3c;
+    font-weight: bold;
 }

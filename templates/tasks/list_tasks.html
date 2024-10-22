@@ -1,0 +1,23 @@
+{% extends "base.html" %}
+{% block title %}タスク一覧{% endblock %}
+{% block content %}
+<h1>タスク一覧</h1>
+<div class="task-grid">
+    {% for task in tasks %}
+    <div class="task-card">
+        <h2>{{ task.title }}</h2>
+        <p><strong>説明:</strong> {{ task.description }}</p>
+        <p><strong>期限:</strong> {{ task.due_date.strftime('%Y-%m-%d') if task.due_date else 'N/A' }}</p>
+        <p><strong>ステータス:</strong> {{ task.status }}</p>
+        <p><strong>完了:</strong> {{ '完了' if task.completed else '未完了' }}</p>
+        <div class="card-actions">
+            <a href="{{ url_for('tasks.edit_task', id=task.id) }}" class="btn btn-edit">編集</a>
+            <a href="{{ url_for('tasks.delete_task', id=task.id) }}" class="btn btn-delete" onclick="return confirm('本当にこのタスクを削除しますか？');">削除</a>
+        </div>
+    </div>
+    {% endfor %}
+</div>
+<div class="add-task">
+    <a href="{{ url_for('tasks.add_task') }}" class="btn btn-add">新規タスクを追加</a>
+</div>
+{% endblock %}
