@@ -8,7 +8,7 @@ from flask_limiter import Limiter
 from flask_limiter.util import get_remote_address
 from config import config
 from extensions import db, migrate, login_manager, mail, limiter
-from email_receiver import setup_email_scheduler
+from email_receiver import fetch_emails, connect_to_email_server, setup_email_scheduler
 import logging
 
 def create_app(config_name='default'):

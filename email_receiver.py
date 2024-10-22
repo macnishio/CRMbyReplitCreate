@@ -11,6 +11,7 @@ import ssl
 import re
 import chardet
 from ai_analysis import analyze_email, parse_ai_response
+from flask_apscheduler import APScheduler
 
 def connect_to_email_server():
     mail_server = os.environ.get('RECEIVE_MAIL_SERVER')
@@ -28,7 +29,6 @@ def connect_to_email_server():
         context.check_hostname = False
         context.verify_mode = ssl.CERT_NONE
 
-        # Try different SSL/TLS versions
         ssl_versions = [ssl.PROTOCOL_TLS, ssl.PROTOCOL_TLSv1_2, ssl.PROTOCOL_TLSv1_1, ssl.PROTOCOL_TLSv1]
         for ssl_version in ssl_versions:
             try:
@@ -46,11 +46,164 @@ def connect_to_email_server():
             except Exception as e:
                 current_app.logger.error(f"Unexpected error with SSL version {ssl_version}: {str(e)}")
 
+        raise Exception("Unable to establish a secure connection with any SSL/TLS version")
+
     except Exception as e:
         current_app.logger.error(f"Unexpected error in connect_to_email_server: {str(e)}")
         raise
 
-    raise Exception("Unable to establish a secure connection with any SSL/TLS version")
+def setup_email_scheduler(app):
+    scheduler = APScheduler()
+    scheduler.init_app(app)
+    scheduler.start()
 
-# The rest of the file remains unchanged
-# ...
+    @scheduler.task('interval', id='check_emails', minutes=5, misfire_grace_time=300, max_instances=1)
+    def check_emails_task():
+        with app.app_context():
+            app.logger.info("Checking for new emails")
+            fetch_emails(time_range=30, max_emails=100)
+
+    with app.app_context():
+        app.logger.info("Email scheduler set up")
+
+def fetch_emails(time_range=30, max_emails=100):
+    try:
+        mail = connect_to_email_server()
+        mail.select('INBOX')
+
+        end_date = datetime.now(timezone.utc)
+        start_date = end_date - timedelta(minutes=time_range)
+        date_str = start_date.strftime("%d-%b-%Y")
+
+        _, message_numbers = mail.search(None, f'(SINCE "{date_str}")')
+        email_ids = message_numbers[0].split()
+
+        email_ids = email_ids[-max_emails:]
+
+        total_emails = len(email_ids)
+        processed_emails = 0
+        known_lead_emails = 0
+        unknown_sender_emails = 0
+
+        current_app.logger.info(f"Total emails found: {total_emails}")
+
+        for num in reversed(email_ids):
+            try:
+                _, msg_data = mail.fetch(num, '(RFC822)')
+                for response_part in msg_data:
+                    if isinstance(response_part, tuple):
+                        email_body = response_part[1]
+                        email_message = email.message_from_bytes(email_body)
+                        
+                        subject = decode_header(email_message["Subject"])[0][0]
+                        sender = email.utils.parseaddr(email_message["From"])[1]
+                        date_tuple = email.utils.parsedate_tz(email_message["Date"])
+                        if date_tuple:
+                            local_date = datetime.fromtimestamp(email.utils.mktime_tz(date_tuple))
+                        else:
+                            local_date = datetime.now()
+
+                        if isinstance(subject, bytes):
+                            subject = subject.decode()
+                        
+                        current_app.logger.info(f"Processing email - Sender: {sender}, Subject: {subject}, Date: {local_date}")
+
+                        lead = Lead.query.filter_by(email=sender).first()
+                        if lead:
+                            known_lead_emails += 1
+                            process_lead_email(lead, email_message, subject, local_date)
+                        else:
+                            unknown_sender_emails += 1
+                            store_unknown_email(sender, subject, email_message, local_date)
+
+                        processed_emails += 1
+            except Exception as e:
+                current_app.logger.error(f"Error processing email {num}: {str(e)}")
+
+        current_app.logger.info(f"Processed {processed_emails} out of {total_emails} emails")
+        current_app.logger.info(f"Emails from known leads: {known_lead_emails}")
+        current_app.logger.info(f"Emails from unknown senders: {unknown_sender_emails}")
+
+    except Exception as e:
+        current_app.logger.error(f"Error fetching emails: {str(e)}")
+    finally:
+        if 'mail' in locals():
+            try:
+                mail.logout()
+            except Exception as e:
+                current_app.logger.error(f"Error logging out from email server: {str(e)}")
+
+def process_lead_email(lead, email_message, subject, date):
+    content = ""
+    if email_message.is_multipart():
+        for part in email_message.walk():
+            if part.get_content_type() == "text/plain":
+                content = part.get_payload(decode=True).decode()
+                break
+    else:
+        content = email_message.get_payload(decode=True).decode()
+
+    new_email = Email(
+        sender=lead.email,
+        sender_name=lead.name,
+        subject=subject,
+        content=content,
+        received_at=date,
+        lead_id=lead.id
+    )
+    db.session.add(new_email)
+
+    lead.last_contact = date
+
+    try:
+        db.session.commit()
+    except DataError as e:
+        current_app.logger.error(f"Error storing email: {str(e)}")
+        db.session.rollback()
+
+    ai_response = analyze_email(subject, content)
+    opportunities, schedules, tasks = parse_ai_response(ai_response)
+
+    for opp in opportunities:
+        new_opp = Opportunity(name=opp, stage="New", user_id=lead.user_id, lead_id=lead.id)
+        db.session.add(new_opp)
+
+    for sched in schedules:
+        new_sched = Schedule(title=sched, start_time=datetime.now(), end_time=datetime.now() + timedelta(hours=1), user_id=lead.user_id, lead_id=lead.id)
+        db.session.add(new_sched)
+
+    for task in tasks:
+        new_task = Task(title=task, status="New", user_id=lead.user_id, lead_id=lead.id)
+        db.session.add(new_task)
+
+    try:
+        db.session.commit()
+    except Exception as e:
+        current_app.logger.error(f"Error storing AI analysis results: {str(e)}")
+        db.session.rollback()
+
+def store_unknown_email(sender, subject, email_message, date):
+    content = ""
+    if email_message.is_multipart():
+        for part in email_message.walk():
+            if part.get_content_type() == "text/plain":
+                content = part.get_payload(decode=True).decode()
+                break
+    else:
+        content = email_message.get_payload(decode=True).decode()
+
+    unknown_email = UnknownEmail(
+        sender=sender,
+        sender_name=email.utils.parseaddr(email_message["From"])[0],
+        subject=subject,
+        content=content,
+        received_at=date
+    )
+    db.session.add(unknown_email)
+
+    try:
+        db.session.commit()
+        current_app.logger.info(f"Stored email from unknown sender: {sender}")
+    except DataError as e:
+        current_app.logger.error(f"Error storing unknown email: {str(e)}")
+        db.session.rollback()
