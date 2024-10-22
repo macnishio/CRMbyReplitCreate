@@ -11,7 +11,7 @@ bp = Blueprint('schedules', __name__, url_prefix='/schedules')
 @login_required
 def list_schedules():
     schedules = Schedule.query.filter_by(user_id=current_user.id).all()
-    return render_template('schedules/list.html', schedules=schedules)
+    return render_template('schedules/list_schedules.html', schedules=schedules)
 
 @bp.route('/create', methods=['GET', 'POST'])
 @login_required
