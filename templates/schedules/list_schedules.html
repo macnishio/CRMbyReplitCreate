@@ -1,0 +1,22 @@
+{% extends "base.html" %}
+{% block title %}スケジュール一覧{% endblock %}
+{% block content %}
+<h1>スケジュール一覧</h1>
+<div class="schedule-grid">
+    {% for schedule in schedules %}
+    <div class="schedule-card">
+        <h2>{{ schedule.title }}</h2>
+        <p><strong>説明:</strong> {{ schedule.description }}</p>
+        <p><strong>開始時間:</strong> {{ schedule.start_time.strftime('%Y-%m-%d %H:%M') }}</p>
+        <p><strong>終了時間:</strong> {{ schedule.end_time.strftime('%Y-%m-%d %H:%M') }}</p>
+        <div class="card-actions">
+            <a href="{{ url_for('schedules.edit_schedule', id=schedule.id) }}" class="btn btn-edit">編集</a>
+            <a href="{{ url_for('schedules.delete_schedule', id=schedule.id) }}" class="btn btn-delete" onclick="return confirm('本当にこのスケジュールを削除しますか？');">削除</a>
+        </div>
+    </div>
+    {% endfor %}
+</div>
+<div class="add-schedule">
+    <a href="{{ url_for('schedules.add_schedule') }}" class="btn btn-add">新規スケジュールを追加</a>
+</div>
+{% endblock %}

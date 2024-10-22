@@ -1,0 +1,232 @@
+"use client"
+
+import { useState } from "react"
+import { Button } from "@/components/ui/button"
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+import { Input } from "@/components/ui/input"
+import { Label } from "@/components/ui/label"
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
+import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, PieChart, Pie, Cell, LineChart, Line } from "recharts"
+import { ArrowUpIcon, ArrowDownIcon, DollarSign, Users, Activity, ChevronDown } from "lucide-react"
+
+// Sample data (replace with actual data in a real application)
+const leadsData = [
+  { status: "New", value: 4500 },
+  { status: "Contacted", value: 3800 },
+  { status: "Qualified", value: 2200 },
+  { status: "Proposal", value: 1500 },
+  { status: "Negotiation", value: 1000 },
+]
+
+const opportunitiesData = [
+  { stage: "Prospecting", value: 5000 },
+  { stage: "Qualification", value: 4200 },
+  { stage: "Needs Analysis", value: 3500 },
+  { stage: "Proposal", value: 2800 },
+  { stage: "Negotiation", value: 2000 },
+  { stage: "Closed Won", value: 1500 },
+]
+
+const customerAcquisitionData = [
+  { month: "Jan", customers: 120 },
+  { month: "Feb", customers: 150 },
+  { month: "Mar", customers: 200 },
+  { month: "Apr", customers: 180 },
+  { month: "May", customers: 220 },
+  { month: "Jun", customers: 250 },
+]
+
+const COLORS = ["#0088FE", "#00C49F", "#FFBB28", "#FF8042", "#8884D8", "#82ca9d"]
+
+export default function RefinedDashboard() {
+  const [dateRange, setDateRange] = useState("今月")
+
+  return (
+    <div className="flex flex-col min-h-screen bg-gray-100">
+      <header className="bg-white shadow-sm">
+        <div className="max-w-7xl mx-auto py-4 px-4 sm:px-6 lg:px-8 flex justify-between items-center">
+          <h1 className="text-2xl font-semibold text-gray-900">営業ダッシュボード</h1>
+          <div className="flex items-center space-x-4">
+            <Label htmlFor="date-range" className="sr-only">
+              Date Range
+            </Label>
+            <div className="relative">
+              <select
+                id="date-range"
+                className="block w-full pl-3 pr-10 py-2 text-base border-gray-300 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm rounded-md"
+                value={dateRange}
+                onChange={(e) => setDateRange(e.target.value)}
+              >
+                <option>今週</option>
+                <option>今月</option>
+                <option>今四半期</option>
+                <option>今年</option>
+              </select>
+              <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-gray-700">
+                <ChevronDown className="h-4 w-4" />
+              </div>
+            </div>
+            <Button variant="outline">データ更新</Button>
+          </div>
+        </div>
+      </header>
+      <main className="flex-grow max-w-7xl w-full mx-auto py-6 sm:px-6 lg:px-8">
+        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
+          <KpiCard
+            title="総収益"
+            value="¥1,234,567"
+            change={12.5}
+            icon={<DollarSign className="h-6 w-6" />}
+          />
+          <KpiCard
+            title="新規顧客"
+            value="1,234"
+            change={-2.5}
+            icon={<Users className="h-6 w-6" />}
+          />
+          <KpiCard
+            title="コンバージョン率"
+            value="3.45％"
+            change={0.8}
+            icon={<Activity className="h-6 w-6" />}
+          />
+          <KpiCard
+            title="平均取引規模"
+            value="¥12,345"
+            change={5.2}
+            icon={<DollarSign className="h-6 w-6" />}
+          />
+        </div>
+        <div className="mt-8">
+          <Tabs defaultValue="概要" className="space-y-4">
+            <TabsList>
+              <TabsTrigger value="概要">概要</TabsTrigger>
+              <TabsTrigger value="リード">リード</TabsTrigger>
+              <TabsTrigger value="商談">商談</TabsTrigger>
+              <TabsTrigger value="顧客">顧客</TabsTrigger>
+            </TabsList>
+            <TabsContent value="概要" className="space-y-4">
+              <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+                <Card>
+                  <CardHeader>
+                    <CardTitle>ステータス別リード</CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="h-[300px]">
+                      <ResponsiveContainer width="100%" height="100%">
+                        <PieChart>
+                          <Pie
+                            data={leadsData}
+                            cx="50%"
+                            cy="50%"
+                            labelLine={false}
+                            outerRadius={80}
+                            fill="#8884d8"
+                            dataKey="value"
+                            label={({ name, percent }) => `${name} ${(percent * 100).toFixed(0)}%`}
+                          >
+                            {leadsData.map((entry, index) => (
+                              <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
+                            ))}
+                          </Pie>
+                          <Tooltip />
+                        </PieChart>
+                      </ResponsiveContainer>
+                    </div>
+                  </CardContent>
+                </Card>
+                <Card>
+                  <CardHeader>
+                    <CardTitle>ステージ別商談</CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="h-[300px]">
+                      <ResponsiveContainer width="100%" height="100%">
+                        <BarChart data={opportunitiesData}>
+                          <CartesianGrid strokeDasharray="3 3" />
+                          <XAxis dataKey="stage" />
+                          <YAxis />
+                          <Tooltip />
+                          <Legend />
+                          <Bar dataKey="value" fill="#8884d8" />
+                        </BarChart>
+                      </ResponsiveContainer>
+                    </div>
+                  </CardContent>
+                </Card>
+              </div>
+              <Card>
+                <CardHeader>
+                  <CardTitle>顧客獲得の推移</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="h-[300px]">
+                    <ResponsiveContainer width="100%" height="100%">
+                      <LineChart data={customerAcquisitionData}>
+                        <CartesianGrid strokeDasharray="3 3" />
+                        <XAxis dataKey="month" />
+                        <YAxis />
+                        <Tooltip />
+                        <Legend />
+                        <Line type="monotone" dataKey="customers" stroke="#8884d8" />
+                      </LineChart>
+                    </ResponsiveContainer>
+                  </div>
+                </CardContent>
+              </Card>
+            </TabsContent>
+            <TabsContent value="リード">
+              <Card>
+                <CardHeader>
+                  <CardTitle>リード管理</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <p>詳細なリード管理コンテンツはこちら。</p>
+                </CardContent>
+              </Card>
+            </TabsContent>
+            <TabsContent value="商談">
+              <Card>
+                <CardHeader>
+                  <CardTitle>商談トラッキング</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <p>詳細な商談トラッキングコンテンツはこちら。</p>
+                </CardContent>
+              </Card>
+            </TabsContent>
+            <TabsContent value="顧客">
+              <Card>
+                <CardHeader>
+                  <CardTitle>顧客分析</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <p>詳細な顧客分析コンテンツはこちら。</p>
+                </CardContent>
+              </Card>
+            </TabsContent>
+          </Tabs>
+        </div>
+      </main>
+    </div>
+  )
+}
+
+function KpiCard({ title, value, change, icon }) {
+  const isPositive = change >= 0
+  return (
+    <Card>
+      <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+        <CardTitle className="text-sm font-medium">{title}</CardTitle>
+        {icon}
+      </CardHeader>
+      <CardContent>
+        <div className="text-2xl font-bold">{value}</div>
+        <p className={`text-xs ${isPositive ? "text-green-500" : "text-red-500"} flex items-center`}>
+          {isPositive ? <ArrowUpIcon className="h-4 w-4 mr-1" /> : <ArrowDownIcon className="h-4 w-4 mr-1" />}
+          {Math.abs(change)}%
+        </p>
+      </CardContent>
+    </Card>
+  )
+}

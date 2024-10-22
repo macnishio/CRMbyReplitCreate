@@ -2,37 +2,22 @@
 {% block title %}リード一覧{% endblock %}
 {% block content %}
 <h1>リード一覧</h1>
-<div class="lead-list-container">
-    <table class="lead-table">
-        <thead>
-            <tr>
-                <th>名前</th>
-                <th>メールアドレス</th>
-                <th>スパム状態</th>
-                <th>スコア</th>
-                <th>最終コンタクト</th>
-                <th>アクション</th>
-            </tr>
-        </thead>
-        <tbody>
-            {% for lead in leads %}
-            <tr class="{% if loop.index is even %}even{% else %}odd{% endif %}">
-                <td>{{ lead.name }}</td>
-                <td>{{ lead.email }}</td>
-                <td>
-                    <span class="spam-status {% if lead.status == 'Spam' %}spam{% else %}not-spam{% endif %}">
-                        {{ lead.status }}
-                    </span>
-                </td>
-                <td>{{ lead.score }}</td>
-                <td>{{ lead.last_contact.strftime('%Y-%m-%d %H:%M') if lead.last_contact else 'N/A' }}</td>
-                <td>
-                    <a href="{{ url_for('leads.edit_lead', id=lead.id) }}" class="btn btn-edit">編集</a>
-                    <a href="{{ url_for('leads.delete_lead', id=lead.id) }}" class="btn btn-delete" onclick="return confirm('本当にこのリードを削除しますか？');">削除</a>
-                </td>
-            </tr>
-            {% endfor %}
-        </tbody>
-    </table>
+<div class="lead-grid">
+    {% for lead in leads %}
+    <div class="lead-card">
+        <h2>{{ lead.name }}</h2>
+        <p><strong>メール:</strong> {{ lead.email }}</p>
+        <p><strong>ステータス:</strong> {{ lead.status }}</p>
+        <p><strong>スコア:</strong> {{ lead.score }}</p>
+        <p><strong>最終コンタクト:</strong> {{ lead.last_contact.strftime('%Y-%m-%d %H:%M') if lead.last_contact else 'N/A' }}</p>
+        <div class="card-actions">
+            <a href="{{ url_for('leads.edit_lead', id=lead.id) }}" class="btn btn-edit">編集</a>
+            <a href="{{ url_for('leads.delete_lead', id=lead.id) }}" class="btn btn-delete" onclick="return confirm('本当にこのリードを削除しますか？');">削除</a>
+        </div>
+    </div>
+    {% endfor %}
+</div>
+<div class="add-lead">
+    <a href="{{ url_for('leads.add_lead') }}" class="btn btn-add">新規リードを追加</a>
 </div>
 {% endblock %}
