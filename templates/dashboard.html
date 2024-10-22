@@ -1,33 +1,44 @@
 {% extends "base.html" %}
-
 {% block title %}Dashboard{% endblock %}
-
 {% block content %}
-    <h1>Dashboard</h1>
-    <div class="dashboard-stats">
-        <div class="stat-card">
-            <h2>Leads</h2>
-            <p>{{ leads }}</p>
+<div class="dashboard-container">
+    <nav class="sidebar">
+        <ul>
+            <li><a href="{{ url_for('main.dashboard') }}">Dashboard</a></li>
+            <li><a href="{{ url_for('leads.list_leads') }}">Leads</a></li>
+            <li><a href="{{ url_for('reports.index') }}">Reports</a></li>
+            <li><a href="#">Sales</a></li>
+            <li><a href="#">Cases</a></li>
+            <li><a href="#">Campaigns</a></li>
+            <li><a href="{{ url_for('tasks.list_tasks') }}">Tasks</a></li>
+            <li><a href="{{ url_for('schedules.list_schedules') }}">Schedule</a></li>
+            <li><a href="#">Settings</a></li>
+        </ul>
+    </nav>
+    <main class="main-content">
+        <h1>ダッシュボード</h1>
+        <div class="metric-cards">
+            <div class="metric-card">
+                <i class="fas fa-user"></i>
+                <h2>新規リード</h2>
+                <p class="metric-value">15</p>
+            </div>
+            <div class="metric-card">
+                <i class="fas fa-chart-line"></i>
+                <h2>進行中の商談</h2>
+                <p class="metric-value">8</p>
+            </div>
+            <div class="metric-card">
+                <i class="fas fa-yen-sign"></i>
+                <h2>今月の売上</h2>
+                <p class="metric-value">¥1,250,000</p>
+            </div>
+            <div class="metric-card">
+                <i class="fas fa-check-circle"></i>
+                <h2>完了タスク</h2>
+                <p class="metric-value">23</p>
+            </div>
         </div>
-        <div class="stat-card">
-            <h2>Opportunities</h2>
-            <p>{{ opportunities }}</p>
-        </div>
-        <div class="stat-card">
-            <h2>Accounts</h2>
-            <p>{{ accounts }}</p>
-        </div>
-    </div>
-    <div class="dashboard-charts">
-        <div class="chart">
-            <canvas id="leadStatusChart"></canvas>
-        </div>
-        <div class="chart">
-            <canvas id="opportunityStageChart"></canvas>
-        </div>
-    </div>
-{% endblock %}
-
-{% block scripts %}
-    <script src="{{ url_for('static', filename='js/dashboard.js') }}"></script>
+    </main>
+</div>
 {% endblock %}
