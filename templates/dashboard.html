@@ -2,17 +2,24 @@
 {% block title %}Dashboard{% endblock %}
 {% block content %}
 <div class="dashboard-container">
+    <header class="header">
+        <div class="logo">CRM System</div>
+        <div class="user-profile">
+            <span>Welcome, {{ current_user.username }}</span>
+            <img src="{{ url_for('static', filename='images/default-avatar.png') }}" alt="User Avatar" class="avatar">
+        </div>
+    </header>
     <nav class="sidebar">
         <ul>
-            <li><a href="{{ url_for('main.dashboard') }}">Dashboard</a></li>
-            <li><a href="{{ url_for('leads.list_leads') }}">Leads</a></li>
-            <li><a href="{{ url_for('reports.index') }}">Reports</a></li>
-            <li><a href="#">Sales</a></li>
-            <li><a href="#">Cases</a></li>
-            <li><a href="#">Campaigns</a></li>
-            <li><a href="{{ url_for('tasks.list_tasks') }}">Tasks</a></li>
-            <li><a href="{{ url_for('schedules.list_schedules') }}">Schedule</a></li>
-            <li><a href="#">Settings</a></li>
+            <li><a href="{{ url_for('main.dashboard') }}"><i class="fas fa-tachometer-alt"></i> Dashboard</a></li>
+            <li><a href="{{ url_for('leads.list_leads') }}"><i class="fas fa-user-friends"></i> リード</a></li>
+            <li><a href="{{ url_for('reports.index') }}"><i class="fas fa-chart-bar"></i> レポート</a></li>
+            <li><a href="#"><i class="fas fa-dollar-sign"></i> 売上</a></li>
+            <li><a href="#"><i class="fas fa-briefcase"></i> 案件</a></li>
+            <li><a href="#"><i class="fas fa-bullhorn"></i> キャンペーン</a></li>
+            <li><a href="{{ url_for('tasks.list_tasks') }}"><i class="fas fa-tasks"></i> タスク</a></li>
+            <li><a href="{{ url_for('schedules.list_schedules') }}"><i class="fas fa-calendar-alt"></i> スケジュール</a></li>
+            <li><a href="#"><i class="fas fa-cog"></i> 設定</a></li>
         </ul>
     </nav>
     <main class="main-content">
@@ -39,6 +46,17 @@
                 <p class="metric-value">23</p>
             </div>
         </div>
+        <section class="recent-activity">
+            <h2>最近のアクティビティ</h2>
+            <ul>
+                <li>新しいリードが追加されました: 山田太郎</li>
+                <li>商談が成立しました: プロジェクトX</li>
+                <li>タスクが完了しました: 提案書の作成</li>
+            </ul>
+        </section>
     </main>
+    <footer class="footer">
+        <p>&copy; 2024 CRM System. All rights reserved.</p>
+    </footer>
 </div>
 {% endblock %}

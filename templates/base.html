@@ -1,50 +1,17 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="ja">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>{% block title %}CRM{% endblock %}</title>
+    <title>{% block title %}CRM System{% endblock %}</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    {% block extra_head %}{% endblock %}
 </head>
 <body>
-    <header>
-        <nav>
-            <ul>
-                <li><a href="{{ url_for('main.index') }}">Home</a></li>
-                <li><a href="{{ url_for('main.dashboard') }}">Dashboard</a></li>
-                <li><a href="{{ url_for('leads.list_leads') }}">Leads</a></li>
-                <li><a href="{{ url_for('opportunities.list_opportunities') }}">Opportunities</a></li>
-                <li><a href="{{ url_for('accounts.list_accounts') }}">Accounts</a></li>
-                <li><a href="{{ url_for('schedules.list_schedules') }}">Schedules</a></li>
-                <li><a href="{{ url_for('tasks.list_tasks') }}">Tasks</a></li>
-                <li><a href="{{ url_for('reports.index') }}">Reports</a></li>
-                <li><a href="{{ url_for('main.recent_emails') }}">Recent Emails</a></li>
-                {% if current_user.is_authenticated %}
-                    <li><a href="{{ url_for('auth.logout') }}">Logout</a></li>
-                {% else %}
-                    <li><a href="{{ url_for('auth.login') }}">Login</a></li>
-                    <li><a href="{{ url_for('auth.register') }}">Register</a></li>
-                {% endif %}
-            </ul>
-        </nav>
-    </header>
-    <main>
-        {% with messages = get_flashed_messages() %}
-            {% if messages %}
-                <ul class="flashes">
-                    {% for message in messages %}
-                        <li>{{ message }}</li>
-                    {% endfor %}
-                </ul>
-            {% endif %}
-        {% endwith %}
-        {% block content %}{% endblock %}
-    </main>
-    <footer>
-        <p>&copy; 2024 CRM Application</p>
-    </footer>
+    {% block content %}{% endblock %}
     <script src="{{ url_for('static', filename='js/main.js') }}"></script>
-    {% block scripts %}{% endblock %}
+    {% block extra_scripts %}{% endblock %}
 </body>
 </html>
