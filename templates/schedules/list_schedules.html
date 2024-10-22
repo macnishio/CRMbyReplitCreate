@@ -2,7 +2,11 @@
 {% block title %}スケジュール一覧{% endblock %}
 {% block content %}
 <h1>スケジュール一覧</h1>
-<div class="schedule-grid">
+<div class="view-toggle">
+    <button id="cardViewBtn" class="active">カード表示</button>
+    <button id="calendarViewBtn">カレンダー表示</button>
+</div>
+<div id="scheduleCardView" class="schedule-grid">
     {% for schedule in schedules %}
     <div class="schedule-card">
         <h2>{{ schedule.title }}</h2>
@@ -16,7 +20,59 @@
     </div>
     {% endfor %}
 </div>
+<div id="scheduleCalendarView" class="calendar-view" style="display: none;">
+    <!-- Calendar will be inserted here by JavaScript -->
+</div>
 <div class="add-schedule">
     <a href="{{ url_for('schedules.add_schedule') }}" class="btn btn-add">新規スケジュールを追加</a>
 </div>
+{% endblock %}
+
+{% block extra_scripts %}
+<script src="https://cdn.jsdelivr.net/npm/fullcalendar@5.10.2/main.min.js"></script>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/fullcalendar@5.10.2/main.min.css">
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const cardViewBtn = document.getElementById('cardViewBtn');
+    const calendarViewBtn = document.getElementById('calendarViewBtn');
+    const scheduleCardView = document.getElementById('scheduleCardView');
+    const scheduleCalendarView = document.getElementById('scheduleCalendarView');
+
+    cardViewBtn.addEventListener('click', function() {
+        scheduleCardView.style.display = 'grid';
+        scheduleCalendarView.style.display = 'none';
+        cardViewBtn.classList.add('active');
+        calendarViewBtn.classList.remove('active');
+    });
+
+    calendarViewBtn.addEventListener('click', function() {
+        scheduleCardView.style.display = 'none';
+        scheduleCalendarView.style.display = 'block';
+        cardViewBtn.classList.remove('active');
+        calendarViewBtn.classList.add('active');
+        if (!calendarViewBtn.hasAttribute('data-calendar-initialized')) {
+            initializeCalendar();
+            calendarViewBtn.setAttribute('data-calendar-initialized', 'true');
+        }
+    });
+
+    function initializeCalendar() {
+        const calendarEl = document.getElementById('scheduleCalendarView');
+        const calendar = new FullCalendar.Calendar(calendarEl, {
+            initialView: 'dayGridMonth',
+            events: [
+                {% for schedule in schedules %}
+                {
+                    title: '{{ schedule.title }}',
+                    start: '{{ schedule.start_time.isoformat() }}',
+                    end: '{{ schedule.end_time.isoformat() }}',
+                    url: '{{ url_for("schedules.edit_schedule", id=schedule.id) }}'
+                },
+                {% endfor %}
+            ]
+        });
+        calendar.render();
+    }
+});
+</script>
 {% endblock %}
