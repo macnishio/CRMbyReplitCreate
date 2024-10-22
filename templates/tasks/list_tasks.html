@@ -9,7 +9,7 @@
         <p><strong>説明:</strong> {{ task.description }}</p>
         <p><strong>期限:</strong> {{ task.due_date.strftime('%Y-%m-%d') if task.due_date else 'N/A' }}</p>
         <p><strong>ステータス:</strong> {{ task.status }}</p>
-        <p><strong>完了:</strong> {{ '完了' if task.completed else '未完了' }}</p>
+        <p><strong>完了:</strong> <span class="{{ 'completed' if task.completed else 'not-completed' }}">{{ '完了' if task.completed else '未完了' }}</span></p>
         <div class="card-actions">
             <a href="{{ url_for('tasks.edit_task', id=task.id) }}" class="btn btn-edit">編集</a>
             <a href="{{ url_for('tasks.delete_task', id=task.id) }}" class="btn btn-delete" onclick="return confirm('本当にこのタスクを削除しますか？');">削除</a>
