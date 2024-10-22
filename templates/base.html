@@ -28,11 +28,24 @@
             <header class="header">
                 <div class="logo">CRM System</div>
                 <div class="user-profile">
-                    <span>ようこそ、{{ current_user.username }}さん</span>
-                    <i class="fas fa-user-circle avatar"></i>
+                    {% if current_user.is_authenticated %}
+                        <span>ようこそ、{{ current_user.username }}さん</span>
+                        <a href="{{ url_for('auth.logout') }}" class="btn btn-logout"><i class="fas fa-sign-out-alt"></i> ログアウト</a>
+                        <i class="fas fa-user-circle avatar"></i>
+                    {% else %}
+                        <a href="{{ url_for('auth.login') }}" class="btn btn-login"><i class="fas fa-sign-in-alt"></i> ログイン</a>
+                        <a href="{{ url_for('auth.register') }}" class="btn btn-register"><i class="fas fa-user-plus"></i> 新規登録</a>
+                    {% endif %}
                 </div>
             </header>
             <main>
+                {% with messages = get_flashed_messages(with_categories=true) %}
+                    {% if messages %}
+                        {% for category, message in messages %}
+                            <div class="alert alert-{{ category }}">{{ message }}</div>
+                        {% endfor %}
+                    {% endif %}
+                {% endwith %}
                 {% block content %}{% endblock %}
             </main>
             <footer class="footer">

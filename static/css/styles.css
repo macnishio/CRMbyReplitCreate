@@ -47,7 +47,7 @@ body {
 .main-content {
     flex-grow: 1;
     padding: 20px;
-    margin-left: 250px; /* Match sidebar width */
+    margin-left: 50px;
 }
 
 /* Header styles */
@@ -68,6 +68,7 @@ body {
 .user-profile {
     display: flex;
     align-items: center;
+    gap: 10px;
 }
 
 .user-profile span {
@@ -77,6 +78,62 @@ body {
 .avatar {
     font-size: 24px;
     color: white;
+}
+
+/* Authentication buttons */
+.btn-login,
+.btn-logout,
+.btn-register {
+    padding: 8px 15px;
+    border-radius: 4px;
+    text-decoration: none;
+    color: white;
+    font-weight: bold;
+    transition: background-color 0.3s;
+}
+
+.btn-login {
+    background-color: #3498db;
+}
+
+.btn-logout {
+    background-color: #e74c3c;
+}
+
+.btn-register {
+    background-color: #2ecc71;
+}
+
+.btn-login:hover,
+.btn-logout:hover,
+.btn-register:hover {
+    opacity: 0.9;
+}
+
+/* Alert messages */
+.alert {
+    padding: 15px;
+    margin-bottom: 20px;
+    border: 1px solid transparent;
+    border-radius: 4px;
+}
+
+.alert-success {
+    color: #155724;
+    background-color: #d4edda;
+    border-color: #c3e6cb;
+}
+
+.alert-error {
+    color: #721c24;
+    background-color: #f8d7da;
+    border-color: #f5c6cb;
+}
+
+.alert-info {
+    color: #0c5460;
+    background-color: #d1ecf1;
+    border-color: #bee5eb;
 }
 
 /* Footer styles */
@@ -113,6 +170,7 @@ body {
 
     .user-profile {
         margin-top: 10px;
+        flex-wrap: wrap;
     }
 }
 
