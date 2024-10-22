@@ -1,0 +1,22 @@
+{% extends "base.html" %}
+{% block title %}商談一覧{% endblock %}
+{% block content %}
+<h1>商談一覧</h1>
+<div class="opportunity-grid">
+    {% for opportunity in opportunities %}
+    <div class="opportunity-card">
+        <h2>{{ opportunity.name }}</h2>
+        <p><strong>ステージ:</strong> {{ opportunity.stage }}</p>
+        <p><strong>金額:</strong> ¥{{ "{:,}".format(opportunity.amount) }}</p>
+        <p><strong>締切日:</strong> {{ opportunity.close_date.strftime('%Y-%m-%d') if opportunity.close_date else 'N/A' }}</p>
+        <div class="card-actions">
+            <a href="{{ url_for('opportunities.edit_opportunity', id=opportunity.id) }}" class="btn btn-edit">編集</a>
+            <a href="{{ url_for('opportunities.delete_opportunity', id=opportunity.id) }}" class="btn btn-delete" onclick="return confirm('本当にこの商談を削除しますか？');">削除</a>
+        </div>
+    </div>
+    {% endfor %}
+</div>
+<div class="add-opportunity">
+    <a href="{{ url_for('opportunities.add_opportunity') }}" class="btn btn-add">新規商談を追加</a>
+</div>
+{% endblock %}
