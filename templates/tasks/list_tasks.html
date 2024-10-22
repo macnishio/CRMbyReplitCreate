@@ -2,75 +2,22 @@
 {% block title %}タスク一覧{% endblock %}
 {% block content %}
 <h1>タスク一覧</h1>
-<div class="task-controls">
-    <button id="toggleCompletedTasks" class="btn btn-secondary">完了したタスクを表示/非表示</button>
-</div>
 <div class="task-grid">
     {% for task in tasks %}
-    <div class="task-card {% if task.completed %}completed{% endif %}" data-priority="{{ task.priority }}">
-        <div class="task-header">
-            <h2>{{ task.title }}</h2>
-            <span class="task-status {{ task.status.lower() }}">{{ task.status }}</span>
-        </div>
-        <p class="task-description">{{ task.description }}</p>
-        <div class="task-details">
-            <p><i class="fas fa-calendar-alt"></i> 期限: {{ task.due_date.strftime('%Y-%m-%d') if task.due_date else 'なし' }}</p>
-            <p><i class="fas fa-check-circle"></i> 完了: <span class="{{ 'completed' if task.completed else 'not-completed' }}">{{ '完了' if task.completed else '未完了' }}</span></p>
-            {% if task.subtasks %}
-            <div class="subtask-progress">
-                <div class="progress-bar" style="width: {{ (task.completed_subtasks / task.total_subtasks) * 100 }}%"></div>
-                <span>{{ task.completed_subtasks }}/{{ task.total_subtasks }} サブタスク完了</span>
-            </div>
-            {% endif %}
-        </div>
+    <div class="task-card">
+        <h2>{{ task.title }}</h2>
+        <p><strong>説明:</strong> {{ task.description }}</p>
+        <p><strong>期限:</strong> {{ task.due_date.strftime('%Y-%m-%d') if task.due_date else 'N/A' }}</p>
+        <p><strong>ステータス:</strong> {{ task.status }}</p>
+        <p><strong>完了:</strong> <span class="{{ 'completed' if task.completed else 'not-completed' }}">{{ '完了' if task.completed else '未完了' }}</span></p>
         <div class="card-actions">
-            <button class="btn btn-toggle-complete" data-task-id="{{ task.id }}">
-                <i class="fas {% if task.completed %}fa-times-circle{% else %}fa-check-circle{% endif %}"></i>
-                {{ '未完了にする' if task.completed else '完了にする' }}
-            </button>
-            <div class="action-buttons">
-                <a href="{{ url_for('tasks.edit_task', id=task.id) }}" class="btn btn-edit"><i class="fas fa-edit"></i> 編集</a>
-                <a href="{{ url_for('tasks.delete_task', id=task.id) }}" class="btn btn-delete" onclick="return confirm('本当にこのタスクを削除しますか？');"><i class="fas fa-trash-alt"></i> 削除</a>
-            </div>
+            <a href="{{ url_for('tasks.edit_task', id=task.id) }}" class="btn btn-edit">編集</a>
+            <a href="{{ url_for('tasks.delete_task', id=task.id) }}" class="btn btn-delete" onclick="return confirm('本当にこのタスクを削除しますか？');">削除</a>
         </div>
     </div>
     {% endfor %}
 </div>
 <div class="add-task">
-    <a href="{{ url_for('tasks.add_task') }}" class="btn btn-add"><i class="fas fa-plus"></i> 新規タスクを追加</a>
+    <a href="{{ url_for('tasks.add_task') }}" class="btn btn-add">新規タスクを追加</a>
 </div>
-{% endblock %}
-
-{% block extra_scripts %}
-<script>
-document.addEventListener('DOMContentLoaded', function() {
-    const toggleCompletedTasksBtn = document.getElementById('toggleCompletedTasks');
-    const taskCards = document.querySelectorAll('.task-card');
-
-    toggleCompletedTasksBtn.addEventListener('click', function() {
-        taskCards.forEach(card => {
-            if (card.classList.contains('completed')) {
-                card.classList.toggle('hidden');
-            }
-        });
-    });
-
-    document.querySelectorAll('.btn-toggle-complete').forEach(btn => {
-        btn.addEventListener('click', function() {
-            const taskId = this.getAttribute('data-task-id');
-            fetch(`/tasks/${taskId}/toggle`, { method: 'POST' })
-                .then(response => response.json())
-                .then(data => {
-                    if (data.success) {
-                        const card = this.closest('.task-card');
-                        card.classList.toggle('completed');
-                        this.innerHTML = card.classList.contains('completed') ?
-                            '<i class="fas fa-times-circle"></i> 未完了にする' :
-                            '<i class="fas fa-check-circle"></i> 完了にする';
-                    }
-                });
-        });
-    });
-});
-</script>
 {% endblock %}

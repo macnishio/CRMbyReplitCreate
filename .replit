@@ -180,7 +180,7 @@ agentRequireRestartOnSave = false
 
 [[workflows.workflow.tasks]]
 task = "shell.exec"
-args = "flask db migrate -m 'Add priority and subtasks to Task model'"
+args = "flask db migrate -m 'Add completed field to Task model'"
 
 [deployment]
 run = ["sh", "-c", "python app.py"]
