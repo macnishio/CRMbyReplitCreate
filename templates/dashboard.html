@@ -1,64 +1,37 @@
 {% extends "base.html" %}
 {% block title %}ダッシュボード{% endblock %}
 {% block content %}
-<div class="dashboard-container">
-    <header class="header">
-        <div class="logo">CRM System</div>
-        <div class="user-profile">
-            <span>ようこそ、{{ current_user.username }}さん</span>
-            <img src="{{ url_for('static', filename='images/default-avatar.png') }}" alt="User Avatar" class="avatar">
-        </div>
-    </header>
-    <nav class="sidebar">
-        <ul>
-            <li><a href="{{ url_for('main.dashboard') }}"><i class="fas fa-tachometer-alt"></i> ダッシュボード</a></li>
-            <li><a href="{{ url_for('leads.list_leads') }}"><i class="fas fa-user-friends"></i> リード</a></li>
-            <li><a href="{{ url_for('reports.index') }}"><i class="fas fa-chart-bar"></i> 報告</a></li>
-            <li><a href="#"><i class="fas fa-yen-sign"></i> 売上</a></li>
-            <li><a href="#"><i class="fas fa-briefcase"></i> 案件</a></li>
-            <li><a href="#"><i class="fas fa-bullhorn"></i> キャンペーン</a></li>
-            <li><a href="{{ url_for('tasks.list_tasks') }}"><i class="fas fa-tasks"></i> タスク</a></li>
-            <li><a href="{{ url_for('schedules.list_schedules') }}"><i class="fas fa-calendar-alt"></i> スケジュール</a></li>
-            <li><a href="#"><i class="fas fa-cog"></i> 設定</a></li>
-        </ul>
-    </nav>
-    <main class="main-content">
-        <h1>ダッシュボード</h1>
-        <div class="metric-cards">
-            <div class="metric-card">
-                <i class="fas fa-user"></i>
-                <h2>新規リード</h2>
-                <p class="metric-value">{{ new_leads_count }}</p>
-            </div>
-            <div class="metric-card">
-                <i class="fas fa-chart-line"></i>
-                <h2>進行中の商談</h2>
-                <p class="metric-value">{{ ongoing_opportunities_count }}</p>
-            </div>
-            <div class="metric-card">
-                <i class="fas fa-yen-sign"></i>
-                <h2>今月の売上</h2>
-                <p class="metric-value">¥{{ "{:,}".format(this_month_revenue) }}</p>
-            </div>
-            <div class="metric-card">
-                <i class="fas fa-check-circle"></i>
-                <h2>完了タスク</h2>
-                <p class="metric-value">{{ completed_tasks_count }}</p>
-            </div>
-        </div>
-        <section class="recent-activity">
-            <h2>最近のアクティビティ</h2>
-            <ul>
-                {% for activity in recent_activities %}
-                    <li>{{ activity }}</li>
-                {% else %}
-                    <li>最近のアクティビティはありません</li>
-                {% endfor %}
-            </ul>
-        </section>
-    </main>
-    <footer class="footer">
-        <p>&copy; 2024 CRM System. All rights reserved.</p>
-    </footer>
+<h1>ダッシュボード</h1>
+<div class="metric-cards">
+    <div class="metric-card">
+        <i class="fas fa-user"></i>
+        <h2>新規リード</h2>
+        <p class="metric-value">{{ new_leads_count }}</p>
+    </div>
+    <div class="metric-card">
+        <i class="fas fa-chart-line"></i>
+        <h2>進行中の商談</h2>
+        <p class="metric-value">{{ ongoing_opportunities_count }}</p>
+    </div>
+    <div class="metric-card">
+        <i class="fas fa-yen-sign"></i>
+        <h2>今月の売上</h2>
+        <p class="metric-value">¥{{ "{:,}".format(this_month_revenue) }}</p>
+    </div>
+    <div class="metric-card">
+        <i class="fas fa-check-circle"></i>
+        <h2>完了タスク</h2>
+        <p class="metric-value">{{ completed_tasks_count }}</p>
+    </div>
 </div>
+<section class="recent-activity">
+    <h2>最近のアクティビティ</h2>
+    <ul>
+        {% for activity in recent_activities %}
+            <li>{{ activity }}</li>
+        {% else %}
+            <li>最近のアクティビティはありません</li>
+        {% endfor %}
+    </ul>
+</section>
 {% endblock %}
