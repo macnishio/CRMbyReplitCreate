@@ -13,7 +13,7 @@ def list_schedules():
     schedules = Schedule.query.filter_by(user_id=current_user.id).all()
     return render_template('schedules/list_schedules.html', schedules=schedules)
 
-@bp.route('/add', methods=['GET', 'POST'])
+@bp.route('/add_schedule', methods=['GET', 'POST'])
 @login_required
 def add_schedule():
     form = ScheduleForm()

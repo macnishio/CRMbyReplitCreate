@@ -1,0 +1,70 @@
+INFO:werkzeug:172.31.196.109 - - [22/Oct/2024 19:10:10] "GET /schedules/ HTTP/1.1" 500 -
+INFO:httpx:HTTP Request: POST https://api.anthropic.com/v1/complete "HTTP/1.1 200 OK"
+INFO:app:Received response from Anthropic API
+INFO:app:Processing email - Sender: notify@zohoconnect.com, Subject: Junya Nakano さんがグループ「 Zoho Champion 」でコメントしました, Date: 2024-10-22 06:13:26
+INFO:app:Attempting to create Anthropic client with API key starting with: sk-an...
+INFO:app:Anthropic client created successfully
+INFO:app:Sending request to Anthropic API
+ERROR:app:Exception on /schedules/ [GET]
+Traceback (most recent call last):
+  File "/home/runner/CRM/.pythonlibs/lib/python3.11/site-packages/flask/app.py", line 2529, in wsgi_app
+    response = self.full_dispatch_request()
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/runner/CRM/.pythonlibs/lib/python3.11/site-packages/flask/app.py", line 1825, in full_dispatch_request
+    rv = self.handle_user_exception(e)
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/runner/CRM/.pythonlibs/lib/python3.11/site-packages/flask/app.py", line 1823, in full_dispatch_request
+    rv = self.dispatch_request()
+         ^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/runner/CRM/.pythonlibs/lib/python3.11/site-packages/flask/app.py", line 1799, in dispatch_request
+    return self.ensure_sync(self.view_functions[rule.endpoint])(**view_args)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/runner/CRM/.pythonlibs/lib/python3.11/site-packages/flask_login/utils.py", line 290, in decorated_view
+    return current_app.ensure_sync(func)(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/runner/CRM/routes/schedules.py", line 14, in list_schedules
+    return render_template('schedules/list_schedules.html', schedules=schedules)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/runner/CRM/.pythonlibs/lib/python3.11/site-packages/flask/templating.py", line 147, in render_template
+    return _render(app, template, context)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/runner/CRM/.pythonlibs/lib/python3.11/site-packages/flask/templating.py", line 130, in _render
+    rv = template.render(context)
+         ^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/runner/CRM/.pythonlibs/lib/python3.11/site-packages/jinja2/environment.py", line 1304, in render
+    self.environment.handle_exception()
+  File "/home/runner/CRM/.pythonlibs/lib/python3.11/site-packages/jinja2/environment.py", line 939, in handle_exception
+    raise rewrite_traceback_stack(source=source)
+  File "/home/runner/CRM/templates/schedules/list_schedules.html", line 1, in top-level template code
+    {% extends "base.html" %}
+  File "/home/runner/CRM/templates/base.html", line 36, in top-level template code
+    {% block content %}{% endblock %}
+    ^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/runner/CRM/templates/schedules/list_schedules.html", line 27, in block 'content'
+    <a href="{{ url_for('schedules.add') }}" class="btn btn-add">新規スケジュールを追加</a>
+    ^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/runner/CRM/.pythonlibs/lib/python3.11/site-packages/flask/app.py", line 2034, in url_for
+    return self.handle_url_build_error(error, endpoint, values)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/runner/CRM/.pythonlibs/lib/python3.11/site-packages/flask/app.py", line 2023, in url_for
+    rv = url_adapter.build(  # type: ignore[union-attr]
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/runner/CRM/.pythonlibs/lib/python3.11/site-packages/werkzeug/routing/map.py", line 917, in build
+    raise BuildError(endpoint, values, method, self)
+werkzeug.routing.exceptions.BuildError: Could not build url for endpoint 'schedules.add_schedule'. Did you mean 'schedules.edit_schedule' instead?
+INFO:werkzeug:172.31.196.109 - - [22/Oct/2024 19:10:22] "GET /schedules/ HTTP/1.1" 500 -
+INFO:httpx:HTTP Request: POST https://api.anthropic.com/v1/complete "HTTP/1.1 200 OK"
+INFO:app:Received response from Anthropic API
+INFO:app:Processing email - Sender: sayaka.tonoshita@cerebrix.jp, Subject: 頭一つ、いや二つ抜ける営業, Date: 2024-10-22 05:26:18
+INFO:app:Attempting to create Anthropic client with API key starting with: sk-an...
+INFO:app:Anthropic client created successfully
+INFO:app:Sending request to Anthropic API
+INFO:httpx:HTTP Request: POST https://api.anthropic.com/v1/complete "HTTP/1.1 200 OK"
+INFO:app:Received response from Anthropic API
+ERROR:app:Error storing AI analysis results: (psycopg2.errors.NotNullViolation) null value in column "amount" of relation "opportunities" violates not-null constraint
+DETAIL:  Failing row contains (1099, セールステクの知識を得ることで、会社に新た..., New, null, null, 1, 14, null).
+
+[SQL: INSERT INTO opportunities (name, stage, amount, close_date, user_id, lead_id) SELECT p0::VARCHAR, p1::VARCHAR, p2::FLOAT, p3::TIMESTAMP WITHOUT TIME ZONE, p4::INTEGER, p5::INTEGER FROM (VALUES (%(name__0)s, %(stage__0)s, %(amount__0)s, %(close_date__ ... 161 characters truncated ...  p3, p4, p5, sen_counter) ORDER BY sen_counter RETURNING opportunities.id, opportunities.id AS id__1]
+[parameters: {'stage__0': 'New', 'user_id__0': 1, 'close_date__0': None, 'amount__0': None, 'lead_id__0': 14, 'name__0': 'セールステクの知識を得ることで、会社に新たな提案ができるようになり、重宝される人材になれる機会がある。', 'stage__1': 'New', 'user_id__1': 1, 'close_date__1': None, 'amount__1': None, 'lead_id__1': 14, 'name__1': 'お客様との営業の際に市場感覚を踏まえた会話ができるようになる機会がある。'}]
+(Background on this error at: https://sqlalche.me/e/20/gkpj)
+INFO:app:Processing email - Sender: feedback@moneyforward.com, Subject: 【疲労感軽減ドリンク】特別お試し価格！（マネーフォワードPR）, Date: 2024-10-22 05:11:30
