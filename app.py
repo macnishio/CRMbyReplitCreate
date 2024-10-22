@@ -37,7 +37,7 @@ def create_app(config_name='default'):
         app.logger.error("CLAUDE_API_KEY is missing from environment variables")
 
     # Register blueprints
-    from routes import main, auth, leads, opportunities, accounts, reports, tracking, mobile, schedules, tasks
+    from routes import main, auth, leads, opportunities, accounts, reports, tracking, mobile, schedules, tasks, settings
     app.register_blueprint(main.bp)
     app.register_blueprint(auth.bp)
     app.register_blueprint(leads.bp)
@@ -48,6 +48,7 @@ def create_app(config_name='default'):
     app.register_blueprint(mobile.bp)
     app.register_blueprint(schedules.bp)
     app.register_blueprint(tasks.bp)
+    app.register_blueprint(settings.bp)
 
     # Set up email scheduler
     with app.app_context():
