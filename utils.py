@@ -21,7 +21,7 @@ def decode_mime_words(s, depth=0):
                 if match:
                     charset, encoding, encoded_text = match.groups()
                     if encoding.upper() == 'B':
-                        decoded = base64.b64decode(encoded_text).decode(charset, errors='replace')
+                        decoded = base64.b64decode(encoded_text + '==').decode(charset, errors='replace')
                     elif encoding.upper() == 'Q':
                         decoded = quopri.decodestring(encoded_text).decode(charset, errors='replace')
                     return decoded
@@ -45,6 +45,18 @@ def decode_mime_words(s, depth=0):
     # UTF-8でエンコードされた16進数表現を直接デコード
     utf8_hex_pattern = r'=([0-9A-Fa-f]{2})'
     if re.search(utf8_hex_pattern, result):
-        result = re.sub(utf8_hex_pattern, lambda m: bytes.fromhex(m.group(1)).decode('utf-8'), result)
+        try:
+            result = re.sub(utf8_hex_pattern, lambda m: bytes.fromhex(m.group(1)).decode('utf-8'), result)
+        except UnicodeDecodeError:
+            # 不完全なUTF-8シーケンスの場合、可能な限りデコード
+            hex_bytes = re.findall(utf8_hex_pattern, result)
+            decoded_chars = []
+            for i in range(0, len(hex_bytes), 3):
+                try:
+                    char = bytes.fromhex(''.join(hex_bytes[i:i+3])).decode('utf-8')
+                    decoded_chars.append(char)
+                except:
+                    break
+            result = result.split('=')[0] + ''.join(decoded_chars)
     
     return result.strip()

@@ -83,6 +83,10 @@ args = "Initialize DB"
 task = "workflow.run"
 args = "Flask App"
 
+[[workflows.workflow.tasks]]
+task = "workflow.run"
+args = "Initialize Database"
+
 [[workflows.workflow]]
 name = "Run Flask App"
 author = "agent"
@@ -287,6 +291,17 @@ agentRequireRestartOnSave = false
 task = "shell.exec"
 args = "python app.py"
 waitForPort = 5000
+
+[[workflows.workflow]]
+name = "Initialize Database"
+author = "agent"
+
+[workflows.workflow.metadata]
+agentRequireRestartOnSave = false
+
+[[workflows.workflow.tasks]]
+task = "shell.exec"
+args = "rm -rf migrations && flask db init && flask db migrate -m 'Initial migration with all models' && flask db upgrade"
 
 [deployment]
 run = ["sh", "-c", "python app.py"]
