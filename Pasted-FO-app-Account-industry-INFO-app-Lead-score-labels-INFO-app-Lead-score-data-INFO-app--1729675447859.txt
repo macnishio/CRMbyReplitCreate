@@ -1,0 +1,57 @@
+FO:app:Account industry: []
+INFO:app:Lead score labels: []
+INFO:app:Lead score data: []
+INFO:app:Task status: []
+INFO:app:Task due date: []
+INFO:werkzeug:172.31.196.40 - - [23/Oct/2024 09:23:22] "GET /reports/ HTTP/1.1" 200 -
+INFO:werkzeug:172.31.196.40 - - [23/Oct/2024 09:23:22] "GET /static/css/styles.css HTTP/1.1" 304 -
+INFO:werkzeug:172.31.196.40 - - [23/Oct/2024 09:23:22] "GET /static/js/main.js HTTP/1.1" 304 -
+INFO:werkzeug:172.31.196.40 - - [23/Oct/2024 09:23:24] "GET /opportunities HTTP/1.1" 200 -
+INFO:werkzeug:172.31.196.40 - - [23/Oct/2024 09:23:24] "GET /static/js/main.js HTTP/1.1" 304 -
+INFO:werkzeug:172.31.196.40 - - [23/Oct/2024 09:23:24] "GET /static/css/styles.css HTTP/1.1" 304 -
+ERROR:app:Exception on /tasks/ [GET]
+Traceback (most recent call last):
+  File "/home/runner/CRM/.pythonlibs/lib/python3.11/site-packages/flask/app.py", line 2529, in wsgi_app
+    response = self.full_dispatch_request()
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/runner/CRM/.pythonlibs/lib/python3.11/site-packages/flask/app.py", line 1825, in full_dispatch_request
+    rv = self.handle_user_exception(e)
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/runner/CRM/.pythonlibs/lib/python3.11/site-packages/flask/app.py", line 1823, in full_dispatch_request
+    rv = self.dispatch_request()
+         ^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/runner/CRM/.pythonlibs/lib/python3.11/site-packages/flask/app.py", line 1799, in dispatch_request
+    return self.ensure_sync(self.view_functions[rule.endpoint])(**view_args)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/runner/CRM/.pythonlibs/lib/python3.11/site-packages/flask_login/utils.py", line 290, in decorated_view
+    return current_app.ensure_sync(func)(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/runner/CRM/routes/tasks.py", line 13, in list_tasks
+    return render_template('tasks/list_tasks.html', tasks=tasks, now=datetime.now)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/runner/CRM/.pythonlibs/lib/python3.11/site-packages/flask/templating.py", line 146, in render_template
+    template = app.jinja_env.get_or_select_template(template_name_or_list)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/runner/CRM/.pythonlibs/lib/python3.11/site-packages/jinja2/environment.py", line 1084, in get_or_select_template
+    return self.get_template(template_name_or_list, parent, globals)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/runner/CRM/.pythonlibs/lib/python3.11/site-packages/jinja2/environment.py", line 1013, in get_template
+    return self._load_template(name, globals)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/runner/CRM/.pythonlibs/lib/python3.11/site-packages/jinja2/environment.py", line 972, in _load_template
+    template = self.loader.load(self, name, self.make_globals(globals))
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/runner/CRM/.pythonlibs/lib/python3.11/site-packages/jinja2/loaders.py", line 138, in load
+    code = environment.compile(source, name, filename)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/runner/CRM/.pythonlibs/lib/python3.11/site-packages/jinja2/environment.py", line 768, in compile
+    self.handle_exception(source=source_hint)
+  File "/home/runner/CRM/.pythonlibs/lib/python3.11/site-packages/jinja2/environment.py", line 939, in handle_exception
+    raise rewrite_traceback_stack(source=source)
+  File "/home/runner/CRM/templates/tasks/list_tasks.html", line 24, in template
+    {% for task in pending_tasks|sort(attribute='due_date')[:3] %}
+    ^^^^^^^^^^^^^^^^^^^^^^^^^
+jinja2.exceptions.TemplateSyntaxError: expected token 'end of statement block', got '['
+INFO:werkzeug:172.31.196.40 - - [23/Oct/2024 09:23:31] "GET /tasks/ HTTP/1.1" 500 -
+INFO:werkzeug:172.31.196.40 - - [23/Oct/2024 09:23:36] "GET /schedules/ HTTP/1.1" 200 -
+INFO:werkzeug:172.31.196.40 - - [23/Oct/2024 09:23:36] "GET /static/css/st

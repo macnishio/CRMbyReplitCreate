@@ -1,0 +1,27 @@
+'FLASK_ENV' is deprecated and will not be used in Flask 2.3. Use 'FLASK_DEBUG' instead.
+/home/runner/CRM/.pythonlibs/lib/python3.11/site-packages/flask_limiter/extension.py:336: UserWarning: Using the in-memory storage for tracking rate limits as no storage was explicitly specified. This is not recommended for production use. See: https://flask-limiter.readthedocs.io#configuring-a-storage-backend for documentation about configuring the storage backend.
+  warnings.warn(
+DEBUG:app:Database URL: postgresql://neondb_owner:joi1vh0dIADb@[REDACTED]
+ERROR:app:CLAUDE_API_KEY is missing from environment variables
+Traceback (most recent call last):
+  File "<string>", line 8, in <module>
+  File "/home/runner/CRM/app.py", line 50, in create_app
+    app.register_blueprint(tasks.bp)
+  File "/home/runner/CRM/.pythonlibs/lib/python3.11/site-packages/flask/scaffold.py", line 50, in wrapper_func
+    return f(self, *args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/runner/CRM/.pythonlibs/lib/python3.11/site-packages/flask/app.py", line 1299, in register_blueprint
+    blueprint.register(self, options)
+  File "/home/runner/CRM/.pythonlibs/lib/python3.11/site-packages/flask/blueprints.py", line 439, in register
+    deferred(state)
+  File "/home/runner/CRM/.pythonlibs/lib/python3.11/site-packages/flask/blueprints.py", line 494, in <lambda>
+    lambda s: s.add_url_rule(
+              ^^^^^^^^^^^^^^^
+  File "/home/runner/CRM/.pythonlibs/lib/python3.11/site-packages/flask/blueprints.py", line 112, in add_url_rule
+    self.app.add_url_rule(
+  File "/home/runner/CRM/.pythonlibs/lib/python3.11/site-packages/flask/scaffold.py", line 50, in wrapper_func
+    return f(self, *args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/runner/CRM/.pythonlibs/lib/python3.11/site-packages/flask/app.py", line 1361, in add_url_rule
+    raise AssertionError(
+AssertionError: View function mapping is overwriting an existing endpoint function: tasks.list_tasks

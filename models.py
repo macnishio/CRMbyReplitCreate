@@ -39,8 +39,8 @@ class UserSettings(db.Model):
     mail_use_tls: Mapped[bool] = mapped_column(Boolean, default=True)
     mail_username: Mapped[str] = mapped_column(String(120))
     _mail_password: Mapped[str] = mapped_column('mail_password', String(255))
-    _claude_api_key: Mapped[str] = mapped_column('claude_api_key', String(255))
-    _clearbit_api_key: Mapped[str] = mapped_column('clearbit_api_key', String(255))
+    _claude_api_key: Mapped[Optional[str]] = mapped_column('claude_api_key', String(255), nullable=True)
+    _clearbit_api_key: Mapped[Optional[str]] = mapped_column('clearbit_api_key', String(255), nullable=True)
     created_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow)
     updated_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
 
@@ -128,10 +128,11 @@ class Opportunity(db.Model):
     id: Mapped[int] = mapped_column(Integer, primary_key=True)
     name: Mapped[str] = mapped_column(String(100), nullable=False)
     stage: Mapped[str] = mapped_column(String(20))
-    amount: Mapped[float] = mapped_column(Float)
-    close_date: Mapped[datetime] = mapped_column(DateTime)
+    amount: Mapped[float] = mapped_column(Float, nullable=True)  # Making amount nullable
+    close_date: Mapped[datetime] = mapped_column(DateTime, nullable=True)  # Making close_date nullable
     user_id: Mapped[int] = mapped_column(Integer, ForeignKey('users.id'), nullable=False)
     lead_id: Mapped[int] = mapped_column(Integer, ForeignKey('leads.id'), nullable=False)
+    account_id = db.Column(db.Integer, db.ForeignKey('accounts.id'))
 
     # リレーションシップ
     lead: Mapped["Lead"] = db.relationship('Lead', back_populates='opportunities')
@@ -152,10 +153,10 @@ class Schedule(db.Model):
     start_time: Mapped[datetime] = mapped_column(DateTime, nullable=False)
     end_time: Mapped[datetime] = mapped_column(DateTime, nullable=False)
     user_id: Mapped[int] = mapped_column(Integer, ForeignKey('users.id'), nullable=False)
-    lead_id: Mapped[int] = mapped_column(Integer, ForeignKey('leads.id'), nullable=False)
+    lead_id: Mapped[Optional[int]] = mapped_column(Integer, ForeignKey('leads.id'), nullable=True)  # Making lead_id nullable
 
     # リレーションシップ
-    lead: Mapped["Lead"] = db.relationship('Lead', back_populates='schedules')
+    lead: Mapped[Optional["Lead"]] = db.relationship('Lead', back_populates='schedules')
 
 class Task(db.Model):
     __tablename__ = 'tasks'
@@ -166,10 +167,10 @@ class Task(db.Model):
     status: Mapped[str] = mapped_column(String(20))
     completed: Mapped[bool] = mapped_column(Boolean, default=False)
     user_id: Mapped[int] = mapped_column(Integer, ForeignKey('users.id'), nullable=False)
-    lead_id: Mapped[int] = mapped_column(Integer, ForeignKey('leads.id'), nullable=False)
+    lead_id: Mapped[Optional[int]] = mapped_column(Integer, ForeignKey('leads.id'), nullable=True)  # Making lead_id nullable
 
     # リレーションシップ
-    lead: Mapped["Lead"] = db.relationship('Lead', back_populates='tasks')
+    lead: Mapped[Optional["Lead"]] = db.relationship('Lead', back_populates='tasks')
 
 class EmailFetchTracker(db.Model):
     __tablename__ = 'email_fetch_tracker'

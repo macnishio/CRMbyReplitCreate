@@ -3,16 +3,29 @@ from flask_login import login_required, current_user
 from models import Task
 from extensions import db
 from datetime import datetime
+from sqlalchemy import func
 
-bp = Blueprint('tasks', __name__)
+tasks_bp = Blueprint('tasks', __name__)
 
-@bp.route('/tasks/')
+@tasks_bp.route('/')
 @login_required
 def list_tasks():
     tasks = Task.query.filter_by(user_id=current_user.id).order_by(Task.due_date.asc()).all()
-    return render_template('tasks/list_tasks.html', tasks=tasks)
 
-@bp.route('/tasks/add', methods=['GET', 'POST'])
+    # Get task status counts
+    status_counts = db.session.query(
+        Task.status,
+        func.count(Task.id).label('count')
+    ).filter_by(user_id=current_user.id).group_by(Task.status).all()
+
+    task_status_counts = [{'status': status, 'count': count} for status, count in status_counts]
+
+    return render_template('tasks/list_tasks.html', 
+                         tasks=tasks,
+                         task_status_counts=task_status_counts,
+                         now=datetime.now)
+
+@tasks_bp.route('/add', methods=['GET', 'POST'])
 @login_required
 def add_task():
     if request.method == 'POST':
@@ -25,7 +38,8 @@ def add_task():
             description=description,
             due_date=due_date,
             status=status,
-            user_id=current_user.id
+            user_id=current_user.id,
+            lead_id=request.form.get('lead_id')  # Make lead_id optional
         )
         db.session.add(new_task)
         db.session.commit()
@@ -33,7 +47,9 @@ def add_task():
         return redirect(url_for('tasks.list_tasks'))
     return render_template('tasks/add_task.html')
 
-@bp.route('/tasks/edit/<int:id>', methods=['GET', 'POST'])
+# Add other task-related routes here (edit, delete, etc.)
+
+@tasks_bp.route('/tasks/edit/<int:id>', methods=['GET', 'POST'])
 @login_required
 def edit_task(id):
     task = Task.query.get_or_404(id)
@@ -51,7 +67,7 @@ def edit_task(id):
         return redirect(url_for('tasks.list_tasks'))
     return render_template('tasks/edit_task.html', task=task)
 
-@bp.route('/tasks/delete/<int:id>')
+@tasks_bp.route('/tasks/delete/<int:id>', methods=['GET', 'POST'])
 @login_required
 def delete_task(id):
     task = Task.query.get_or_404(id)

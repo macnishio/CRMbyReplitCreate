@@ -10,6 +10,7 @@ from config import config
 from extensions import db, migrate, login_manager, mail, limiter
 from email_receiver import fetch_emails, connect_to_email_server, setup_email_scheduler
 import logging
+from routes import tasks 
 
 def create_app(config_name='default'):
     app = Flask(__name__)
@@ -47,7 +48,7 @@ def create_app(config_name='default'):
     app.register_blueprint(tracking.bp)
     app.register_blueprint(mobile.bp)
     app.register_blueprint(schedules.bp)
-    app.register_blueprint(tasks.bp)
+    app.register_blueprint(tasks.tasks_bp, url_prefix='/tasks')
     app.register_blueprint(settings.bp)
 
     # Set up email scheduler
