@@ -91,6 +91,22 @@ args = "Initialize Database"
 task = "workflow.run"
 args = "Flask Server"
 
+[[workflows.workflow.tasks]]
+task = "workflow.run"
+args = "Reset DB"
+
+[[workflows.workflow.tasks]]
+task = "workflow.run"
+args = "DB Init"
+
+[[workflows.workflow.tasks]]
+task = "workflow.run"
+args = "Reset And Init DB"
+
+[[workflows.workflow.tasks]]
+task = "workflow.run"
+args = "DB Setup"
+
 [[workflows.workflow]]
 name = "Run Flask App"
 author = "agent"
@@ -282,7 +298,11 @@ agentRequireRestartOnSave = false
 
 [[workflows.workflow.tasks]]
 task = "shell.exec"
-args = "rm -rf migrations && flask db init && flask db migrate -m 'Initial migration with all models' && flask db upgrade"
+args = """
+
+    rm -rf migrations &&     flask db init &&     flask db migrate -m 'Initial migration with all models' &&     flask db upgrade &&     python app.py
+    """
+waitForPort = 5000
 
 [[workflows.workflow]]
 name = "Flask App"
@@ -305,7 +325,11 @@ agentRequireRestartOnSave = false
 
 [[workflows.workflow.tasks]]
 task = "shell.exec"
-args = "rm -rf migrations && flask db init && flask db migrate -m 'Initial migration with all models' && flask db upgrade"
+args = """
+
+    rm -rf migrations &&     flask db init &&     flask db migrate -m 'Initial migration with all models including Task and UserSettings' &&     flask db upgrade &&     python app.py
+    """
+waitForPort = 5000
 
 [[workflows.workflow]]
 name = "Flask Server"
@@ -317,7 +341,63 @@ agentRequireRestartOnSave = false
 [[workflows.workflow.tasks]]
 task = "shell.exec"
 args = "python3 app.py"
-waitForPort = 5001
+waitForPort = 5000
+
+[[workflows.workflow]]
+name = "Reset DB"
+author = "agent"
+
+[workflows.workflow.metadata]
+agentRequireRestartOnSave = false
+
+[[workflows.workflow.tasks]]
+task = "shell.exec"
+args = """
+
+rm -rf migrations && flask db init && flask db migrate -m 'Initial migration with all models including Task and UserSettings' && flask db upgrade"""
+
+[[workflows.workflow]]
+name = "DB Init"
+author = "agent"
+
+[workflows.workflow.metadata]
+agentRequireRestartOnSave = false
+
+[[workflows.workflow.tasks]]
+task = "shell.exec"
+args = """
+
+    rm -rf migrations &&     flask db init &&     flask db migrate -m 'Initial migration with all models' &&     flask db upgrade
+    """
+
+[[workflows.workflow]]
+name = "Reset And Init DB"
+author = "agent"
+
+[workflows.workflow.metadata]
+agentRequireRestartOnSave = false
+
+[[workflows.workflow.tasks]]
+task = "shell.exec"
+args = """
+
+    export FLASK_APP=app.py &&     rm -rf migrations &&     flask db init &&     flask db migrate -m \"Initial migration with all models and tables\" &&     flask db upgrade &&     python app.py
+    """
+waitForPort = 5000
+
+[[workflows.workflow]]
+name = "DB Setup"
+author = "agent"
+
+[workflows.workflow.metadata]
+agentRequireRestartOnSave = false
+
+[[workflows.workflow.tasks]]
+task = "shell.exec"
+args = """
+
+    export FLASK_APP=app.py &&     export FLASK_ENV=development &&     rm -rf migrations &&     flask db init &&     flask db migrate -m \"Initial setup with all models\" &&     flask db upgrade
+    """
 
 [deployment]
 run = ["sh", "-c", "python3 app.py"]
