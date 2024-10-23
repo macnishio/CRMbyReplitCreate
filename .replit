@@ -278,7 +278,7 @@ agentRequireRestartOnSave = false
 
 [[workflows.workflow.tasks]]
 task = "shell.exec"
-args = "flask db init && flask db migrate -m 'Initial migration with all models' && flask db upgrade"
+args = "rm -rf migrations && flask db init && flask db migrate -m 'Initial migration with all models' && flask db upgrade"
 
 [[workflows.workflow]]
 name = "Flask App"
