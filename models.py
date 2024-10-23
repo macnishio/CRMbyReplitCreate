@@ -88,7 +88,7 @@ class UserSettings(db.Model):
 class Lead(db.Model):
     __tablename__ = 'leads'
     id: Mapped[int] = mapped_column(Integer, primary_key=True)
-    name: Mapped[str] = mapped_column(String(100), nullable=False)
+    name: Mapped[str] = mapped_column(String(255), nullable=False)
     email: Mapped[Optional[str]] = mapped_column(String(120), nullable=True)
     phone: Mapped[Optional[str]] = mapped_column(String(20), nullable=True)
     status: Mapped[str] = mapped_column(String(20), nullable=False, default='New')
@@ -108,7 +108,7 @@ class Email(db.Model):
     __tablename__ = 'emails'
     id: Mapped[int] = mapped_column(Integer, primary_key=True)
     sender: Mapped[str] = mapped_column(String(120), nullable=False)
-    sender_name: Mapped[str] = mapped_column(String(100))
+    sender_name: Mapped[str] = mapped_column(String(255))
     subject: Mapped[str] = mapped_column(String(200))
     content: Mapped[str] = mapped_column(Text)
     received_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow)
