@@ -1,4 +1,4 @@
-from flask import Blueprint, render_template, redirect, url_for, flash, request, current_app, jsonify
+from flask import Blueprint, render_template, redirect, url_for, flash, request, current_app
 from flask_login import login_required, current_user
 from models import Lead, Email
 from extensions import db
@@ -40,32 +40,6 @@ def update_empty_names():
         flash('リード名の更新中にエラーが発生しました。', 'error')
         
     return redirect(url_for('leads.list_leads'))
-
-@bp.route('/api/leads/<int:lead_id>/emails')
-@login_required
-def get_lead_emails(lead_id):
-    try:
-        lead = Lead.query.get_or_404(lead_id)
-        if lead.user_id != current_user.id:
-            return jsonify([])
-            
-        emails = Email.query.filter_by(
-            lead_id=lead_id
-        ).order_by(Email.received_date.desc()).all()
-        
-        email_list = [{
-            'subject': email.subject,
-            'sender': email.sender,
-            'sender_name': email.sender_name,
-            'content': email.content,
-            'received_date': email.received_date.isoformat() if email.received_date else None
-        } for email in emails]
-        
-        return jsonify(email_list)
-        
-    except Exception as e:
-        current_app.logger.error(f"Error fetching emails for lead {lead_id}: {str(e)}")
-        return jsonify([])
 
 @bp.route('/')
 @bp.route('')

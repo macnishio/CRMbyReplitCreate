@@ -1,98 +1,117 @@
-# routes/auth.py
+import os
+from flask import Flask, render_template
+from flask_login import LoginManager
+from flask_migrate import Migrate
+from flask_talisman import Talisman
+from dotenv import load_dotenv
+from flask_limiter import Limiter
+from flask_limiter.util import get_remote_address
+import logging
+from logging.handlers import RotatingFileHandler
+from extensions import db, mail, scheduler, cache, init_app
+from email_receiver import setup_email_scheduler
+from routes.auth import bp as auth_bp
 
-from flask import Blueprint, render_template, redirect, url_for, flash, request, current_app
-from flask_login import login_user, logout_user, login_required, current_user
-from models import User, UserSettings
-from extensions import db
-from forms import LoginForm, RegistrationForm
-from werkzeug.urls import url_parse
-from datetime import datetime
-
-bp = Blueprint('auth', __name__)
-
-def is_safe_url(target):
-    ref_url = url_parse(request.host_url)
-    test_url = url_parse(url_for(target) if target.startswith('.')
-                        else target)
-    return test_url.scheme in ('http', 'https') and \
-           ref_url.netloc == test_url.netloc
-
-@bp.route('/login', methods=['GET', 'POST'])
-def login():
-    """ログイン処理"""
-    if current_user.is_authenticated:
-        return redirect(url_for('main.dashboard'))
-
-    form = LoginForm()
-    if form.validate_on_submit():
-        try:
-            user = User.query.filter_by(username=form.username.data).first()
-            if user is None or not user.check_password(form.password.data):
-                flash('ユーザー名またはパスワードが正しくありません', 'error')
-                return redirect(url_for('auth.login'))
-
-            login_user(user, remember=True)
-            next_page = request.args.get('next')
-            if not next_page or not is_safe_url(next_page):
-                next_page = url_for('main.dashboard')
-
-            return redirect(next_page)
-        except Exception as e:
-            current_app.logger.error(f"Login error: {str(e)}")
-            flash('ログイン処理中にエラーが発生しました', 'error')
-
-    return render_template('auth/login.html', title='ログイン', form=form)
-
-@bp.route('/logout')
-@login_required
-def logout():
-    """ログアウト処理"""
-    try:
-        user_email = current_user.email
-        logout_user()
-        flash('ログアウトしました', 'success')
-        current_app.logger.info(f"User logged out: {user_email}")
-    except Exception as e:
-        current_app.logger.error(f"Logout error: {str(e)}")
-        flash('ログアウト処理中にエラーが発生しました', 'error')
-
-    return redirect(url_for('auth.login'))
+logging.basicConfig(level=logging.DEBUG)
+load_dotenv()
 
 
-@bp.route('/register', methods=['GET', 'POST'])
-def register():
-    if current_user.is_authenticated:
-        return redirect(url_for('main.dashboard'))
+def create_app():
+    from models import User
+    from config import config
+    from email_utils import send_automated_follow_ups
 
-    form = RegistrationForm()  # フォームのインスタンスを作成
-    if form.validate_on_submit():
-        try:
-            user = User(
-                username=form.username.data,
-                email=form.email.data,
-                role='user'
-            )
-            user.set_password(form.password.data)
+    app = Flask(__name__)
+    app.config['SQLALCHEMY_ECHO'] = True
+    env = 'production' if os.environ.get('FLASK_DEBUG') != 'True' else 'development'
+    app.config.from_object(config[env])
+    config[env].init_app(app)
 
-            settings = UserSettings(
-                user=user,
-                mail_server='smtp.gmail.com',
-                mail_port=587,
-                mail_use_tls=True,
-                mail_username='',
-                mail_password='',
-                created_at=datetime.utcnow()
-            )
+    init_app(app)  # 拡張機能の初期化を一括で行う
 
-            db.session.add(user)
-            db.session.add(settings)
-            db.session.commit()
+    app.config['SCHEDULER_API_ENABLED'] = False
 
-            flash('アカウントが作成されました。ログインしてください。', 'success')
-            return redirect(url_for('auth.login'))
-        except Exception as e:
-            db.session.rollback()
-            current_app.logger.error(f"Registration error: {str(e)}")
-            flash('登録中にエラーが発生しました。', 'error')
+    limiter = Limiter(get_remote_address,
+                      app=app,
+                      default_limits=["200 per day", "50 per hour"],
+                      storage_uri="memory://")
 
-    return render_template('register.html', form=form)  # formをテンプレートに渡す
+    csp = {
+        'default-src': "'self'",
+        'script-src': "'self' 'unsafe-inline' https://cdn.jsdelivr.net",
+        'style-src': "'self' 'unsafe-inline'",
+        'img-src': "'self' data:",
+        'font-src': "'self'",
+        'form-action': "'self'",
+        'frame-ancestors': "'none'",
+    }
+    Talisman(app, content_security_policy=csp, force_https=True)
+
+    login_manager = LoginManager()
+    login_manager.login_view = 'auth.login'
+    login_manager.init_app(app)
+
+    @login_manager.user_loader
+    def load_user(user_id):
+        return db.session.get(User, int(user_id))
+
+    from routes import main, leads, opportunities, accounts, reports, tracking, mobile, schedules, tasks
+
+    app.register_blueprint(main.bp)
+    app.register_blueprint(auth_bp)
+    app.register_blueprint(leads.bp)
+    app.register_blueprint(opportunities.bp)
+    app.register_blueprint(accounts.bp)
+    app.register_blueprint(reports.bp)
+    app.register_blueprint(tracking.bp)
+    app.register_blueprint(mobile.bp)
+    app.register_blueprint(schedules.bp)
+    app.register_blueprint(tasks.bp)
+
+    migrate = Migrate(app, db)  # 必要に応じてextensions.py内で初期化
+
+    scheduler.add_job(id='send_automated_follow_ups',
+                      func=send_automated_follow_ups,
+                      trigger='interval',
+                      hours=24)
+    app.logger.info("Scheduled automated follow-ups job")
+
+    setup_email_scheduler(app)
+
+    if not app.debug:
+        if not os.path.exists('logs'):
+            os.mkdir('logs')
+        file_handler = RotatingFileHandler('logs/crm.log',
+                                           maxBytes=10240,
+                                           backupCount=10)
+        file_handler.setFormatter(
+            logging.Formatter(
+                '%(asctime)s %(levelname)s: %(message)s [in %(pathname)s:%(lineno)d]'
+            ))
+        file_handler.setLevel(logging.INFO)
+        app.logger.addHandler(file_handler)
+        app.logger.setLevel(logging.INFO)
+        app.logger.info('CRM startup')
+
+    @app.route('/dashboard')
+    def dashboard():
+        leads = 100
+        opportunities = 50
+        accounts = 30
+        return render_template('dashboard.html',
+                               leads=leads,
+                               opportunities=opportunities,
+                               accounts=accounts)
+
+    return app
+
+
+app = create_app()
+
+if __name__ == '__main__':
+    with app.app_context():
+        app.logger.info('Starting scheduler')
+        scheduler.start()
+        app.logger.info('Scheduler started')
+
+    app.run(host='0.0.0.0', port=5000)

@@ -51,44 +51,44 @@
         <button type="submit" class="btn btn-primary" onclick="return confirmBulkAction()">適用</button>
     </div>
 
-    <!-- AI Analysis Section -->
-    <div class="ai-analysis-section">
-        <div class="analysis-header" onclick="toggleAnalysis()">
-            <h2>タスク分析 <span class="toggle-icon">▼</span></h2>
-        </div>
-        <div class="analysis-content" id="analysisContent">
-            <div class="analysis-grid">
-                <!-- タスクの概要 -->
-                <div class="analysis-card">
-                    <h3>タスクの概要</h3>
-                    <p>完了タスク: {{ tasks|selectattr('completed', 'eq', true)|list|length }}</p>
-                    <p>未完了タスク: {{ tasks|selectattr('completed', 'eq', false)|list|length }}</p>
-                    <p>期限切れタスク: {{ tasks|selectattr('completed', 'eq', false)|selectattr('due_date', 'le', utcnow())|list|length }}</p>
-                </div>
+<!-- AI Analysis Section -->
+<div class="ai-analysis-section">
+    <div class="analysis-header" onclick="toggleAnalysis()">
+        <h2>タスク分析 <span class="toggle-icon">▼</span></h2>
+    </div>
+    <div class="analysis-content" id="analysisContent">
+        <div class="analysis-grid">
+            <!-- タスクの概要 -->
+            <div class="analysis-card">
+                <h3>タスクの概要</h3>
+                <p>完了タスク: {{ tasks|selectattr('completed', 'eq', true)|list|length }}</p>
+                <p>未完了タスク: {{ tasks|selectattr('completed', 'eq', false)|list|length }}</p>
+                <p>期限切れタスク: {{ tasks|selectattr('completed', 'eq', false)|selectattr('due_date', 'le', utcnow())|list|length }}</p>
+            </div>
 
-                <!-- ステータス分布 -->
-                <div class="analysis-card">
-                    <h3>ステータス分布</h3>
-                    <ul>
-                    {% for status in task_status_counts %}
-                        <li>{{ status.status }}: {{ status.count }}件</li>
-                    {% endfor %}
-                    </ul>
-                </div>
+            <!-- ステータス分布 -->
+            <div class="analysis-card">
+                <h3>ステータス分布</h3>
+                <ul>
+                {% for status in task_status_counts %}
+                    <li>{{ status.status }}: {{ status.count }}件</li>
+                {% endfor %}
+                </ul>
+            </div>
 
-                <!-- AI Insights -->
-                <div class="analysis-card">
-                    <h3>AI分析結果</h3>
-                    {% if ai_analysis %}
-                        {{ ai_analysis|safe }}
-                    {% else %}
-                        <p>AI分析を実行できませんでした。</p>
-                    {% endif %}
-                </div>
+            <!-- AI Insights -->
+            <div class="analysis-card">
+                <h3>AI分析結果</h3>
+                {% if ai_analysis %}
+                    {{ ai_analysis|safe }}
+                {% else %}
+                    <p>AI分析を実行できませんでした。</p>
+                {% endif %}
             </div>
         </div>
     </div>
-    
+</div>
+
 <!-- Task Grid -->
 <div class="task-grid">
     {% for task in tasks %}
@@ -111,11 +111,6 @@
                 <li><strong>スコア:</strong> {{ "%.1f"|format(task.lead.score) }}</li>
                 <li><strong>最終接触:</strong> {{ task.lead.last_contact.strftime('%Y-%m-%d %H:%M') if task.lead.last_contact else '未接触' }}</li>
             </ul>
-            {% if task.lead.emails %}
-            <div class="email-buttons">
-                <button type="button" class="btn btn-info" onclick="viewEmails({{ task.lead.id }})">関連メール閲覧</button>
-            </div>
-            {% endif %}
         </div>
         {% else %}
         <p class="no-lead">リードが関連付けられていません</p>
@@ -135,15 +130,20 @@
     <a href="{{ url_for('tasks.add_task') }}" class="btn btn-add">新規タスクを追加</a>
 </div>
 
-<!-- Email Content Modal -->
-<div id="emailModal" class="modal">
-    <div class="modal-content">
-        <span class="close">&times;</span>
-        <div id="emailContent"></div>
-    </div>
-</div>
-
 <script>
+function toggleAnalysis() {
+    const content = document.getElementById('analysisContent');
+    const icon = document.querySelector('.toggle-icon');
+    
+    if (content.style.maxHeight) {
+        content.style.maxHeight = null;
+        icon.style.transform = 'rotate(0deg)';
+    } else {
+        content.style.maxHeight = content.scrollHeight + "px";
+        icon.style.transform = 'rotate(180deg)';
+    }
+}
+
 function toggleAllCheckboxes() {
     const selectAll = document.getElementById('select-all');
     const checkboxes = document.querySelectorAll('.task-checkbox');
@@ -186,51 +186,6 @@ document.querySelectorAll('.task-checkbox').forEach(checkbox => {
         selectAll.checked = [...checkboxes].every(cb => cb.checked);
     });
 });
-
-// Email viewing functionality
-function viewEmails(leadId) {
-    const modal = document.getElementById('emailModal');
-    const content = document.getElementById('emailContent');
-    const span = document.getElementsByClassName('close')[0];
-    
-    // Fetch emails for this lead
-    fetch(`/api/leads/${leadId}/emails`)
-        .then(response => response.json())
-        .then(data => {
-            content.innerHTML = formatEmails(data);
-            modal.style.display = 'block';
-        })
-        .catch(error => {
-            console.error('Error:', error);
-            content.innerHTML = '<p>メールの取得中にエラーが発生しました。</p>';
-            modal.style.display = 'block';
-        });
-    
-    span.onclick = function() {
-        modal.style.display = 'none';
-    }
-    
-    window.onclick = function(event) {
-        if (event.target == modal) {
-            modal.style.display = 'none';
-        }
-    }
-}
-
-function formatEmails(emails) {
-    if (!emails || emails.length === 0) {
-        return '<p>関連するメールはありません。</p>';
-    }
-    
-    return emails.map(email => `
-        <div class="email-item">
-            <h3>${email.subject || '（件名なし）'}</h3>
-            <p><strong>送信者:</strong> ${email.sender_name} &lt;${email.sender}&gt;</p>
-            <p><strong>日時:</strong> ${new Date(email.received_date).toLocaleString()}</p>
-            <div class="email-content">${email.content}</div>
-        </div>
-    `).join('<hr>');
-}
 </script>
 
 <style>
@@ -311,74 +266,6 @@ function formatEmails(emails) {
 
 .not-completed {
     color: #dc3545;
-}
-
-.email-buttons {
-    margin-top: 10px;
-}
-
-.btn-info {
-    background-color: #17a2b8;
-    color: white;
-    border: none;
-    padding: 5px 10px;
-    border-radius: 4px;
-    cursor: pointer;
-}
-
-.btn-info:hover {
-    background-color: #138496;
-}
-
-/* Modal styles */
-.modal {
-    display: none;
-    position: fixed;
-    z-index: 1;
-    left: 0;
-    top: 0;
-    width: 100%;
-    height: 100%;
-    background-color: rgba(0,0,0,0.4);
-}
-
-.modal-content {
-    background-color: #fefefe;
-    margin: 15% auto;
-    padding: 20px;
-    border: 1px solid #888;
-    width: 80%;
-    max-width: 800px;
-    border-radius: 5px;
-    max-height: 70vh;
-    overflow-y: auto;
-}
-
-.close {
-    color: #aaa;
-    float: right;
-    font-size: 28px;
-    font-weight: bold;
-    cursor: pointer;
-}
-
-.close:hover,
-.close:focus {
-    color: black;
-    text-decoration: none;
-    cursor: pointer;
-}
-
-.email-item {
-    margin-bottom: 20px;
-    padding: 10px;
-    background-color: #f8f9fa;
-    border-radius: 5px;
-}
-
-.email-content {
-    margin-top: 10px;
-    white-space: pre-wrap;
 }
 </style>
 {% endblock %}
