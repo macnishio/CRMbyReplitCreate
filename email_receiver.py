@@ -203,41 +203,42 @@ def create_opportunities_from_ai(opportunities, lead):
                 name=desc.strip(),
                 stage='Initial Contact',
                 user_id=lead.user_id,
-                lead_id=lead.id
+                lead_id=lead.id  # Ensure this is set
             )
             db.session.add(opportunity)
+            db.session.flush()  # Flush to get the ID
 
 def create_schedules_from_ai(schedules, lead):
     """Create schedules from AI analysis"""
     from models import Schedule
     
     for schedule in schedules:
-        if isinstance(schedule, dict):
-            if 'Description' in schedule and ':' in schedule['Description']:
-                _, desc = schedule['Description'].split(':', 1)
-                try:
-                    start_time = datetime.strptime(schedule.get('Start Time', ''), '%Y-%m-%d %H:%M')
-                    end_time = datetime.strptime(schedule.get('End Time', ''), '%Y-%m-%d %H:%M')
-                except ValueError:
-                    start_time = datetime.utcnow()
-                    end_time = start_time + timedelta(hours=1)
-                
-                schedule_record = Schedule(
-                    title=desc.strip(),
-                    description=desc.strip(),
-                    start_time=start_time,
-                    end_time=end_time,
-                    user_id=lead.user_id,
-                    lead_id=lead.id
-                )
-                db.session.add(schedule_record)
+        if isinstance(schedule, dict) and ':' in schedule.get('Description', ''):
+            _, desc = schedule['Description'].split(':', 1)
+            try:
+                start_time = datetime.strptime(schedule.get('Start Time', ''), '%Y-%m-%d %H:%M')
+                end_time = datetime.strptime(schedule.get('End Time', ''), '%Y-%m-%d %H:%M')
+            except ValueError:
+                start_time = datetime.utcnow()
+                end_time = start_time + timedelta(hours=1)
+            
+            schedule_record = Schedule(
+                title=desc.strip(),
+                description=desc.strip(),
+                start_time=start_time,
+                end_time=end_time,
+                user_id=lead.user_id,
+                lead_id=lead.id  # Ensure this is set
+            )
+            db.session.add(schedule_record)
+            db.session.flush()  # Flush to get the ID
 
 def create_tasks_from_ai(tasks, lead):
     """Create tasks from AI analysis"""
     from models import Task
     
     for task in tasks:
-        if isinstance(task, dict) and 'Description' in task and ':' in task['Description']:
+        if isinstance(task, dict) and ':' in task.get('Description', ''):
             _, desc = task['Description'].split(':', 1)
             try:
                 due_date = datetime.strptime(task.get('Due Date', ''), '%Y-%m-%d')
@@ -250,6 +251,7 @@ def create_tasks_from_ai(tasks, lead):
                 due_date=due_date,
                 status='New',
                 user_id=lead.user_id,
-                lead_id=lead.id
+                lead_id=lead.id  # Ensure this is set
             )
             db.session.add(task_record)
+            db.session.flush()  # Flush to get the ID
