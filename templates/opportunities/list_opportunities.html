@@ -1,206 +1,42 @@
 {% extends "base.html" %}
-{% block title %}商談一覧{% endblock %}
+
 {% block content %}
-<h1>商談一覧</h1>
+<div class="container py-4">
+  <h2 class="mb-4">Opportunities</h2>
+  
+  <div class="mb-3">
+    <a href="{{ url_for('opportunities.create_opportunity') }}" class="btn btn-primary">New Opportunity</a>
+  </div>
 
-<!-- Bulk Operations Form -->
-<form method="POST" action="{{ url_for('opportunities.bulk_action') }}" id="bulkForm">
-    <div class="bulk-actions">
-        <div class="select-all-container">
-            <input type="checkbox" id="select-all" onclick="toggleAllCheckboxes()">
-            <label for="select-all">すべて選択</label>
-        </div>
-        <select name="action" id="bulk-action">
-            <option value="">一括操作を選択...</option>
-            <option value="delete">削除</option>
-            <option value="change_stage">ステージ変更</option>
-        </select>
-        <select name="new_stage" id="new-stage" style="display: none;">
-            <option value="Initial Contact">初期接触</option>
-            <option value="Qualification">資格確認</option>
-            <option value="Proposal">提案</option>
-            <option value="Negotiation">交渉</option>
-            <option value="Closed Won">成約</option>
-            <option value="Closed Lost">失注</option>
-        </select>
-        <button type="submit" class="btn btn-primary" onclick="return confirmBulkAction()">適用</button>
-    </div>
-
-<!-- AI Analysis Section -->
-<div class="ai-analysis-section">
-    <div class="analysis-header" onclick="toggleAnalysis()">
-        <h2>商談分析 <span class="toggle-icon">▼</span></h2>
-    </div>
-    <div class="analysis-content" id="analysisContent">
-        <div class="analysis-grid">
-            <!-- Stage Distribution -->
-            <div class="analysis-card">
-                <h3>ステージ分布</h3>
-                {% for stat in opp_stage_stats %}
-                <p>{{ stat.stage }}: {{ stat.count }}件 ({{ "¥{:,.0f}".format(stat.amount or 0) }})</p>
-                {% endfor %}
-            </div>
-
-            <!-- AI Insights -->
-            <div class="analysis-card">
-                <h3>AI分析結果</h3>
-                {% if ai_analysis %}
-                    {{ ai_analysis|safe }}
-                {% else %}
-                    <p>AI分析を実行できませんでした。</p>
-                {% endif %}
-            </div>
-        </div>
-    </div>
+  <div class="table-responsive">
+    <table class="table table-striped">
+      <thead>
+        <tr>
+          <th>Title</th>
+          <th>Description</th>
+          <th>Amount</th>
+          <th>Stage</th>
+          <th>Expected Close Date</th>
+          <th>Associated Lead</th>
+          <th>Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for opportunity in opportunities %}
+        <tr>
+          <td>{{ opportunity.title }}</td>
+          <td>{{ opportunity.description }}</td>
+          <td>${{ "%.2f"|format(opportunity.amount) }}</td>
+          <td>{{ opportunity.stage }}</td>
+          <td>{{ opportunity.expected_close_date.strftime('%Y-%m-%d') }}</td>
+          <td>{{ opportunity.lead.name if opportunity.lead else 'None' }}</td>
+          <td>
+            <a href="{{ url_for('opportunities.edit_opportunity', opportunity_id=opportunity.id) }}" class="btn btn-sm btn-primary">Edit</a>
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
 </div>
-
-<!-- Opportunities Grid -->
-<div class="opportunity-grid">
-    {% for opportunity in opportunities %}
-    <div class="opportunity-card">
-        <div class="opportunity-select">
-            <input type="checkbox" name="selected_opportunities[]" value="{{ opportunity.id }}" class="opportunity-checkbox">
-        </div>
-        <h2>{{ opportunity.name }}</h2>
-        <p><strong>ステージ:</strong> {{ opportunity.stage }}</p>
-        <p><strong>金額:</strong> {{ "¥{:,.0f}".format(opportunity.amount or 0) }}</p>
-        <p><strong>完了予定日:</strong> {{ opportunity.close_date.strftime('%Y-%m-%d') if opportunity.close_date }}</p>
-        {% if opportunity.lead %}
-        <div class="lead-info">
-            <p><strong>リード情報:</strong></p>
-            <ul>
-                <li><strong>名前:</strong> {{ opportunity.lead.name }}</li>
-                <li><strong>メール:</strong> {{ opportunity.lead.email }}</li>
-                <li><strong>スコア:</strong> {{ "%.1f"|format(opportunity.lead.score) }}</li>
-                <li><strong>ステータス:</strong> {{ opportunity.lead.status }}</li>
-            </ul>
-        </div>
-        {% else %}
-        <p class="no-lead">リードが関連付けられていません</p>
-        {% endif %}
-        <div class="card-actions">
-            <a href="{{ url_for('opportunities.edit_opportunity', id=opportunity.id) }}" class="btn btn-edit">編集</a>
-            <form method="POST" action="{{ url_for('opportunities.delete_opportunity', id=opportunity.id) }}" style="display: inline;">
-                <button type="submit" class="btn btn-delete" onclick="return confirm('この商談を削除してもよろしいですか？');">削除</button>
-            </form>
-        </div>
-    </div>
-    {% endfor %}
-</div>
-</form>
-
-<div class="add-opportunity">
-    <a href="{{ url_for('opportunities.add_opportunity') }}" class="btn btn-add">新規商談を追加</a>
-</div>
-
-<script>
-function toggleAnalysis() {
-    const content = document.getElementById('analysisContent');
-    const icon = document.querySelector('.toggle-icon');
-    
-    if (content.style.maxHeight) {
-        content.style.maxHeight = null;
-        icon.style.transform = 'rotate(0deg)';
-    } else {
-        content.style.maxHeight = content.scrollHeight + "px";
-        icon.style.transform = 'rotate(180deg)';
-    }
-}
-
-function toggleAllCheckboxes() {
-    const selectAll = document.getElementById('select-all');
-    const checkboxes = document.querySelectorAll('.opportunity-checkbox');
-    checkboxes.forEach(checkbox => {
-        checkbox.checked = selectAll.checked;
-    });
-}
-
-document.getElementById('bulk-action').addEventListener('change', function() {
-    const newStageSelect = document.getElementById('new-stage');
-    newStageSelect.style.display = this.value === 'change_stage' ? 'inline-block' : 'none';
-});
-
-function confirmBulkAction() {
-    const action = document.getElementById('bulk-action').value;
-    const selectedOpportunities = document.querySelectorAll('input[name="selected_opportunities[]"]:checked').length;
-    
-    if (!action) {
-        alert('操作を選択してください。');
-        return false;
-    }
-    
-    if (selectedOpportunities === 0) {
-        alert('商談を選択してください。');
-        return false;
-    }
-    
-    if (action === 'delete') {
-        return confirm(`選択された${selectedOpportunities}件の商談を削除してもよろしいですか？`);
-    }
-    
-    return true;
-}
-
-// Update select-all checkbox state when individual checkboxes change
-document.querySelectorAll('.opportunity-checkbox').forEach(checkbox => {
-    checkbox.addEventListener('change', function() {
-        const checkboxes = document.querySelectorAll('.opportunity-checkbox');
-        const selectAll = document.getElementById('select-all');
-        selectAll.checked = [...checkboxes].every(cb => cb.checked);
-    });
-});
-</script>
-
-<style>
-.bulk-actions {
-    margin: 20px 0;
-    padding: 10px;
-    background-color: #f8f9fa;
-    border-radius: 5px;
-    display: flex;
-    gap: 10px;
-    align-items: center;
-}
-
-.select-all-container {
-    display: flex;
-    align-items: center;
-    gap: 5px;
-    margin-right: 15px;
-}
-
-.opportunity-select {
-    position: absolute;
-    top: 10px;
-    right: 10px;
-}
-
-.opportunity-card {
-    position: relative;
-    padding-top: 40px;
-}
-
-.lead-info {
-    margin-top: 15px;
-    padding: 10px;
-    background-color: #f8f9fa;
-    border-radius: 5px;
-}
-
-.lead-info ul {
-    list-style: none;
-    padding-left: 0;
-    margin: 5px 0;
-}
-
-.lead-info li {
-    margin: 5px 0;
-}
-
-.no-lead {
-    color: #6c757d;
-    font-style: italic;
-    margin-top: 10px;
-}
-</style>
 {% endblock %}

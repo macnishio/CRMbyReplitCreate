@@ -1,271 +1,42 @@
 {% extends "base.html" %}
-{% block title %}タスク一覧{% endblock %}
+
 {% block content %}
-<h1>タスク一覧</h1>
+<div class="container py-4">
+  <h2 class="mb-4">Tasks</h2>
+  
+  <div class="mb-3">
+    <a href="{{ url_for('tasks.create_task') }}" class="btn btn-primary">New Task</a>
+  </div>
 
-<!-- Filter Section -->
-<div class="filter-section">
-    <form method="GET" action="{{ url_for('tasks.list_tasks') }}" class="filter-form">
-        <div class="filter-group">
-            <label for="status">ステータス:</label>
-            <select name="status" id="status">
-                <option value="">すべて</option>
-                <option value="New" {% if request.args.get('status') == 'New' %}selected{% endif %}>新規</option>
-                <option value="In Progress" {% if request.args.get('status') == 'In Progress' %}selected{% endif %}>進行中</option>
-                <option value="Completed" {% if request.args.get('status') == 'Completed' %}selected{% endif %}>完了</option>
-            </select>
-        </div>
-        <div class="filter-group">
-            <label for="due_date">期限:</label>
-            <select name="due_date" id="due_date">
-                <option value="">すべて</option>
-                <option value="today" {% if request.args.get('due_date') == 'today' %}selected{% endif %}>今日</option>
-                <option value="week" {% if request.args.get('due_date') == 'week' %}selected{% endif %}>今週</option>
-                <option value="month" {% if request.args.get('due_date') == 'month' %}selected{% endif %}>今月</option>
-                <option value="overdue" {% if request.args.get('due_date') == 'overdue' %}selected{% endif %}>期限超過</option>
-            </select>
-        </div>
-        <button type="submit" class="btn btn-primary">フィルター適用</button>
-        <a href="{{ url_for('tasks.list_tasks') }}" class="btn btn-secondary">リセット</a>
-    </form>
+  <div class="table-responsive">
+    <table class="table table-striped">
+      <thead>
+        <tr>
+          <th>Title</th>
+          <th>Description</th>
+          <th>Due Date</th>
+          <th>Priority</th>
+          <th>Status</th>
+          <th>Associated Lead</th>
+          <th>Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for task in tasks %}
+        <tr>
+          <td>{{ task.title }}</td>
+          <td>{{ task.description }}</td>
+          <td>{{ task.due_date.strftime('%Y-%m-%d') }}</td>
+          <td>{{ task.priority }}</td>
+          <td>{{ task.status }}</td>
+          <td>{{ task.lead.name if task.lead else 'None' }}</td>
+          <td>
+            <a href="{{ url_for('tasks.edit_task', task_id=task.id) }}" class="btn btn-sm btn-primary">Edit</a>
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
 </div>
-
-<!-- Bulk Operations Form -->
-<form method="POST" action="{{ url_for('tasks.bulk_action') }}" id="bulkForm">
-    <div class="bulk-actions">
-        <div class="select-all-container">
-            <input type="checkbox" id="select-all" onclick="toggleAllCheckboxes()">
-            <label for="select-all">すべて選択</label>
-        </div>
-        <select name="action" id="bulk-action">
-            <option value="">一括操作を選択...</option>
-            <option value="complete">完了にする</option>
-            <option value="delete">削除</option>
-            <option value="change_status">ステータス変更</option>
-        </select>
-        <select name="new_status" id="new-status" style="display: none;">
-            <option value="New">新規</option>
-            <option value="In Progress">進行中</option>
-            <option value="Completed">完了</option>
-        </select>
-        <button type="submit" class="btn btn-primary" onclick="return confirmBulkAction()">適用</button>
-    </div>
-
-<!-- AI Analysis Section -->
-<div class="ai-analysis-section">
-    <div class="analysis-header" onclick="toggleAnalysis()">
-        <h2>タスク分析 <span class="toggle-icon">▼</span></h2>
-    </div>
-    <div class="analysis-content" id="analysisContent">
-        <div class="analysis-grid">
-            <!-- タスクの概要 -->
-            <div class="analysis-card">
-                <h3>タスクの概要</h3>
-                <p>完了タスク: {{ tasks|selectattr('completed', 'eq', true)|list|length }}</p>
-                <p>未完了タスク: {{ tasks|selectattr('completed', 'eq', false)|list|length }}</p>
-                <p>期限切れタスク: {{ tasks|selectattr('completed', 'eq', false)|selectattr('due_date', 'le', utcnow())|list|length }}</p>
-            </div>
-
-            <!-- ステータス分布 -->
-            <div class="analysis-card">
-                <h3>ステータス分布</h3>
-                <ul>
-                {% for status in task_status_counts %}
-                    <li>{{ status.status }}: {{ status.count }}件</li>
-                {% endfor %}
-                </ul>
-            </div>
-
-            <!-- AI Insights -->
-            <div class="analysis-card">
-                <h3>AI分析結果</h3>
-                {% if ai_analysis %}
-                    {{ ai_analysis|safe }}
-                {% else %}
-                    <p>AI分析を実行できませんでした。</p>
-                {% endif %}
-            </div>
-        </div>
-    </div>
-</div>
-
-<!-- Task Grid -->
-<div class="task-grid">
-    {% for task in tasks %}
-    <div class="task-card {% if task.completed %}completed{% endif %}">
-        <div class="task-select">
-            <input type="checkbox" name="selected_tasks[]" value="{{ task.id }}" class="task-checkbox">
-        </div>
-        <h2>{{ task.title }}</h2>
-        <p><strong>説明:</strong> {{ task.description }}</p>
-        <p><strong>期限:</strong> {{ task.due_date.strftime('%Y-%m-%d') }}</p>
-        <p><strong>ステータス:</strong> {{ task.status }}</p>
-        <p><strong>完了:</strong> <span class="{{ 'completed' if task.completed else 'not-completed' }}">
-            {{ '完了' if task.completed else '未完了' }}</span></p>
-        {% if task.lead %}
-        <div class="lead-info">
-            <p><strong>リード情報:</strong></p>
-            <ul>
-                <li><strong>名前:</strong> {{ task.lead.name }}</li>
-                <li><strong>メール:</strong> {{ task.lead.email }}</li>
-                <li><strong>スコア:</strong> {{ "%.1f"|format(task.lead.score) }}</li>
-                <li><strong>最終接触:</strong> {{ task.lead.last_contact.strftime('%Y-%m-%d %H:%M') if task.lead.last_contact else '未接触' }}</li>
-            </ul>
-        </div>
-        {% else %}
-        <p class="no-lead">リードが関連付けられていません</p>
-        {% endif %}
-        <div class="card-actions">
-            <a href="{{ url_for('tasks.edit_task', id=task.id) }}" class="btn btn-edit">編集</a>
-            <form method="POST" action="{{ url_for('tasks.delete_task', id=task.id) }}" style="display: inline;">
-                <button type="submit" class="btn btn-delete" onclick="return confirm('本当にこのタスクを削除しますか？');">削除</button>
-            </form>
-        </div>
-    </div>
-    {% endfor %}
-</div>
-</form>
-
-<div class="add-task">
-    <a href="{{ url_for('tasks.add_task') }}" class="btn btn-add">新規タスクを追加</a>
-</div>
-
-<script>
-function toggleAnalysis() {
-    const content = document.getElementById('analysisContent');
-    const icon = document.querySelector('.toggle-icon');
-    
-    if (content.style.maxHeight) {
-        content.style.maxHeight = null;
-        icon.style.transform = 'rotate(0deg)';
-    } else {
-        content.style.maxHeight = content.scrollHeight + "px";
-        icon.style.transform = 'rotate(180deg)';
-    }
-}
-
-function toggleAllCheckboxes() {
-    const selectAll = document.getElementById('select-all');
-    const checkboxes = document.querySelectorAll('.task-checkbox');
-    checkboxes.forEach(checkbox => {
-        checkbox.checked = selectAll.checked;
-    });
-}
-
-document.getElementById('bulk-action').addEventListener('change', function() {
-    const newStatusSelect = document.getElementById('new-status');
-    newStatusSelect.style.display = this.value === 'change_status' ? 'inline-block' : 'none';
-});
-
-function confirmBulkAction() {
-    const action = document.getElementById('bulk-action').value;
-    const selectedTasks = document.querySelectorAll('input[name="selected_tasks[]"]:checked').length;
-    
-    if (!action) {
-        alert('操作を選択してください。');
-        return false;
-    }
-    
-    if (selectedTasks === 0) {
-        alert('タスクを選択してください。');
-        return false;
-    }
-    
-    if (action === 'delete') {
-        return confirm(`選択された${selectedTasks}件のタスクを削除してもよろしいですか？`);
-    }
-    
-    return true;
-}
-
-// Update select-all checkbox state when individual checkboxes change
-document.querySelectorAll('.task-checkbox').forEach(checkbox => {
-    checkbox.addEventListener('change', function() {
-        const checkboxes = document.querySelectorAll('.task-checkbox');
-        const selectAll = document.getElementById('select-all');
-        selectAll.checked = [...checkboxes].every(cb => cb.checked);
-    });
-});
-</script>
-
-<style>
-.filter-section {
-    margin-bottom: 20px;
-    padding: 15px;
-    background-color: #f8f9fa;
-    border-radius: 5px;
-}
-
-.filter-form {
-    display: flex;
-    gap: 15px;
-    align-items: center;
-    flex-wrap: wrap;
-}
-
-.filter-group {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-}
-
-.bulk-actions {
-    margin: 20px 0;
-    padding: 10px;
-    background-color: #f8f9fa;
-    border-radius: 5px;
-    display: flex;
-    gap: 10px;
-    align-items: center;
-}
-
-.select-all-container {
-    display: flex;
-    align-items: center;
-    gap: 5px;
-    margin-right: 15px;
-}
-
-.task-select {
-    position: absolute;
-    top: 10px;
-    right: 10px;
-}
-
-.task-card {
-    position: relative;
-    padding-top: 40px;
-}
-
-.lead-info {
-    margin-top: 15px;
-    padding: 10px;
-    background-color: #f8f9fa;
-    border-radius: 5px;
-}
-
-.lead-info ul {
-    list-style: none;
-    padding-left: 0;
-    margin: 5px 0;
-}
-
-.lead-info li {
-    margin: 5px 0;
-}
-
-.no-lead {
-    color: #6c757d;
-    font-style: italic;
-    margin-top: 10px;
-}
-
-.completed {
-    color: #28a745;
-}
-
-.not-completed {
-    color: #dc3545;
-}
-</style>
 {% endblock %}

@@ -6,6 +6,12 @@ from extensions import db
 
 schedules_bp = Blueprint('schedules', __name__)
 
+@schedules_bp.route('/')
+@login_required
+def list_schedules():
+    schedules = Schedule.query.filter_by(user_id=current_user.id).all()
+    return render_template('schedules/list_schedules.html', schedules=schedules)
+
 @schedules_bp.route('/edit/<int:schedule_id>', methods=['GET', 'POST'])
 @login_required
 def edit_schedule(schedule_id):

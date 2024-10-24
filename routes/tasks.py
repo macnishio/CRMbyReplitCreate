@@ -6,6 +6,12 @@ from extensions import db
 
 tasks_bp = Blueprint('tasks', __name__)
 
+@tasks_bp.route('/')
+@login_required
+def list_tasks():
+    tasks = Task.query.filter_by(user_id=current_user.id).all()
+    return render_template('tasks/list_tasks.html', tasks=tasks)
+
 @tasks_bp.route('/edit/<int:task_id>', methods=['GET', 'POST'])
 @login_required
 def edit_task(task_id):
