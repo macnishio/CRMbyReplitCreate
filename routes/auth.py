@@ -5,6 +5,7 @@ from extensions import db
 from functools import wraps
 from werkzeug.security import check_password_hash
 from urllib.parse import urlparse, urljoin
+from forms import RegistrationForm
 
 bp = Blueprint('auth', __name__)
 
@@ -47,22 +48,20 @@ def logout():
 def register():
     if current_user.is_authenticated:
         return redirect(url_for('main.dashboard'))
-        
-    if request.method == 'POST':
-        email = request.form['email']
-        password = request.form['password']
-        
-        if User.query.filter_by(email=email).first():
+    
+    form = RegistrationForm()
+    if form.validate_on_submit():
+        if User.query.filter_by(email=form.email.data).first():
             flash('このメールアドレスは既に登録されています。', 'error')
             return redirect(url_for('auth.register'))
-            
-        user = User(email=email)
-        user.set_password(password)
+        
+        user = User(email=form.email.data)
+        user.set_password(form.password.data)
         
         db.session.add(user)
         db.session.commit()
         
         flash('登録が完了しました。ログインしてください。', 'success')
         return redirect(url_for('auth.login'))
-        
-    return render_template('register.html')
+    
+    return render_template('register.html', form=form)
