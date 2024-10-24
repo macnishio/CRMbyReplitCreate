@@ -129,6 +129,28 @@ def process_email(email_body, app):
         db.session.rollback()
         raise
 
+def process_ai_response(response, lead, app):
+    """Process AI analysis response and create corresponding records"""
+    try:
+        if isinstance(response, str) and response.startswith('{'):
+            data = json.loads(response)
+            
+            if 'Opportunities' in data:
+                create_opportunities_from_ai(data['Opportunities'], lead)
+            
+            if 'Schedules' in data:
+                create_schedules_from_ai(data['Schedules'], lead)
+            
+            if 'Tasks' in data:
+                create_tasks_from_ai(data['Tasks'], lead)
+            
+            # Commit changes to ensure relationships are saved
+            db.session.commit()
+                
+    except Exception as e:
+        app.logger.error(f"Error processing AI response: {str(e)}")
+        db.session.rollback()
+
 def decode_email_header(header):
     """Decode email header with proper encoding"""
     if not header:
@@ -170,24 +192,6 @@ def extract_email_address(sender):
     match = re.search(r'<([^>]+)>', sender)
     return match.group(1) if match else sender
 
-def process_ai_response(response, lead, app):
-    """Process AI analysis response and create corresponding records"""
-    try:
-        if isinstance(response, str) and response.startswith('{'):
-            data = json.loads(response)
-            
-            if 'Opportunities' in data:
-                create_opportunities_from_ai(data['Opportunities'], lead)
-            
-            if 'Schedules' in data:
-                create_schedules_from_ai(data['Schedules'], lead)
-            
-            if 'Tasks' in data:
-                create_tasks_from_ai(data['Tasks'], lead)
-                
-    except Exception as e:
-        app.logger.error(f"Error processing AI response: {str(e)}")
-
 def create_opportunities_from_ai(opportunities, lead):
     """Create opportunities from AI analysis"""
     from models import Opportunity
@@ -220,6 +224,7 @@ def create_schedules_from_ai(schedules, lead):
                 
                 schedule_record = Schedule(
                     title=desc.strip(),
+                    description=desc.strip(),
                     start_time=start_time,
                     end_time=end_time,
                     user_id=lead.user_id,
@@ -241,6 +246,7 @@ def create_tasks_from_ai(tasks, lead):
             
             task_record = Task(
                 title=desc.strip(),
+                description=desc.strip(),
                 due_date=due_date,
                 status='New',
                 user_id=lead.user_id,

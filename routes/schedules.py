@@ -34,7 +34,8 @@ def list_schedules():
                 Schedule.start_time < today + timedelta(days=30)
             )
 
-    schedules = query.order_by(Schedule.start_time.asc()).all()
+    # Order by start time and eager load lead relationship
+    schedules = query.options(db.joinedload(Schedule.lead)).order_by(Schedule.start_time.asc()).all()
     
     # Get AI analysis
     ai_analysis = analyze_schedules(schedules)

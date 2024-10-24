@@ -12,7 +12,7 @@ bp = Blueprint('opportunities', __name__)
 @bp.route('')
 @login_required
 def list_opportunities():
-    opportunities = Opportunity.query.filter_by(user_id=current_user.id).order_by(Opportunity.close_date.asc()).all()
+    opportunities = Opportunity.query.filter_by(user_id=current_user.id).options(db.joinedload(Opportunity.lead)).order_by(Opportunity.close_date.asc()).all()
     
     # Get stage counts and total amount
     stage_stats = db.session.query(

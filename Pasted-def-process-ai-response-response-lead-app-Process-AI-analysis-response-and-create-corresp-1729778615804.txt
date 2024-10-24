@@ -1,0 +1,77 @@
+def process_ai_response(response, lead, app):
+    """Process AI analysis response and create corresponding records"""
+    try:
+        if isinstance(response, str) and response.startswith('{'):
+            data = json.loads(response)
+            
+            if 'Opportunities' in data:
+                create_opportunities_from_ai(data['Opportunities'], lead)
+            
+            if 'Schedules' in data:
+                create_schedules_from_ai(data['Schedules'], lead)
+            
+            if 'Tasks' in data:
+                create_tasks_from_ai(data['Tasks'], lead)
+                
+    except Exception as e:
+        app.logger.error(f"Error processing AI response: {str(e)}")
+
+def create_opportunities_from_ai(opportunities, lead):
+    """Create opportunities from AI analysis"""
+    from models import Opportunity
+    
+    for opp_desc in opportunities:
+        if ':' in opp_desc:
+            _, desc = opp_desc.split(':', 1)
+            opportunity = Opportunity(
+                name=desc.strip(),
+                stage='Initial Contact',
+                user_id=lead.user_id,
+                lead_id=lead.id
+            )
+            db.session.add(opportunity)
+
+def create_schedules_from_ai(schedules, lead):
+    """Create schedules from AI analysis"""
+    from models import Schedule
+    
+    for schedule in schedules:
+        if isinstance(schedule, dict):
+            if 'Description' in schedule and ':' in schedule['Description']:
+                _, desc = schedule['Description'].split(':', 1)
+                try:
+                    start_time = datetime.strptime(schedule.get('Start Time', ''), '%Y-%m-%d %H:%M')
+                    end_time = datetime.strptime(schedule.get('End Time', ''), '%Y-%m-%d %H:%M')
+                except ValueError:
+                    start_time = datetime.utcnow()
+                    end_time = start_time + timedelta(hours=1)
+                
+                schedule_record = Schedule(
+                    title=desc.strip(),
+                    start_time=start_time,
+                    end_time=end_time,
+                    user_id=lead.user_id,
+                    lead_id=lead.id
+                )
+                db.session.add(schedule_record)
+
+def create_tasks_from_ai(tasks, lead):
+    """Create tasks from AI analysis"""
+    from models import Task
+    
+    for task in tasks:
+        if isinstance(task, dict) and 'Description' in task and ':' in task['Description']:
+            _, desc = task['Description'].split(':', 1)
+            try:
+                due_date = datetime.strptime(task.get('Due Date', ''), '%Y-%m-%d')
+            except ValueError:
+                due_date = datetime.utcnow() + timedelta(days=7)
+            
+            task_record = Task(
+                title=desc.strip(),
+                due_date=due_date,
+                status='New',
+                user_id=lead.user_id,
+                lead_id=lead.id
+            )
+            db.session.add(task_record)
