@@ -4,6 +4,7 @@ from models import Task
 from extensions import db
 from datetime import datetime
 from sqlalchemy import func
+from ai_analysis import analyze_tasks
 
 tasks_bp = Blueprint('tasks', __name__)
 
@@ -20,9 +21,13 @@ def list_tasks():
     
     task_status_counts = [{'status': status, 'count': count} for status, count in status_counts]
     
+    # Get AI analysis
+    ai_analysis = analyze_tasks(tasks)
+    
     return render_template('tasks/list_tasks.html', 
                          tasks=tasks,
                          task_status_counts=task_status_counts,
+                         ai_analysis=ai_analysis,
                          utcnow=datetime.utcnow)
 
 @tasks_bp.route('/add', methods=['GET', 'POST'])

@@ -28,14 +28,14 @@
                 </ul>
             </div>
 
-            <!-- リード関連タスク -->
+            <!-- AI Insights -->
             <div class="analysis-card">
-                <h3>リード関連タスク</h3>
-                <ul>
-                {% for task in tasks if task.lead %}
-                    <li>{{ task.title }} (リード: {{ task.lead.name }})</li>
-                {% endfor %}
-                </ul>
+                <h3>AI分析結果</h3>
+                {% if ai_analysis %}
+                    {{ ai_analysis|safe }}
+                {% else %}
+                    <p>AI分析を実行できませんでした。</p>
+                {% endif %}
             </div>
         </div>
     </div>

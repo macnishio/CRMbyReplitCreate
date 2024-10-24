@@ -27,33 +27,29 @@ def analyze_email(subject, content, user_id=None):
     try:
         user_settings = UserSettings.query.filter_by(user_id=user_id if user_id else current_user.id).first()
         if not user_settings or not user_settings.claude_api_key:
-            current_app.logger.error("Claude API key not found in user settings")
             return '<p class="error-message">AI分析を実行するにはAPIキーの設定が必要です。</p>'
 
-        current_app.logger.debug("Initializing Anthropic client")
         client = Anthropic(api_key=user_settings.claude_api_key)
 
         prompt = f"""以下のメールを分析し、商談、スケジュール、タスクの提案をしてください:
+        件名: {subject}
+        本文: {content}
 
-件名: {subject}
-本文: {content}
+        以下の形式で回答してください:
+        商談:
+        1. [提案1]
+        2. [提案2]
 
-以下の形式で回答してください:
-商談:
-1.
-2.
+        スケジュール:
+        1. [予定1]
+        2. [予定2]
 
-スケジュール:
-1.
-2.
+        タスク:
+        1. [タスク1]
+        2. [タスク2]
 
-タスク:
-1.
-2.
+        回答は日本語でお願いします。HTMLの段落タグ（<p>）を使用してフォーマットしてください。"""
 
-回答は日本語でお願いします。"""
-
-        current_app.logger.debug("Sending request to Claude API")
         message = client.messages.create(
             model="claude-3-haiku-20240307",
             max_tokens=4000,
@@ -62,7 +58,7 @@ def analyze_email(subject, content, user_id=None):
                 "content": prompt
             }]
         )
-        
+
         if message.content:
             return message.content[0].text
         return '<p>AI分析の結果を取得できませんでした。</p>'
@@ -93,6 +89,48 @@ def parse_ai_response(response):
                 current_section.append(line[2:].strip())
 
     return opportunities, schedules, tasks
+
+def analyze_tasks(tasks):
+    """Analyze tasks using Claude AI with improved error handling"""
+    try:
+        user_settings = UserSettings.query.filter_by(user_id=current_user.id).first()
+        if not user_settings or not user_settings.claude_api_key:
+            return '<p class="error-message">AI分析を実行するにはAPIキーの設定が必要です。</p>'
+            
+        client = Anthropic(api_key=user_settings.claude_api_key)
+
+        task_data = "\n".join([
+            f"- タイトル: {task.title}, 期限: {task.due_date}, ステータス: {task.status}, 完了: {'完了' if task.completed else '未完了'}"
+            for task in tasks
+        ])
+
+        if not tasks:
+            return '<p>分析対象のタスクがありません。</p>'
+
+        prompt = f"""以下のタスクデータを分析してください:\n{task_data}\n
+        以下の項目について簡潔に分析してください:
+        1. タスクの優先度と期限
+        2. 進捗状況の分析
+        3. リソース配分の提案
+        4. 効率化のための提案
+        回答は日本語でお願いします。HTMLの段落タグ（<p>）を使用してフォーマットしてください。"""
+
+        message = client.messages.create(
+            model="claude-3-haiku-20240307",
+            max_tokens=4000,
+            messages=[{
+                "role": "user",
+                "content": prompt
+            }]
+        )
+
+        if message.content:
+            content = message.content[0].text
+            return content if isinstance(content, str) else '<p>AI分析の結果を取得できませんでした。</p>'
+        return '<p>AI分析の結果を取得できませんでした。</p>'
+
+    except Exception as e:
+        return handle_ai_error("analyze_tasks", e)
 
 def analyze_opportunities(opportunities):
     """Analyze opportunities using Claude AI with improved error handling"""
@@ -129,7 +167,8 @@ def analyze_opportunities(opportunities):
         )
         
         if message.content:
-            return message.content[0].text
+            content = message.content[0].text
+            return content if isinstance(content, str) else '<p>AI分析の結果を取得できませんでした。</p>'
         return '<p>AI分析の結果を取得できませんでした。</p>'
 
     except Exception as e:
@@ -170,7 +209,8 @@ def analyze_schedules(schedules):
         )
 
         if message.content:
-            return message.content[0].text
+            content = message.content[0].text
+            return content if isinstance(content, str) else '<p>AI分析の結果を取得できませんでした。</p>'
         return '<p>AI分析の結果を取得できませんでした。</p>'
 
     except Exception as e:
