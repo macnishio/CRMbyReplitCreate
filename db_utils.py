@@ -60,25 +60,21 @@ def init_database(app):
     """Initialize database safely without recreation if tables exist"""
     with app.app_context():
         try:
-            # Verify database connection
+            # Check database connection
             db.session.execute(text('SELECT 1'))
             app.logger.info("Database connection successful")
             
             # Check existing tables
             inspector = inspect(db.engine)
             existing_tables = set(inspector.get_table_names())
-            app.logger.info(f"Found existing tables: {existing_tables}")
-
-            # Don't attempt to create tables if they already exist
-            if existing_tables:
-                app.logger.info("Database tables already exist")
-                # Ensure admin user exists even if tables are present
-                create_initial_admin(app)
-            else:
-                app.logger.info("Creating database tables")
+            
+            if not existing_tables:
+                # Only create tables if none exist
                 db.create_all()
                 create_initial_admin(app)
                 app.logger.info("Database initialized with initial data")
+            else:
+                app.logger.info("Database tables already exist")
             return True
         except Exception as e:
             app.logger.error(f"Database initialization error: {str(e)}")

@@ -1,0 +1,59 @@
+EBUG:app:Database URL: postgresql://neondb_owner:BtFAszK5GE7c@[REDACTED]
+/home/runner/CRM/.pythonlibs/lib/python3.11/site-packages/flask_limiter/extension.py:336: UserWarning: Using the in-memory storage for tracking rate limits as no storage was explicitly specified. This is not recommended for production use. See: https://flask-limiter.readthedocs.io#configuring-a-storage-backend for documentation about configuring the storage backend.
+  warnings.warn(
+INFO:app:Database connection successful
+INFO:app:Found existing tables: {'user_settings', 'alembic_version', 'emails', 'schedules', 'users', 'accounts', 'tasks', 'email_fetch_tracker', 'opportunities', 'leads', 'unknown_emails'}
+INFO:app:Database tables already exist
+INFO:app:Admin user already exists
+INFO:apscheduler.scheduler:Scheduler started
+INFO:apscheduler.scheduler:Added job "setup_email_scheduler.<locals>.check_emails_task" to job store "default"
+INFO  [alembic.runtime.migration] Context impl PostgresqlImpl.
+INFO  [alembic.runtime.migration] Will assume transactional DDL.
+DEBUG:app:Database URL: postgresql://neondb_owner:BtFAszK5GE7c@[REDACTED]
+/home/runner/CRM/.pythonlibs/lib/python3.11/site-packages/flask_limiter/extension.py:336: UserWarning: Using the in-memory storage for tracking rate limits as no storage was explicitly specified. This is not recommended for production use. See: https://flask-limiter.readthedocs.io#configuring-a-storage-backend for documentation about configuring the storage backend.
+  warnings.warn(
+INFO:app:Database connection successful
+INFO:app:Found existing tables: {'alembic_version'}
+INFO:app:Database tables already exist
+ERROR:app:Error creating admin user: (psycopg2.errors.UndefinedTable) relation "users" does not exist
+LINE 2: FROM users 
+             ^
+
+[SQL: SELECT users.id AS users_id, users.username AS users_username, users.email AS users_email, users.password_hash AS users_password_hash, users.role AS users_role 
+FROM users 
+WHERE users.username = %(username_1)s 
+ LIMIT %(param_1)s]
+[parameters: {'username_1': 'admin', 'param_1': 1}]
+(Background on this error at: https://sqlalche.me/e/20/f405)
+ERROR:app:Database initialization error: (psycopg2.errors.UndefinedTable) relation "users" does not exist
+LINE 2: FROM users 
+             ^
+
+[SQL: SELECT users.id AS users_id, users.username AS users_username, users.email AS users_email, users.password_hash AS users_password_hash, users.role AS users_role 
+FROM users 
+WHERE users.username = %(username_1)s 
+ LIMIT %(param_1)s]
+[parameters: {'username_1': 'admin', 'param_1': 1}]
+(Background on this error at: https://sqlalche.me/e/20/f405)
+INFO:apscheduler.scheduler:Scheduler started
+INFO:apscheduler.scheduler:Added job "setup_email_scheduler.<locals>.check_emails_task" to job store "default"
+  Creating directory '/home/runner/CRM/migrations' ...  done
+  Creating directory '/home/runner/CRM/migrations/versions' ...  done
+  Generating /home/runner/CRM/migrations/README ...  done
+  Generating /home/runner/CRM/migrations/alembic.ini ...  done
+  Generating /home/runner/CRM/migrations/env.py ...  done
+  Generating /home/runner/CRM/migrations/script.py.mako ...  done
+  Please edit configuration/connection/logging settings in
+  '/home/runner/CRM/migrations/alembic.ini' before proceeding.
+DEBUG:app:Database URL: postgresql://neondb_owner:BtFAszK5GE7c@[REDACTED]
+/home/runner/CRM/.pythonlibs/lib/python3.11/site-packages/flask_limiter/extension.py:336: UserWarning: Using the in-memory storage for tracking rate limits as no storage was explicitly specified. This is not recommended for production use. See: https://flask-limiter.readthedocs.io#configuring-a-storage-backend for documentation about configuring the storage backend.
+  warnings.warn(
+INFO:app:Database connection successful
+^AINFO:app:Found existing tables: {'accounts', 'email_fetch_tracker', 'opportunities', 'tasks', 'leads', 'alembic_version', 'emails', 'schedules', 'unknown_emails', 'users', 'user_settings'}
+INFO:app:Database tables already exist
+INFO:app:Admin user already exists
+INFO:apscheduler.scheduler:Scheduler started
+INFO:apscheduler.scheduler:Added job "setup_email_scheduler.<locals>.check_emails_task" to job store "default"
+INFO  [alembic.runtime.migration] Context impl PostgresqlImpl.
+INFO  [alembic.runtime.migration] Will assume transactional DDL.
+INFO  [alembic.ddl.postgresql] Detected sequence named 'leads_
