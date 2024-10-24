@@ -1,20 +1,17 @@
-from flask import Blueprint, jsonify, render_template, redirect, url_for, flash, current_app, request
+from flask import Blueprint, render_template, redirect, url_for, flash, current_app
 from flask_login import login_required, current_user
-from email_receiver import fetch_emails
-from models import Email, Lead, Opportunity, Task
+from email_receiver import check_emails
+from models import Lead, Opportunity, Task
 from sqlalchemy import func
 from datetime import datetime, timedelta
-from extensions import db  # Add this line to import the db object
+from extensions import db
 
 bp = Blueprint('main', __name__)
 
 @bp.route('/')
+@login_required
 def index():
-    return render_template('home.html')
-
-@bp.route('/health')
-def health_check():
-    return jsonify({"status": "ok"}), 200
+    return redirect(url_for('main.dashboard'))
 
 @bp.route('/dashboard')
 @login_required
@@ -37,33 +34,14 @@ def dashboard():
     # Get completed tasks count
     completed_tasks_count = Task.query.filter_by(user_id=current_user.id, completed=True).count()
 
-    # Get recent activities
-    recent_activities = []
-    # Add logic to fetch recent activities (e.g., recent leads, won opportunities, completed tasks)
+    return render_template('index.html',
+                         new_leads_count=new_leads_count,
+                         ongoing_opportunities_count=ongoing_opportunities_count,
+                         this_month_revenue=this_month_revenue,
+                         completed_tasks_count=completed_tasks_count)
 
-    return render_template('dashboard.html',
-                           new_leads_count=new_leads_count,
-                           ongoing_opportunities_count=ongoing_opportunities_count,
-                           this_month_revenue=this_month_revenue,
-                           completed_tasks_count=completed_tasks_count,
-                           recent_activities=recent_activities)
-
-@bp.route('/fetch-emails', methods=['POST'])
+@bp.route('/check_emails')
 @login_required
-def manual_fetch_emails():
-    try:
-        time_range = int(request.form.get('time_range', 30))
-        fetch_emails(time_range=time_range, user_id=current_user.id)
-        flash(f'過去{time_range}分間のメールを正常に取得しました', 'success')
-    except Exception as e:
-        current_app.logger.error(f"メール取得中にエラーが発生しました: {str(e)}")
-        flash('メールの取得中にエラーが発生しました。もう一度お試しください。', 'error')
-    return redirect(url_for('main.index'))
-
-@bp.route('/recent-emails')
-@login_required
-def recent_emails():
-    emails = Email.query.order_by(Email.received_at.desc()).limit(100).all()
-    for email in emails:
-        current_app.logger.info(f"Email sender: {email.sender_name} <{email.sender}>, Received at: {email.received_at}")
-    return render_template('recent_emails.html', emails=emails)
+def trigger_email_check():
+    check_emails(current_app)
+    return redirect(url_for('main.dashboard'))

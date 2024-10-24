@@ -1,234 +1,248 @@
 import os
+import imaplib
 import email
 from email.header import decode_header
-from datetime import datetime, timedelta, timezone
-from flask import current_app
-from models import Lead, Email, UnknownEmail, EmailFetchTracker, Opportunity, Schedule, Task, User, UserSettings
+import logging
+from datetime import datetime, timedelta
+from models import Lead, Email, UnknownEmail, EmailFetchTracker
 from extensions import db
-from sqlalchemy.exc import SQLAlchemyError
-import imaplib
-import ssl
+from flask import current_app
+from apscheduler.schedulers.background import BackgroundScheduler
+from ai_analysis import analyze_email
+import json
 import re
-import chardet
-from ai_analysis import analyze_email, parse_ai_response
-from flask_apscheduler import APScheduler
-import smtplib
-from utils import decode_mime_words
-
-def get_user_settings(user_id):
-    return UserSettings.query.filter_by(user_id=user_id).first()
-
-def connect_to_email_server(user_settings):
-    if not user_settings:
-        raise ValueError("User settings are required to connect to the email server.")
-
-    mail_server = user_settings.mail_server
-    mail_port = user_settings.mail_port
-    mail_username = user_settings.mail_username
-    mail_password = user_settings.mail_password
-
-    if not all([mail_server, mail_port, mail_username, mail_password]):
-        raise ValueError("One or more email connection settings are missing.")
-
-    try:
-        mail = imaplib.IMAP4_SSL(mail_server, mail_port)
-        mail.login(mail_username, mail_password)
-        current_app.logger.info(f"Successfully connected to email server: {mail_server}:{mail_port}")
-        return mail
-    except Exception as e:
-        current_app.logger.error(f"Error connecting to email server: {str(e)}")
-        raise
 
 def setup_email_scheduler(app):
-    scheduler = APScheduler()
-    scheduler.init_app(app)
+    """Setup scheduler for periodic email checking"""
+    scheduler = BackgroundScheduler()
     scheduler.start()
-
-    @scheduler.task('interval', id='check_emails', minutes=5, misfire_grace_time=300, max_instances=1)
+    
     def check_emails_task():
+        """Task to check for new emails"""
         with app.app_context():
-            app.logger.info("Checking for new emails")
-            user_ids = [user.id for user in User.query.all()]
-            for user_id in user_ids:
-                try:
-                    fetch_emails(time_range=30, max_emails=100, user_id=user_id)
-                except Exception as e:
-                    current_app.logger.error(f"Error fetching emails for user_id {user_id}: {str(e)}")
-
-def fetch_emails(time_range=30, max_emails=100, user_id=None):
-    current_app.logger.info(f"Fetching emails for user_id: {user_id}")
-    mail = None
-    try:
-        user_settings = get_user_settings(user_id)
-        if not user_settings:
-            raise ValueError(f"No user settings found for user_id: {user_id}")
-
-        mail = connect_to_email_server(user_settings)
-        mail.select('INBOX')
-
-        end_date = datetime.now(timezone.utc)
-        start_date = end_date - timedelta(minutes=time_range)
-        date_str = start_date.strftime("%d-%b-%Y")
-
-        _, message_numbers = mail.search(None, f'(SINCE "{date_str}")')
-        email_ids = message_numbers[0].split()[-max_emails:]
-
-        total_emails = len(email_ids)
-        processed_emails = 0
-        known_lead_emails = 0
-        unknown_sender_emails = 0
-
-        current_app.logger.info(f"Total emails found: {total_emails}")
-
-        for num in reversed(email_ids):
             try:
-                _, msg_data = mail.fetch(num, '(RFC822)')
-                for response_part in msg_data:
-                    if isinstance(response_part, tuple):
-                        email_message = email.message_from_bytes(response_part[1])
-                        subject = decode_mime_words(email_message["Subject"])
-                        sender = email.utils.parseaddr(email_message["From"])[1]
-                        date_tuple = email.utils.parsedate_tz(email_message["Date"])
-                        local_date = datetime.fromtimestamp(email.utils.mktime_tz(date_tuple)) if date_tuple else datetime.now()
-
-                        current_app.logger.info(f"Processing email - Sender: {sender}, Subject: {subject}")
-
-                        lead = Lead.query.filter_by(email=sender).first()
-                        if lead:
-                            known_lead_emails += 1
-                            process_lead_email(lead, email_message, subject, local_date)
-                        else:
-                            unknown_sender_emails += 1
-                            store_unknown_email(sender, email_message, subject, local_date, user_id)
-
-                        processed_emails += 1
+                check_emails(app)
             except Exception as e:
-                current_app.logger.error(f"Error processing email ID {num}: {str(e)}")
+                app.logger.error(f"Error checking emails: {str(e)}")
+    
+    # Schedule email checking every 5 minutes
+    scheduler.add_job(check_emails_task, 'interval', minutes=5)
+    app.logger.info("Email scheduler started")
 
-        current_app.logger.info(f"Processed {processed_emails} out of {total_emails} emails")
-        current_app.logger.info(f"Emails from known leads: {known_lead_emails}")
-        current_app.logger.info(f"Emails from unknown senders: {unknown_sender_emails}")
+def check_emails(app):
+    """Check for new emails and process them"""
+    try:
+        # Get last fetch time or default to 5 minutes ago
+        tracker = EmailFetchTracker.query.order_by(EmailFetchTracker.last_fetch_time.desc()).first()
+        if tracker:
+            last_fetch = tracker.last_fetch_time
+        else:
+            last_fetch = datetime.utcnow() - timedelta(minutes=5)
+            tracker = EmailFetchTracker()
+            db.session.add(tracker)
+
+        # Connect to email server
+        mail = connect_to_email_server(app)
+        if not mail:
+            return
+
+        # Search for new emails
+        date_str = last_fetch.strftime("%d-%b-%Y")
+        _, message_numbers = mail.search(None, f'(SINCE "{date_str}")')
+
+        # Update last fetch time
+        tracker.last_fetch_time = datetime.utcnow()
+        db.session.commit()
+
+        # Process each email
+        for num in message_numbers[0].split():
+            _, msg_data = mail.fetch(num, '(RFC822)')
+            email_body = msg_data[0][1]
+            process_email(email_body, app)
+
+        mail.close()
+        mail.logout()
 
     except Exception as e:
-        current_app.logger.error(f"Error fetching emails: {str(e)}")
-    finally:
-        if mail:
-            try:
-                mail.logout()
-            except Exception as e:
-                current_app.logger.error(f"Error logging out from email server: {str(e)}")
+        app.logger.error(f"Error checking emails: {str(e)}")
+        raise
 
-def get_email_content(email_message):
-    if email_message.is_multipart():
-        for part in email_message.walk():
+def connect_to_email_server(app):
+    """Connect to email server with error handling and SSL options"""
+    try:
+        mail = imaplib.IMAP4_SSL(os.environ['MAIL_SERVER'])
+        mail.login(os.environ['MAIL_USERNAME'], os.environ['MAIL_PASSWORD'])
+        mail.select('inbox')
+        return mail
+    except Exception as e:
+        app.logger.error(f"Failed to connect to email server: {str(e)}")
+        return None
+
+def process_email(email_body, app):
+    """Process a single email"""
+    try:
+        msg = email.message_from_bytes(email_body)
+        subject = decode_email_header(msg['subject'])
+        sender = decode_email_header(msg['from'])
+        sender_name = extract_sender_name(sender)
+        sender_email = extract_email_address(sender)
+        
+        # Get email content
+        content = get_email_content(msg)
+        app.logger.info(f"Email sender: {sender_name} <{sender_email}> Received at: {datetime.utcnow()}")
+
+        # Find matching lead
+        lead = Lead.query.filter_by(email=sender_email).first()
+
+        if lead:
+            # Store email and update lead
+            email_record = Email(
+                sender=sender_email,
+                sender_name=sender_name,
+                subject=subject,
+                content=content,
+                lead_id=lead.id
+            )
+            lead.last_contact = datetime.utcnow()
+            db.session.add(email_record)
+            
+            # Analyze email content
+            ai_response = analyze_email(subject, content, lead.user_id)
+            process_ai_response(ai_response, lead, app)
+            
+        else:
+            # Store unknown email
+            unknown_email = UnknownEmail(
+                sender=sender_email,
+                sender_name=sender_name,
+                subject=subject,
+                content=content
+            )
+            db.session.add(unknown_email)
+            app.logger.info(f"Stored email from unknown sender: {sender_email}")
+
+        db.session.commit()
+
+    except Exception as e:
+        app.logger.error(f"Error processing email: {str(e)}")
+        db.session.rollback()
+        raise
+
+def decode_email_header(header):
+    """Decode email header with proper encoding"""
+    if not header:
+        return ""
+    try:
+        decoded_parts = []
+        for part, encoding in decode_header(header):
+            if isinstance(part, bytes):
+                decoded_parts.append(part.decode(encoding or 'utf-8', errors='replace'))
+            else:
+                decoded_parts.append(part)
+        return " ".join(decoded_parts)
+    except Exception:
+        return header
+
+def get_email_content(msg):
+    """Extract email content handling different content types"""
+    if msg.is_multipart():
+        for part in msg.walk():
             if part.get_content_type() == "text/plain":
-                return part.get_payload(decode=True).decode(errors='ignore')
+                try:
+                    return part.get_payload(decode=True).decode()
+                except:
+                    continue
     else:
-        return email_message.get_payload(decode=True).decode(errors='ignore')
+        try:
+            return msg.get_payload(decode=True).decode()
+        except:
+            return msg.get_payload()
     return ""
 
-def process_lead_email(lead, email_message, subject, date):
+def extract_sender_name(sender):
+    """Extract sender name from email header"""
+    match = re.match(r'"?([^"<]+)"?\s*(?:<[^>]+>)?', sender)
+    return match.group(1).strip() if match else sender
+
+def extract_email_address(sender):
+    """Extract email address from sender header"""
+    match = re.search(r'<([^>]+)>', sender)
+    return match.group(1) if match else sender
+
+def process_ai_response(response, lead, app):
+    """Process AI analysis response and create corresponding records"""
     try:
-        content = get_email_content(email_message)
-        new_email = Email(
-            sender=lead.email,
-            sender_name=lead.name,
-            subject=subject,
-            content=content,
-            received_at=date,
-            lead_id=lead.id
-        )
-        db.session.add(new_email)
-        lead.last_contact = date
-
-        ai_response = analyze_email(subject, content, lead.user_id)
-        opportunities, schedules, tasks = parse_ai_response(ai_response)
-
-        create_opportunities(opportunities, lead)
-        create_schedules(schedules, lead)
-        create_tasks(tasks, lead)
-
-        db.session.commit()
-        current_app.logger.info(f"Processed email for lead: {lead.email}")
-    except SQLAlchemyError as e:
-        current_app.logger.error(f"Database error processing lead email: {str(e)}")
-        db.session.rollback()
+        if isinstance(response, str) and response.startswith('{'):
+            data = json.loads(response)
+            
+            if 'Opportunities' in data:
+                create_opportunities_from_ai(data['Opportunities'], lead)
+            
+            if 'Schedules' in data:
+                create_schedules_from_ai(data['Schedules'], lead)
+            
+            if 'Tasks' in data:
+                create_tasks_from_ai(data['Tasks'], lead)
+                
     except Exception as e:
-        current_app.logger.error(f"Error processing lead email: {str(e)}")
-        db.session.rollback()
+        app.logger.error(f"Error processing AI response: {str(e)}")
 
-def store_unknown_email(sender, email_message, subject, date, user_id):
-    try:
-        content = get_email_content(email_message)
-        sender_name, sender_email = email.utils.parseaddr(sender)
+def create_opportunities_from_ai(opportunities, lead):
+    """Create opportunities from AI analysis"""
+    from models import Opportunity
+    
+    for opp_desc in opportunities:
+        if ':' in opp_desc:
+            _, desc = opp_desc.split(':', 1)
+            opportunity = Opportunity(
+                name=desc.strip(),
+                stage='Initial Contact',
+                user_id=lead.user_id,
+                lead_id=lead.id
+            )
+            db.session.add(opportunity)
 
-        new_lead = Lead(
-            name=decode_mime_words(sender_name),
-            email=sender_email,
-            user_id=user_id,
-            status='New'
-        )
-        db.session.add(new_lead)
-        db.session.flush()  # To get the new lead's ID
+def create_schedules_from_ai(schedules, lead):
+    """Create schedules from AI analysis"""
+    from models import Schedule
+    
+    for schedule in schedules:
+        if isinstance(schedule, dict):
+            if 'Description' in schedule and ':' in schedule['Description']:
+                _, desc = schedule['Description'].split(':', 1)
+                try:
+                    start_time = datetime.strptime(schedule.get('Start Time', ''), '%Y-%m-%d %H:%M')
+                    end_time = datetime.strptime(schedule.get('End Time', ''), '%Y-%m-%d %H:%M')
+                except ValueError:
+                    start_time = datetime.utcnow()
+                    end_time = start_time + timedelta(hours=1)
+                
+                schedule_record = Schedule(
+                    title=desc.strip(),
+                    start_time=start_time,
+                    end_time=end_time,
+                    user_id=lead.user_id,
+                    lead_id=lead.id
+                )
+                db.session.add(schedule_record)
 
-        new_email = Email(
-            sender=sender_email,
-            sender_name=sender_name,
-            subject=subject,
-            content=content,
-            received_at=date,
-            lead_id=new_lead.id
-        )
-        db.session.add(new_email)
-
-        ai_response = analyze_email(subject, content, user_id)
-        opportunities, schedules, tasks = parse_ai_response(ai_response)
-
-        create_opportunities(opportunities, new_lead)
-        create_schedules(schedules, new_lead)
-        create_tasks(tasks, new_lead)
-
-        db.session.commit()
-        current_app.logger.info(f"Stored email from new lead: {sender_email}")
-    except SQLAlchemyError as e:
-        current_app.logger.error(f"Database error storing unknown email: {str(e)}")
-        db.session.rollback()
-    except Exception as e:
-        current_app.logger.error(f"Error storing unknown email: {str(e)}")
-        db.session.rollback()
-
-def create_opportunities(opportunities, lead):
-    for opp in opportunities:
-        new_opp = Opportunity(
-            name=opp,
-            stage="New",
-            amount=0,
-            close_date=datetime.utcnow() + timedelta(days=30),
-            user_id=lead.user_id,
-            lead_id=lead.id
-        )
-        db.session.add(new_opp)
-
-def create_schedules(schedules, lead):
-    for sched in schedules:
-        new_sched = Schedule(
-            title=sched,
-            description="AI生成されたスケジュール",
-            start_time=datetime.now(),
-            end_time=datetime.now() + timedelta(hours=1),
-            user_id=lead.user_id,
-            lead_id=lead.id
-        )
-        db.session.add(new_sched)
-
-def create_tasks(tasks, lead):
+def create_tasks_from_ai(tasks, lead):
+    """Create tasks from AI analysis"""
+    from models import Task
+    
     for task in tasks:
-        new_task = Task(
-            title=task,
-            description="AI生成されたタスク",
-            status="New",
-            due_date=datetime.now() + timedelta(days=7),
-            user_id=lead.user_id,
-            lead_id=lead.id
-        )
-        db.session.add(new_task)
+        if isinstance(task, dict) and 'Description' in task and ':' in task['Description']:
+            _, desc = task['Description'].split(':', 1)
+            try:
+                due_date = datetime.strptime(task.get('Due Date', ''), '%Y-%m-%d')
+            except ValueError:
+                due_date = datetime.utcnow() + timedelta(days=7)
+            
+            task_record = Task(
+                title=desc.strip(),
+                due_date=due_date,
+                status='New',
+                user_id=lead.user_id,
+                lead_id=lead.id
+            )
+            db.session.add(task_record)

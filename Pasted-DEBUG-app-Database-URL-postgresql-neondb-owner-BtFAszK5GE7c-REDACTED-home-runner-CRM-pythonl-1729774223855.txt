@@ -1,0 +1,37 @@
+DEBUG:app:Database URL: postgresql://neondb_owner:BtFAszK5GE7c@[REDACTED]
+/home/runner/CRM/.pythonlibs/lib/python3.11/site-packages/flask_limiter/extension.py:336: UserWarning: Using the in-memory storage for tracking rate limits as no storage was explicitly specified. This is not recommended for production use. See: https://flask-limiter.readthedocs.io#configuring-a-storage-backend for documentation about configuring the storage backend.
+  warnings.warn(
+INFO:app:Database connection successful
+INFO:app:Database tables already exist
+Traceback (most recent call last):
+  File "/home/runner/CRM/.pythonlibs/bin/flask", line 8, in <module>
+    sys.exit(main())
+             ^^^^^^
+  File "/home/runner/CRM/.pythonlibs/lib/python3.11/site-packages/flask/cli.py", line 1050, in main
+    cli.main()
+  File "/home/runner/CRM/.pythonlibs/lib/python3.11/site-packages/click/core.py", line 1078, in main
+    rv = self.invoke(ctx)
+         ^^^^^^^^^^^^^^^^
+  File "/home/runner/CRM/.pythonlibs/lib/python3.11/site-packages/click/core.py", line 1682, in invoke
+    cmd_name, cmd, args = self.resolve_command(ctx, args)
+                          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/runner/CRM/.pythonlibs/lib/python3.11/site-packages/click/core.py", line 1729, in resolve_command
+    cmd = self.get_command(ctx, cmd_name)
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/runner/CRM/.pythonlibs/lib/python3.11/site-packages/flask/cli.py", line 578, in get_command
+    app = info.load_app()
+          ^^^^^^^^^^^^^^^
+  File "/home/runner/CRM/.pythonlibs/lib/python3.11/site-packages/flask/cli.py", line 312, in load_app
+    app = locate_app(import_name, None, raise_if_not_found=False)
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/runner/CRM/.pythonlibs/lib/python3.11/site-packages/flask/cli.py", line 235, in locate_app
+    return find_best_app(module)
+           ^^^^^^^^^^^^^^^^^^^^^
+  File "/home/runner/CRM/.pythonlibs/lib/python3.11/site-packages/flask/cli.py", line 63, in find_best_app
+    app = app_factory()
+          ^^^^^^^^^^^^^
+  File "/home/runner/CRM/app.py", line 30, in create_app
+    from routes import main, auth, leads, opportunities, accounts, reports
+  File "/home/runner/CRM/routes/leads.py", line 7, in <module>
+    from ai_analysis import analyze_leads
+ImportError: cannot import name 'analyze_leads' from 'ai_analysis' (/home/runner/CRM/ai_analysis.py)
