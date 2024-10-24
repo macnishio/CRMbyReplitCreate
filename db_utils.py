@@ -30,7 +30,7 @@ def create_initial_admin(app):
         admin = User.query.filter_by(username='admin').first()
         if not admin:
             admin = User(username='admin', email='admin@example.com')
-            admin.set_password('admin')
+            admin.set_password(os.environ.get('INITIAL_ADMIN_PASSWORD', 'admin'))
             db.session.add(admin)
             db.session.flush()
 
@@ -57,32 +57,28 @@ def create_initial_admin(app):
 
 @retry_on_exception(retries=3, delay=1)
 def init_database(app):
-    """Initialize database if tables don't exist"""
+    """Initialize database safely without recreation if tables exist"""
     with app.app_context():
         try:
-            # Check database connection using text()
+            # Verify database connection
             db.session.execute(text('SELECT 1'))
             app.logger.info("Database connection successful")
             
             # Check existing tables
             inspector = inspect(db.engine)
             existing_tables = set(inspector.get_table_names())
-            required_tables = {
-                'users', 'leads', 'opportunities', 'accounts',
-                'tasks', 'emails', 'schedules', 'user_settings',
-                'unknown_emails', 'email_fetch_tracker'
-            }
-            
             app.logger.info(f"Found existing tables: {existing_tables}")
-            missing_tables = required_tables - existing_tables
-            
-            if missing_tables:
-                app.logger.info(f"Missing tables: {missing_tables}, creating tables")
+
+            # Don't attempt to create tables if they already exist
+            if existing_tables:
+                app.logger.info("Database tables already exist")
+                # Ensure admin user exists even if tables are present
+                create_initial_admin(app)
+            else:
+                app.logger.info("Creating database tables")
                 db.create_all()
                 create_initial_admin(app)
                 app.logger.info("Database initialized with initial data")
-            else:
-                app.logger.info("All required tables exist")
             return True
         except Exception as e:
             app.logger.error(f"Database initialization error: {str(e)}")
