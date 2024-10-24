@@ -74,6 +74,11 @@
                 <li><strong>スコア:</strong> {{ "%.1f"|format(opportunity.lead.score) }}</li>
                 <li><strong>ステータス:</strong> {{ opportunity.lead.status }}</li>
             </ul>
+            {% if opportunity.lead.emails %}
+            <div class="email-buttons">
+                <button type="button" class="btn btn-info" onclick="viewEmails({{ opportunity.lead.id }})">関連メール閲覧</button>
+            </div>
+            {% endif %}
         </div>
         {% else %}
         <p class="no-lead">リードが関連付けられていません</p>
@@ -91,6 +96,14 @@
 
 <div class="add-opportunity">
     <a href="{{ url_for('opportunities.add_opportunity') }}" class="btn btn-add">新規商談を追加</a>
+</div>
+
+<!-- Email Content Modal -->
+<div id="emailModal" class="modal">
+    <div class="modal-content">
+        <span class="close">&times;</span>
+        <div id="emailContent"></div>
+    </div>
 </div>
 
 <script>
@@ -149,6 +162,51 @@ document.querySelectorAll('.opportunity-checkbox').forEach(checkbox => {
         selectAll.checked = [...checkboxes].every(cb => cb.checked);
     });
 });
+
+// Email viewing functionality
+function viewEmails(leadId) {
+    const modal = document.getElementById('emailModal');
+    const content = document.getElementById('emailContent');
+    const span = document.getElementsByClassName('close')[0];
+    
+    // Fetch emails for this lead
+    fetch(`/api/leads/${leadId}/emails`)
+        .then(response => response.json())
+        .then(data => {
+            content.innerHTML = formatEmails(data);
+            modal.style.display = 'block';
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            content.innerHTML = '<p>メールの取得中にエラーが発生しました。</p>';
+            modal.style.display = 'block';
+        });
+    
+    span.onclick = function() {
+        modal.style.display = 'none';
+    }
+    
+    window.onclick = function(event) {
+        if (event.target == modal) {
+            modal.style.display = 'none';
+        }
+    }
+}
+
+function formatEmails(emails) {
+    if (!emails || emails.length === 0) {
+        return '<p>関連するメールはありません。</p>';
+    }
+    
+    return emails.map(email => `
+        <div class="email-item">
+            <h3>${email.subject || '（件名なし）'}</h3>
+            <p><strong>送信者:</strong> ${email.sender_name} &lt;${email.sender}&gt;</p>
+            <p><strong>日時:</strong> ${new Date(email.received_date).toLocaleString()}</p>
+            <div class="email-content">${email.content}</div>
+        </div>
+    `).join('<hr>');
+}
 </script>
 
 <style>
@@ -201,6 +259,74 @@ document.querySelectorAll('.opportunity-checkbox').forEach(checkbox => {
     color: #6c757d;
     font-style: italic;
     margin-top: 10px;
+}
+
+.email-buttons {
+    margin-top: 10px;
+}
+
+.btn-info {
+    background-color: #17a2b8;
+    color: white;
+    border: none;
+    padding: 5px 10px;
+    border-radius: 4px;
+    cursor: pointer;
+}
+
+.btn-info:hover {
+    background-color: #138496;
+}
+
+/* Modal styles */
+.modal {
+    display: none;
+    position: fixed;
+    z-index: 1;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0,0,0,0.4);
+}
+
+.modal-content {
+    background-color: #fefefe;
+    margin: 15% auto;
+    padding: 20px;
+    border: 1px solid #888;
+    width: 80%;
+    max-width: 800px;
+    border-radius: 5px;
+    max-height: 70vh;
+    overflow-y: auto;
+}
+
+.close {
+    color: #aaa;
+    float: right;
+    font-size: 28px;
+    font-weight: bold;
+    cursor: pointer;
+}
+
+.close:hover,
+.close:focus {
+    color: black;
+    text-decoration: none;
+    cursor: pointer;
+}
+
+.email-item {
+    margin-bottom: 20px;
+    padding: 10px;
+    background-color: #f8f9fa;
+    border-radius: 5px;
+}
+
+.email-content {
+    margin-top: 10px;
+    white-space: pre-wrap;
 }
 </style>
 {% endblock %}

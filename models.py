@@ -23,9 +23,7 @@ class User(UserMixin, db.Model):
     opportunities = db.relationship('Opportunity', backref='user', lazy='dynamic')
     accounts = db.relationship('Account', backref='user', lazy='dynamic')
     settings = db.relationship("UserSettings", backref="user", uselist=False)
-
-    def __init__(self, **kwargs):
-        super(User, self).__init__(**kwargs)
+    email_trackers = db.relationship('EmailFetchTracker', backref='user', lazy=True)
 
     def set_password(self, password):
         self.password_hash = generate_password_hash(password)
@@ -115,6 +113,7 @@ class Email(db.Model):
     content: Mapped[str] = mapped_column(Text)
     received_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow)
     lead_id: Mapped[int] = mapped_column(Integer, ForeignKey('leads.id'), nullable=False)
+    user_id: Mapped[int] = mapped_column(Integer, ForeignKey('users.id'), nullable=False)
 
 class UnknownEmail(db.Model):
     __tablename__ = 'unknown_emails'
@@ -177,4 +176,34 @@ class Task(db.Model):
 class EmailFetchTracker(db.Model):
     __tablename__ = 'email_fetch_tracker'
     id: Mapped[int] = mapped_column(Integer, primary_key=True)
-    last_fetch_time: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow)
+    user_id: Mapped[int] = mapped_column(Integer, ForeignKey('users.id'), nullable=False)
+    last_fetch_time: Mapped[datetime] = mapped_column(DateTime, nullable=False, default=datetime.utcnow)
+    created_at: Mapped[datetime] = mapped_column(DateTime, nullable=False, default=datetime.utcnow)
+    updated_at: Mapped[datetime] = mapped_column(DateTime, nullable=False, default=datetime.utcnow, onupdate=datetime.utcnow)
+
+    def __repr__(self):
+        return f'<EmailFetchTracker {self.id} for user {self.user_id}>'
+
+def init_email_fetch_tracker():
+    """Initialize email fetch tracker for existing users"""
+    from flask import current_app
+    with current_app.app_context():
+        try:
+            # Create trackers for existing users
+            users = User.query.all()
+            for user in users:
+                tracker = EmailFetchTracker.query.filter_by(user_id=user.id).first()
+                if not tracker:
+                    tracker = EmailFetchTracker(
+                        user_id=user.id,
+                        last_fetch_time=datetime.utcnow()
+                    )
+                    db.session.add(tracker)
+
+            db.session.commit()
+            current_app.logger.info("Email fetch trackers initialized successfully")
+
+        except Exception as e:
+            current_app.logger.error(f"Error initializing email fetch trackers: {str(e)}")
+            db.session.rollback()
+            raise
