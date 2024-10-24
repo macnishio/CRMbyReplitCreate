@@ -2,22 +2,189 @@
 {% block title %}リード一覧{% endblock %}
 {% block content %}
 <h1>リード一覧</h1>
+
+<!-- Filter Section -->
+<div class="filter-section">
+    <form method="GET" action="{{ url_for('leads.list_leads') }}" class="filter-form">
+        <div class="filter-group">
+            <label for="status">ステータス:</label>
+            <select name="status" id="status">
+                <option value="">すべて</option>
+                <option value="New" {% if request.args.get('status') == 'New' %}selected{% endif %}>新規</option>
+                <option value="Contacted" {% if request.args.get('status') == 'Contacted' %}selected{% endif %}>連絡済み</option>
+                <option value="Qualified" {% if request.args.get('status') == 'Qualified' %}selected{% endif %}>適格</option>
+                <option value="Lost" {% if request.args.get('status') == 'Lost' %}selected{% endif %}>失注</option>
+            </select>
+        </div>
+        <div class="filter-group">
+            <label for="score">最小スコア:</label>
+            <input type="number" name="min_score" id="score" min="0" max="100" step="1" 
+                   value="{{ request.args.get('min_score', '') }}">
+        </div>
+        <button type="submit" class="btn btn-primary">フィルター適用</button>
+        <a href="{{ url_for('leads.list_leads') }}" class="btn btn-secondary">リセット</a>
+    </form>
+</div>
+
+<!-- Bulk Operations Form -->
+<form method="POST" action="{{ url_for('leads.bulk_action') }}" id="bulkForm">
+    <div class="bulk-actions">
+        <div class="select-all-container">
+            <input type="checkbox" id="select-all" onclick="toggleAllCheckboxes()">
+            <label for="select-all">すべて選択</label>
+        </div>
+        <select name="action" id="bulk-action">
+            <option value="">一括操作を選択...</option>
+            <option value="delete">削除</option>
+            <option value="change_status">ステータス変更</option>
+            <option value="update_score">スコア更新</option>
+        </select>
+        <select name="new_status" id="new-status" style="display: none;">
+            <option value="New">新規</option>
+            <option value="Contacted">連絡済み</option>
+            <option value="Qualified">適格</option>
+            <option value="Lost">失注</option>
+        </select>
+        <input type="number" name="new_score" id="new-score" min="0" max="100" step="1" 
+               placeholder="新しいスコア" style="display: none;">
+        <button type="submit" class="btn btn-primary" onclick="return confirmBulkAction()">適用</button>
+    </div>
+
+<!-- Lead Grid -->
 <div class="lead-grid">
     {% for lead in leads %}
     <div class="lead-card">
+        <div class="lead-select">
+            <input type="checkbox" name="selected_leads[]" value="{{ lead.id }}" class="lead-checkbox">
+        </div>
         <h2>{{ lead.name }}</h2>
         <p><strong>メール:</strong> {{ lead.email }}</p>
+        <p><strong>電話:</strong> {{ lead.phone }}</p>
         <p><strong>ステータス:</strong> {{ lead.status }}</p>
-        <p><strong>スコア:</strong> {{ lead.score }}</p>
-        <p><strong>最終コンタクト:</strong> {{ lead.last_contact.strftime('%Y-%m-%d %H:%M') if lead.last_contact else 'N/A' }}</p>
+        <p><strong>スコア:</strong> {{ "%.1f"|format(lead.score) }}</p>
+        <p><strong>最終接触:</strong> {{ lead.last_contact.strftime('%Y-%m-%d %H:%M') if lead.last_contact }}</p>
         <div class="card-actions">
             <a href="{{ url_for('leads.edit_lead', id=lead.id) }}" class="btn btn-edit">編集</a>
-            <a href="{{ url_for('leads.delete_lead', id=lead.id) }}" class="btn btn-delete" onclick="return confirm('本当にこのリードを削除しますか？');">削除</a>
+            <form method="POST" action="{{ url_for('leads.delete_lead', id=lead.id) }}" style="display: inline;">
+                <button type="submit" class="btn btn-delete" onclick="return confirm('このリードを削除してもよろしいですか？');">削除</button>
+            </form>
         </div>
     </div>
     {% endfor %}
 </div>
+</form>
+
 <div class="add-lead">
     <a href="{{ url_for('leads.add_lead') }}" class="btn btn-add">新規リードを追加</a>
 </div>
+
+<script>
+function toggleAllCheckboxes() {
+    const selectAll = document.getElementById('select-all');
+    const checkboxes = document.querySelectorAll('.lead-checkbox');
+    checkboxes.forEach(checkbox => {
+        checkbox.checked = selectAll.checked;
+    });
+}
+
+document.getElementById('bulk-action').addEventListener('change', function() {
+    const newStatusSelect = document.getElementById('new-status');
+    const newScoreInput = document.getElementById('new-score');
+    
+    newStatusSelect.style.display = this.value === 'change_status' ? 'inline-block' : 'none';
+    newScoreInput.style.display = this.value === 'update_score' ? 'inline-block' : 'none';
+});
+
+function confirmBulkAction() {
+    const action = document.getElementById('bulk-action').value;
+    const selectedLeads = document.querySelectorAll('input[name="selected_leads[]"]:checked').length;
+    
+    if (!action) {
+        alert('操作を選択してください。');
+        return false;
+    }
+    
+    if (selectedLeads === 0) {
+        alert('リードを選択してください。');
+        return false;
+    }
+    
+    if (action === 'delete') {
+        return confirm(`選択された${selectedLeads}件のリードを削除してもよろしいですか？`);
+    }
+    
+    if (action === 'update_score') {
+        const newScore = document.getElementById('new-score').value;
+        if (!newScore || newScore < 0 || newScore > 100) {
+            alert('0から100の間のスコアを入力してください。');
+            return false;
+        }
+    }
+    
+    return true;
+}
+
+// Update select-all checkbox state when individual checkboxes change
+document.querySelectorAll('.lead-checkbox').forEach(checkbox => {
+    checkbox.addEventListener('change', function() {
+        const checkboxes = document.querySelectorAll('.lead-checkbox');
+        const selectAll = document.getElementById('select-all');
+        selectAll.checked = [...checkboxes].every(cb => cb.checked);
+    });
+});
+</script>
+
+<style>
+.filter-section {
+    margin-bottom: 20px;
+    padding: 15px;
+    background-color: #f8f9fa;
+    border-radius: 5px;
+}
+
+.filter-form {
+    display: flex;
+    gap: 15px;
+    align-items: center;
+    flex-wrap: wrap;
+}
+
+.filter-group {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.bulk-actions {
+    margin: 20px 0;
+    padding: 10px;
+    background-color: #f8f9fa;
+    border-radius: 5px;
+    display: flex;
+    gap: 10px;
+    align-items: center;
+}
+
+.select-all-container {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    margin-right: 15px;
+}
+
+.lead-select {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+}
+
+.lead-card {
+    position: relative;
+    padding-top: 40px;
+}
+
+#new-score {
+    width: 100px;
+}
+</style>
 {% endblock %}

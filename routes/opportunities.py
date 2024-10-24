@@ -1,10 +1,10 @@
-from flask import Blueprint, render_template, redirect, url_for, flash, request
+from flask import Blueprint, render_template, redirect, url_for, flash, request, current_app
 from flask_login import login_required, current_user
 from models import Opportunity, Lead
 from extensions import db
 from datetime import datetime
-from ai_analysis import analyze_opportunities
 from sqlalchemy import func
+from ai_analysis import analyze_opportunities
 
 bp = Blueprint('opportunities', __name__)
 
@@ -33,6 +33,45 @@ def list_opportunities():
                          opportunities=opportunities,
                          opp_stage_stats=opp_stage_stats,
                          ai_analysis=ai_analysis)
+
+@bp.route('/bulk_action', methods=['POST'])
+@login_required
+def bulk_action():
+    action = request.form.get('action')
+    selected_opportunities = request.form.getlist('selected_opportunities[]')
+    
+    if not action or not selected_opportunities:
+        flash('操作と商談を選択してください。', 'error')
+        return redirect(url_for('opportunities.list_opportunities'))
+    
+    try:
+        opportunities = Opportunity.query.filter(
+            Opportunity.id.in_(selected_opportunities),
+            Opportunity.user_id == current_user.id
+        ).all()
+        
+        if action == 'delete':
+            for opportunity in opportunities:
+                db.session.delete(opportunity)
+            flash(f'{len(opportunities)}件の商談を削除しました。', 'success')
+            
+        elif action == 'change_stage':
+            new_stage = request.form.get('new_stage')
+            if new_stage:
+                for opportunity in opportunities:
+                    opportunity.stage = new_stage
+                flash(f'{len(opportunities)}件の商談のステージを変更しました。', 'success')
+            else:
+                flash('新しいステージを選択してください。', 'error')
+        
+        db.session.commit()
+        
+    except Exception as e:
+        db.session.rollback()
+        flash('操作中にエラーが発生しました。', 'error')
+        current_app.logger.error(f"Bulk action error: {str(e)}")
+    
+    return redirect(url_for('opportunities.list_opportunities'))
 
 @bp.route('/add', methods=['GET', 'POST'])
 @login_required

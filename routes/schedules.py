@@ -1,8 +1,9 @@
-from flask import Blueprint, render_template, redirect, url_for, flash, request
+from flask import Blueprint, render_template, redirect, url_for, flash, request, current_app
 from flask_login import login_required, current_user
 from models import Schedule, Lead
 from extensions import db
 from datetime import datetime, timedelta
+from sqlalchemy import func
 from ai_analysis import analyze_schedules
 
 bp = Blueprint('schedules', __name__)
@@ -11,7 +12,29 @@ bp = Blueprint('schedules', __name__)
 @bp.route('')
 @login_required
 def list_schedules():
-    schedules = Schedule.query.filter_by(user_id=current_user.id).order_by(Schedule.start_time.asc()).all()
+    query = Schedule.query.filter_by(user_id=current_user.id)
+
+    # Apply filters if provided
+    date_filter = request.args.get('date_filter')
+    if date_filter:
+        today = datetime.utcnow().replace(hour=0, minute=0, second=0, microsecond=0)
+        if date_filter == 'today':
+            query = query.filter(
+                Schedule.start_time >= today,
+                Schedule.start_time < today + timedelta(days=1)
+            )
+        elif date_filter == 'week':
+            query = query.filter(
+                Schedule.start_time >= today,
+                Schedule.start_time < today + timedelta(days=7)
+            )
+        elif date_filter == 'month':
+            query = query.filter(
+                Schedule.start_time >= today,
+                Schedule.start_time < today + timedelta(days=30)
+            )
+
+    schedules = query.order_by(Schedule.start_time.asc()).all()
     
     # Get AI analysis
     ai_analysis = analyze_schedules(schedules)
@@ -21,6 +44,55 @@ def list_schedules():
                          ai_analysis=ai_analysis,
                          now=datetime.utcnow,
                          timedelta=timedelta)
+
+@bp.route('/bulk_action', methods=['POST'])
+@login_required
+def bulk_action():
+    action = request.form.get('action')
+    selected_schedules = request.form.getlist('selected_schedules[]')
+    
+    if not action or not selected_schedules:
+        flash('操作とスケジュールを選択してください。', 'error')
+        return redirect(url_for('schedules.list_schedules'))
+    
+    try:
+        schedules = Schedule.query.filter(
+            Schedule.id.in_(selected_schedules),
+            Schedule.user_id == current_user.id
+        ).all()
+        
+        if action == 'delete':
+            for schedule in schedules:
+                db.session.delete(schedule)
+            flash(f'{len(schedules)}件のスケジュールを削除しました。', 'success')
+            
+        elif action == 'reschedule':
+            new_date = request.form.get('new_date')
+            new_time = request.form.get('new_time')
+            
+            if not new_date or not new_time:
+                flash('新しい日時を選択してください。', 'error')
+                return redirect(url_for('schedules.list_schedules'))
+            
+            try:
+                new_datetime = datetime.strptime(f"{new_date} {new_time}", '%Y-%m-%d %H:%M')
+                for schedule in schedules:
+                    duration = schedule.end_time - schedule.start_time
+                    schedule.start_time = new_datetime
+                    schedule.end_time = new_datetime + duration
+                flash(f'{len(schedules)}件のスケジュールを変更しました。', 'success')
+            except ValueError:
+                flash('日時の形式が正しくありません。', 'error')
+                return redirect(url_for('schedules.list_schedules'))
+        
+        db.session.commit()
+        
+    except Exception as e:
+        db.session.rollback()
+        flash('操作中にエラーが発生しました。', 'error')
+        current_app.logger.error(f"Bulk action error: {str(e)}")
+    
+    return redirect(url_for('schedules.list_schedules'))
 
 @bp.route('/add', methods=['GET', 'POST'])
 @login_required
