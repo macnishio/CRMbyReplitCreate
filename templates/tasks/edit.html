@@ -1,60 +1,41 @@
 {% extends "base.html" %}
 
+{% block title %}Edit Task{% endblock %}
+
 {% block content %}
-<div class="container py-4">
-  <h2 class="mb-4">Edit Task</h2>
-  
-  <form method="POST" action="{{ url_for('tasks.edit_task', task_id=task.id) }}">
-    <div class="mb-3">
-      <label for="title" class="form-label">Title</label>
-      <input type="text" class="form-control" id="title" name="title" value="{{ task.title }}" required>
-    </div>
-
-    <div class="mb-3">
-      <label for="description" class="form-label">Description</label>
-      <textarea class="form-control" id="description" name="description" rows="3">{{ task.description }}</textarea>
-    </div>
-
-    <div class="mb-3">
-      <label for="due_date" class="form-label">Due Date</label>
-      <input type="date" class="form-control" id="due_date" name="due_date" 
-             value="{{ task.due_date.strftime('%Y-%m-%d') }}" required>
-    </div>
-
-    <div class="mb-3">
-      <label for="priority" class="form-label">Priority</label>
-      <select class="form-select" id="priority" name="priority">
-        <option value="low" {% if task.priority == 'low' %}selected{% endif %}>Low</option>
-        <option value="medium" {% if task.priority == 'medium' %}selected{% endif %}>Medium</option>
-        <option value="high" {% if task.priority == 'high' %}selected{% endif %}>High</option>
-      </select>
-    </div>
-
-    <div class="mb-3">
-      <label for="status" class="form-label">Status</label>
-      <select class="form-select" id="status" name="status">
-        <option value="not_started" {% if task.status == 'not_started' %}selected{% endif %}>Not Started</option>
-        <option value="in_progress" {% if task.status == 'in_progress' %}selected{% endif %}>In Progress</option>
-        <option value="completed" {% if task.status == 'completed' %}selected{% endif %}>Completed</option>
-      </select>
-    </div>
-
-    <div class="mb-3">
-      <label for="lead_id" class="form-label">Associated Lead</label>
-      <select class="form-select" id="lead_id" name="lead_id">
-        <option value="">None</option>
-        {% for lead in leads %}
-        <option value="{{ lead.id }}" {% if task.lead_id == lead.id %}selected{% endif %}>
-          {{ lead.name }}
-        </option>
-        {% endfor %}
-      </select>
-    </div>
-
-    <div class="mb-3">
-      <button type="submit" class="btn btn-primary">Update Task</button>
-      <a href="{{ url_for('tasks.list_tasks') }}" class="btn btn-secondary">Cancel</a>
-    </div>
-  </form>
-</div>
+    <h1>Edit Task</h1>
+    <form method="POST">
+        {{ form.hidden_tag() }}
+        <div>
+            {{ form.title.label }}
+            {{ form.title() }}
+        </div>
+        <div>
+            {{ form.description.label }}
+            {{ form.description() }}
+        </div>
+        <div>
+            {{ form.due_date.label }}
+            {{ form.due_date(type="datetime-local") }}
+        </div>
+        <div>
+            {{ form.user_id.label }}
+            {{ form.user_id() }}
+        </div>
+        <div>
+            {{ form.lead_id.label }}
+            {{ form.lead_id() }}
+        </div>
+        <div>
+            {{ form.opportunity_id.label }}
+            {{ form.opportunity_id() }}
+        </div>
+        <div>
+            {{ form.account_id.label }}
+            {{ form.account_id() }}
+        </div>
+        <div>
+            {{ form.submit() }}
+        </div>
+    </form>
 {% endblock %}
