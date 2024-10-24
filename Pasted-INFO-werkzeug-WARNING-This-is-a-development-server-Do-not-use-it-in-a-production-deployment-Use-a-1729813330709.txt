@@ -1,0 +1,115 @@
+INFO:werkzeug:WARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.
+ * Running on all addresses (0.0.0.0)
+ * Running on http://127.0.0.1:5000
+ * Running on http://172.31.196.21:5000
+INFO:werkzeug:Press CTRL+C to quit
+INFO:werkzeug:172.31.196.21 - - [24/Oct/2024 23:40:25] "GET / HTTP/1.1" 302 -
+INFO:werkzeug:172.31.196.21 - - [24/Oct/2024 23:40:25] "GET /auth/login?next=%2F HTTP/1.1" 200 -
+INFO:werkzeug:172.31.196.21 - - [24/Oct/2024 23:40:25] "GET /static/js/main.js HTTP/1.1" 304 -
+INFO:werkzeug:172.31.196.21 - - [24/Oct/2024 23:40:25] "GET /static/css/styles.css HTTP/1.1" 304 -
+INFO:werkzeug:172.31.196.21 - - [24/Oct/2024 23:40:29] "GET /auth/register HTTP/1.1" 200 -
+INFO:werkzeug:172.31.196.21 - - [24/Oct/2024 23:40:29] "GET /static/css/styles.css HTTP/1.1" 200 -
+INFO:werkzeug:172.31.196.21 - - [24/Oct/2024 23:40:29] "GET /static/js/main.js HTTP/1.1" 200 -
+INFO:werkzeug:172.31.196.21 - - [24/Oct/2024 23:40:40] "GET /auth/register HTTP/1.1" 200 -
+INFO:werkzeug:172.31.196.21 - - [24/Oct/2024 23:40:41] "GET /static/css/styles.css HTTP/1.1" 304 -
+INFO:werkzeug:172.31.196.21 - - [24/Oct/2024 23:40:41] "GET /static/js/main.js HTTP/1.1" 304 -
+INFO:werkzeug:172.31.196.21 - - [24/Oct/2024 23:40:41] "GET /auth/register HTTP/1.1" 200 -
+INFO:werkzeug:172.31.196.21 - - [24/Oct/2024 23:40:42] "GET /static/css/styles.css HTTP/1.1" 304 -
+INFO:werkzeug:172.31.196.21 - - [24/Oct/2024 23:40:42] "GET /static/js/main.js HTTP/1.1" 304 -
+INFO:werkzeug:172.31.196.21 - - [24/Oct/2024 23:41:23] "GET /auth/register HTTP/1.1" 200 -
+INFO:werkzeug:172.31.196.21 - - [24/Oct/2024 23:41:23] "GET /static/css/styles.css HTTP/1.1" 304 -
+INFO:werkzeug:172.31.196.21 - - [24/Oct/2024 23:41:23] "GET /static/js/main.js HTTP/1.1" 304 -
+INFO:werkzeug:172.31.196.21 - - [24/Oct/2024 23:41:27] "GET /auth/login HTTP/1.1" 200 -
+INFO:werkzeug:172.31.196.21 - - [24/Oct/2024 23:41:27] "GET /static/css/styles.css HTTP/1.1" 304 -
+INFO:werkzeug:172.31.196.21 - - [24/Oct/2024 23:41:27] "GET /static/js/main.js HTTP/1.1" 304 -
+INFO:werkzeug:172.31.196.21 - - [24/Oct/2024 23:41:30] "GET /auth/register HTTP/1.1" 200 -
+INFO:werkzeug:172.31.196.21 - - [24/Oct/2024 23:41:30] "GET /static/css/styles.css HTTP/1.1" 304 -
+INFO:werkzeug:172.31.196.21 - - [24/Oct/2024 23:41:31] "GET /static/js/main.js HTTP/1.1" 304 -
+ERROR:app:Exception on /auth/register [POST]
+Traceback (most recent call last):
+  File "/home/runner/CRM/.pythonlibs/lib/python3.11/site-packages/sqlalchemy/engine/base.py", line 1967, in _exec_single_context
+    self.dialect.do_execute(
+  File "/home/runner/CRM/.pythonlibs/lib/python3.11/site-packages/sqlalchemy/engine/default.py", line 941, in do_execute
+    cursor.execute(statement, parameters)
+psycopg2.errors.NotNullViolation: null value in column "username" of relation "users" violates not-null constraint
+DETAIL:  Failing row contains (1, null, makoto@team240.net, pbkdf2:sha256:260000$CmToUzQXaesYGaBC$88787b067abba2d5702167b6e5..., user).
+
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "/home/runner/CRM/.pythonlibs/lib/python3.11/site-packages/flask/app.py", line 2529, in wsgi_app
+    response = self.full_dispatch_request()
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/runner/CRM/.pythonlibs/lib/python3.11/site-packages/flask/app.py", line 1825, in full_dispatch_request
+    rv = self.handle_user_exception(e)
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/runner/CRM/.pythonlibs/lib/python3.11/site-packages/flask/app.py", line 1823, in full_dispatch_request
+    rv = self.dispatch_request()
+         ^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/runner/CRM/.pythonlibs/lib/python3.11/site-packages/flask/app.py", line 1799, in dispatch_request
+    return self.ensure_sync(self.view_functions[rule.endpoint])(**view_args)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/runner/CRM/routes/auth.py", line 62, in register
+    db.session.commit()
+  File "/home/runner/CRM/.pythonlibs/lib/python3.11/site-packages/sqlalchemy/orm/scoping.py", line 597, in commit
+    return self._proxied.commit()
+           ^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/runner/CRM/.pythonlibs/lib/python3.11/site-packages/sqlalchemy/orm/session.py", line 2028, in commit
+    trans.commit(_to_root=True)
+  File "<string>", line 2, in commit
+  File "/home/runner/CRM/.pythonlibs/lib/python3.11/site-packages/sqlalchemy/orm/state_changes.py", line 139, in _go
+    ret_value = fn(self, *arg, **kw)
+                ^^^^^^^^^^^^^^^^^^^^
+  File "/home/runner/CRM/.pythonlibs/lib/python3.11/site-packages/sqlalchemy/orm/session.py", line 1313, in commit
+    self._prepare_impl()
+  File "<string>", line 2, in _prepare_impl
+  File "/home/runner/CRM/.pythonlibs/lib/python3.11/site-packages/sqlalchemy/orm/state_changes.py", line 139, in _go
+    ret_value = fn(self, *arg, **kw)
+                ^^^^^^^^^^^^^^^^^^^^
+  File "/home/runner/CRM/.pythonlibs/lib/python3.11/site-packages/sqlalchemy/orm/session.py", line 1288, in _prepare_impl
+    self.session.flush()
+  File "/home/runner/CRM/.pythonlibs/lib/python3.11/site-packages/sqlalchemy/orm/session.py", line 4352, in flush
+    self._flush(objects)
+  File "/home/runner/CRM/.pythonlibs/lib/python3.11/site-packages/sqlalchemy/orm/session.py", line 4487, in _flush
+    with util.safe_reraise():
+  File "/home/runner/CRM/.pythonlibs/lib/python3.11/site-packages/sqlalchemy/util/langhelpers.py", line 146, in __exit__
+    raise exc_value.with_traceback(exc_tb)
+  File "/home/runner/CRM/.pythonlibs/lib/python3.11/site-packages/sqlalchemy/orm/session.py", line 4448, in _flush
+    flush_context.execute()
+  File "/home/runner/CRM/.pythonlibs/lib/python3.11/site-packages/sqlalchemy/orm/unitofwork.py", line 466, in execute
+    rec.execute(self)
+  File "/home/runner/CRM/.pythonlibs/lib/python3.11/site-packages/sqlalchemy/orm/unitofwork.py", line 642, in execute
+    util.preloaded.orm_persistence.save_obj(
+  File "/home/runner/CRM/.pythonlibs/lib/python3.11/site-packages/sqlalchemy/orm/persistence.py", line 93, in save_obj
+    _emit_insert_statements(
+  File "/home/runner/CRM/.pythonlibs/lib/python3.11/site-packages/sqlalchemy/orm/persistence.py", line 1233, in _emit_insert_statements
+    result = connection.execute(
+             ^^^^^^^^^^^^^^^^^^^
+  File "/home/runner/CRM/.pythonlibs/lib/python3.11/site-packages/sqlalchemy/engine/base.py", line 1418, in execute
+    return meth(
+           ^^^^^
+  File "/home/runner/CRM/.pythonlibs/lib/python3.11/site-packages/sqlalchemy/sql/elements.py", line 515, in _execute_on_connection
+    return connection._execute_clauseelement(
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/runner/CRM/.pythonlibs/lib/python3.11/site-packages/sqlalchemy/engine/base.py", line 1640, in _execute_clauseelement
+    ret = self._execute_context(
+          ^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/runner/CRM/.pythonlibs/lib/python3.11/site-packages/sqlalchemy/engine/base.py", line 1846, in _execute_context
+    return self._exec_single_context(
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/runner/CRM/.pythonlibs/lib/python3.11/site-packages/sqlalchemy/engine/base.py", line 1986, in _exec_single_context
+    self._handle_dbapi_exception(
+  File "/home/runner/CRM/.pythonlibs/lib/python3.11/site-packages/sqlalchemy/engine/base.py", line 2355, in _handle_dbapi_exception
+    raise sqlalchemy_exception.with_traceback(exc_info[2]) from e
+  File "/home/runner/CRM/.pythonlibs/lib/python3.11/site-packages/sqlalchemy/engine/base.py", line 1967, in _exec_single_context
+    self.dialect.do_execute(
+  File "/home/runner/CRM/.pythonlibs/lib/python3.11/site-packages/sqlalchemy/engine/default.py", line 941, in do_execute
+    cursor.execute(statement, parameters)
+sqlalchemy.exc.IntegrityError: (psycopg2.errors.NotNullViolation) null value in column "username" of relation "users" violates not-null constraint
+DETAIL:  Failing row contains (1, null, makoto@team240.net, pbkdf2:sha256:260000$CmToUzQXaesYGaBC$88787b067abba2d5702167b6e5..., user).
+
+[SQL: INSERT INTO users (username, email, password_hash, role) VALUES (%(username)s, %(email)s, %(password_hash)s, %(role)s) RETURNING users.id]
+[parameters: {'username': None, 'email': 'makoto@team240.net', 'password_hash': 'pbkdf2:sha256:260000$CmToUzQXaesYGaBC$88787b067abba2d5702167b6e575d0b236d4cc7035eb57aeab9bb15af370de87', 'role': 'user'}]
+(Background on this error at: https://sqlalche.me/e/20/gkpj)
+INFO:werkzeug:172.31.196.21 - - [24/Oct/2024 23:41:49] "POST /auth/register HTTP/1.1" 500 -

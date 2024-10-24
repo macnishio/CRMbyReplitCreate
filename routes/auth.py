@@ -55,7 +55,14 @@ def register():
             flash('このメールアドレスは既に登録されています。', 'error')
             return redirect(url_for('auth.register'))
         
-        user = User(email=form.email.data)
+        if User.query.filter_by(username=form.username.data).first():
+            flash('このユーザー名は既に使用されています。', 'error')
+            return redirect(url_for('auth.register'))
+        
+        user = User(
+            username=form.username.data,
+            email=form.email.data
+        )
         user.set_password(form.password.data)
         
         db.session.add(user)

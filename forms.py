@@ -10,6 +10,10 @@ class LoginForm(FlaskForm):
     submit = SubmitField('Sign In')
 
 class RegistrationForm(FlaskForm):
+    username = StringField('ユーザー名', validators=[
+        DataRequired(message='ユーザー名を入力してください'),
+        Length(min=3, max=80, message='ユーザー名は3文字以上80文字以内で入力してください')
+    ])
     email = StringField('メールアドレス', validators=[
         DataRequired(message='メールアドレスを入力してください'),
         Email(message='有効なメールアドレスを入力してください'),

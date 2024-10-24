@@ -15,6 +15,15 @@
     <form method="POST" action="{{ url_for('auth.register') }}" class="register-form">
         {{ form.hidden_tag() }}
         <div class="form-group">
+            {{ form.username.label }}
+            {{ form.username(class="form-control") }}
+            {% if form.username.errors %}
+                {% for error in form.username.errors %}
+                    <div class="error-message">{{ error }}</div>
+                {% endfor %}
+            {% endif %}
+        </div>
+        <div class="form-group">
             {{ form.email.label }}
             {{ form.email(class="form-control") }}
             {% if form.email.errors %}
