@@ -5,6 +5,12 @@ from extensions import db
 
 leads_bp = Blueprint('leads', __name__)
 
+@leads_bp.route('/')
+@login_required
+def list_leads():
+    leads = Lead.query.filter_by(user_id=current_user.id).all()
+    return render_template('leads/list_leads.html', leads=leads)
+
 @leads_bp.route('/edit/<int:lead_id>', methods=['GET', 'POST'])
 @login_required
 def edit_lead(lead_id):
@@ -33,5 +39,3 @@ def edit_lead(lead_id):
             flash(f'Error updating lead: {str(e)}', 'danger')
     
     return render_template('leads/edit_lead.html', lead=lead)
-
-# Other routes remain unchanged...
