@@ -6,12 +6,6 @@ from extensions import db
 
 opportunities_bp = Blueprint('opportunities', __name__)
 
-@opportunities_bp.route('/')
-@login_required
-def list_opportunities():
-    opportunities = Opportunity.query.filter_by(user_id=current_user.id).all()
-    return render_template('opportunities/list_opportunities.html', opportunities=opportunities)
-
 @opportunities_bp.route('/edit/<int:opportunity_id>', methods=['GET', 'POST'])
 @login_required
 def edit_opportunity(opportunity_id):

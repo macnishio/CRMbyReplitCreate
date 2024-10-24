@@ -1,6 +1,5 @@
 {pkgs}: {
   deps = [
-    pkgs.htop-vim
     pkgs.postgresql
     pkgs.rustc
     pkgs.openssl
