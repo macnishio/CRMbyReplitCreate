@@ -20,13 +20,21 @@ def init_database(app):
             db.session.execute(text('SELECT 1'))
             app.logger.info("Database connection successful")
             
-            # Step 2: すべてのテーブルを作成（存在する場合はスキップ）
-            db.create_all()
-            app.logger.info("Database tables verified")
+            # Step 2: テーブルの存在確認
+            inspector = inspect(db.engine)
+            existing_tables = set(inspector.get_table_names())
+            app.logger.info(f"Found existing tables: {existing_tables}")
             
-            # Step 3: 管理者ユーザーの確認と作成
-            create_initial_admin(app)
-                
+            # Step 3: 必要に応じてテーブルを作成
+            if not existing_tables:
+                # 新規データベースの場合
+                db.create_all()
+                create_initial_admin(app)
+                app.logger.info("Database tables created and initialized")
+            else:
+                # 既存のデータベースの場合は何もしない
+                app.logger.info("Database tables already exist")
+            
         except Exception as e:
             app.logger.error(f"Database initialization error: {str(e)}")
             raise
