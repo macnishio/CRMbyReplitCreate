@@ -1,9 +1,9 @@
-import os
 from anthropic import Anthropic, APIError, APIConnectionError, AuthenticationError
 from flask import current_app
-from models import Opportunity, Schedule
+from models import Opportunity, Schedule, UserSettings
 from datetime import datetime, timedelta
 import logging
+from flask_login import current_user
 
 def handle_ai_error(func_name, error):
     """Handle AI analysis errors with proper logging and localized messages"""
@@ -25,13 +25,13 @@ def handle_ai_error(func_name, error):
 def analyze_email(subject, content, user_id=None):
     """Analyze email content using Claude AI with improved error handling"""
     try:
-        api_key = os.environ.get('CLAUDE_API_KEY')
-        if not api_key:
-            current_app.logger.error("CLAUDE_API_KEY is missing from environment variables")
-            return '<p class="error-message">AI分析を実行するにはAPIキーが必要です。</p>'
+        user_settings = UserSettings.query.filter_by(user_id=user_id if user_id else current_user.id).first()
+        if not user_settings or not user_settings.claude_api_key:
+            current_app.logger.error("Claude API key not found in user settings")
+            return '<p class="error-message">AI分析を実行するにはAPIキーの設定が必要です。</p>'
 
         current_app.logger.debug("Initializing Anthropic client")
-        client = Anthropic(api_key=api_key)
+        client = Anthropic(api_key=user_settings.claude_api_key)
 
         prompt = f"""以下のメールを分析し、商談、スケジュール、タスクの提案をしてください:
 
@@ -92,13 +92,13 @@ def parse_ai_response(response):
 def analyze_opportunities(opportunities):
     """Analyze opportunities using Claude AI with improved error handling"""
     try:
-        api_key = os.environ.get('CLAUDE_API_KEY')
-        if not api_key:
-            current_app.logger.error("CLAUDE_API_KEY is missing from environment variables")
-            return '<p class="error-message">AI分析を実行するにはAPIキーが必要です。</p>'
+        user_settings = UserSettings.query.filter_by(user_id=current_user.id).first()
+        if not user_settings or not user_settings.claude_api_key:
+            current_app.logger.error("Claude API key not found in user settings")
+            return '<p class="error-message">AI分析を実行するにはAPIキーの設定が必要です。</p>'
             
         current_app.logger.debug("Initializing Anthropic client")
-        client = Anthropic(api_key=api_key)
+        client = Anthropic(api_key=user_settings.claude_api_key)
         
         # Prepare opportunity data for analysis
         opp_data = "\n".join([
@@ -132,13 +132,13 @@ def analyze_opportunities(opportunities):
 def analyze_schedules(schedules):
     """Analyze schedules using Claude AI with improved error handling"""
     try:
-        api_key = os.environ.get('CLAUDE_API_KEY')
-        if not api_key:
-            current_app.logger.error("CLAUDE_API_KEY is missing from environment variables")
-            return '<p class="error-message">AI分析を実行するにはAPIキーが必要です。</p>'
+        user_settings = UserSettings.query.filter_by(user_id=current_user.id).first()
+        if not user_settings or not user_settings.claude_api_key:
+            current_app.logger.error("Claude API key not found in user settings")
+            return '<p class="error-message">AI分析を実行するにはAPIキーの設定が必要です。</p>'
             
         current_app.logger.debug("Initializing Anthropic client")
-        client = Anthropic(api_key=api_key)
+        client = Anthropic(api_key=user_settings.claude_api_key)
 
         # Prepare schedule data for analysis
         schedule_data = "\n".join([
