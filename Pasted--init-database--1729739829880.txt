@@ -1,0 +1,49 @@
+データベースのテーブルが既に存在しているのにも関わらず、再度作成しようとしたために発生しています。
+具体的な原因は、init_database関数の中でテーブルの存在確認と作成の処理に問題があります。コードを以下のように修正しましょう：
+pythonCopydef init_database(app):
+    """データベースの初期化（既存の場合はスキップ）"""
+    with app.app_context():
+        try:
+            # Step 1: データベース接続の確認
+            db.session.execute(text('SELECT 1'))
+            app.logger.info("Database connection successful")
+            
+            # Step 2: 必要なテーブルの存在確認
+            inspector = inspect(db.engine)
+            existing_tables = set(inspector.get_table_names())
+            app.logger.debug(f"Existing tables: {existing_tables}")
+            
+            # アプリケーションが必要とするすべてのテーブルを定義
+            required_tables = {
+                'users', 'leads', 'opportunities', 'accounts', 
+                'tasks', 'emails', 'schedules', 'user_settings', 
+                'email_fetch_tracker'
+            }
+            
+            # Step 3: 不足テーブルの確認
+            missing_tables = required_tables - existing_tables
+            
+            if missing_tables:
+                app.logger.info(f"Missing tables: {missing_tables}, initializing database")
+                try:
+                    # テーブルが存在しない場合のみ作成
+                    for table in dir(db.Model):
+                        model = getattr(db.Model, table)
+                        if hasattr(model, '__tablename__') and model.__tablename__ in missing_tables:
+                            model.__table__.create(db.engine)
+                    create_initial_admin(app)
+                    app.logger.info("Database initialized successfully")
+                except Exception as e:
+                    app.logger.error(f"Error creating tables: {str(e)}")
+                    raise
+            else:
+                app.logger.info("All required tables exist, skipping initialization")
+                
+        except Exception as e:
+            app.logger.error(f"Database initialization error: {str(e)}")
+            raise
+主な変更点：
+
+既存のテーブルのリストを明示的に取得してログ出力
+不足しているテーブルのみを作成するように変更
+db.create_

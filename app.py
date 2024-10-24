@@ -10,43 +10,23 @@ from config import config
 from extensions import db, migrate, login_manager, mail, limiter
 from email_receiver import setup_email_scheduler
 import logging
-from sqlalchemy import inspect
+from sqlalchemy import text, inspect
 
 def init_database(app):
-    """Initialize database with proper error handling and table existence checks"""
+    """データベースの初期化（既存の場合はスキップ）"""
     with app.app_context():
         try:
-            inspector = inspect(db.engine)
-            existing_tables = inspector.get_table_names()
+            # Step 1: データベース接続の確認
+            db.session.execute(text('SELECT 1'))
+            app.logger.info("Database connection successful")
             
-            if not existing_tables:
-                app.logger.info("No existing tables found. Creating database schema...")
-                db.create_all()
-                create_initial_admin(app)
-                app.logger.info("Database initialized successfully")
-            else:
-                required_tables = {'users', 'user_settings', 'leads', 'opportunities', 
-                                 'accounts', 'tasks', 'schedules', 'emails', 'unknown_emails',
-                                 'email_fetch_tracker'}
-                missing_tables = required_tables - set(existing_tables)
+            # Step 2: すべてのテーブルを作成（存在する場合はスキップ）
+            db.create_all()
+            app.logger.info("Database tables verified")
+            
+            # Step 3: 管理者ユーザーの確認と作成
+            create_initial_admin(app)
                 
-                if missing_tables:
-                    app.logger.warning(f"Missing tables detected: {missing_tables}")
-                    for table in missing_tables:
-                        if table not in existing_tables:
-                            try:
-                                db.create_all()
-                                break
-                            except Exception as e:
-                                app.logger.error(f"Error creating table {table}: {str(e)}")
-                                continue
-                    
-                    if 'users' in missing_tables:
-                        create_initial_admin(app)
-                    app.logger.info("Missing tables created successfully")
-                else:
-                    app.logger.info("All required tables exist")
-                    
         except Exception as e:
             app.logger.error(f"Database initialization error: {str(e)}")
             raise
@@ -65,11 +45,11 @@ def create_initial_admin(app):
             # Create user settings with environment variables
             settings = UserSettings(
                 user_id=admin.id,
-                mail_server=os.environ.get('MAIL_SERVER', 'smtp.example.com'),
+                mail_server=os.environ.get('MAIL_SERVER'),
                 mail_port=int(os.environ.get('MAIL_PORT', 587)),
                 mail_use_tls=os.environ.get('MAIL_USE_TLS', 'true').lower() == 'true',
-                mail_username=os.environ.get('MAIL_USERNAME', 'test@example.com'),
-                mail_password=os.environ.get('MAIL_PASSWORD', 'password123'),
+                mail_username=os.environ.get('MAIL_USERNAME'),
+                mail_password=os.environ.get('MAIL_PASSWORD'),
                 claude_api_key=os.environ.get('CLAUDE_API_KEY'),
                 clearbit_api_key=os.environ.get('CLEARBIT_API_KEY')
             )
