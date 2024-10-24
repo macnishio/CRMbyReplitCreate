@@ -1,8 +1,8 @@
-from flask import Blueprint, render_template, redirect, url_for, flash, request
+from flask import Blueprint, render_template, redirect, url_for, flash, request, jsonify
 from flask_login import login_required, current_user
-from models import Task
+from models import Task, Lead
 from extensions import db
-from datetime import datetime
+from datetime import datetime, timedelta
 from sqlalchemy import func
 from ai_analysis import analyze_tasks
 
@@ -11,7 +11,35 @@ tasks_bp = Blueprint('tasks', __name__)
 @tasks_bp.route('/')
 @login_required
 def list_tasks():
-    tasks = Task.query.filter_by(user_id=current_user.id).order_by(Task.due_date.asc()).all()
+    query = Task.query.filter_by(user_id=current_user.id)
+    
+    # Apply filters
+    status = request.args.get('status')
+    if status:
+        query = query.filter(Task.status == status)
+        
+    due_date = request.args.get('due_date')
+    today = datetime.utcnow().replace(hour=0, minute=0, second=0, microsecond=0)
+    if due_date == 'today':
+        query = query.filter(
+            Task.due_date >= today,
+            Task.due_date < today + timedelta(days=1)
+        )
+    elif due_date == 'week':
+        query = query.filter(
+            Task.due_date >= today,
+            Task.due_date < today + timedelta(days=7)
+        )
+    elif due_date == 'month':
+        query = query.filter(
+            Task.due_date >= today,
+            Task.due_date < today + timedelta(days=30)
+        )
+    elif due_date == 'overdue':
+        query = query.filter(Task.due_date < today)
+
+    # Order by due date
+    tasks = query.order_by(Task.due_date.asc()).all()
     
     # Get task status counts
     status_counts = db.session.query(
@@ -29,6 +57,51 @@ def list_tasks():
                          task_status_counts=task_status_counts,
                          ai_analysis=ai_analysis,
                          utcnow=datetime.utcnow)
+
+@tasks_bp.route('/bulk_action', methods=['POST'])
+@login_required
+def bulk_action():
+    action = request.form.get('action')
+    selected_tasks = request.form.getlist('selected_tasks[]')
+    
+    if not action or not selected_tasks:
+        flash('操作とタスクを選択してください。', 'error')
+        return redirect(url_for('tasks.list_tasks'))
+    
+    try:
+        tasks = Task.query.filter(
+            Task.id.in_(selected_tasks),
+            Task.user_id == current_user.id
+        ).all()
+        
+        if action == 'complete':
+            for task in tasks:
+                task.completed = True
+                task.status = 'Completed'
+            flash(f'{len(tasks)}件のタスクを完了にしました。', 'success')
+            
+        elif action == 'delete':
+            for task in tasks:
+                db.session.delete(task)
+            flash(f'{len(tasks)}件のタスクを削除しました。', 'success')
+            
+        elif action == 'change_status':
+            new_status = request.form.get('new_status')
+            if new_status:
+                for task in tasks:
+                    task.status = new_status
+                flash(f'{len(tasks)}件のタスクのステータスを変更しました。', 'success')
+            else:
+                flash('新しいステータスを選択してください。', 'error')
+        
+        db.session.commit()
+        
+    except Exception as e:
+        db.session.rollback()
+        flash('操作中にエラーが発生しました。', 'error')
+        current_app.logger.error(f"Bulk action error: {str(e)}")
+    
+    return redirect(url_for('tasks.list_tasks'))
 
 @tasks_bp.route('/add', methods=['GET', 'POST'])
 @login_required

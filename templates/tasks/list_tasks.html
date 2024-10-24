@@ -3,6 +3,50 @@
 {% block content %}
 <h1>タスク一覧</h1>
 
+<!-- Filter Section -->
+<div class="filter-section">
+    <form method="GET" action="{{ url_for('tasks.list_tasks') }}" class="filter-form">
+        <div class="filter-group">
+            <label for="status">ステータス:</label>
+            <select name="status" id="status">
+                <option value="">すべて</option>
+                <option value="New" {% if request.args.get('status') == 'New' %}selected{% endif %}>新規</option>
+                <option value="In Progress" {% if request.args.get('status') == 'In Progress' %}selected{% endif %}>進行中</option>
+                <option value="Completed" {% if request.args.get('status') == 'Completed' %}selected{% endif %}>完了</option>
+            </select>
+        </div>
+        <div class="filter-group">
+            <label for="due_date">期限:</label>
+            <select name="due_date" id="due_date">
+                <option value="">すべて</option>
+                <option value="today" {% if request.args.get('due_date') == 'today' %}selected{% endif %}>今日</option>
+                <option value="week" {% if request.args.get('due_date') == 'week' %}selected{% endif %}>今週</option>
+                <option value="month" {% if request.args.get('due_date') == 'month' %}selected{% endif %}>今月</option>
+                <option value="overdue" {% if request.args.get('due_date') == 'overdue' %}selected{% endif %}>期限超過</option>
+            </select>
+        </div>
+        <button type="submit" class="btn btn-primary">フィルター適用</button>
+        <a href="{{ url_for('tasks.list_tasks') }}" class="btn btn-secondary">リセット</a>
+    </form>
+</div>
+
+<!-- Bulk Operations Form -->
+<form method="POST" action="{{ url_for('tasks.bulk_action') }}" id="bulkForm">
+    <div class="bulk-actions">
+        <select name="action" id="bulk-action">
+            <option value="">一括操作を選択...</option>
+            <option value="complete">完了にする</option>
+            <option value="delete">削除</option>
+            <option value="change_status">ステータス変更</option>
+        </select>
+        <select name="new_status" id="new-status" style="display: none;">
+            <option value="New">新規</option>
+            <option value="In Progress">進行中</option>
+            <option value="Completed">完了</option>
+        </select>
+        <button type="submit" class="btn btn-primary" onclick="return confirmBulkAction()">適用</button>
+    </div>
+
 <!-- AI Analysis Section -->
 <div class="ai-analysis-section">
     <div class="analysis-header" onclick="toggleAnalysis()">
@@ -45,6 +89,9 @@
 <div class="task-grid">
     {% for task in tasks %}
     <div class="task-card {% if task.completed %}completed{% endif %}">
+        <div class="task-select">
+            <input type="checkbox" name="selected_tasks[]" value="{{ task.id }}" class="task-checkbox">
+        </div>
         <h2>{{ task.title }}</h2>
         <p><strong>説明:</strong> {{ task.description }}</p>
         <p><strong>期限:</strong> {{ task.due_date.strftime('%Y-%m-%d') }}</p>
@@ -63,6 +110,7 @@
     </div>
     {% endfor %}
 </div>
+</form>
 
 <div class="add-task">
     <a href="{{ url_for('tasks.add_task') }}" class="btn btn-add">新規タスクを追加</a>
@@ -81,5 +129,74 @@ function toggleAnalysis() {
         icon.style.transform = 'rotate(180deg)';
     }
 }
+
+document.getElementById('bulk-action').addEventListener('change', function() {
+    const newStatusSelect = document.getElementById('new-status');
+    newStatusSelect.style.display = this.value === 'change_status' ? 'inline-block' : 'none';
+});
+
+function confirmBulkAction() {
+    const action = document.getElementById('bulk-action').value;
+    const selectedTasks = document.querySelectorAll('input[name="selected_tasks[]"]:checked').length;
+    
+    if (!action) {
+        alert('操作を選択してください。');
+        return false;
+    }
+    
+    if (selectedTasks === 0) {
+        alert('タスクを選択してください。');
+        return false;
+    }
+    
+    if (action === 'delete') {
+        return confirm(`選択された${selectedTasks}件のタスクを削除してもよろしいですか？`);
+    }
+    
+    return true;
+}
 </script>
+
+<style>
+.filter-section {
+    margin-bottom: 20px;
+    padding: 15px;
+    background-color: #f8f9fa;
+    border-radius: 5px;
+}
+
+.filter-form {
+    display: flex;
+    gap: 15px;
+    align-items: center;
+    flex-wrap: wrap;
+}
+
+.filter-group {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.bulk-actions {
+    margin: 20px 0;
+    padding: 10px;
+    background-color: #f8f9fa;
+    border-radius: 5px;
+    display: flex;
+    gap: 10px;
+    align-items: center;
+}
+
+.task-select {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+}
+
+.task-card {
+    position: relative;
+    padding-top: 40px;
+}
+</style>
 {% endblock %}
