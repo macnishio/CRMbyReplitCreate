@@ -1,12 +1,45 @@
 from flask import Blueprint, render_template, redirect, url_for, flash, request, current_app
 from flask_login import login_required, current_user
-from models import Lead
+from models import Lead, Email
 from extensions import db
 from datetime import datetime
 from sqlalchemy import func
 from ai_analysis import analyze_leads
 
 bp = Blueprint('leads', __name__)
+
+@bp.route('/update_empty_names')
+@login_required
+def update_empty_names():
+    try:
+        # Get leads with empty names and their latest emails
+        empty_name_leads = Lead.query.filter(
+            (Lead.name == '') | (Lead.name == None)
+        ).all()
+        
+        updated_count = 0
+        for lead in empty_name_leads:
+            # Get the latest email for this lead
+            latest_email = Email.query.filter_by(
+                lead_id=lead.id
+            ).order_by(Email.created_at.desc()).first()
+            
+            if latest_email and latest_email.sender_name:
+                lead.name = latest_email.sender_name
+                updated_count += 1
+        
+        if updated_count > 0:
+            db.session.commit()
+            flash(f'{updated_count}件のリード名を更新しました。', 'success')
+        else:
+            flash('更新が必要なリードはありませんでした。', 'info')
+            
+    except Exception as e:
+        current_app.logger.error(f"Error updating lead names: {str(e)}")
+        db.session.rollback()
+        flash('リード名の更新中にエラーが発生しました。', 'error')
+        
+    return redirect(url_for('leads.list_leads'))
 
 @bp.route('/')
 @bp.route('')

@@ -25,6 +25,9 @@
         <button type="submit" class="btn btn-primary">フィルター適用</button>
         <a href="{{ url_for('leads.list_leads') }}" class="btn btn-secondary">リセット</a>
     </form>
+    <div class="action-buttons">
+        <a href="{{ url_for('leads.update_empty_names') }}" class="btn btn-info">空の名前を更新</a>
+    </div>
 </div>
 
 <!-- Bulk Operations Form -->
@@ -59,7 +62,7 @@
         <div class="lead-select">
             <input type="checkbox" name="selected_leads[]" value="{{ lead.id }}" class="lead-checkbox">
         </div>
-        <h2>{{ lead.name }}</h2>
+        <h2>{{ lead.name or '名前なし' }}</h2>
         <p><strong>メール:</strong> {{ lead.email }}</p>
         <p><strong>電話:</strong> {{ lead.phone }}</p>
         <p><strong>ステータス:</strong> {{ lead.status }}</p>
@@ -157,6 +160,10 @@ document.querySelectorAll('.lead-checkbox').forEach(checkbox => {
     gap: 8px;
 }
 
+.action-buttons {
+    margin-top: 15px;
+}
+
 .bulk-actions {
     margin: 20px 0;
     padding: 10px;
@@ -187,6 +194,15 @@ document.querySelectorAll('.lead-checkbox').forEach(checkbox => {
 
 #new-score {
     width: 100px;
+}
+
+.btn-info {
+    background-color: #17a2b8;
+    color: white;
+}
+
+.btn-info:hover {
+    background-color: #138496;
 }
 </style>
 {% endblock %}
