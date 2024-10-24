@@ -127,6 +127,10 @@ args = "DB Reset And Init"
 task = "workflow.run"
 args = "DB Init and Run"
 
+[[workflows.workflow.tasks]]
+task = "workflow.run"
+args = "CRM App"
+
 [[workflows.workflow]]
 name = "Run Flask App"
 author = "agent"
@@ -804,6 +808,18 @@ with app.app_context():
 \" &&
     python3 app.py
     """
+waitForPort = 5000
+
+[[workflows.workflow]]
+name = "CRM App"
+author = "agent"
+
+[workflows.workflow.metadata]
+agentRequireRestartOnSave = false
+
+[[workflows.workflow.tasks]]
+task = "shell.exec"
+args = "python3 db_init.py && python3 app.py"
 waitForPort = 5000
 
 [deployment]
