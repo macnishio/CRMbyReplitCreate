@@ -1,0 +1,146 @@
+{% extends "base.html" %}
+{% block title %}スケジュール編集{% endblock %}
+
+{% block content %}
+<div class="edit-container">
+    <h1>スケジュール編集</h1>
+    {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+            {% for category, message in messages %}
+                <div class="alert alert-{{ category }}">{{ message }}</div>
+            {% endfor %}
+        {% endif %}
+    {% endwith %}
+    
+    <form method="POST" action="{{ url_for('schedules.edit_schedule', id=schedule.id) }}" class="edit-form">
+        <div class="form-group">
+            <label for="title">タイトル</label>
+            <input type="text" id="title" name="title" class="form-control" value="{{ schedule.title }}" required>
+        </div>
+        <div class="form-group">
+            <label for="description">説明</label>
+            <textarea id="description" name="description" class="form-control" rows="3">{{ schedule.description }}</textarea>
+        </div>
+        <div class="form-group">
+            <label for="start_date">開始日</label>
+            <input type="date" id="start_date" name="start_date" class="form-control" 
+                   value="{{ schedule.start_time.strftime('%Y-%m-%d') }}" required>
+        </div>
+        <div class="form-group">
+            <label for="start_time">開始時刻</label>
+            <input type="time" id="start_time" name="start_time" class="form-control" 
+                   value="{{ schedule.start_time.strftime('%H:%M') }}" required>
+        </div>
+        <div class="form-group">
+            <label for="end_date">終了日</label>
+            <input type="date" id="end_date" name="end_date" class="form-control" 
+                   value="{{ schedule.end_time.strftime('%Y-%m-%d') }}" required>
+        </div>
+        <div class="form-group">
+            <label for="end_time">終了時刻</label>
+            <input type="time" id="end_time" name="end_time" class="form-control" 
+                   value="{{ schedule.end_time.strftime('%H:%M') }}" required>
+        </div>
+        <div class="form-group">
+            <label for="lead_id">リード</label>
+            <select name="lead_id" id="lead_id" class="form-control">
+                <option value="">リードを選択...</option>
+                {% for lead in leads %}
+                    <option value="{{ lead.id }}" {% if schedule.lead_id == lead.id %}selected{% endif %}>
+                        {{ lead.name }} ({{ lead.email }})
+                    </option>
+                {% endfor %}
+            </select>
+        </div>
+        <div class="button-group">
+            <a href="{{ url_for('schedules.list_schedules') }}" class="btn btn-secondary">キャンセル</a>
+            <button type="submit" class="btn btn-primary">保存</button>
+        </div>
+    </form>
+</div>
+
+<style>
+.edit-container {
+    max-width: 600px;
+    margin: 2rem auto;
+    padding: 2rem;
+    background: #fff;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.edit-form {
+    margin-top: 1rem;
+}
+
+.form-group {
+    margin-bottom: 1rem;
+}
+
+.form-group label {
+    display: block;
+    margin-bottom: 0.5rem;
+    font-weight: bold;
+}
+
+.form-control {
+    width: 100%;
+    padding: 0.5rem;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    font-size: 1rem;
+}
+
+.button-group {
+    margin-top: 2rem;
+    display: flex;
+    gap: 1rem;
+    justify-content: flex-end;
+}
+
+.btn {
+    padding: 0.5rem 1rem;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 1rem;
+    text-decoration: none;
+}
+
+.btn-primary {
+    background: #007bff;
+    color: white;
+}
+
+.btn-secondary {
+    background: #6c757d;
+    color: white;
+}
+
+.btn-primary:hover {
+    background: #0056b3;
+}
+
+.btn-secondary:hover {
+    background: #545b62;
+}
+
+.alert {
+    padding: 0.75rem;
+    margin-bottom: 1rem;
+    border-radius: 4px;
+}
+
+.alert-error {
+    background-color: #f8d7da;
+    color: #721c24;
+    border: 1px solid #f5c6cb;
+}
+
+.alert-success {
+    background-color: #d4edda;
+    color: #155724;
+    border: 1px solid #c3e6cb;
+}
+</style>
+{% endblock %}
