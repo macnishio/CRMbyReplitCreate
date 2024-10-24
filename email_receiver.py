@@ -56,9 +56,16 @@ def check_emails(app):
 
         # Process each email
         for num in message_numbers[0].split():
-            _, msg_data = mail.fetch(num, '(RFC822)')
-            email_body = msg_data[0][1]
-            process_email(email_body, app)
+            try:
+                _, msg_data = mail.fetch(num, '(RFC822)')
+                if msg_data and msg_data[0] and msg_data[0][1]:
+                    email_body = msg_data[0][1]
+                    process_email(email_body, app)
+                else:
+                    app.logger.warning(f"Skipping email {num} - invalid message data")
+            except Exception as e:
+                app.logger.error(f"Error processing email {num}: {str(e)}")
+                continue
 
         mail.close()
         mail.logout()
@@ -91,6 +98,23 @@ def process_email(email_body, app):
         app.logger.info(f"Email sender: {sender_name} <{sender_email}> Received at: {datetime.utcnow()}")
 
         lead = Lead.query.filter_by(email=sender_email).first()
+        
+        if not lead:
+            # Find a reference user_id from existing leads
+            reference_lead = Lead.query.first()
+            if reference_lead:
+                # Create a new lead for the unknown sender
+                lead = Lead(
+                    name=sender_name,
+                    email=sender_email,
+                    status='New',
+                    score=0.0,
+                    user_id=reference_lead.user_id,
+                    last_contact=datetime.utcnow()
+                )
+                db.session.add(lead)
+                db.session.flush()  # Get the ID without committing
+                app.logger.info(f"Created new lead for unknown sender: {sender_email}")
 
         if lead:
             # Store email and update lead
@@ -99,7 +123,8 @@ def process_email(email_body, app):
                 sender_name=sender_name,
                 subject=subject,
                 content=content,
-                lead_id=lead.id
+                lead_id=lead.id,
+                user_id=lead.user_id  # Set the user_id from the lead
             )
             lead.last_contact = datetime.utcnow()
             db.session.add(email_record)
@@ -110,9 +135,8 @@ def process_email(email_body, app):
                 process_ai_response(ai_response, lead, app)
             else:
                 app.logger.info(f"Skipping AI analysis for spam lead: {sender_email}")
-            
         else:
-            # Store unknown email
+            # Store unknown email if we couldn't create a lead (no reference user found)
             unknown_email = UnknownEmail(
                 sender=sender_email,
                 sender_name=sender_name,
