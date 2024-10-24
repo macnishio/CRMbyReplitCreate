@@ -1,0 +1,162 @@
+import os
+from flask import Flask
+from flask_sqlalchemy import SQLAlchemy
+from flask_migrate import Migrate
+from flask_login import LoginManager
+from flask_mail import Mail
+from flask_limiter import Limiter
+from flask_limiter.util import get_remote_address
+from config import config
+from extensions import db, migrate, login_manager, mail, limiter
+from email_receiver import setup_email_scheduler
+import logging
+from sqlalchemy import inspect
+
+def create_app(config_name='default'):
+    app = Flask(__name__)
+    app.config.from_object(config[config_name])
+
+    # 基本設定の初期化
+    init_basic_config(app)
+
+    # 拡張機能の初期化
+    init_extensions(app)
+
+    # データベースの初期化
+    init_database(app)
+
+    # ブループリントの登録
+    register_blueprints(app)
+
+    # メールスケジューラーの設定
+    setup_email_scheduler(app)
+
+    return app
+
+def init_basic_config(app):
+    """基本設定の初期化"""
+    # SQLite用のディレクトリ作成
+    if app.config['SQLALCHEMY_DATABASE_URI'].startswith('sqlite:///'):
+        db_path = os.path.dirname(app.config['SQLALCHEMY_DATABASE_URI'].replace('sqlite:///', ''))
+        os.makedirs(db_path, exist_ok=True)
+
+    # 環境変数からの設定読み込み
+    app.config.update(
+        ENCRYPTION_KEY=os.environ.get('ENCRYPTION_KEY'),
+        SECRET_KEY=os.environ.get('SECRET_KEY', 'default_secret_key'),
+        CLAUDE_API_KEY=os.environ.get('CLAUDE_API_KEY')
+    )
+
+    # 設定の検証とログ出力
+    if not app.config['ENCRYPTION_KEY']:
+        app.logger.error("ENCRYPTION_KEYが環境変数に設定されていません")
+    if app.config['CLAUDE_API_KEY']:
+        app.logger.info("CLAUDE_API_KEY is set in app.config")
+    else:
+        app.logger.warning("CLAUDE_API_KEY is missing from environment variables")
+
+    # ログレベルの設定
+    logging.basicConfig(level=app.config['LOG_LEVEL'])
+    app.logger.debug(f"Database URL: {app.config['SQLALCHEMY_DATABASE_URI'].split('@')[0]}@[REDACTED]")
+
+def init_extensions(app):
+    """拡張機能の初期化"""
+    db.init_app(app)
+    migrate.init_app(app, db)
+    login_manager.init_app(app)
+    mail.init_app(app)
+
+    # レートリミッターの設定
+    limiter = Limiter(
+        app=app,
+        key_func=get_remote_address,
+        storage_uri="memory://",
+        default_limits=["1000 per day", "200 per hour"]
+    )
+    limiter.init_app(app)
+
+def init_database(app):
+    """データベースの初期化"""
+    with app.app_context():
+        try:
+            inspector = inspect(db.engine)
+            if not inspector.get_table_names():
+                db.create_all()
+                create_initial_admin(app)
+                app.logger.info("Database initialized successfully")
+            else:
+                app.logger.info("Database tables already exist")
+        except Exception as e:
+            app.logger.error(f"Database initialization error: {str(e)}")
+            try:
+                db.drop_all()
+                db.create_all()
+                create_initial_admin(app)
+                app.logger.info("Database recreated successfully")
+            except Exception as e:
+                app.logger.error(f"Failed to recreate database: {str(e)}")
+                raise
+
+def create_initial_admin(app):
+    """管理者ユーザーの作成"""
+    from models import User
+    try:
+        if not User.query.filter_by(username='admin').first():
+            admin = User(
+                username='admin',
+                email='admin@example.com',
+                role='admin'
+            )
+            admin.set_password(os.environ.get('INITIAL_ADMIN_PASSWORD', 'default_password'))
+            db.session.add(admin)
+            db.session.commit()
+            app.logger.info("Admin user created successfully")
+        else:
+            app.logger.info("Admin user already exists")
+    except Exception as e:
+        app.logger.error(f"Error creating admin user: {str(e)}")
+        db.session.rollback()
+        raise
+
+def register_blueprints(app):
+    """ブループリントの登録"""
+    from routes import (
+        main, auth, leads, opportunities, accounts,
+        reports, tracking, mobile, schedules, tasks, settings
+    )
+
+    blueprints = {
+        main.bp: '',
+        auth.bp: '',
+        leads.bp: '',
+        opportunities.bp: '',
+        accounts.bp: '',
+        reports.bp: '',
+        tracking.bp: '',
+        mobile.bp: '',
+        schedules.bp: '',
+        tasks.tasks_bp: '/tasks',
+        settings.bp: ''
+    }
+
+    for blueprint, url_prefix in blueprints.items():
+        app.register_blueprint(blueprint, url_prefix=url_prefix)
+
+@login_manager.user_loader
+def load_user(user_id):
+    """ユーザーローダー"""
+    try:
+        from models import User
+        return db.session.get(User, int(user_id))
+    except Exception as e:
+        current_app.logger.error(f"Error loading user: {str(e)}")
+        return None
+
+if __name__ == '__main__':
+    app = create_app()
+    with app.app_context():
+        try:
+            db.create_all()
+        except Exception as e:
+            app.logger.error(f"Error creating database tables: {str(e)}")
+    app.run(host='0.0.0.0', port=8080)

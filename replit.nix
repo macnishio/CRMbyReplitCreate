@@ -1,5 +1,6 @@
 {pkgs}: {
   deps = [
+    pkgs.postgresql
     pkgs.rustc
     pkgs.openssl
     pkgs.libiconv
