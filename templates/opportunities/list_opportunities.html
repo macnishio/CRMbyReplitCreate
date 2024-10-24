@@ -2,21 +2,72 @@
 {% block title %}商談一覧{% endblock %}
 {% block content %}
 <h1>商談一覧</h1>
+
+<!-- AI Analysis Section -->
+<div class="ai-analysis-section">
+    <div class="analysis-header" onclick="toggleAnalysis()">
+        <h2>商談分析 <span class="toggle-icon">▼</span></h2>
+    </div>
+    <div class="analysis-content" id="analysisContent">
+        <div class="analysis-grid">
+            <!-- Stage Distribution -->
+            <div class="analysis-card">
+                <h3>ステージ分布</h3>
+                {% for stat in opp_stage_stats %}
+                <p>{{ stat.stage }}: {{ stat.count }}件 ({{ "¥{:,.0f}".format(stat.amount or 0) }})</p>
+                {% endfor %}
+            </div>
+
+            <!-- AI Insights -->
+            <div class="analysis-card">
+                <h3>AI分析結果</h3>
+                {% if ai_analysis %}
+                    {{ ai_analysis|safe }}
+                {% else %}
+                    <p>AI分析を実行できませんでした。</p>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Opportunities Grid -->
 <div class="opportunity-grid">
     {% for opportunity in opportunities %}
     <div class="opportunity-card">
         <h2>{{ opportunity.name }}</h2>
         <p><strong>ステージ:</strong> {{ opportunity.stage }}</p>
-        <p><strong>金額:</strong> ¥{{ "{:,}".format(opportunity.amount) }}</p>
-        <p><strong>締切日:</strong> {{ opportunity.close_date.strftime('%Y-%m-%d') if opportunity.close_date else 'N/A' }}</p>
+        <p><strong>金額:</strong> {{ "¥{:,.0f}".format(opportunity.amount or 0) }}</p>
+        <p><strong>完了予定日:</strong> {{ opportunity.close_date.strftime('%Y-%m-%d') if opportunity.close_date }}</p>
+        {% if opportunity.lead %}
+        <p><strong>リード:</strong> {{ opportunity.lead.name }}</p>
+        {% endif %}
         <div class="card-actions">
             <a href="{{ url_for('opportunities.edit_opportunity', id=opportunity.id) }}" class="btn btn-edit">編集</a>
-            <a href="{{ url_for('opportunities.delete_opportunity', id=opportunity.id) }}" class="btn btn-delete" onclick="return confirm('本当にこの商談を削除しますか？');">削除</a>
+            <form method="POST" action="{{ url_for('opportunities.delete_opportunity', id=opportunity.id) }}" style="display: inline;">
+                <button type="submit" class="btn btn-delete" onclick="return confirm('この商談を削除してもよろしいですか？');">削除</button>
+            </form>
         </div>
     </div>
     {% endfor %}
 </div>
+
 <div class="add-opportunity">
     <a href="{{ url_for('opportunities.add_opportunity') }}" class="btn btn-add">新規商談を追加</a>
 </div>
+
+<script>
+function toggleAnalysis() {
+    const content = document.getElementById('analysisContent');
+    const icon = document.querySelector('.toggle-icon');
+    
+    if (content.style.maxHeight) {
+        content.style.maxHeight = null;
+        icon.style.transform = 'rotate(0deg)';
+    } else {
+        content.style.maxHeight = content.scrollHeight + "px";
+        icon.style.transform = 'rotate(180deg)';
+    }
+}
+</script>
 {% endblock %}

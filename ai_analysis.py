@@ -1,30 +1,17 @@
+import os
 from anthropic import Anthropic
 from flask import current_app
-import logging
-from models import UserSettings
-
-def get_user_settings(user_id):
-    return UserSettings.query.filter_by(user_id=user_id).first()
+from models import Opportunity, Schedule
+from datetime import datetime, timedelta
 
 def analyze_email(subject, content, user_id=None):
+    """Analyze email content using Claude AI"""
     try:
-        api_key = None
-        if user_id:
-            user_settings = get_user_settings(user_id)
-            if user_settings:
-                api_key = user_settings.claude_api_key
-
-        # Fallback to environment variable if no user settings
+        api_key = os.environ.get('CLAUDE_API_KEY')
         if not api_key:
-            api_key = current_app.config['CLAUDE_API_KEY']
-
-        if not api_key:
-            current_app.logger.error("No Claude API key available")
+            current_app.logger.error("CLAUDE_API_KEY is missing from environment variables")
             return "Error: No Claude API key available"
 
-        current_app.logger.info(
-            f"Attempting to create Anthropic client with API key starting with: {api_key[:5]}..."
-        )
         client = Anthropic(api_key=api_key)
         current_app.logger.info("Anthropic client created successfully")
 
@@ -32,22 +19,18 @@ def analyze_email(subject, content, user_id=None):
 
         prompt = f"\n\nHuman: 回答はすべて日本語でお願いします。Analyze the following email and provide suggestions for opportunities, schedules, and tasks:\n\nSubject: {subject}\n\nContent: {content}\n\nPlease provide your analysis in the following format:\nOpportunities:\n1.\n2.\n\nSchedules:\n1.\n2.\n\nTasks:\n1.\n2.\n\nAssistant:"
 
-        current_app.logger.info("Sending request to Anthropic API")
-        response = client.completions.create(
-            prompt=system_message + prompt,
+        response = client.messages.create(
+            messages=[{"role": "user", "content": system_message + prompt}],
             model="claude-2",
-            max_tokens_to_sample=4000,
-            temperature=0.7,
+            max_tokens=4000,
         )
-        current_app.logger.info("Received response from Anthropic API")
-
-        return response.completion
-
+        return response.content
     except Exception as e:
         current_app.logger.error(f"Error in analyze_email: {str(e)}")
         return f"Error: {str(e)}"
 
 def parse_ai_response(response):
+    """Parse AI response into opportunities, schedules, and tasks"""
     opportunities = []
     schedules = []
     tasks = []
@@ -65,3 +48,73 @@ def parse_ai_response(response):
                 current_section.append(line.strip()[3:])
 
     return opportunities, schedules, tasks
+
+def analyze_opportunities(opportunities):
+    """Analyze opportunities using Claude AI"""
+    try:
+        api_key = os.environ.get('CLAUDE_API_KEY')
+        if not api_key:
+            current_app.logger.error("CLAUDE_API_KEY is missing from environment variables")
+            return None
+            
+        client = Anthropic(api_key=api_key)
+        current_app.logger.info("Anthropic client created successfully")
+
+        # Prepare opportunity data for analysis
+        opp_data = "\n".join([
+            f"- Name: {opp.name}, Stage: {opp.stage}, Amount: {opp.amount}, Close Date: {opp.close_date}"
+            for opp in opportunities
+        ])
+
+        prompt = f"""Given these opportunities:\n{opp_data}\n
+        Provide a brief analysis including:
+        1. Total pipeline value
+        2. Distribution across stages
+        3. Key opportunities to focus on
+        4. Recommendations for next steps
+        Format the response in simple HTML paragraphs."""
+
+        response = client.messages.create(
+            messages=[{"role": "user", "content": prompt}],
+            model="claude-2",
+            max_tokens=500,
+        )
+        return response.content
+    except Exception as e:
+        current_app.logger.error(f"Error in analyze_opportunities: {str(e)}")
+        return None
+
+def analyze_schedules(schedules):
+    """Analyze schedules using Claude AI"""
+    try:
+        api_key = os.environ.get('CLAUDE_API_KEY')
+        if not api_key:
+            current_app.logger.error("CLAUDE_API_KEY is missing from environment variables")
+            return None
+            
+        client = Anthropic(api_key=api_key)
+        current_app.logger.info("Anthropic client created successfully")
+
+        # Prepare schedule data for analysis
+        schedule_data = "\n".join([
+            f"- Title: {sch.title}, Start: {sch.start_time}, End: {sch.end_time}"
+            for sch in schedules
+        ])
+
+        prompt = f"""Given these schedules:\n{schedule_data}\n
+        Provide a brief analysis including:
+        1. Schedule density and busy periods
+        2. Time allocation patterns
+        3. Upcoming important events
+        4. Scheduling recommendations
+        Format the response in simple HTML paragraphs."""
+
+        response = client.messages.create(
+            messages=[{"role": "user", "content": prompt}],
+            model="claude-2",
+            max_tokens=500,
+        )
+        return response.content
+    except Exception as e:
+        current_app.logger.error(f"Error in analyze_schedules: {str(e)}")
+        return None

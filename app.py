@@ -30,21 +30,21 @@ def create_app(config_name='default'):
     from routes import main, auth, leads, opportunities, accounts, reports
     from routes import tracking, mobile, schedules, tasks, settings
     
-    blueprints = [
-        (main.bp, ''),
-        (auth.bp, ''),
-        (leads.bp, ''),
-        (opportunities.bp, ''),
-        (accounts.bp, ''),
-        (reports.bp, ''),
-        (tracking.bp, ''),
-        (mobile.bp, ''),
-        (schedules.bp, ''),
-        (tasks.tasks_bp, '/tasks'),
-        (settings.bp, '')
-    ]
+    blueprints = {
+        main.bp: '/',
+        auth.bp: '/auth',
+        leads.bp: '/leads',
+        opportunities.bp: '/opportunities',
+        accounts.bp: '/accounts',
+        reports.bp: '/reports',
+        tracking.bp: '/tracking',
+        mobile.bp: '/mobile',
+        schedules.bp: '/schedules',
+        tasks.tasks_bp: '/tasks',
+        settings.bp: '/settings'
+    }
     
-    for blueprint, url_prefix in blueprints:
+    for blueprint, url_prefix in blueprints.items():
         app.register_blueprint(blueprint, url_prefix=url_prefix)
 
     # Set up email scheduler
