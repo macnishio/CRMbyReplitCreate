@@ -70,7 +70,7 @@ def init_database(app):
             
             if not existing_tables:
                 # Only create tables if none exist
-                db.create_all()
+                #db.create_all()
                 create_initial_admin(app)
                 app.logger.info("Database initialized with initial data")
             else:
