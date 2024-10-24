@@ -139,8 +139,14 @@ def process_email(email_body, app):
         msg = email.message_from_bytes(email_body)
         subject = decode_email_header(msg['subject'])
         sender = decode_email_header(msg['from'])
+        
+        # Enhanced sender name extraction with better logging
         sender_name = extract_sender_name(sender)
         sender_email = extract_email_address(sender)
+        
+        app.logger.debug(f"Original sender: {sender}")
+        app.logger.debug(f"Extracted name: {sender_name}")
+        app.logger.debug(f"Extracted email: {sender_email}")
         
         content = get_email_content(msg)
         received_date = parse_email_date(msg.get('date'))
@@ -262,34 +268,83 @@ def get_email_content(msg):
     return "\n".join(content)
 
 def extract_sender_name(sender):
-    """Extract sender name with improved parsing"""
+    """Extract sender name with enhanced parsing and validation"""
     if not sender:
         return ""
+    
     try:
-        # Try to match "Name" <email> format
-        match = re.match(r'"([^"]+)"|([^<]+?)\s*(?:<[^>]+>)?', sender)
+        # Log the original sender string for debugging
+        current_app.logger.debug(f"Extracting name from: {sender}")
+        
+        # Remove any newlines and extra spaces
+        sender = ' '.join(sender.strip().splitlines())
+        
+        # Pattern 1: "Display Name" <email@example.com>
+        pattern1 = r'"([^"]+)"'
+        match = re.search(pattern1, sender)
         if match:
-            name = match.group(1) or match.group(2)
-            return name.strip().strip('"')
-        return sender.split('@')[0]  # Fallback to email username
-    except Exception:
-        return sender
+            name = match.group(1).strip()
+            current_app.logger.debug(f"Found name using pattern 1: {name}")
+            return name
+        
+        # Pattern 2: Display Name <email@example.com>
+        pattern2 = r'^([^<>]+?)\s*(?:<[^>]+>)'
+        match = re.search(pattern2, sender)
+        if match:
+            name = match.group(1).strip().strip('"')
+            if name and not re.match(r'^[^@]+@[^@]+\.[^@]+$', name):  # Ensure it's not just an email
+                current_app.logger.debug(f"Found name using pattern 2: {name}")
+                return name
+        
+        # Pattern 3: email@example.com (Display Name)
+        pattern3 = r'\((.*?)\)'
+        match = re.search(pattern3, sender)
+        if match:
+            name = match.group(1).strip()
+            current_app.logger.debug(f"Found name using pattern 3: {name}")
+            return name
+        
+        # Pattern 4: Extract email and use local part as name
+        email_match = re.search(r'[\w\.-]+@[\w\.-]+\.\w+', sender)
+        if email_match:
+            email = email_match.group(0)
+            name = email.split('@')[0].replace('.', ' ').title()
+            current_app.logger.debug(f"Using email local part as name: {name}")
+            return name
+        
+        # Fallback: Use the whole string if it doesn't contain email-like patterns
+        if not re.search(r'[<>@]', sender):
+            current_app.logger.debug(f"Using full sender string as name: {sender}")
+            return sender.strip()
+        
+        # Final fallback
+        current_app.logger.warning(f"Could not extract name from sender: {sender}")
+        return "Unknown Sender"
+        
+    except Exception as e:
+        current_app.logger.error(f"Error extracting sender name: {str(e)}")
+        return "Unknown Sender"
 
 def extract_email_address(sender):
     """Extract email address with improved validation"""
     if not sender:
         return ""
     try:
-        # Try to match <email> format
+        # Pattern 1: <email@example.com>
         match = re.search(r'<([^>]+)>', sender)
         if match:
-            return match.group(1).strip()
-        # Try to match plain email format
+            email = match.group(1).strip()
+            if re.match(r'^[\w\.-]+@[\w\.-]+\.\w+$', email):
+                return email
+        
+        # Pattern 2: Plain email address
         match = re.search(r'[\w\.-]+@[\w\.-]+\.\w+', sender)
         if match:
             return match.group(0).strip()
+        
         return sender.strip()
-    except Exception:
+    except Exception as e:
+        current_app.logger.error(f"Error extracting email address: {str(e)}")
         return sender
 
 def parse_email_date(date_str):
