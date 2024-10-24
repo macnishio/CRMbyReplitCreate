@@ -1,5 +1,5 @@
 import os
-from flask import Flask
+from flask import Flask, current_app
 from flask_sqlalchemy import SQLAlchemy
 from flask_migrate import Migrate
 from flask_login import LoginManager
@@ -8,25 +8,51 @@ from flask_limiter import Limiter
 from flask_limiter.util import get_remote_address
 from config import config
 from extensions import db, migrate, login_manager, mail, limiter
-from email_receiver import fetch_emails, connect_to_email_server, setup_email_scheduler
+from email_receiver import setup_email_scheduler
 import logging
 from sqlalchemy import inspect
 
 def init_database(app):
+    """Initialize database with proper error handling and table existence checks"""
     with app.app_context():
         try:
             inspector = inspect(db.engine)
-            if not inspector.get_table_names():
+            existing_tables = inspector.get_table_names()
+            
+            if not existing_tables:
+                app.logger.info("No existing tables found. Creating database schema...")
                 db.create_all()
                 create_initial_admin(app)
                 app.logger.info("Database initialized successfully")
             else:
-                app.logger.info("Database tables already exist")
+                required_tables = {'users', 'user_settings', 'leads', 'opportunities', 
+                                 'accounts', 'tasks', 'schedules', 'emails', 'unknown_emails',
+                                 'email_fetch_tracker'}
+                missing_tables = required_tables - set(existing_tables)
+                
+                if missing_tables:
+                    app.logger.warning(f"Missing tables detected: {missing_tables}")
+                    for table in missing_tables:
+                        if table not in existing_tables:
+                            try:
+                                db.create_all()
+                                break
+                            except Exception as e:
+                                app.logger.error(f"Error creating table {table}: {str(e)}")
+                                continue
+                    
+                    if 'users' in missing_tables:
+                        create_initial_admin(app)
+                    app.logger.info("Missing tables created successfully")
+                else:
+                    app.logger.info("All required tables exist")
+                    
         except Exception as e:
             app.logger.error(f"Database initialization error: {str(e)}")
             raise
 
 def create_initial_admin(app):
+    """Create initial admin user and settings if they don't exist"""
     from models import User, UserSettings
     try:
         admin = User.query.filter_by(username='admin').first()
@@ -36,14 +62,16 @@ def create_initial_admin(app):
             db.session.add(admin)
             db.session.flush()
 
-            # Create user settings
+            # Create user settings with environment variables
             settings = UserSettings(
                 user_id=admin.id,
                 mail_server=os.environ.get('MAIL_SERVER', 'smtp.example.com'),
                 mail_port=int(os.environ.get('MAIL_PORT', 587)),
                 mail_use_tls=os.environ.get('MAIL_USE_TLS', 'true').lower() == 'true',
                 mail_username=os.environ.get('MAIL_USERNAME', 'test@example.com'),
-                mail_password=os.environ.get('MAIL_PASSWORD', 'password123')
+                mail_password=os.environ.get('MAIL_PASSWORD', 'password123'),
+                claude_api_key=os.environ.get('CLAUDE_API_KEY'),
+                clearbit_api_key=os.environ.get('CLEARBIT_API_KEY')
             )
             db.session.add(settings)
             db.session.commit()
@@ -70,18 +98,8 @@ def create_app(config_name='default'):
     mail.init_app(app)
     limiter.init_app(app)
 
-    # Debug logging for database URL
-    app.logger.debug(f"Database URL: {app.config['SQLALCHEMY_DATABASE_URI'].split('@')[0]}@[REDACTED]")
-
     # Initialize database
     init_database(app)
-
-    # Set CLAUDE_API_KEY in app.config
-    app.config['CLAUDE_API_KEY'] = os.environ.get('CLAUDE_API_KEY')
-    if app.config['CLAUDE_API_KEY']:
-        app.logger.info("CLAUDE_API_KEY is set in app.config")
-    else:
-        app.logger.error("CLAUDE_API_KEY is missing from environment variables")
 
     # Register blueprints
     from routes import main, auth, leads, opportunities, accounts, reports, tracking, mobile, schedules, tasks, settings

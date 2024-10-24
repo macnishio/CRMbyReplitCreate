@@ -18,11 +18,14 @@ class User(UserMixin, db.Model):
     password_hash: Mapped[str] = mapped_column(String(128))
     role: Mapped[str] = mapped_column(String(20), nullable=False, default='user')
 
-    # リレーションシップ
-    leads: Mapped[List["Lead"]] = db.relationship('Lead', backref='user', lazy='dynamic')
-    opportunities: Mapped[List["Opportunity"]] = db.relationship('Opportunity', backref='user', lazy='dynamic')
-    accounts: Mapped[List["Account"]] = db.relationship('Account', backref='user', lazy='dynamic')
-    settings: Mapped["UserSettings"] = db.relationship("UserSettings", backref="user", uselist=False)
+    # Relationships
+    leads = db.relationship('Lead', backref='user', lazy='dynamic')
+    opportunities = db.relationship('Opportunity', backref='user', lazy='dynamic')
+    accounts = db.relationship('Account', backref='user', lazy='dynamic')
+    settings = db.relationship("UserSettings", backref="user", uselist=False)
+
+    def __init__(self, **kwargs):
+        super(User, self).__init__(**kwargs)
 
     def set_password(self, password):
         self.password_hash = generate_password_hash(password)
@@ -46,7 +49,6 @@ class UserSettings(db.Model):
 
     def _get_encryption_key(self):
         key = current_app.config['SECRET_KEY']
-        # Ensure the key is 32 bytes long for Fernet
         return base64.urlsafe_b64encode(key.ljust(32)[:32].encode())
 
     def _encrypt(self, data):
@@ -95,14 +97,14 @@ class Lead(db.Model):
     score: Mapped[float] = mapped_column(Float, nullable=False, default=0.0)
     user_id: Mapped[int] = mapped_column(Integer, ForeignKey('users.id'), nullable=False)
     created_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow)
-    last_contact: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow)
+    last_contact: Mapped[Optional[datetime]] = mapped_column(DateTime, nullable=True)
     last_followup_email: Mapped[Optional[datetime]] = mapped_column(DateTime, nullable=True)
 
-    # リレーションシップ
-    emails: Mapped[List["Email"]] = db.relationship('Email', backref='lead', lazy='dynamic')
-    opportunities: Mapped[List["Opportunity"]] = db.relationship('Opportunity', back_populates='lead', cascade='all, delete-orphan')
-    schedules: Mapped[List["Schedule"]] = db.relationship('Schedule', back_populates='lead', cascade='all, delete-orphan')
-    tasks: Mapped[List["Task"]] = db.relationship('Task', back_populates='lead', cascade='all, delete-orphan')
+    # Relationships
+    opportunities = db.relationship('Opportunity', back_populates='lead', cascade='all, delete-orphan')
+    schedules = db.relationship('Schedule', back_populates='lead', cascade='all, delete-orphan')
+    tasks = db.relationship('Task', back_populates='lead', cascade='all, delete-orphan')
+    emails = db.relationship('Email', backref='lead', lazy='dynamic')
 
 class Email(db.Model):
     __tablename__ = 'emails'
@@ -128,14 +130,14 @@ class Opportunity(db.Model):
     id: Mapped[int] = mapped_column(Integer, primary_key=True)
     name: Mapped[str] = mapped_column(String(100), nullable=False)
     stage: Mapped[str] = mapped_column(String(20))
-    amount: Mapped[float] = mapped_column(Float, nullable=True)  # Making amount nullable
-    close_date: Mapped[datetime] = mapped_column(DateTime, nullable=True)  # Making close_date nullable
+    amount: Mapped[Optional[float]] = mapped_column(Float, nullable=True)
+    close_date: Mapped[Optional[datetime]] = mapped_column(DateTime, nullable=True)
     user_id: Mapped[int] = mapped_column(Integer, ForeignKey('users.id'), nullable=False)
     lead_id: Mapped[int] = mapped_column(Integer, ForeignKey('leads.id'), nullable=False)
-    account_id = db.Column(db.Integer, db.ForeignKey('accounts.id'))
+    account_id: Mapped[Optional[int]] = mapped_column(Integer, ForeignKey('accounts.id'), nullable=True)
 
-    # リレーションシップ
-    lead: Mapped["Lead"] = db.relationship('Lead', back_populates='opportunities')
+    # Relationships
+    lead = db.relationship('Lead', back_populates='opportunities')
 
 class Account(db.Model):
     __tablename__ = 'accounts'
@@ -153,10 +155,10 @@ class Schedule(db.Model):
     start_time: Mapped[datetime] = mapped_column(DateTime, nullable=False)
     end_time: Mapped[datetime] = mapped_column(DateTime, nullable=False)
     user_id: Mapped[int] = mapped_column(Integer, ForeignKey('users.id'), nullable=False)
-    lead_id: Mapped[Optional[int]] = mapped_column(Integer, ForeignKey('leads.id'), nullable=True)  # Making lead_id nullable
+    lead_id: Mapped[Optional[int]] = mapped_column(Integer, ForeignKey('leads.id'), nullable=True)
 
-    # リレーションシップ
-    lead: Mapped[Optional["Lead"]] = db.relationship('Lead', back_populates='schedules')
+    # Relationships
+    lead = db.relationship('Lead', back_populates='schedules')
 
 class Task(db.Model):
     __tablename__ = 'tasks'
@@ -167,10 +169,10 @@ class Task(db.Model):
     status: Mapped[str] = mapped_column(String(20))
     completed: Mapped[bool] = mapped_column(Boolean, default=False)
     user_id: Mapped[int] = mapped_column(Integer, ForeignKey('users.id'), nullable=False)
-    lead_id: Mapped[Optional[int]] = mapped_column(Integer, ForeignKey('leads.id'), nullable=True)  # Making lead_id nullable
+    lead_id: Mapped[Optional[int]] = mapped_column(Integer, ForeignKey('leads.id'), nullable=True)
 
-    # リレーションシップ
-    lead: Mapped[Optional["Lead"]] = db.relationship('Lead', back_populates='tasks')
+    # Relationships
+    lead = db.relationship('Lead', back_populates='tasks')
 
 class EmailFetchTracker(db.Model):
     __tablename__ = 'email_fetch_tracker'
