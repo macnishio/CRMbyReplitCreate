@@ -1,217 +1,35 @@
 {% extends "base.html" %}
-{% block title %}スケジュール一覧{% endblock %}
+
 {% block content %}
-<h1>スケジュール一覧</h1>
-
-<!-- Bulk Operations Form -->
-<form method="POST" action="{{ url_for('schedules.bulk_action') }}" id="bulkForm">
-    <div class="bulk-actions">
-        <div class="select-all-container">
-            <input type="checkbox" id="select-all" onclick="toggleAllCheckboxes()">
-            <label for="select-all">すべて選択</label>
-        </div>
-        <select name="action" id="bulk-action">
-            <option value="">一括操作を選択...</option>
-            <option value="delete">削除</option>
-            <option value="reschedule">日時変更</option>
-        </select>
-        <div id="reschedule-inputs" style="display: none;">
-            <input type="date" name="new_date" id="new-date">
-            <input type="time" name="new_time" id="new-time">
-        </div>
-        <button type="submit" class="btn btn-primary" onclick="return confirmBulkAction()">適用</button>
-    </div>
-
-<!-- AI Analysis Section -->
-<div class="ai-analysis-section">
-    <div class="analysis-header" onclick="toggleAnalysis()">
-        <h2>スケジュール分析 <span class="toggle-icon">▼</span></h2>
-    </div>
-    <div class="analysis-content" id="analysisContent">
-        <div class="analysis-grid">
-            <!-- Schedule Overview -->
-            <div class="analysis-card">
-                <h3>概要</h3>
-                <p>今日のイベント: {{ schedules|selectattr('start_time', 'le', now())|selectattr('end_time', 'ge', now())|list|length }}件</p>
-                <p>今週のイベント: {{ schedules|selectattr('start_time', 'le', now() + timedelta(days=7))|selectattr('start_time', 'ge', now())|list|length }}件</p>
-            </div>
-
-            <!-- AI Insights -->
-            <div class="analysis-card">
-                <h3>AI分析結果</h3>
-                {% if ai_analysis %}
-                    {{ ai_analysis|safe }}
-                {% else %}
-                    <p>AI分析を実行できませんでした。</p>
-                {% endif %}
-            </div>
-        </div>
-    </div>
+<div class="container py-4">
+  <h2 class="mb-4">Schedules</h2>
+  <div class="mb-3">
+    <a href="{{ url_for('schedules.create_schedule') }}" class="btn btn-primary">Create New Schedule</a>
+  </div>
+  
+  <div class="table-responsive">
+    <table class="table table-striped">
+      <thead>
+        <tr>
+          <th>Title</th>
+          <th>Start Time</th>
+          <th>End Time</th>
+          <th>Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for schedule in schedules %}
+        <tr>
+          <td>{{ schedule.title }}</td>
+          <td>{{ schedule.start_time.strftime('%Y-%m-%d %H:%M') }}</td>
+          <td>{{ schedule.end_time.strftime('%Y-%m-%d %H:%M') }}</td>
+          <td>
+            <a href="{{ url_for('schedules.edit_schedule', schedule_id=schedule.id) }}" class="btn btn-sm btn-secondary">Edit</a>
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
 </div>
-
-<!-- Schedule Grid -->
-<div class="schedule-grid">
-    {% for schedule in schedules %}
-    <div class="schedule-card">
-        <div class="schedule-select">
-            <input type="checkbox" name="selected_schedules[]" value="{{ schedule.id }}" class="schedule-checkbox">
-        </div>
-        <h2>{{ schedule.title }}</h2>
-        <p><strong>説明:</strong> {{ schedule.description }}</p>
-        <p><strong>開始時間:</strong> {{ schedule.start_time.strftime('%Y-%m-%d %H:%M') }}</p>
-        <p><strong>終了時間:</strong> {{ schedule.end_time.strftime('%Y-%m-%d %H:%M') }}</p>
-        {% if schedule.lead %}
-        <div class="lead-info">
-            <p><strong>リード情報:</strong></p>
-            <ul>
-                <li><strong>名前:</strong> {{ schedule.lead.name }}</li>
-                <li><strong>メール:</strong> {{ schedule.lead.email }}</li>
-                <li><strong>スコア:</strong> {{ "%.1f"|format(schedule.lead.score) }}</li>
-                <li><strong>ステータス:</strong> {{ schedule.lead.status }}</li>
-                <li><strong>最終接触:</strong> {{ schedule.lead.last_contact.strftime('%Y-%m-%d %H:%M') if schedule.lead.last_contact else '未接触' }}</li>
-            </ul>
-        </div>
-        {% else %}
-        <p class="no-lead">リードが関連付けられていません</p>
-        {% endif %}
-        <div class="card-actions">
-            <a href="{{ url_for('schedules.edit_schedule', id=schedule.id) }}" class="btn btn-edit">編集</a>
-            <form method="POST" action="{{ url_for('schedules.delete_schedule', id=schedule.id) }}" style="display: inline;">
-                <button type="submit" class="btn btn-delete" onclick="return confirm('このスケジュールを削除してもよろしいですか？');">削除</button>
-            </form>
-        </div>
-    </div>
-    {% endfor %}
-</div>
-</form>
-
-<div class="add-schedule">
-    <a href="{{ url_for('schedules.add_schedule') }}" class="btn btn-add">新規スケジュールを追加</a>
-</div>
-
-<script>
-function toggleAnalysis() {
-    const content = document.getElementById('analysisContent');
-    const icon = document.querySelector('.toggle-icon');
-    
-    if (content.style.maxHeight) {
-        content.style.maxHeight = null;
-        icon.style.transform = 'rotate(0deg)';
-    } else {
-        content.style.maxHeight = content.scrollHeight + "px";
-        icon.style.transform = 'rotate(180deg)';
-    }
-}
-
-function toggleAllCheckboxes() {
-    const selectAll = document.getElementById('select-all');
-    const checkboxes = document.querySelectorAll('.schedule-checkbox');
-    checkboxes.forEach(checkbox => {
-        checkbox.checked = selectAll.checked;
-    });
-}
-
-document.getElementById('bulk-action').addEventListener('change', function() {
-    const rescheduleInputs = document.getElementById('reschedule-inputs');
-    rescheduleInputs.style.display = this.value === 'reschedule' ? 'inline-block' : 'none';
-});
-
-function confirmBulkAction() {
-    const action = document.getElementById('bulk-action').value;
-    const selectedSchedules = document.querySelectorAll('input[name="selected_schedules[]"]:checked').length;
-    
-    if (!action) {
-        alert('操作を選択してください。');
-        return false;
-    }
-    
-    if (selectedSchedules === 0) {
-        alert('スケジュールを選択してください。');
-        return false;
-    }
-    
-    if (action === 'delete') {
-        return confirm(`選択された${selectedSchedules}件のスケジュールを削除してもよろしいですか？`);
-    }
-    
-    if (action === 'reschedule') {
-        const newDate = document.getElementById('new-date').value;
-        const newTime = document.getElementById('new-time').value;
-        if (!newDate || !newTime) {
-            alert('新しい日時を選択してください。');
-            return false;
-        }
-    }
-    
-    return true;
-}
-
-// Update select-all checkbox state when individual checkboxes change
-document.querySelectorAll('.schedule-checkbox').forEach(checkbox => {
-    checkbox.addEventListener('change', function() {
-        const checkboxes = document.querySelectorAll('.schedule-checkbox');
-        const selectAll = document.getElementById('select-all');
-        selectAll.checked = [...checkboxes].every(cb => cb.checked);
-    });
-});
-</script>
-
-<style>
-.bulk-actions {
-    margin: 20px 0;
-    padding: 10px;
-    background-color: #f8f9fa;
-    border-radius: 5px;
-    display: flex;
-    gap: 10px;
-    align-items: center;
-}
-
-.select-all-container {
-    display: flex;
-    align-items: center;
-    gap: 5px;
-    margin-right: 15px;
-}
-
-.schedule-select {
-    position: absolute;
-    top: 10px;
-    right: 10px;
-}
-
-.schedule-card {
-    position: relative;
-    padding-top: 40px;
-}
-
-.lead-info {
-    margin-top: 15px;
-    padding: 10px;
-    background-color: #f8f9fa;
-    border-radius: 5px;
-}
-
-.lead-info ul {
-    list-style: none;
-    padding-left: 0;
-    margin: 5px 0;
-}
-
-.lead-info li {
-    margin: 5px 0;
-}
-
-.no-lead {
-    color: #6c757d;
-    font-style: italic;
-    margin-top: 10px;
-}
-
-#reschedule-inputs {
-    display: flex;
-    gap: 10px;
-    align-items: center;
-}
-</style>
 {% endblock %}

@@ -1,0 +1,59 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container py-4">
+  <h2 class="mb-4">Edit Opportunity</h2>
+  
+  <form method="POST" action="{{ url_for('opportunities.edit_opportunity', opportunity_id=opportunity.id) }}">
+    <div class="mb-3">
+      <label for="title" class="form-label">Title</label>
+      <input type="text" class="form-control" id="title" name="title" value="{{ opportunity.title }}" required>
+    </div>
+
+    <div class="mb-3">
+      <label for="description" class="form-label">Description</label>
+      <textarea class="form-control" id="description" name="description" rows="3">{{ opportunity.description }}</textarea>
+    </div>
+
+    <div class="mb-3">
+      <label for="amount" class="form-label">Amount</label>
+      <input type="number" class="form-control" id="amount" name="amount" value="{{ opportunity.amount }}" step="0.01" required>
+    </div>
+
+    <div class="mb-3">
+      <label for="stage" class="form-label">Stage</label>
+      <select class="form-select" id="stage" name="stage">
+        <option value="prospecting" {% if opportunity.stage == 'prospecting' %}selected{% endif %}>Prospecting</option>
+        <option value="qualification" {% if opportunity.stage == 'qualification' %}selected{% endif %}>Qualification</option>
+        <option value="proposal" {% if opportunity.stage == 'proposal' %}selected{% endif %}>Proposal</option>
+        <option value="negotiation" {% if opportunity.stage == 'negotiation' %}selected{% endif %}>Negotiation</option>
+        <option value="closed_won" {% if opportunity.stage == 'closed_won' %}selected{% endif %}>Closed Won</option>
+        <option value="closed_lost" {% if opportunity.stage == 'closed_lost' %}selected{% endif %}>Closed Lost</option>
+      </select>
+    </div>
+
+    <div class="mb-3">
+      <label for="expected_close_date" class="form-label">Expected Close Date</label>
+      <input type="date" class="form-control" id="expected_close_date" name="expected_close_date" 
+             value="{{ opportunity.expected_close_date.strftime('%Y-%m-%d') }}" required>
+    </div>
+
+    <div class="mb-3">
+      <label for="lead_id" class="form-label">Associated Lead</label>
+      <select class="form-select" id="lead_id" name="lead_id">
+        <option value="">None</option>
+        {% for lead in leads %}
+        <option value="{{ lead.id }}" {% if opportunity.lead_id == lead.id %}selected{% endif %}>
+          {{ lead.name }}
+        </option>
+        {% endfor %}
+      </select>
+    </div>
+
+    <div class="mb-3">
+      <button type="submit" class="btn btn-primary">Update Opportunity</button>
+      <a href="{{ url_for('opportunities.list_opportunities') }}" class="btn btn-secondary">Cancel</a>
+    </div>
+  </form>
+</div>
+{% endblock %}

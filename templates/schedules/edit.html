@@ -1,45 +1,48 @@
 {% extends "base.html" %}
 
-{% block title %}Edit Schedule{% endblock %}
-
 {% block content %}
-    <h1>Edit Schedule</h1>
-    <form method="POST">
-        {{ form.hidden_tag() }}
-        <div>
-            {{ form.title.label }}
-            {{ form.title() }}
-        </div>
-        <div>
-            {{ form.description.label }}
-            {{ form.description() }}
-        </div>
-        <div>
-            {{ form.start_time.label }}
-            {{ form.start_time() }}
-        </div>
-        <div>
-            {{ form.end_time.label }}
-            {{ form.end_time() }}
-        </div>
-        <div>
-            {{ form.user_id.label }}
-            {{ form.user_id() }}
-        </div>
-        <div>
-            {{ form.account_id.label }}
-            {{ form.account_id() }}
-        </div>
-        <div>
-            {{ form.lead_id.label }}
-            {{ form.lead_id() }}
-        </div>
-        <div>
-            {{ form.opportunity_id.label }}
-            {{ form.opportunity_id() }}
-        </div>
-        <div>
-            {{ form.submit() }}
-        </div>
-    </form>
+<div class="container py-4">
+  <h2 class="mb-4">Edit Schedule</h2>
+  
+  <form method="POST" action="{{ url_for('schedules.edit_schedule', schedule_id=schedule.id) }}">
+    <div class="mb-3">
+      <label for="title" class="form-label">Title</label>
+      <input type="text" class="form-control" id="title" name="title" value="{{ schedule.title }}" required>
+    </div>
+
+    <div class="mb-3">
+      <label for="description" class="form-label">Description</label>
+      <textarea class="form-control" id="description" name="description" rows="3">{{ schedule.description }}</textarea>
+    </div>
+
+    <div class="mb-3">
+      <label for="start_time" class="form-label">Start Time</label>
+      <input type="datetime-local" class="form-control" id="start_time" name="start_time" 
+             value="{{ schedule.start_time.strftime('%Y-%m-%dT%H:%M') }}" required>
+    </div>
+
+    <div class="mb-3">
+      <label for="end_time" class="form-label">End Time</label>
+      <input type="datetime-local" class="form-control" id="end_time" name="end_time" 
+             value="{{ schedule.end_time.strftime('%Y-%m-%dT%H:%M') }}" required>
+    </div>
+
+    <div class="mb-3">
+      <label for="lead_id" class="form-label">Associated Lead</label>
+      <select class="form-select" id="lead_id" name="lead_id">
+        <option value="">None</option>
+        {% for lead in leads %}
+        <option value="{{ lead.id }}" {% if schedule.lead_id == lead.id %}selected{% endif %}>
+          {{ lead.name }}
+        </option>
+        {% endfor %}
+      </select>
+    </div>
+
+    <div class="mb-3">
+      <button type="submit" class="btn btn-primary">Update Schedule</button>
+      <a href="{{ url_for('schedules.list_schedules') }}" class="btn btn-secondary">Cancel</a>
+    </div>
+  </form>
+</div>
 {% endblock %}

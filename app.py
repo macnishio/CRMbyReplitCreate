@@ -1,62 +1,33 @@
 import os
 from flask import Flask
-from config import config
-from extensions import db, migrate, login_manager, mail, limiter
-from email_receiver import setup_email_scheduler
-import logging
-from sqlalchemy import text
-from db_utils import init_database
+from flask_sqlalchemy import SQLAlchemy
+from flask_login import LoginManager
+from extensions import db, login_manager
+from models import User
 
-def create_app(config_name='default'):
+def create_app():
     app = Flask(__name__)
-    app.config.from_object(config[config_name])
-    config[config_name].init_app(app)
-
-    # Set up logging
-    logging.basicConfig(level=app.config['LOG_LEVEL'])
-    app.logger.debug(f"Database URL: {app.config['SQLALCHEMY_DATABASE_URI'].split('@')[0]}@[REDACTED]")
+    app.config['SECRET_KEY'] = os.environ.get('SECRET_KEY', 'dev')
+    app.config['SQLALCHEMY_DATABASE_URI'] = os.environ.get('DATABASE_URL')
+    app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
     # Initialize extensions
     db.init_app(app)
-    migrate.init_app(app, db)
     login_manager.init_app(app)
-    mail.init_app(app)
-    limiter.init_app(app)
 
-    # Initialize database
-    init_database(app)
+    @login_manager.user_loader
+    def load_user(user_id):
+        return User.query.get(int(user_id))
 
     # Register blueprints
-    from routes import main, auth, leads, opportunities, accounts, reports
-    from routes import tracking, mobile, schedules, tasks, settings
+    from routes import tasks, schedules, opportunities
     
-    blueprints = {
-        main.bp: '/',
-        auth.bp: '/auth',
-        leads.bp: '/leads',
-        opportunities.bp: '/opportunities',
-        accounts.bp: '/accounts',
-        reports.bp: '/reports',
-        tracking.bp: '/tracking',
-        mobile.bp: '/mobile',
-        schedules.bp: '/schedules',
-        tasks.tasks_bp: '/tasks',
-        settings.bp: '/settings'
-    }
-    
-    for blueprint, url_prefix in blueprints.items():
-        app.register_blueprint(blueprint, url_prefix=url_prefix)
-
-    # Set up email scheduler
-    setup_email_scheduler(app)
+    app.register_blueprint(tasks.bp, url_prefix='/tasks')
+    app.register_blueprint(schedules.bp, url_prefix='/schedules')
+    app.register_blueprint(opportunities.bp, url_prefix='/opportunities')
 
     return app
 
-@login_manager.user_loader
-def load_user(user_id):
-    from models import User
-    return db.session.get(User, int(user_id))
-
 if __name__ == '__main__':
     app = create_app()
-    app.run(host='0.0.0.0', port=5000)
+    app.run(host='0.0.0.0', port=5000, debug=True)
