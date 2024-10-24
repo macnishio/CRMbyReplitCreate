@@ -66,7 +66,17 @@
         <p><strong>金額:</strong> {{ "¥{:,.0f}".format(opportunity.amount or 0) }}</p>
         <p><strong>完了予定日:</strong> {{ opportunity.close_date.strftime('%Y-%m-%d') if opportunity.close_date }}</p>
         {% if opportunity.lead %}
-        <p><strong>リード:</strong> {{ opportunity.lead.name }}</p>
+        <div class="lead-info">
+            <p><strong>リード情報:</strong></p>
+            <ul>
+                <li><strong>名前:</strong> {{ opportunity.lead.name }}</li>
+                <li><strong>メール:</strong> {{ opportunity.lead.email }}</li>
+                <li><strong>スコア:</strong> {{ "%.1f"|format(opportunity.lead.score) }}</li>
+                <li><strong>ステータス:</strong> {{ opportunity.lead.status }}</li>
+            </ul>
+        </div>
+        {% else %}
+        <p class="no-lead">リードが関連付けられていません</p>
         {% endif %}
         <div class="card-actions">
             <a href="{{ url_for('opportunities.edit_opportunity', id=opportunity.id) }}" class="btn btn-edit">編集</a>
@@ -168,6 +178,29 @@ document.querySelectorAll('.opportunity-checkbox').forEach(checkbox => {
 .opportunity-card {
     position: relative;
     padding-top: 40px;
+}
+
+.lead-info {
+    margin-top: 15px;
+    padding: 10px;
+    background-color: #f8f9fa;
+    border-radius: 5px;
+}
+
+.lead-info ul {
+    list-style: none;
+    padding-left: 0;
+    margin: 5px 0;
+}
+
+.lead-info li {
+    margin: 5px 0;
+}
+
+.no-lead {
+    color: #6c757d;
+    font-style: italic;
+    margin-top: 10px;
 }
 </style>
 {% endblock %}

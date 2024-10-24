@@ -61,7 +61,18 @@
         <p><strong>開始時間:</strong> {{ schedule.start_time.strftime('%Y-%m-%d %H:%M') }}</p>
         <p><strong>終了時間:</strong> {{ schedule.end_time.strftime('%Y-%m-%d %H:%M') }}</p>
         {% if schedule.lead %}
-        <p><strong>関連リード:</strong> {{ schedule.lead.name }}</p>
+        <div class="lead-info">
+            <p><strong>リード情報:</strong></p>
+            <ul>
+                <li><strong>名前:</strong> {{ schedule.lead.name }}</li>
+                <li><strong>メール:</strong> {{ schedule.lead.email }}</li>
+                <li><strong>スコア:</strong> {{ "%.1f"|format(schedule.lead.score) }}</li>
+                <li><strong>ステータス:</strong> {{ schedule.lead.status }}</li>
+                <li><strong>最終接触:</strong> {{ schedule.lead.last_contact.strftime('%Y-%m-%d %H:%M') if schedule.lead.last_contact else '未接触' }}</li>
+            </ul>
+        </div>
+        {% else %}
+        <p class="no-lead">リードが関連付けられていません</p>
         {% endif %}
         <div class="card-actions">
             <a href="{{ url_for('schedules.edit_schedule', id=schedule.id) }}" class="btn btn-edit">編集</a>
@@ -172,6 +183,29 @@ document.querySelectorAll('.schedule-checkbox').forEach(checkbox => {
 .schedule-card {
     position: relative;
     padding-top: 40px;
+}
+
+.lead-info {
+    margin-top: 15px;
+    padding: 10px;
+    background-color: #f8f9fa;
+    border-radius: 5px;
+}
+
+.lead-info ul {
+    list-style: none;
+    padding-left: 0;
+    margin: 5px 0;
+}
+
+.lead-info li {
+    margin: 5px 0;
+}
+
+.no-lead {
+    color: #6c757d;
+    font-style: italic;
+    margin-top: 10px;
 }
 
 #reschedule-inputs {

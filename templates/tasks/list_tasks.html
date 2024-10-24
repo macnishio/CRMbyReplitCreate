@@ -103,7 +103,17 @@
         <p><strong>完了:</strong> <span class="{{ 'completed' if task.completed else 'not-completed' }}">
             {{ '完了' if task.completed else '未完了' }}</span></p>
         {% if task.lead %}
-        <p><strong>関連リード:</strong> {{ task.lead.name }}</p>
+        <div class="lead-info">
+            <p><strong>リード情報:</strong></p>
+            <ul>
+                <li><strong>名前:</strong> {{ task.lead.name }}</li>
+                <li><strong>メール:</strong> {{ task.lead.email }}</li>
+                <li><strong>スコア:</strong> {{ "%.1f"|format(task.lead.score) }}</li>
+                <li><strong>最終接触:</strong> {{ task.lead.last_contact.strftime('%Y-%m-%d %H:%M') if task.lead.last_contact else '未接触' }}</li>
+            </ul>
+        </div>
+        {% else %}
+        <p class="no-lead">リードが関連付けられていません</p>
         {% endif %}
         <div class="card-actions">
             <a href="{{ url_for('tasks.edit_task', id=task.id) }}" class="btn btn-edit">編集</a>
@@ -225,6 +235,37 @@ document.querySelectorAll('.task-checkbox').forEach(checkbox => {
 .task-card {
     position: relative;
     padding-top: 40px;
+}
+
+.lead-info {
+    margin-top: 15px;
+    padding: 10px;
+    background-color: #f8f9fa;
+    border-radius: 5px;
+}
+
+.lead-info ul {
+    list-style: none;
+    padding-left: 0;
+    margin: 5px 0;
+}
+
+.lead-info li {
+    margin: 5px 0;
+}
+
+.no-lead {
+    color: #6c757d;
+    font-style: italic;
+    margin-top: 10px;
+}
+
+.completed {
+    color: #28a745;
+}
+
+.not-completed {
+    color: #dc3545;
 }
 </style>
 {% endblock %}
