@@ -87,11 +87,9 @@ def process_email(email_body, app):
         sender_name = extract_sender_name(sender)
         sender_email = extract_email_address(sender)
         
-        # Get email content
         content = get_email_content(msg)
         app.logger.info(f"Email sender: {sender_name} <{sender_email}> Received at: {datetime.utcnow()}")
 
-        # Find matching lead
         lead = Lead.query.filter_by(email=sender_email).first()
 
         if lead:
@@ -106,9 +104,12 @@ def process_email(email_body, app):
             lead.last_contact = datetime.utcnow()
             db.session.add(email_record)
             
-            # Analyze email content
-            ai_response = analyze_email(subject, content, lead.user_id)
-            process_ai_response(ai_response, lead, app)
+            # Skip AI analysis for spam leads
+            if lead.status != 'Spam':
+                ai_response = analyze_email(subject, content, lead.user_id)
+                process_ai_response(ai_response, lead, app)
+            else:
+                app.logger.info(f"Skipping AI analysis for spam lead: {sender_email}")
             
         else:
             # Store unknown email

@@ -14,6 +14,7 @@
                 <option value="Contacted" {% if request.args.get('status') == 'Contacted' %}selected{% endif %}>連絡済み</option>
                 <option value="Qualified" {% if request.args.get('status') == 'Qualified' %}selected{% endif %}>適格</option>
                 <option value="Lost" {% if request.args.get('status') == 'Lost' %}selected{% endif %}>失注</option>
+                <option value="Spam" {% if request.args.get('status') == 'Spam' %}selected{% endif %}>迷惑メール</option>
             </select>
         </div>
         <div class="filter-group">
@@ -44,6 +45,7 @@
             <option value="Contacted">連絡済み</option>
             <option value="Qualified">適格</option>
             <option value="Lost">失注</option>
+            <option value="Spam">迷惑メール</option>
         </select>
         <input type="number" name="new_score" id="new-score" min="0" max="100" step="1" 
                placeholder="新しいスコア" style="display: none;">
