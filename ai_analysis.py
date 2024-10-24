@@ -54,13 +54,18 @@ def analyze_email(subject, content, user_id=None):
 回答は日本語でお願いします。"""
 
         current_app.logger.debug("Sending request to Claude API")
-        response = client.messages.create(
-            messages=[{"role": "user", "content": prompt}],
-            model="claude-2",
-            max_tokens=1000,
+        message = client.messages.create(
+            model="claude-3-haiku-20240307",
+            max_tokens=4000,
+            messages=[{
+                "role": "user",
+                "content": prompt
+            }]
         )
-        current_app.logger.debug("Successfully received response from Claude API")
-        return response.content
+        
+        if message.content:
+            return message.content[0].text
+        return '<p>AI分析の結果を取得できませんでした。</p>'
 
     except Exception as e:
         return handle_ai_error("analyze_email", e)
@@ -94,13 +99,10 @@ def analyze_opportunities(opportunities):
     try:
         user_settings = UserSettings.query.filter_by(user_id=current_user.id).first()
         if not user_settings or not user_settings.claude_api_key:
-            current_app.logger.error("Claude API key not found in user settings")
             return '<p class="error-message">AI分析を実行するにはAPIキーの設定が必要です。</p>'
             
-        current_app.logger.debug("Initializing Anthropic client")
         client = Anthropic(api_key=user_settings.claude_api_key)
         
-        # Prepare opportunity data for analysis
         opp_data = "\n".join([
             f"- 名前: {opp.name}, ステージ: {opp.stage}, 金額: {opp.amount}, 完了予定日: {opp.close_date}"
             for opp in opportunities
@@ -117,14 +119,18 @@ def analyze_opportunities(opportunities):
         4. 次のステップへの提案
         回答は日本語でお願いします。HTMLの段落タグ（<p>）を使用してフォーマットしてください。"""
 
-        current_app.logger.debug("Sending request to Claude API")
-        response = client.messages.create(
-            messages=[{"role": "user", "content": prompt}],
-            model="claude-2",
-            max_tokens=500,
+        message = client.messages.create(
+            model="claude-3-haiku-20240307",
+            max_tokens=4000,
+            messages=[{
+                "role": "user",
+                "content": prompt
+            }]
         )
-        current_app.logger.debug("Successfully received response from Claude API")
-        return response.content
+        
+        if message.content:
+            return message.content[0].text
+        return '<p>AI分析の結果を取得できませんでした。</p>'
 
     except Exception as e:
         return handle_ai_error("analyze_opportunities", e)
@@ -134,13 +140,10 @@ def analyze_schedules(schedules):
     try:
         user_settings = UserSettings.query.filter_by(user_id=current_user.id).first()
         if not user_settings or not user_settings.claude_api_key:
-            current_app.logger.error("Claude API key not found in user settings")
             return '<p class="error-message">AI分析を実行するにはAPIキーの設定が必要です。</p>'
             
-        current_app.logger.debug("Initializing Anthropic client")
         client = Anthropic(api_key=user_settings.claude_api_key)
 
-        # Prepare schedule data for analysis
         schedule_data = "\n".join([
             f"- タイトル: {sch.title}, 開始: {sch.start_time}, 終了: {sch.end_time}"
             for sch in schedules
@@ -157,14 +160,18 @@ def analyze_schedules(schedules):
         4. スケジュール管理の提案
         回答は日本語でお願いします。HTMLの段落タグ（<p>）を使用してフォーマットしてください。"""
 
-        current_app.logger.debug("Sending request to Claude API")
-        response = client.messages.create(
-            messages=[{"role": "user", "content": prompt}],
-            model="claude-2",
-            max_tokens=500,
+        message = client.messages.create(
+            model="claude-3-haiku-20240307",
+            max_tokens=4000,
+            messages=[{
+                "role": "user",
+                "content": prompt
+            }]
         )
-        current_app.logger.debug("Successfully received response from Claude API")
-        return response.content
+
+        if message.content:
+            return message.content[0].text
+        return '<p>AI分析の結果を取得できませんでした。</p>'
 
     except Exception as e:
         return handle_ai_error("analyze_schedules", e)
