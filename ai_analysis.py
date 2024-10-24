@@ -1,120 +1,170 @@
 import os
-from anthropic import Anthropic
+from anthropic import Anthropic, APIError, APIConnectionError, AuthenticationError
 from flask import current_app
 from models import Opportunity, Schedule
 from datetime import datetime, timedelta
+import logging
+
+def handle_ai_error(func_name, error):
+    """Handle AI analysis errors with proper logging and localized messages"""
+    error_msg = None
+    if isinstance(error, AuthenticationError):
+        error_msg = "APIキーが無効です。システム管理者に連絡してください。"
+        current_app.logger.error(f"{func_name}: Invalid API key - {str(error)}")
+    elif isinstance(error, APIConnectionError):
+        error_msg = "AI分析サービスに接続できません。しばらく待ってから再試行してください。"
+        current_app.logger.error(f"{func_name}: Connection error - {str(error)}")
+    elif isinstance(error, APIError):
+        error_msg = "AI分析中にエラーが発生しました。しばらく待ってから再試行してください。"
+        current_app.logger.error(f"{func_name}: API error - {str(error)}")
+    else:
+        error_msg = "予期せぬエラーが発生しました。システム管理者に連絡してください。"
+        current_app.logger.error(f"{func_name}: Unexpected error - {str(error)}")
+    return f'<p class="error-message">{error_msg}</p>'
 
 def analyze_email(subject, content, user_id=None):
-    """Analyze email content using Claude AI"""
+    """Analyze email content using Claude AI with improved error handling"""
     try:
         api_key = os.environ.get('CLAUDE_API_KEY')
         if not api_key:
             current_app.logger.error("CLAUDE_API_KEY is missing from environment variables")
-            return "Error: No Claude API key available"
+            return '<p class="error-message">AI分析を実行するにはAPIキーが必要です。</p>'
 
+        current_app.logger.debug("Initializing Anthropic client")
         client = Anthropic(api_key=api_key)
-        current_app.logger.info("Anthropic client created successfully")
 
-        system_message = "You are an AI assistant that analyzes emails and provides suggestions for opportunities, schedules, and tasks."
+        prompt = f"""以下のメールを分析し、商談、スケジュール、タスクの提案をしてください:
 
-        prompt = f"\n\nHuman: 回答はすべて日本語でお願いします。Analyze the following email and provide suggestions for opportunities, schedules, and tasks:\n\nSubject: {subject}\n\nContent: {content}\n\nPlease provide your analysis in the following format:\nOpportunities:\n1.\n2.\n\nSchedules:\n1.\n2.\n\nTasks:\n1.\n2.\n\nAssistant:"
+件名: {subject}
+本文: {content}
 
+以下の形式で回答してください:
+商談:
+1.
+2.
+
+スケジュール:
+1.
+2.
+
+タスク:
+1.
+2.
+
+回答は日本語でお願いします。"""
+
+        current_app.logger.debug("Sending request to Claude API")
         response = client.messages.create(
-            messages=[{"role": "user", "content": system_message + prompt}],
+            messages=[{"role": "user", "content": prompt}],
             model="claude-2",
-            max_tokens=4000,
+            max_tokens=1000,
         )
+        current_app.logger.debug("Successfully received response from Claude API")
         return response.content
+
     except Exception as e:
-        current_app.logger.error(f"Error in analyze_email: {str(e)}")
-        return f"Error: {str(e)}"
+        return handle_ai_error("analyze_email", e)
 
 def parse_ai_response(response):
     """Parse AI response into opportunities, schedules, and tasks"""
+    if not response or isinstance(response, str) and response.startswith('<p class="error-message"'):
+        return [], [], []
+
     opportunities = []
     schedules = []
     tasks = []
     current_section = None
 
     for line in response.split('\n'):
-        if line.startswith('Opportunities:'):
+        line = line.strip()
+        if '商談:' in line:
             current_section = opportunities
-        elif line.startswith('Schedules:'):
+        elif 'スケジュール:' in line:
             current_section = schedules
-        elif line.startswith('Tasks:'):
+        elif 'タスク:' in line:
             current_section = tasks
-        elif line.strip().startswith('1.') or line.strip().startswith('2.'):
-            if current_section is not None:
-                current_section.append(line.strip()[3:])
+        elif line.startswith('1.') or line.startswith('2.'):
+            if current_section is not None and line[2:].strip():
+                current_section.append(line[2:].strip())
 
     return opportunities, schedules, tasks
 
 def analyze_opportunities(opportunities):
-    """Analyze opportunities using Claude AI"""
+    """Analyze opportunities using Claude AI with improved error handling"""
     try:
         api_key = os.environ.get('CLAUDE_API_KEY')
         if not api_key:
             current_app.logger.error("CLAUDE_API_KEY is missing from environment variables")
-            return None
+            return '<p class="error-message">AI分析を実行するにはAPIキーが必要です。</p>'
             
+        current_app.logger.debug("Initializing Anthropic client")
         client = Anthropic(api_key=api_key)
-        current_app.logger.info("Anthropic client created successfully")
-
+        
         # Prepare opportunity data for analysis
         opp_data = "\n".join([
-            f"- Name: {opp.name}, Stage: {opp.stage}, Amount: {opp.amount}, Close Date: {opp.close_date}"
+            f"- 名前: {opp.name}, ステージ: {opp.stage}, 金額: {opp.amount}, 完了予定日: {opp.close_date}"
             for opp in opportunities
         ])
+        
+        if not opportunities:
+            return '<p>分析対象の商談がありません。</p>'
 
-        prompt = f"""Given these opportunities:\n{opp_data}\n
-        Provide a brief analysis including:
-        1. Total pipeline value
-        2. Distribution across stages
-        3. Key opportunities to focus on
-        4. Recommendations for next steps
-        Format the response in simple HTML paragraphs."""
+        prompt = f"""以下の商談データを分析してください:\n{opp_data}\n
+        以下の項目について簡潔に分析してください:
+        1. 総パイプライン価値
+        2. ステージごとの分布
+        3. 重点的に取り組むべき商談
+        4. 次のステップへの提案
+        回答は日本語でお願いします。HTMLの段落タグ（<p>）を使用してフォーマットしてください。"""
 
+        current_app.logger.debug("Sending request to Claude API")
         response = client.messages.create(
             messages=[{"role": "user", "content": prompt}],
             model="claude-2",
             max_tokens=500,
         )
+        current_app.logger.debug("Successfully received response from Claude API")
         return response.content
+
     except Exception as e:
-        current_app.logger.error(f"Error in analyze_opportunities: {str(e)}")
-        return None
+        return handle_ai_error("analyze_opportunities", e)
 
 def analyze_schedules(schedules):
-    """Analyze schedules using Claude AI"""
+    """Analyze schedules using Claude AI with improved error handling"""
     try:
         api_key = os.environ.get('CLAUDE_API_KEY')
         if not api_key:
             current_app.logger.error("CLAUDE_API_KEY is missing from environment variables")
-            return None
+            return '<p class="error-message">AI分析を実行するにはAPIキーが必要です。</p>'
             
+        current_app.logger.debug("Initializing Anthropic client")
         client = Anthropic(api_key=api_key)
-        current_app.logger.info("Anthropic client created successfully")
 
         # Prepare schedule data for analysis
         schedule_data = "\n".join([
-            f"- Title: {sch.title}, Start: {sch.start_time}, End: {sch.end_time}"
+            f"- タイトル: {sch.title}, 開始: {sch.start_time}, 終了: {sch.end_time}"
             for sch in schedules
         ])
 
-        prompt = f"""Given these schedules:\n{schedule_data}\n
-        Provide a brief analysis including:
-        1. Schedule density and busy periods
-        2. Time allocation patterns
-        3. Upcoming important events
-        4. Scheduling recommendations
-        Format the response in simple HTML paragraphs."""
+        if not schedules:
+            return '<p>分析対象のスケジュールがありません。</p>'
 
+        prompt = f"""以下のスケジュールデータを分析してください:\n{schedule_data}\n
+        以下の項目について簡潔に分析してください:
+        1. スケジュールの密度と繁忙期
+        2. 時間配分のパターン
+        3. 重要な予定
+        4. スケジュール管理の提案
+        回答は日本語でお願いします。HTMLの段落タグ（<p>）を使用してフォーマットしてください。"""
+
+        current_app.logger.debug("Sending request to Claude API")
         response = client.messages.create(
             messages=[{"role": "user", "content": prompt}],
             model="claude-2",
             max_tokens=500,
         )
+        current_app.logger.debug("Successfully received response from Claude API")
         return response.content
+
     except Exception as e:
-        current_app.logger.error(f"Error in analyze_schedules: {str(e)}")
-        return None
+        return handle_ai_error("analyze_schedules", e)
