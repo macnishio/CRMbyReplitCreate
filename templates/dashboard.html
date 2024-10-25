@@ -100,7 +100,7 @@
             <h2>最近のメール</h2>
             <div class="dashboard-list">
                 {% for email in emails %}
-                <div class="dashboard-item">
+                <div class="dashboard-item email-card" onclick="showEmailModal('{{ email.id }}')">
                     <h3>{{ email.subject or '件名なし' }}</h3>
                     <p>送信者: {{ email.sender_name or email.sender }}</p>
                     <p>受信日時: {{ email.received_date.strftime('%Y-%m-%d %H:%M') if email.received_date }}</p>
@@ -110,6 +110,19 @@
                 {% endfor %}
             </div>
         </div>
+    </div>
+</div>
+
+<!-- Email Modal -->
+<div id="emailModal" class="modal">
+    <div class="modal-content">
+        <span class="close-modal">&times;</span>
+        <h2 id="modalSubject"></h2>
+        <div class="email-info">
+            <p id="modalSender"></p>
+            <p id="modalDate"></p>
+        </div>
+        <div class="email-content" id="modalContent"></div>
     </div>
 </div>
 
@@ -209,5 +222,109 @@
     box-shadow: 0 4px 6px rgba(0,0,0,0.1);
     transition: all 0.2s ease;
 }
+
+.email-card {
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.email-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+}
+
+/* Modal Styles */
+.modal {
+    display: none;
+    position: fixed;
+    z-index: 1000;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0,0,0,0.5);
+}
+
+.modal-content {
+    position: relative;
+    background-color: #fff;
+    margin: 5% auto;
+    padding: 20px;
+    width: 80%;
+    max-width: 800px;
+    border-radius: 8px;
+    box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+    max-height: 80vh;
+    overflow-y: auto;
+}
+
+.close-modal {
+    position: absolute;
+    right: 20px;
+    top: 10px;
+    font-size: 28px;
+    font-weight: bold;
+    color: #666;
+    cursor: pointer;
+}
+
+.close-modal:hover {
+    color: #333;
+}
+
+.email-info {
+    margin: 10px 0;
+    padding-bottom: 10px;
+    border-bottom: 1px solid #eee;
+}
+
+.email-content {
+    margin-top: 20px;
+    white-space: pre-wrap;
+    font-family: Arial, sans-serif;
+    line-height: 1.6;
+}
 </style>
+
+<script>
+async function showEmailModal(emailId) {
+    try {
+        const response = await fetch(`/api/emails/${emailId}`);
+        const data = await response.json();
+        
+        if (data.error) {
+            console.error('Error fetching email:', data.error);
+            return;
+        }
+        
+        // Update modal content
+        document.getElementById('modalSubject').textContent = data.subject || '(件名なし)';
+        document.getElementById('modalSender').textContent = `送信者: ${data.sender_name || data.sender}`;
+        document.getElementById('modalDate').textContent = `受信日時: ${new Date(data.received_date).toLocaleString('ja-JP')}`;
+        document.getElementById('modalContent').textContent = data.content || '(本文なし)';
+        
+        // Show modal
+        const modal = document.getElementById('emailModal');
+        modal.style.display = 'block';
+    } catch (error) {
+        console.error('Error:', error);
+    }
+}
+
+// Close modal when clicking on X or outside the modal
+document.addEventListener('DOMContentLoaded', function() {
+    const modal = document.getElementById('emailModal');
+    const closeBtn = document.querySelector('.close-modal');
+    
+    closeBtn.onclick = function() {
+        modal.style.display = 'none';
+    }
+    
+    window.onclick = function(event) {
+        if (event.target == modal) {
+            modal.style.display = 'none';
+        }
+    }
+});
+</script>
 {% endblock %}

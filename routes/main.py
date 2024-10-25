@@ -1,4 +1,4 @@
-from flask import Blueprint, render_template, redirect, url_for, flash, request, current_app
+from flask import Blueprint, render_template, redirect, url_for, flash, request, current_app, jsonify
 from flask_login import login_required, current_user
 from models import Lead, Opportunity, Task, Schedule, Email
 from extensions import db
@@ -113,3 +113,28 @@ def dashboard():
                             this_month_revenue=0.0,
                             previous_month_revenue=0.0,
                             total_pipeline=0.0)
+
+@bp.route('/api/emails/<int:email_id>')
+@login_required
+def get_email_content(email_id):
+    try:
+        email = Email.query.filter_by(
+            id=email_id,
+            user_id=current_user.id
+        ).first()
+        
+        if not email:
+            return jsonify({'error': 'メールが見つかりません'}), 404
+            
+        return jsonify({
+            'id': email.id,
+            'subject': email.subject,
+            'sender': email.sender,
+            'sender_name': email.sender_name,
+            'content': email.content,
+            'received_date': email.received_date.isoformat() if email.received_date else None
+        })
+        
+    except Exception as e:
+        current_app.logger.error(f"Error fetching email content: {str(e)}")
+        return jsonify({'error': 'メール内容の取得中にエラーが発生しました'}), 500
