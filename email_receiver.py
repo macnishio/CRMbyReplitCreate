@@ -106,47 +106,58 @@ def connect_to_email_server(app):
         ssl_context.verify_mode = ssl.CERT_REQUIRED
         ssl_context.check_hostname = True
         
-        # Connect using SSL context
-        mail = imaplib.IMAP4_SSL(
-            host=os.environ['MAIL_SERVER'],
-            ssl_context=ssl_context
-        )
+        # Get credentials from environment
+        username = os.environ.get('MAIL_USERNAME')
+        password = os.environ.get('MAIL_PASSWORD')
+        server = os.environ.get('MAIL_SERVER')
         
-        # Authenticate with proper error handling
-        try:
-            mail.login(os.environ['MAIL_USERNAME'], os.environ['MAIL_PASSWORD'])
-        except imaplib.IMAP4.error as e:
-            app.logger.error(f"IMAP login error: {str(e)}")
+        if not all([username, password, server]):
+            app.logger.error("Missing required email credentials")
             return None
-        
-        # Select inbox
-        mail.select('inbox')
-        return mail
-        
+            
+        # Connect using SSL context
+        try:
+            mail = imaplib.IMAP4_SSL(
+                host=server,
+                ssl_context=ssl_context
+            )
+            
+            # Format login command properly
+            username = username.strip()
+            password = password.strip()
+            
+            # Authenticate using the raw login command
+            typ, data = mail.login(username, password)
+            
+            if typ != 'OK':
+                app.logger.error(f"Login failed: {data[0].decode()}")
+                return None
+                
+            # Select inbox
+            mail.select('inbox')
+            app.logger.info("Successfully connected to email server")
+            return mail
+            
+        except imaplib.IMAP4.error as e:
+            app.logger.error(f"IMAP error: {str(e)}")
+            return None
+            
     except ssl.SSLError as e:
         app.logger.error(f"SSL error connecting to mail server: {str(e)}")
-        return None
-    except imaplib.IMAP4.error as e:
-        app.logger.error(f"IMAP error connecting to mail server: {str(e)}")
         return None
     except Exception as e:
         app.logger.error(f"Unexpected error connecting to mail server: {str(e)}")
         return None
 
+# Rest of the code remains the same...
 def process_email(email_body, app):
     """Process a single email with improved error handling and lead management"""
     try:
         msg = email.message_from_bytes(email_body)
         subject = decode_email_header(msg['subject'])
         sender = decode_email_header(msg['from'])
-        
-        # Enhanced sender name extraction with better logging
         sender_name = extract_sender_name(sender)
         sender_email = extract_email_address(sender)
-        
-        app.logger.debug(f"Original sender: {sender}")
-        app.logger.debug(f"Extracted name: {sender_name}")
-        app.logger.debug(f"Extracted email: {sender_email}")
         
         content = get_email_content(msg)
         received_date = parse_email_date(msg.get('date'))
@@ -268,83 +279,34 @@ def get_email_content(msg):
     return "\n".join(content)
 
 def extract_sender_name(sender):
-    """Extract sender name with enhanced parsing and validation"""
+    """Extract sender name with enhanced parsing"""
     if not sender:
         return ""
-    
     try:
-        # Log the original sender string for debugging
-        current_app.logger.debug(f"Extracting name from: {sender}")
-        
-        # Remove any newlines and extra spaces
-        sender = ' '.join(sender.strip().splitlines())
-        
-        # Pattern 1: "Display Name" <email@example.com>
-        pattern1 = r'"([^"]+)"'
-        match = re.search(pattern1, sender)
+        # Try to match "Name" <email> format
+        match = re.match(r'"([^"]+)"|([^<]+?)\s*(?:<[^>]+>)?', sender)
         if match:
-            name = match.group(1).strip()
-            current_app.logger.debug(f"Found name using pattern 1: {name}")
-            return name
-        
-        # Pattern 2: Display Name <email@example.com>
-        pattern2 = r'^([^<>]+?)\s*(?:<[^>]+>)'
-        match = re.search(pattern2, sender)
-        if match:
-            name = match.group(1).strip().strip('"')
-            if name and not re.match(r'^[^@]+@[^@]+\.[^@]+$', name):  # Ensure it's not just an email
-                current_app.logger.debug(f"Found name using pattern 2: {name}")
-                return name
-        
-        # Pattern 3: email@example.com (Display Name)
-        pattern3 = r'\((.*?)\)'
-        match = re.search(pattern3, sender)
-        if match:
-            name = match.group(1).strip()
-            current_app.logger.debug(f"Found name using pattern 3: {name}")
-            return name
-        
-        # Pattern 4: Extract email and use local part as name
-        email_match = re.search(r'[\w\.-]+@[\w\.-]+\.\w+', sender)
-        if email_match:
-            email = email_match.group(0)
-            name = email.split('@')[0].replace('.', ' ').title()
-            current_app.logger.debug(f"Using email local part as name: {name}")
-            return name
-        
-        # Fallback: Use the whole string if it doesn't contain email-like patterns
-        if not re.search(r'[<>@]', sender):
-            current_app.logger.debug(f"Using full sender string as name: {sender}")
-            return sender.strip()
-        
-        # Final fallback
-        current_app.logger.warning(f"Could not extract name from sender: {sender}")
-        return "Unknown Sender"
-        
-    except Exception as e:
-        current_app.logger.error(f"Error extracting sender name: {str(e)}")
-        return "Unknown Sender"
+            name = match.group(1) or match.group(2)
+            return name.strip().strip('"')
+        return sender.split('@')[0]  # Fallback to email username
+    except Exception:
+        return sender
 
 def extract_email_address(sender):
     """Extract email address with improved validation"""
     if not sender:
         return ""
     try:
-        # Pattern 1: <email@example.com>
+        # Try to match <email> format
         match = re.search(r'<([^>]+)>', sender)
         if match:
-            email = match.group(1).strip()
-            if re.match(r'^[\w\.-]+@[\w\.-]+\.\w+$', email):
-                return email
-        
-        # Pattern 2: Plain email address
+            return match.group(1).strip()
+        # Try to match plain email format
         match = re.search(r'[\w\.-]+@[\w\.-]+\.\w+', sender)
         if match:
             return match.group(0).strip()
-        
         return sender.strip()
-    except Exception as e:
-        current_app.logger.error(f"Error extracting email address: {str(e)}")
+    except Exception:
         return sender
 
 def parse_email_date(date_str):
