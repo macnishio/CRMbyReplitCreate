@@ -314,14 +314,40 @@ def extract_sender_name(sender):
     if not sender:
         return ""
     try:
-        # Try to match "Name" <email> format
-        match = re.match(r'"([^"]+)"|([^<]+?)\s*(?:<[^>]+>)?', sender)
-        if match:
-            name = match.group(1) or match.group(2)
-            return name.strip().strip('"')
-        return sender.split('@')[0]  # Fallback to email username
-    except Exception:
-        return sender
+        # まず、エンコードされたヘッダーをデコード
+        decoded_sender = decode_email_header(sender)
+
+        # 一般的なパターンを処理
+        # 1. "Name" <email@example.com>
+        # 2. Name <email@example.com>
+        # 3. 'Name' <email@example.com>
+        # 4. name@example.com
+        name_patterns = [
+            r'"([^"]+)"?\s*<[^>]+>',  # "Name" <email>
+            r'([^<>]+?)\s*<[^>]+>',   # Name <email>
+            r"'([^']+)'\s*<[^>]+>",   # 'Name' <email>
+        ]
+
+        for pattern in name_patterns:
+            match = re.match(pattern, decoded_sender)
+            if match:
+                name = match.group(1)
+                # 余分な文字を削除
+                name = name.strip().strip('"').strip("'").strip()
+                if name and len(name) > 1:  # 名前が1文字以上あることを確認
+                    return name
+
+        # メールアドレスのみの場合
+        email_match = re.search(r'[\w\.-]+@[\w\.-]+\.\w+', decoded_sender)
+        if email_match:
+            return email_match.group(0).split('@')[0]  # メールアドレスのユーザー名部分を返す
+
+        # どのパターンにも一致しない場合は、デコードされた送信者情報をそのまま返す
+        return decoded_sender.strip()
+
+    except Exception as e:
+        current_app.logger.warning(f"Error extracting sender name: {str(e)} from sender: {sender}")
+        return sender or ""
 
 def extract_email_address(sender):
     """Extract email address with improved validation"""

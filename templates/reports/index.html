@@ -1,260 +1,227 @@
 {% extends "base.html" %}
-{% block title %}Reports{% endblock %}
+{% block title %}レポート{% endblock %}
+
 {% block content %}
-<h1>Reports</h1>
+<div class="reports-container">
+    <h1>レポート</h1>
 
-<h2>Advanced Analytics</h2>
-<div class="analytics-summary">
-    <div class="stat-card">
-        <h3>Conversion Rate</h3>
-        <p>{{ "%.2f"|format(conversion_rate) }}%</p>
+    <div class="metrics-grid">
+        <div class="metric-card">
+            <h3>今月の売上</h3>
+            <p class="metric-value">¥{{ "{:,.0f}".format(this_month_revenue or 0) }}</p>
+        </div>
+        <div class="metric-card">
+            <h3>商談パイプライン</h3>
+            <p class="metric-value">¥{{ "{:,.0f}".format(sales_pipeline_value or 0) }}</p>
+        </div>
+        <div class="metric-card">
+            <h3>リード変換率</h3>
+            <p class="metric-value">{{ "{:.1f}".format(conversion_rate or 0) }}%</p>
+        </div>
+        <div class="metric-card">
+            <h3>平均商談金額</h3>
+            <p class="metric-value">¥{{ "{:,.0f}".format(average_deal_size or 0) }}</p>
+        </div>
     </div>
-    <div class="stat-card">
-        <h3>Average Deal Size</h3>
-        <p>${{ "%.2f"|format(average_deal_size) }}</p>
+
+    <div class="charts-grid">
+        <div class="chart-container">
+            <h2>売上推移</h2>
+            <canvas id="revenueChart"></canvas>
+        </div>
+        <div class="chart-container">
+            <h2>商談ステージ分布</h2>
+            <canvas id="pipelineChart"></canvas>
+        </div>
+        <div class="chart-container">
+            <h2>リードスコア分布</h2>
+            <canvas id="leadScoreChart"></canvas>
+        </div>
+        <div class="chart-container">
+            <h2>タスクステータス分布</h2>
+            <canvas id="taskStatusChart"></canvas>
+        </div>
     </div>
-    <div class="stat-card">
-        <h3>Sales Pipeline Value</h3>
-        <p>${{ "%.2f"|format(sales_pipeline_value) }}</p>
-    </div>
 </div>
 
-<h2>Lead Status</h2>
-<div style="width: 80%; max-width: 600px; margin: auto;">
-    <canvas id="leadStatusChart"></canvas>
-</div>
-
-<h2>Opportunity Stage</h2>
-<div style="width: 80%; max-width: 600px; margin: auto;">
-    <canvas id="opportunityStageChart"></canvas>
-</div>
-
-<h2>Account Industry</h2>
-<div style="width: 80%; max-width: 600px; margin: auto;">
-    <canvas id="accountIndustryChart"></canvas>
-</div>
-
-<h2>Lead Score Distribution</h2>
-<div style="width: 80%; max-width: 600px; margin: auto;">
-    <canvas id="leadScoreChart"></canvas>
-</div>
-
-<h2>Task Status Distribution</h2>
-<div style="width: 80%; max-width: 600px; margin: auto;">
-    <canvas id="taskStatusChart"></canvas>
-</div>
-
-<h2>Task Due Date Distribution</h2>
-<div style="width: 80%; max-width: 600px; margin: auto;">
-    <canvas id="taskDueDateChart"></canvas>
-</div>
-{% endblock %}
-
-{% block scripts %}
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
 <script>
-    // Lead Status Chart
-    new Chart(document.getElementById('leadStatusChart'), {
-        type: 'pie',
-        data: {
-            labels: {{ lead_status|map(attribute=0)|list|tojson }},
-            datasets: [{
-                data: {{ lead_status|map(attribute=1)|list|tojson }},
-                backgroundColor: ['#FF6384', '#36A2EB', '#FFCE56', '#4BC0C0']
-            }]
-        },
-        options: {
-            responsive: true,
-            maintainAspectRatio: false,
-            plugins: {
-                legend: {
-                    position: 'top',
-                },
-            },
-            layout: {
-                padding: {
-                    left: 10,
-                    right: 10,
-                    top: 0,
-                    bottom: 0
-                }
-            }
-        }
-    });
+// Chart.jsの設定
+Chart.defaults.font.family = "'Helvetica Neue', 'Helvetica', 'Arial', sans-serif";
+Chart.defaults.color = '#666';
 
-    // Opportunity Stage Chart
-    new Chart(document.getElementById('opportunityStageChart'), {
-        type: 'bar',
-        data: {
-            labels: {{ opportunity_stage|map(attribute=0)|list|tojson }},
-            datasets: [{
-                label: 'Count',
-                data: {{ opportunity_stage|map(attribute=1)|list|tojson }},
-                backgroundColor: '#36A2EB'
-            }, {
-                label: 'Amount',
-                data: {{ opportunity_stage|map(attribute=2)|list|tojson }},
-                backgroundColor: '#FFCE56',
-                yAxisID: 'y-axis-2'
-            }]
+// 売上推移チャート
+const revenueCtx = document.getElementById('revenueChart').getContext('2d');
+new Chart(revenueCtx, {
+    type: 'line',
+    data: {
+        labels: {{ revenue_trend_labels | tojson }},
+        datasets: [{
+            label: '月間売上',
+            data: {{ revenue_trend_data | tojson }},
+            borderColor: '#007bff',
+            backgroundColor: 'rgba(0, 123, 255, 0.1)',
+            tension: 0.4,
+            fill: true
+        }]
+    },
+    options: {
+        responsive: true,
+        plugins: {
+            legend: {
+                position: 'bottom'
+            }
         },
-        options: {
-            responsive: true,
-            maintainAspectRatio: false,
-            scales: {
-                y: {
-                    type: 'linear',
-                    position: 'left',
-                    beginAtZero: true
-                },
-                'y-axis-2': {
-                    type: 'linear',
-                    position: 'right',
-                    beginAtZero: true
-                }
-            },
-            plugins: {
-                legend: {
-                    position: 'top',
-                },
-            },
-            layout: {
-                padding: {
-                    left: 10,
-                    right: 10,
-                    top: 0,
-                    bottom: 0
+        scales: {
+            y: {
+                beginAtZero: true,
+                ticks: {
+                    callback: function(value) {
+                        return '¥' + value.toLocaleString();
+                    }
                 }
             }
         }
-    });
+    }
+});
 
-    // Account Industry Chart
-    new Chart(document.getElementById('accountIndustryChart'), {
-        type: 'doughnut',
-        data: {
-            labels: {{ account_industry|map(attribute=0)|list|tojson }},
-            datasets: [{
-                data: {{ account_industry|map(attribute=1)|list|tojson }},
-                backgroundColor: ['#FF6384', '#36A2EB', '#FFCE56', '#4BC0C0', '#9966FF']
-            }]
-        },
-        options: {
-            responsive: true,
-            maintainAspectRatio: false,
-            plugins: {
-                legend: {
-                    position: 'top',
-                },
-            },
-            layout: {
-                padding: {
-                    left: 10,
-                    right: 10,
-                    top: 0,
-                    bottom: 0
-                }
+// 商談ステージ分布チャート
+const pipelineCtx = document.getElementById('pipelineChart').getContext('2d');
+new Chart(pipelineCtx, {
+    type: 'doughnut',
+    data: {
+        labels: {{ pipeline_labels | tojson }},
+        datasets: [{
+            data: {{ pipeline_data | tojson }},
+            backgroundColor: [
+                '#007bff',
+                '#28a745',
+                '#ffc107',
+                '#dc3545',
+                '#17a2b8'
+            ]
+        }]
+    },
+    options: {
+        responsive: true,
+        plugins: {
+            legend: {
+                position: 'bottom'
             }
         }
-    });
+    }
+});
 
-    // Lead Score Distribution Chart
-    new Chart(document.getElementById('leadScoreChart'), {
-        type: 'bar',
-        data: {
-            labels: {{ lead_score_labels|tojson }},
-            datasets: [{
-                label: 'Number of Leads',
-                data: {{ lead_score_data|tojson }},
-                backgroundColor: '#4BC0C0'
-            }]
+// リードスコア分布チャート
+const leadScoreCtx = document.getElementById('leadScoreChart').getContext('2d');
+new Chart(leadScoreCtx, {
+    type: 'bar',
+    data: {
+        labels: {{ lead_score_labels | tojson }},
+        datasets: [{
+            label: 'リード数',
+            data: {{ lead_score_data | tojson }},
+            backgroundColor: '#28a745'
+        }]
+    },
+    options: {
+        responsive: true,
+        plugins: {
+            legend: {
+                position: 'bottom'
+            }
         },
-        options: {
-            responsive: true,
-            maintainAspectRatio: false,
-            scales: {
-                y: {
-                    beginAtZero: true
-                }
-            },
-            plugins: {
-                legend: {
-                    position: 'top',
-                },
-            },
-            layout: {
-                padding: {
-                    left: 10,
-                    right: 10,
-                    top: 0,
-                    bottom: 0
+        scales: {
+            y: {
+                beginAtZero: true,
+                ticks: {
+                    stepSize: 1
                 }
             }
         }
-    });
+    }
+});
 
-    // Task Status Distribution Chart
-    new Chart(document.getElementById('taskStatusChart'), {
-        type: 'pie',
-        data: {
-            labels: ['Completed', 'Not Completed'],
-            datasets: [{
-                data: {{ task_status|map(attribute=1)|list|tojson }},
-                backgroundColor: ['#4BC0C0', '#FF6384']
-            }]
-        },
-        options: {
-            responsive: true,
-            maintainAspectRatio: false,
-            plugins: {
-                legend: {
-                    position: 'top',
-                },
-            },
-            layout: {
-                padding: {
-                    left: 10,
-                    right: 10,
-                    top: 0,
-                    bottom: 0
-                }
+// タスクステータス分布チャート
+const taskStatusCtx = document.getElementById('taskStatusChart').getContext('2d');
+new Chart(taskStatusCtx, {
+    type: 'pie',
+    data: {
+        labels: {{ task_status_labels | tojson }},
+        datasets: [{
+            data: {{ task_status_data | tojson }},
+            backgroundColor: [
+                '#17a2b8',
+                '#ffc107',
+                '#28a745'
+            ]
+        }]
+    },
+    options: {
+        responsive: true,
+        plugins: {
+            legend: {
+                position: 'bottom'
             }
         }
-    });
-
-    // Task Due Date Distribution Chart
-    new Chart(document.getElementById('taskDueDateChart'), {
-        type: 'bar',
-        data: {
-            labels: {{ task_due_date|map(attribute=0)|list|tojson }},
-            datasets: [{
-                label: 'Number of Tasks',
-                data: {{ task_due_date|map(attribute=1)|list|tojson }},
-                backgroundColor: ['#FF6384', '#36A2EB', '#FFCE56']
-            }]
-        },
-        options: {
-            responsive: true,
-            maintainAspectRatio: false,
-            scales: {
-                y: {
-                    beginAtZero: true
-                }
-            },
-            plugins: {
-                legend: {
-                    position: 'top',
-                },
-            },
-            layout: {
-                padding: {
-                    left: 10,
-                    right: 10,
-                    top: 0,
-                    bottom: 0
-                }
-            }
-        }
-    });
+    }
+});
 </script>
+
+<style>
+.reports-container {
+    padding: 20px;
+}
+
+.metrics-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 20px;
+    margin-bottom: 30px;
+}
+
+.metric-card {
+    background: white;
+    padding: 20px;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.metric-card h3 {
+    margin: 0 0 10px 0;
+    color: #666;
+}
+
+.metric-value {
+    font-size: 24px;
+    font-weight: bold;
+    margin: 10px 0;
+}
+
+.charts-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+    gap: 20px;
+}
+
+.chart-container {
+    background: white;
+    padding: 20px;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.chart-container h2 {
+    margin: 0 0 20px 0;
+    color: #333;
+    font-size: 18px;
+}
+
+@media (max-width: 768px) {
+    .charts-grid {
+        grid-template-columns: 1fr;
+    }
+}
+</style>
 {% endblock %}

@@ -1,88 +1,61 @@
-from flask import Blueprint, render_template, current_app
+from flask import Blueprint, render_template
 from flask_login import login_required, current_user
+from datetime import datetime, timedelta
+from sqlalchemy import func
+from models import Lead, Opportunity, Task, Schedule
 from extensions import db
-from models import Lead, Opportunity, Account, Task
-from sqlalchemy import func, case
-from analytics import get_conversion_rate, get_average_deal_size, get_sales_pipeline_value
-from datetime import datetime
+from analytics import (
+    get_sales_pipeline_value,
+    get_monthly_revenue,
+    get_conversion_rate,
+    get_average_deal_size,
+    get_revenue_trend,
+    get_lead_score_distribution,
+    get_task_status_distribution,
+    get_sales_pipeline_by_stage
+)
 
-bp = Blueprint('reports', __name__, url_prefix='/reports')
+bp = Blueprint('reports', __name__)
 
 @bp.route('/')
 @login_required
 def index():
-    # Lead status report
-    lead_status = db.session.query(Lead.status, func.count(Lead.id)).filter_by(user_id=current_user.id).group_by(Lead.status).all()
-    current_app.logger.debug(f"Lead status data: {lead_status}")
-
-    # Opportunity stage report
-    opportunity_stage = db.session.query(
-        Opportunity.stage, func.count(Opportunity.id), func.sum(Opportunity.amount)
-    ).filter_by(user_id=current_user.id).group_by(Opportunity.stage).all()
-    current_app.logger.debug(f"Opportunity stage data: {opportunity_stage}")
-
-    # Account industry report
-    account_industry = db.session.query(
-        Account.industry, func.count(Account.id)
-    ).filter_by(user_id=current_user.id).group_by(Account.industry).all()
-    current_app.logger.debug(f"Account industry data: {account_industry}")
-
-    # Advanced analytics
+    # Get basic metrics
+    this_month_revenue = get_monthly_revenue()
+    sales_pipeline_value = get_sales_pipeline_value()
     conversion_rate = get_conversion_rate()
     average_deal_size = get_average_deal_size()
-    sales_pipeline_value = get_sales_pipeline_value()
 
-    # Lead scoring distribution
-    lead_scores = db.session.query(
-        func.floor(Lead.score / 10) * 10, func.count(Lead.id)
-    ).filter_by(user_id=current_user.id).group_by(func.floor(Lead.score / 10) * 10).all()
-    lead_score_labels = [f"{int(score)}-{int(score)+9}" for score, _ in lead_scores]
-    lead_score_data = [count for _, count in lead_scores]
-    current_app.logger.debug(f"Lead score distribution: {lead_scores}")
+    # Get revenue trend data
+    revenue_trend = get_revenue_trend(months=6)
+    revenue_trend_labels = [item['month'] for item in revenue_trend]
+    revenue_trend_data = [item['revenue'] for item in revenue_trend]
 
-    # Task status report
-    task_status = db.session.query(Task.completed, func.count(Task.id)).filter_by(user_id=current_user.id).group_by(Task.completed).all()
-    current_app.logger.debug(f"Task status data: {task_status}")
+    # Get pipeline data
+    pipeline_stages = get_sales_pipeline_by_stage()
+    pipeline_labels = [stage[0] for stage in pipeline_stages]
+    pipeline_data = [float(stage[2]) for stage in pipeline_stages]
 
-    # Task due date report
-    today = datetime.utcnow().date()
-    due_date_case = case(
-        (Task.due_date.cast(db.Date) < today, 'Overdue'),
-        (Task.due_date.cast(db.Date) == today, 'Due Today'),
-        else_='Upcoming'
-    )
+    # Get lead score distribution
+    lead_scores = get_lead_score_distribution()
+    lead_score_labels = list(lead_scores.keys())
+    lead_score_data = list(lead_scores.values())
 
-    task_due_date = db.session.query(
-        due_date_case.label('due_status'),
-        func.count(Task.id)
-    ).filter_by(user_id=current_user.id).group_by('due_status').all()
+    # Get task status distribution
+    task_statuses = get_task_status_distribution()
+    task_status_labels = list(task_statuses.keys())
+    task_status_data = list(task_statuses.values())
 
-    current_app.logger.debug(f"Task due date data: {task_due_date}")
-
-    current_app.logger.debug(f"Conversion rate: {conversion_rate}")
-    current_app.logger.debug(f"Average deal size: {average_deal_size}")
-    current_app.logger.debug(f"Sales pipeline value: {sales_pipeline_value}")
-
-    # Add more detailed logging
-    current_app.logger.info("Data being passed to the reports template:")
-    current_app.logger.info(f"Lead status: {lead_status}")
-    current_app.logger.info(f"Opportunity stage: {opportunity_stage}")
-    current_app.logger.info(f"Account industry: {account_industry}")
-    current_app.logger.info(f"Lead score labels: {lead_score_labels}")
-    current_app.logger.info(f"Lead score data: {lead_score_data}")
-    current_app.logger.info(f"Task status: {task_status}")
-    current_app.logger.info(f"Task due date: {task_due_date}")
-
-    return render_template(
-        'reports/index.html',
-        lead_status=lead_status,
-        opportunity_stage=opportunity_stage,
-        account_industry=account_industry,
-        conversion_rate=conversion_rate,
-        average_deal_size=average_deal_size,
-        sales_pipeline_value=sales_pipeline_value,
-        lead_score_labels=lead_score_labels,
-        lead_score_data=lead_score_data,
-        task_status=task_status,
-        task_due_date=task_due_date
-    )
+    return render_template('reports/index.html',
+                         this_month_revenue=this_month_revenue,
+                         sales_pipeline_value=sales_pipeline_value,
+                         conversion_rate=conversion_rate,
+                         average_deal_size=average_deal_size,
+                         revenue_trend_labels=revenue_trend_labels,
+                         revenue_trend_data=revenue_trend_data,
+                         pipeline_labels=pipeline_labels,
+                         pipeline_data=pipeline_data,
+                         lead_score_labels=lead_score_labels,
+                         lead_score_data=lead_score_data,
+                         task_status_labels=task_status_labels,
+                         task_status_data=task_status_data)

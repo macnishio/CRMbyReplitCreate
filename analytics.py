@@ -6,22 +6,23 @@ from extensions import db
 
 def get_sales_pipeline_value():
     """Get total value of open opportunities with null handling"""
-    open_opportunities = Opportunity.query.filter(
+    pipeline_value = db.session.query(
+        func.coalesce(func.sum(Opportunity.amount), 0.0)
+    ).filter(
         and_(
             Opportunity.user_id == current_user.id,
-            Opportunity.stage.in_(['Initial Contact', 'Qualification', 'Proposal', 'Negotiation']),
-            Opportunity.amount != None  # Exclude null amounts
+            Opportunity.stage.in_(['Initial Contact', 'Qualification', 'Proposal', 'Negotiation'])
         )
-    ).all()
+    ).scalar()
     
-    return sum(opp.amount or 0 for opp in open_opportunities)
+    return float(pipeline_value or 0.0)
 
 def get_sales_pipeline_by_stage():
     """Get pipeline value broken down by stage with null handling"""
     pipeline_data = db.session.query(
         Opportunity.stage,
         func.count(Opportunity.id).label('count'),
-        func.coalesce(func.sum(Opportunity.amount), 0).label('amount')
+        func.coalesce(func.sum(Opportunity.amount), 0.0).label('amount')
     ).filter(
         Opportunity.user_id == current_user.id
     ).group_by(Opportunity.stage).all()
@@ -83,11 +84,10 @@ def get_monthly_revenue(date=None):
         Opportunity.user_id == current_user.id,
         Opportunity.stage == 'Closed Won',
         Opportunity.close_date >= start_date,
-        Opportunity.close_date <= end_date,
-        Opportunity.amount != None  # Exclude null amounts
-    ).scalar() or 0.0
+        Opportunity.close_date <= end_date
+    ).scalar()
     
-    return float(revenue)
+    return float(revenue or 0.0)
 
 def get_task_status_distribution():
     """Get distribution of task statuses"""
