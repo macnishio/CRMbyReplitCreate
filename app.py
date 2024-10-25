@@ -58,26 +58,6 @@ def load_user(user_id):
     from models import User
     return User.query.get(int(user_id))
 
-def is_port_in_use(port):
-    with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
-        try:
-            s.bind(('0.0.0.0', port))
-            return False
-        except socket.error:
-            return True
-
-def find_available_port(start_port=5000, max_attempts=10):
-    port = start_port
-    while port < start_port + max_attempts:
-        if not is_port_in_use(port):
-            return port
-        port += 1
-    raise RuntimeError(f"Could not find an available port after {max_attempts} attempts")
-
 if __name__ == '__main__':
     app = create_app()
-    try:
-        port = find_available_port()
-        app.run(host='0.0.0.0', port=port)
-    except RuntimeError as e:
-        print(f"Error starting server: {e}")
+    app.run(host='0.0.0.0', port=5000, debug=False)

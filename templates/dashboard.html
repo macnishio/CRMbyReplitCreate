@@ -1,37 +1,193 @@
 {% extends "base.html" %}
 {% block title %}ダッシュボード{% endblock %}
+
 {% block content %}
-<h1>ダッシュボード</h1>
-<div class="metric-cards">
-    <div class="metric-card">
-        <i class="fas fa-user"></i>
-        <h2>新規リード</h2>
-        <p class="metric-value">{{ new_leads_count }}</p>
+<div class="dashboard">
+    <div class="metrics-grid">
+        <div class="metric-card">
+            <h3>今月の売上</h3>
+            <p class="metric-value">¥{{ "{:,.0f}".format(this_month_revenue or 0) }}</p>
+            {% if previous_month_revenue and previous_month_revenue > 0 %}
+                {% set revenue_change = ((this_month_revenue - previous_month_revenue) / previous_month_revenue * 100) %}
+                <p class="metric-change {% if revenue_change >= 0 %}positive{% else %}negative{% endif %}">
+                    {{ "{:+.1f}".format(revenue_change) }}% 先月比
+                </p>
+            {% else %}
+                <p class="metric-change">前月データなし</p>
+            {% endif %}
+        </div>
+        <div class="metric-card">
+            <h3>先月の売上</h3>
+            <p class="metric-value">¥{{ "{:,.0f}".format(previous_month_revenue or 0) }}</p>
+        </div>
+        <div class="metric-card">
+            <h3>商談パイプライン</h3>
+            <p class="metric-value">¥{{ "{:,.0f}".format(total_pipeline or 0) }}</p>
+        </div>
     </div>
-    <div class="metric-card">
-        <i class="fas fa-chart-line"></i>
-        <h2>進行中の商談</h2>
-        <p class="metric-value">{{ ongoing_opportunities_count }}</p>
-    </div>
-    <div class="metric-card">
-        <i class="fas fa-yen-sign"></i>
-        <h2>今月の売上</h2>
-        <p class="metric-value">¥{{ "{:,}".format(this_month_revenue) }}</p>
-    </div>
-    <div class="metric-card">
-        <i class="fas fa-check-circle"></i>
-        <h2>完了タスク</h2>
-        <p class="metric-value">{{ completed_tasks_count }}</p>
+
+    <div class="dashboard-grid">
+        <div class="dashboard-section">
+            <h2>最近のリード</h2>
+            <div class="dashboard-list">
+                {% for lead in leads %}
+                <div class="dashboard-item">
+                    <h3>{{ lead.name or '名前なし' }}</h3>
+                    <p>{{ lead.email }}</p>
+                    <p>スコア: {{ "%.1f"|format(lead.score or 0) }}</p>
+                    <p>ステータス: {{ lead.status }}</p>
+                </div>
+                {% else %}
+                <p>リードはありません</p>
+                {% endfor %}
+            </div>
+        </div>
+
+        <div class="dashboard-section">
+            <h2>商談ステージ別集計</h2>
+            <div class="dashboard-list">
+                {% for stage, count, amount in opportunities %}
+                <div class="dashboard-item">
+                    <h3>{{ stage }}</h3>
+                    <p>件数: {{ count }}</p>
+                    <p>金額: ¥{{ "{:,.0f}".format(amount or 0) }}</p>
+                </div>
+                {% else %}
+                <p>商談はありません</p>
+                {% endfor %}
+            </div>
+        </div>
+
+        <div class="dashboard-section">
+            <h2>直近のタスク</h2>
+            <div class="dashboard-list">
+                {% for task in tasks %}
+                <div class="dashboard-item">
+                    <h3>{{ task.title }}</h3>
+                    <p>期限: {{ task.due_date.strftime('%Y-%m-%d %H:%M') }}</p>
+                    <p>ステータス: {{ task.status }}</p>
+                </div>
+                {% else %}
+                <p>タスクはありません</p>
+                {% endfor %}
+            </div>
+        </div>
+
+        <div class="dashboard-section">
+            <h2>今後のスケジュール</h2>
+            <div class="dashboard-list">
+                {% for schedule in schedules %}
+                <div class="dashboard-item">
+                    <h3>{{ schedule.title }}</h3>
+                    <p>開始: {{ schedule.start_time.strftime('%Y-%m-%d %H:%M') }}</p>
+                    <p>終了: {{ schedule.end_time.strftime('%Y-%m-%d %H:%M') }}</p>
+                </div>
+                {% else %}
+                <p>スケジュールはありません</p>
+                {% endfor %}
+            </div>
+        </div>
+
+        <div class="dashboard-section">
+            <h2>最近のメール</h2>
+            <div class="dashboard-list">
+                {% for email in emails %}
+                <div class="dashboard-item">
+                    <h3>{{ email.subject or '件名なし' }}</h3>
+                    <p>送信者: {{ email.sender_name or email.sender }}</p>
+                    <p>受信日時: {{ email.received_date.strftime('%Y-%m-%d %H:%M') if email.received_date }}</p>
+                </div>
+                {% else %}
+                <p>メールはありません</p>
+                {% endfor %}
+            </div>
+        </div>
     </div>
 </div>
-<section class="recent-activity">
-    <h2>最近のアクティビティ</h2>
-    <ul>
-        {% for activity in recent_activities %}
-            <li>{{ activity }}</li>
-        {% else %}
-            <li>最近のアクティビティはありません</li>
-        {% endfor %}
-    </ul>
-</section>
+
+<style>
+.dashboard {
+    padding: 20px;
+}
+
+.metrics-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 20px;
+    margin-bottom: 30px;
+}
+
+.metric-card {
+    background: white;
+    padding: 20px;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.metric-card h3 {
+    margin: 0 0 10px 0;
+    color: #666;
+}
+
+.metric-value {
+    font-size: 24px;
+    font-weight: bold;
+    margin: 10px 0;
+}
+
+.metric-change {
+    font-size: 14px;
+    margin: 5px 0;
+}
+
+.metric-change.positive {
+    color: #28a745;
+}
+
+.metric-change.negative {
+    color: #dc3545;
+}
+
+.dashboard-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 20px;
+}
+
+.dashboard-section {
+    background: white;
+    padding: 20px;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.dashboard-section h2 {
+    margin: 0 0 20px 0;
+    color: #333;
+}
+
+.dashboard-list {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+}
+
+.dashboard-item {
+    padding: 15px;
+    background: #f8f9fa;
+    border-radius: 4px;
+}
+
+.dashboard-item h3 {
+    margin: 0 0 10px 0;
+    font-size: 16px;
+    color: #333;
+}
+
+.dashboard-item p {
+    margin: 5px 0;
+    color: #666;
+    font-size: 14px;
+}
+</style>
 {% endblock %}
