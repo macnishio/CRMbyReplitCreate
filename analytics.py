@@ -3,6 +3,7 @@ from models import Lead, Opportunity, Account, Task, Schedule
 from sqlalchemy import func
 from datetime import datetime, timedelta
 from extensions import db
+from flask import current_app
 
 def get_lead_stats():
     """Get lead statistics with proper handling of null values"""
@@ -24,7 +25,7 @@ def get_opportunity_stats():
         stats = db.session.query(
             Opportunity.stage,
             func.count(Opportunity.id).label('count'),
-            func.coalesce(func.sum(Opportunity.amount), 0.0).label('total_amount')
+            func.coalesce(func.sum(func.coalesce(Opportunity.amount, 0.0)), 0.0).label('total_amount')
         ).filter(
             Opportunity.user_id == current_user.id
         ).group_by(Opportunity.stage).all()
@@ -75,16 +76,13 @@ def get_lead_score_stats():
 def get_sales_pipeline_value():
     """Get total sales pipeline value with proper null handling"""
     try:
-        open_opportunities = Opportunity.query.filter(
+        pipeline_value = db.session.query(
+            func.coalesce(func.sum(func.coalesce(Opportunity.amount, 0.0)), 0.0)
+        ).filter(
             Opportunity.user_id == current_user.id,
             Opportunity.stage.in_(['Initial Contact', 'Qualification', 'Proposal', 'Negotiation'])
-        ).all()
-
-        total_value = 0.0
-        for opp in open_opportunities:
-            if opp.amount is not None:  # Only add non-null amounts
-                total_value += float(opp.amount)
-        return total_value
+        ).scalar()
+        return float(pipeline_value or 0.0)
     except Exception as e:
         current_app.logger.error(f"Error getting sales pipeline value: {str(e)}")
         return 0.0
@@ -96,13 +94,12 @@ def get_this_month_revenue():
         first_day = today.replace(day=1, hour=0, minute=0, second=0, microsecond=0)
         
         revenue = db.session.query(
-            func.coalesce(func.sum(Opportunity.amount), 0.0)
+            func.coalesce(func.sum(func.coalesce(Opportunity.amount, 0.0)), 0.0)
         ).filter(
             Opportunity.user_id == current_user.id,
             Opportunity.stage == 'Closed Won',
             Opportunity.close_date >= first_day,
-            Opportunity.close_date <= today,
-            Opportunity.amount.isnot(None)  # Exclude null amounts
+            Opportunity.close_date <= today
         ).scalar()
         
         return float(revenue or 0.0)
