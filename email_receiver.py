@@ -36,7 +36,7 @@ def process_emails_for_user(settings, parent_session, app):
         .filter_by(user_id=settings.user_id)\
         .order_by(EmailFetchTracker.last_fetch_time.desc())\
         .first()
-
+    
     if not tracker:
         tracker = EmailFetchTracker(
             user_id=settings.user_id,
@@ -48,7 +48,7 @@ def process_emails_for_user(settings, parent_session, app):
     # Connect to email server with exponential backoff
     mail = None
     retry_delays = [5, 10, 20]  # Exponential backoff delays in seconds
-
+    
     for attempt, delay in enumerate(retry_delays):
         try:
             mail = connect_to_email_server(app, settings)
@@ -98,10 +98,10 @@ def process_emails_for_user(settings, parent_session, app):
                 if msg_data and msg_data[0] and msg_data[0][1]:
                     email_body = msg_data[0][1]
                     msg = email.message_from_bytes(email_body)
-
+                    
                     # メールの重複チェックのために必要な情報を取得
                     message_id = msg.get('Message-ID', '')
-
+                    
                     # 既に処理済みのメールかチェック
                     if message_id:
                         existing_email = parent_session.query(Email)\
@@ -109,18 +109,18 @@ def process_emails_for_user(settings, parent_session, app):
                                 message_id=message_id,
                                 user_id=settings.user_id
                             ).first()
-
+                        
                         if existing_email:
                             app.logger.info(f"Skipping already processed email: {message_id}")
                             continue
-
+                    
                     subject = decode_email_header(msg['subject'])
                     sender = decode_email_header(msg['from'])
                     sender_name = extract_sender_name(sender)
                     sender_email = extract_email_address(sender)
                     content = get_email_content(msg)
                     received_date = parse_email_date(msg.get('date'))
-
+                    
                     lead = parent_session.query(Lead).filter_by(email=sender_email, user_id=settings.user_id).first()
                     if not lead:
                         lead = Lead(
@@ -141,7 +141,7 @@ def process_emails_for_user(settings, parent_session, app):
                             process_ai_response(ai_response, lead, app)
                         except Exception as e:
                             app.logger.error(f"AI analysis error: {str(e)}")
-
+                    
                     email_record = Email(
                         message_id=message_id,  # メールIDを保存
                         sender=sender_email,
@@ -154,10 +154,10 @@ def process_emails_for_user(settings, parent_session, app):
                     )
                     parent_session.add(email_record)
                     processed_count += 1
-
+                    
                     # 処理済みメールのログを残す
                     app.logger.info(f"Processed email: {message_id} from {sender_email}")
-
+            
             except Exception as e:
                 app.logger.error(f"Error processing email {num}: {str(e)}")
                 continue
@@ -170,7 +170,7 @@ def process_emails_for_user(settings, parent_session, app):
             app.logger.error(f"Error updating tracker: {str(e)}")
             parent_session.rollback()
             raise
-
+        
         app.logger.info(f"Processed {processed_count} emails for user {settings.user_id}")
 
     except Exception as e:
@@ -190,7 +190,7 @@ def check_emails_task(app):
             with session_scope() as session:
                 settings_list = session.query(UserSettings).all()
                 processed_count = 0
-
+                
                 for settings in settings_list:
                     try:
                         process_emails_for_user(settings, session, app)
@@ -198,7 +198,7 @@ def check_emails_task(app):
                     except Exception as e:
                         app.logger.error(f"Error processing emails for user {settings.user_id}: {str(e)}")
                         continue
-
+                        
                 app.logger.info(f"Processed emails for {processed_count} users")
         except Exception as e:
             app.logger.error(f"Error in check_emails_task: {str(e)}")
@@ -206,15 +206,15 @@ def check_emails_task(app):
 def setup_email_scheduler(app):
     """Setup scheduler for periodic email checking with immediate first run"""
     scheduler = BackgroundScheduler()
-
+    
     def run_initial_check():
         with app.app_context():
             app.logger.info("Running initial email check on startup")
             check_emails_task(app)
-
+    
     # Run initial check in a background thread
     Thread(target=run_initial_check).start()
-
+    
     # Schedule email checking every 5 minutes
     scheduler.add_job(lambda: check_emails_task(app), 'interval', minutes=5)
     scheduler.start()
@@ -226,12 +226,12 @@ def connect_to_email_server(app, settings):
         ssl_context = ssl.create_default_context()
         ssl_context.verify_mode = ssl.CERT_REQUIRED
         ssl_context.check_hostname = True
-
+        
         mail = imaplib.IMAP4_SSL(
             host=settings.mail_server,
             ssl_context=ssl_context
         )
-
+        
         try:
             mail.login(settings.mail_username, settings.mail_password)
             status, messages = mail.select('inbox')
@@ -239,7 +239,7 @@ def connect_to_email_server(app, settings):
                 app.logger.error(f"Failed to select inbox: {messages}")
                 return None
             return mail
-
+            
         except imaplib.IMAP4.error as e:
             error_str = str(e)
             if '[UNAVAILABLE]' in error_str:
@@ -247,7 +247,7 @@ def connect_to_email_server(app, settings):
             else:
                 app.logger.error(f"IMAP login error: {error_str}")
             return None
-
+        
     except ssl.SSLError as e:
         app.logger.error(f"SSL error connecting to mail server: {str(e)}")
         return None
@@ -306,7 +306,7 @@ def get_email_content(msg):
         except Exception as e:
             current_app.logger.warning(f"Error decoding email payload: {str(e)}")
             content.append(msg.get_payload())
-
+    
     return "\n".join(content)
 
 def extract_sender_name(sender):
