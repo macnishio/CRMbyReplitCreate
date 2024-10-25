@@ -1,0 +1,32 @@
+6752e81-926c-11ef-8705-52540064429e.192c130d164@mailer.endpointcentralplus.com> [in /home/runner/CRM/email_receiver.py:114]
+2024-10-25 06:57:31,496 INFO: 172.31.196.21 - - [25/Oct/2024 06:57:31] "GET /reports/ HTTP/1.1" 500 - [in /home/runner/CRM/.pythonlibs/lib/python3.11/site-packages/werkzeug/_internal.py:224]
+Traceback (most recent call last):
+  File "/home/runner/CRM/.pythonlibs/lib/python3.11/site-packages/flask/app.py", line 2552, in __call__
+    return self.wsgi_app(environ, start_response)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/runner/CRM/.pythonlibs/lib/python3.11/site-packages/flask/app.py", line 2532, in wsgi_app
+    response = self.handle_exception(e)
+               ^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/runner/CRM/.pythonlibs/lib/python3.11/site-packages/flask/app.py", line 2529, in wsgi_app
+    response = self.full_dispatch_request()
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/runner/CRM/.pythonlibs/lib/python3.11/site-packages/flask/app.py", line 1825, in full_dispatch_request
+    rv = self.handle_user_exception(e)
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/runner/CRM/.pythonlibs/lib/python3.11/site-packages/flask/app.py", line 1823, in full_dispatch_request
+    rv = self.dispatch_request()
+         ^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/runner/CRM/.pythonlibs/lib/python3.11/site-packages/flask/app.py", line 1799, in dispatch_request
+    return self.ensure_sync(self.view_functions[rule.endpoint])(**view_args)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/runner/CRM/.pythonlibs/lib/python3.11/site-packages/flask_login/utils.py", line 290, in decorated_view
+    return current_app.ensure_sync(func)(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/runner/CRM/routes/reports.py", line 33, in index
+    sales_pipeline_value = get_sales_pipeline_value()
+                           ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/runner/CRM/analytics.py", line 75, in get_sales_pipeline_value
+    return sum(opp.amount for opp in open_opportunities)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+TypeError: unsupported operand type(s) for +: 'int' and 'NoneType'
+2024-10-25 06:57:31,779 INFO: 172.31.196.21 - - [25/Oct/2024 06:57:31] "GET /reports/?__debugger__=yes&cmd=resource&f=style.css HTTP/1.1" 304 - [in /home/runner/CRM/.pythonlibs/lib/python3.11/site-packages/werkz
