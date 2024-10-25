@@ -8,7 +8,7 @@
             <h3>今月の売上</h3>
             <p class="metric-value">¥{{ "{:,.0f}".format(this_month_revenue or 0) }}</p>
             {% if previous_month_revenue and previous_month_revenue > 0 %}
-                {% set revenue_change = ((this_month_revenue or 0) - (previous_month_revenue or 0)) / (previous_month_revenue or 1) * 100 %}
+                {% set revenue_change = ((this_month_revenue - previous_month_revenue) / previous_month_revenue * 100) %}
                 <p class="metric-change {% if revenue_change >= 0 %}positive{% else %}negative{% endif %}">
                     {{ "{:+.1f}".format(revenue_change) }}% 先月比
                 </p>
@@ -31,14 +31,12 @@
             <h2>最近のリード</h2>
             <div class="dashboard-list">
                 {% for lead in leads %}
-                <a href="{{ url_for('leads.edit_lead', id=lead.id) }}" class="card-link">
-                    <div class="dashboard-item">
-                        <h3>{{ lead.name or '名前なし' }}</h3>
-                        <p>{{ lead.email }}</p>
-                        <p>スコア: {{ "%.1f"|format(lead.score or 0) }}</p>
-                        <p>ステータス: {{ lead.status }}</p>
-                    </div>
-                </a>
+                <div class="dashboard-item">
+                    <h3>{{ lead.name or '名前なし' }}</h3>
+                    <p>{{ lead.email }}</p>
+                    <p>スコア: {{ "%.1f"|format(lead.score or 0) }}</p>
+                    <p>ステータス: {{ lead.status }}</p>
+                </div>
                 {% else %}
                 <p>リードはありません</p>
                 {% endfor %}
@@ -49,13 +47,11 @@
             <h2>商談ステージ別集計</h2>
             <div class="dashboard-list">
                 {% for stage, count, amount in opportunities %}
-                <a href="{{ url_for('opportunities.list_opportunities') }}" class="card-link">
-                    <div class="dashboard-item">
-                        <h3>{{ stage }}</h3>
-                        <p>件数: {{ count }}</p>
-                        <p>金額: ¥{{ "{:,.0f}".format(amount or 0) }}</p>
-                    </div>
-                </a>
+                <div class="dashboard-item">
+                    <h3>{{ stage }}</h3>
+                    <p>件数: {{ count }}</p>
+                    <p>金額: ¥{{ "{:,.0f}".format(amount or 0) }}</p>
+                </div>
                 {% else %}
                 <p>商談はありません</p>
                 {% endfor %}
@@ -66,13 +62,11 @@
             <h2>直近のタスク</h2>
             <div class="dashboard-list">
                 {% for task in tasks %}
-                <a href="{{ url_for('tasks.edit_task', id=task.id) }}" class="card-link">
-                    <div class="dashboard-item">
-                        <h3>{{ task.title }}</h3>
-                        <p>期限: {{ task.due_date.strftime('%Y-%m-%d %H:%M') if task.due_date }}</p>
-                        <p>ステータス: {{ task.status }}</p>
-                    </div>
-                </a>
+                <div class="dashboard-item">
+                    <h3>{{ task.title }}</h3>
+                    <p>期限: {{ task.due_date.strftime('%Y-%m-%d %H:%M') }}</p>
+                    <p>ステータス: {{ task.status }}</p>
+                </div>
                 {% else %}
                 <p>タスクはありません</p>
                 {% endfor %}
@@ -83,13 +77,11 @@
             <h2>今後のスケジュール</h2>
             <div class="dashboard-list">
                 {% for schedule in schedules %}
-                <a href="{{ url_for('schedules.edit_schedule', id=schedule.id) }}" class="card-link">
-                    <div class="dashboard-item">
-                        <h3>{{ schedule.title }}</h3>
-                        <p>開始: {{ schedule.start_time.strftime('%Y-%m-%d %H:%M') if schedule.start_time }}</p>
-                        <p>終了: {{ schedule.end_time.strftime('%Y-%m-%d %H:%M') if schedule.end_time }}</p>
-                    </div>
-                </a>
+                <div class="dashboard-item">
+                    <h3>{{ schedule.title }}</h3>
+                    <p>開始: {{ schedule.start_time.strftime('%Y-%m-%d %H:%M') }}</p>
+                    <p>終了: {{ schedule.end_time.strftime('%Y-%m-%d %H:%M') }}</p>
+                </div>
                 {% else %}
                 <p>スケジュールはありません</p>
                 {% endfor %}
@@ -196,18 +188,6 @@
     margin: 5px 0;
     color: #666;
     font-size: 14px;
-}
-
-.card-link {
-    text-decoration: none;
-    color: inherit;
-    display: block;
-}
-
-.card-link:hover .dashboard-item {
-    transform: translateY(-2px);
-    box-shadow: 0 4px 6px rgba(0,0,0,0.1);
-    transition: all 0.2s ease;
 }
 </style>
 {% endblock %}

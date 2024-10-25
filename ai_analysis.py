@@ -1,11 +1,17 @@
 import json
 from datetime import datetime, timedelta
+from zoneinfo import ZoneInfo
 from models import Opportunity, Schedule, Task
 from extensions import db
 from anthropic import Anthropic, APIError, APIConnectionError, AuthenticationError
 from flask import current_app
 from models import UserSettings
 from flask_login import current_user
+
+# 現在の日時を日本時間で取得
+jst_datetime = datetime.now(ZoneInfo("Asia/Tokyo"))
+# 日付をフォーマット
+formatted_date = jst_datetime.strftime("%Y-%m-%d")
 
 def handle_ai_error(func_name, error):
     """Handle AI analysis errors with proper logging and localized messages"""
@@ -41,7 +47,7 @@ def analyze_tasks(tasks):
         if not tasks:
             return '<p>分析対象のタスクがありません。</p>'
 
-        prompt = f"""以下のタスクデータを分析してください:\n{task_data}\n
+        prompt = f"""今は日本時間の{formatted_date}です。以下のタスクデータを分析してください:\n{task_data}\n
         以下の項目について簡潔に分析してください:
         1. タスクの優先度と進捗状況
         2. リソース配分の提案
@@ -82,7 +88,7 @@ def analyze_schedules(schedules):
         if not schedules:
             return '<p>分析対象のスケジュールがありません。</p>'
 
-        prompt = f"""以下のスケジュールデータを分析してください:\n{schedule_data}\n
+        prompt = f"""今は日本時間の{formatted_date}です。以下のスケジュールデータを分析してください:\n{schedule_data}\n
         以下の項目について簡潔に分析してください:
         1. スケジュールの密度と時間配分
         2. 重要な予定の特定
@@ -123,7 +129,7 @@ def analyze_opportunities(opportunities):
         if not opportunities:
             return '<p>分析対象の商談がありません。</p>'
 
-        prompt = f"""以下の商談データを分析してください:\n{opp_data}\n
+        prompt = f"""今は日本時間の{formatted_date}です。以下の商談データを分析してください:\n{opp_data}\n
         以下の項目について簡潔に分析してください:
         1. 総パイプライン価値と分布
         2. ステージごとの進捗状況
@@ -164,7 +170,7 @@ def analyze_leads(leads):
         if not leads:
             return '<p>分析対象のリードがありません。</p>'
 
-        prompt = f"""以下のリードデータを分析してください:\n{lead_data}\n
+        prompt = f"""今は日本時間の{formatted_date}です。以下のリードデータを分析してください:\n{lead_data}\n
         以下の項目について簡潔に分析してください:
         1. リードの品質とスコア分布
         2. フォローアップの優先順位
@@ -201,7 +207,7 @@ def analyze_email(subject, content, user_id=None):
 
         client = Anthropic(api_key=user_settings.claude_api_key)
 
-        prompt = f"""以下のメールを分析し、機会、スケジュール、タスクを簡潔にJSON形式で提案してください：
+        prompt = f"""今は日本時間の{formatted_date}です。以下のメールを分析し、機会、スケジュール、タスクを簡潔にJSON形式で提案してください：
 
         Subject: {subject}
         Content: {content}

@@ -108,6 +108,7 @@ class Lead(db.Model):
 class Email(db.Model):
     __tablename__ = 'emails'
     id: Mapped[int] = mapped_column(Integer, primary_key=True)
+    message_id: Mapped[str] = mapped_column(String(255), unique=True, nullable=True)  # 追加
     sender: Mapped[str] = mapped_column(String(120), nullable=False)
     sender_name: Mapped[str] = mapped_column(String(255))
     subject: Mapped[str] = mapped_column(String(200))

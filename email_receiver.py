@@ -98,6 +98,22 @@ def process_emails_for_user(settings, parent_session, app):
                 if msg_data and msg_data[0] and msg_data[0][1]:
                     email_body = msg_data[0][1]
                     msg = email.message_from_bytes(email_body)
+                    
+                    # メールの重複チェックのために必要な情報を取得
+                    message_id = msg.get('Message-ID', '')
+                    
+                    # 既に処理済みのメールかチェック
+                    if message_id:
+                        existing_email = parent_session.query(Email)\
+                            .filter_by(
+                                message_id=message_id,
+                                user_id=settings.user_id
+                            ).first()
+                        
+                        if existing_email:
+                            app.logger.info(f"Skipping already processed email: {message_id}")
+                            continue
+                    
                     subject = decode_email_header(msg['subject'])
                     sender = decode_email_header(msg['from'])
                     sender_name = extract_sender_name(sender)
@@ -118,7 +134,16 @@ def process_emails_for_user(settings, parent_session, app):
                         parent_session.add(lead)
                         parent_session.flush()
 
+                    # Analyze email if not spam
+                    if lead.status != 'Spam':
+                        try:
+                            ai_response = analyze_email(subject, content, lead.user_id)
+                            process_ai_response(ai_response, lead, app)
+                        except Exception as e:
+                            app.logger.error(f"AI analysis error: {str(e)}")
+                    
                     email_record = Email(
+                        message_id=message_id,  # メールIDを保存
                         sender=sender_email,
                         sender_name=sender_name,
                         subject=subject,
@@ -129,6 +154,10 @@ def process_emails_for_user(settings, parent_session, app):
                     )
                     parent_session.add(email_record)
                     processed_count += 1
+                    
+                    # 処理済みメールのログを残す
+                    app.logger.info(f"Processed email: {message_id} from {sender_email}")
+            
             except Exception as e:
                 app.logger.error(f"Error processing email {num}: {str(e)}")
                 continue
@@ -205,6 +234,12 @@ def connect_to_email_server(app, settings):
         
         try:
             mail.login(settings.mail_username, settings.mail_password)
+            status, messages = mail.select('inbox')
+            if status != 'OK':
+                app.logger.error(f"Failed to select inbox: {messages}")
+                return None
+            return mail
+            
         except imaplib.IMAP4.error as e:
             error_str = str(e)
             if '[UNAVAILABLE]' in error_str:
@@ -212,9 +247,6 @@ def connect_to_email_server(app, settings):
             else:
                 app.logger.error(f"IMAP login error: {error_str}")
             return None
-        
-        mail.select('inbox')
-        return mail
         
     except ssl.SSLError as e:
         app.logger.error(f"SSL error connecting to mail server: {str(e)}")
