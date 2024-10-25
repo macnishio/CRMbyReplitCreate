@@ -1,14 +1,13 @@
-from extensions import db
 from flask_login import UserMixin
 from werkzeug.security import generate_password_hash, check_password_hash
+from extensions import db
 from datetime import datetime
-from sqlalchemy.orm import Mapped, mapped_column
-from typing import List
-from sqlalchemy import Integer, String, DateTime, Float, ForeignKey, Text, Boolean
-from typing import List, Optional 
 import base64
 from cryptography.fernet import Fernet
 from flask import current_app
+from sqlalchemy.orm import Mapped, mapped_column
+from sqlalchemy import Integer, String, DateTime, Float, ForeignKey, Text, Boolean
+from typing import List, Optional
 
 class User(UserMixin, db.Model):
     __tablename__ = 'users'
@@ -113,17 +112,18 @@ class Email(db.Model):
     sender_name: Mapped[str] = mapped_column(String(255))
     subject: Mapped[str] = mapped_column(String(200))
     content: Mapped[str] = mapped_column(Text)
-    received_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow)
+    received_date: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow)
     lead_id: Mapped[int] = mapped_column(Integer, ForeignKey('leads.id'), nullable=False)
+    user_id: Mapped[int] = mapped_column(Integer, ForeignKey('users.id'), nullable=False)
 
 class UnknownEmail(db.Model):
     __tablename__ = 'unknown_emails'
     id: Mapped[int] = mapped_column(Integer, primary_key=True)
     sender: Mapped[str] = mapped_column(String(120), nullable=False)
-    sender_name: Mapped[str] = mapped_column(String(100))
+    sender_name: Mapped[str] = mapped_column(String(255))
     subject: Mapped[str] = mapped_column(String(200))
     content: Mapped[str] = mapped_column(Text)
-    received_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow)
+    received_date: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow)
 
 class Opportunity(db.Model):
     __tablename__ = 'opportunities'
@@ -178,3 +178,6 @@ class EmailFetchTracker(db.Model):
     __tablename__ = 'email_fetch_tracker'
     id: Mapped[int] = mapped_column(Integer, primary_key=True)
     last_fetch_time: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow)
+    user_id: Mapped[int] = mapped_column(Integer, ForeignKey('users.id'), nullable=False)
+    created_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow)
+    updated_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)

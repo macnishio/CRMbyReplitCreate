@@ -75,6 +75,26 @@ args = "Create and Apply Migration"
 task = "workflow.run"
 args = "Flask Server"
 
+[[workflows.workflow.tasks]]
+task = "workflow.run"
+args = "Init Database"
+
+[[workflows.workflow.tasks]]
+task = "workflow.run"
+args = "Database Migration"
+
+[[workflows.workflow.tasks]]
+task = "workflow.run"
+args = "Database Fix"
+
+[[workflows.workflow.tasks]]
+task = "workflow.run"
+args = "Fix Database Schema"
+
+[[workflows.workflow.tasks]]
+task = "workflow.run"
+args = "Clean and Migrate"
+
 [[workflows.workflow]]
 name = "Run Flask App"
 author = "agent"
@@ -200,7 +220,7 @@ agentRequireRestartOnSave = false
 
 [[workflows.workflow.tasks]]
 task = "shell.exec"
-args = "flask db migrate -m 'Add UserSettings model' && flask db upgrade"
+args = "flask db migrate -m 'Add user_id to EmailFetchTracker' && flask db upgrade"
 
 [[workflows.workflow]]
 name = "Clean Migration"
@@ -233,7 +253,7 @@ agentRequireRestartOnSave = false
 
 [[workflows.workflow.tasks]]
 task = "shell.exec"
-args = "rm -rf migrations && flask db init"
+args = "rm -rf migrations && flask db init && flask db migrate -m 'Initial migration' && flask db upgrade"
 
 [[workflows.workflow]]
 name = "Create and Apply Migration"
@@ -258,9 +278,68 @@ task = "shell.exec"
 args = "python app.py"
 waitForPort = 5000
 
+[[workflows.workflow]]
+name = "Init Database"
+author = "agent"
+
+[workflows.workflow.metadata]
+agentRequireRestartOnSave = false
+
+[[workflows.workflow.tasks]]
+task = "shell.exec"
+args = "flask db init && flask db migrate -m 'Initial migration' && flask db upgrade"
+
+[[workflows.workflow]]
+name = "Database Migration"
+author = "agent"
+
+[workflows.workflow.metadata]
+agentRequireRestartOnSave = false
+
+[[workflows.workflow.tasks]]
+task = "shell.exec"
+args = "flask db migrate -m 'Add missing columns' && flask db upgrade"
+
+[[workflows.workflow]]
+name = "Database Fix"
+author = "agent"
+
+[workflows.workflow.metadata]
+agentRequireRestartOnSave = false
+
+[[workflows.workflow.tasks]]
+task = "shell.exec"
+args = "flask db init && flask db migrate -m 'Fix email schema' && flask db upgrade"
+
+[[workflows.workflow]]
+name = "Fix Database Schema"
+author = "agent"
+
+[workflows.workflow.metadata]
+agentRequireRestartOnSave = false
+
+[[workflows.workflow.tasks]]
+task = "shell.exec"
+args = "rm -rf migrations && flask db init && flask db migrate -m 'Fix email schema' && flask db upgrade"
+
+[[workflows.workflow]]
+name = "Clean and Migrate"
+author = "agent"
+
+[workflows.workflow.metadata]
+agentRequireRestartOnSave = false
+
+[[workflows.workflow.tasks]]
+task = "shell.exec"
+args = "rm -rf migrations && flask db init && flask db migrate -m 'Email schema update' && flask db upgrade"
+
 [deployment]
 run = ["sh", "-c", "python app.py"]
 
 [[ports]]
 localPort = 5000
 externalPort = 80
+
+[[ports]]
+localPort = 5001
+externalPort = 3000

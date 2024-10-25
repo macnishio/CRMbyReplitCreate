@@ -5,7 +5,7 @@ from email.header import decode_header
 import logging
 import ssl
 from datetime import datetime, timedelta
-from models import Lead, Email, UnknownEmail, EmailFetchTracker
+from models import Lead, Email, UnknownEmail, EmailFetchTracker, UserSettings
 from extensions import db
 from flask import current_app
 from apscheduler.schedulers.background import BackgroundScheduler
@@ -13,223 +13,222 @@ from ai_analysis import analyze_email, process_ai_response
 import json
 import re
 import time
+from contextlib import contextmanager
+from threading import Thread
 
-def setup_email_scheduler(app):
-    """Setup scheduler for periodic email checking"""
-    scheduler = BackgroundScheduler()
-    scheduler.start()
-    
-    def check_emails_task():
-        """Task to check for new emails"""
-        with app.app_context():
-            try:
-                check_emails(app)
-            except Exception as e:
-                app.logger.error(f"Error checking emails: {str(e)}")
-    
-    # Schedule email checking every 5 minutes
-    scheduler.add_job(check_emails_task, 'interval', minutes=5)
-    app.logger.info("Email scheduler started")
-
-def check_emails(app):
-    """Check for new emails and process them"""
+@contextmanager
+def session_scope():
+    """Provide a transactional scope around a series of operations."""
+    session = db.session()
     try:
-        # Get last fetch time or default to 5 minutes ago
-        tracker = EmailFetchTracker.query.order_by(EmailFetchTracker.last_fetch_time.desc()).first()
-        if tracker:
-            last_fetch = tracker.last_fetch_time
-        else:
-            last_fetch = datetime.utcnow() - timedelta(minutes=5)
-            tracker = EmailFetchTracker()
-            db.session.add(tracker)
+        yield session
+        session.commit()
+    except Exception as e:
+        session.rollback()
+        raise
+    finally:
+        session.close()
 
-        # Connect to email server with retries
-        mail = None
-        max_retries = 3
-        retry_delay = 5  # seconds
-        
-        for attempt in range(max_retries):
-            try:
-                mail = connect_to_email_server(app)
-                if mail:
-                    break
-                app.logger.warning(f"Failed to connect on attempt {attempt + 1}, retrying...")
-                time.sleep(retry_delay)
-            except Exception as e:
-                app.logger.error(f"Connection attempt {attempt + 1} failed: {str(e)}")
-                if attempt < max_retries - 1:
-                    time.sleep(retry_delay)
+def process_emails_for_user(settings, parent_session, app):
+    """Process emails for a single user with exponential backoff"""
+    # Get or create tracker
+    tracker = parent_session.query(EmailFetchTracker)\
+        .filter_by(user_id=settings.user_id)\
+        .order_by(EmailFetchTracker.last_fetch_time.desc())\
+        .first()
+    
+    if not tracker:
+        tracker = EmailFetchTracker(
+            user_id=settings.user_id,
+            last_fetch_time=datetime.utcnow() - timedelta(minutes=5)
+        )
+        parent_session.add(tracker)
+        parent_session.flush()
+
+    # Connect to email server with exponential backoff
+    mail = None
+    retry_delays = [5, 10, 20]  # Exponential backoff delays in seconds
+    
+    for attempt, delay in enumerate(retry_delays):
+        try:
+            mail = connect_to_email_server(app, settings)
+            if mail:
+                break
+            app.logger.warning(f"Failed to connect on attempt {attempt + 1}, waiting {delay}s before retry...")
+            time.sleep(delay)
+        except imaplib.IMAP4.error as e:
+            error_str = str(e)
+            if '[UNAVAILABLE]' in error_str:
+                app.logger.error(f"Server temporarily unavailable (attempt {attempt + 1}): {error_str}")
+                if attempt < len(retry_delays) - 1:
+                    time.sleep(delay)
                     continue
-                raise
-
-        if not mail:
-            app.logger.error("Failed to connect to email server after all retries")
+                app.logger.error("Server still unavailable after all retries")
+                return
+            app.logger.error(f"IMAP error on attempt {attempt + 1}: {error_str}")
+            if attempt < len(retry_delays) - 1:
+                time.sleep(delay)
+                continue
+        except Exception as e:
+            app.logger.error(f"Connection attempt {attempt + 1} failed: {str(e)}")
+            if attempt < len(retry_delays) - 1:
+                time.sleep(delay)
+                continue
+            app.logger.error("Failed all connection attempts")
             return
 
+    if not mail:
+        app.logger.error(f"Failed to connect to email server for user {settings.user_id} after all retries")
+        return
+
+    try:
         # Search for new emails
-        date_str = last_fetch.strftime("%d-%b-%Y")
+        date_str = tracker.last_fetch_time.strftime("%d-%b-%Y")
         try:
             _, message_numbers = mail.search(None, f'(SINCE "{date_str}")')
-        except Exception as e:
-            app.logger.error(f"Error searching emails: {str(e)}")
+        except imaplib.IMAP4.error as e:
+            app.logger.error(f"IMAP search error: {str(e)}")
             return
 
-        # Update last fetch time
-        tracker.last_fetch_time = datetime.utcnow()
-        db.session.commit()
-
         # Process each email
+        processed_count = 0
         for num in message_numbers[0].split():
             try:
                 _, msg_data = mail.fetch(num, '(RFC822)')
                 if msg_data and msg_data[0] and msg_data[0][1]:
                     email_body = msg_data[0][1]
-                    process_email(email_body, app)
-                else:
-                    app.logger.warning(f"Skipping email {num} - invalid message data")
+                    msg = email.message_from_bytes(email_body)
+                    subject = decode_email_header(msg['subject'])
+                    sender = decode_email_header(msg['from'])
+                    sender_name = extract_sender_name(sender)
+                    sender_email = extract_email_address(sender)
+                    content = get_email_content(msg)
+                    received_date = parse_email_date(msg.get('date'))
+                    
+                    lead = parent_session.query(Lead).filter_by(email=sender_email, user_id=settings.user_id).first()
+                    if not lead:
+                        lead = Lead(
+                            name=sender_name,
+                            email=sender_email,
+                            status='New',
+                            score=0.0,
+                            user_id=settings.user_id,
+                            last_contact=received_date or datetime.utcnow()
+                        )
+                        parent_session.add(lead)
+                        parent_session.flush()
+
+                    email_record = Email(
+                        sender=sender_email,
+                        sender_name=sender_name,
+                        subject=subject,
+                        content=content,
+                        lead_id=lead.id,
+                        user_id=settings.user_id,
+                        received_date=received_date
+                    )
+                    parent_session.add(email_record)
+                    processed_count += 1
             except Exception as e:
                 app.logger.error(f"Error processing email {num}: {str(e)}")
                 continue
 
-        mail.close()
-        mail.logout()
+        # Update tracker
+        try:
+            tracker.last_fetch_time = datetime.utcnow()
+            parent_session.commit()
+        except Exception as e:
+            app.logger.error(f"Error updating tracker: {str(e)}")
+            parent_session.rollback()
+            raise
+        
+        app.logger.info(f"Processed {processed_count} emails for user {settings.user_id}")
 
     except Exception as e:
-        app.logger.error(f"Error checking emails: {str(e)}")
+        app.logger.error(f"Error checking emails for user {settings.user_id}: {str(e)}")
         raise
+    finally:
+        try:
+            mail.close()
+            mail.logout()
+        except:
+            pass
 
-def connect_to_email_server(app):
-    """Connect to email server with improved error handling and SSL options"""
+def check_emails_task(app):
+    """Task to check for new emails"""
+    with app.app_context():
+        try:
+            with session_scope() as session:
+                settings_list = session.query(UserSettings).all()
+                processed_count = 0
+                
+                for settings in settings_list:
+                    try:
+                        process_emails_for_user(settings, session, app)
+                        processed_count += 1
+                    except Exception as e:
+                        app.logger.error(f"Error processing emails for user {settings.user_id}: {str(e)}")
+                        continue
+                        
+                app.logger.info(f"Processed emails for {processed_count} users")
+        except Exception as e:
+            app.logger.error(f"Error in check_emails_task: {str(e)}")
+
+def setup_email_scheduler(app):
+    """Setup scheduler for periodic email checking with immediate first run"""
+    scheduler = BackgroundScheduler()
+    
+    def run_initial_check():
+        with app.app_context():
+            app.logger.info("Running initial email check on startup")
+            check_emails_task(app)
+    
+    # Run initial check in a background thread
+    Thread(target=run_initial_check).start()
+    
+    # Schedule email checking every 5 minutes
+    scheduler.add_job(lambda: check_emails_task(app), 'interval', minutes=5)
+    scheduler.start()
+    app.logger.info("Email scheduler started")
+
+def connect_to_email_server(app, settings):
+    """Connect to email server with improved error handling"""
     try:
-        # Create SSL context with proper options
         ssl_context = ssl.create_default_context()
         ssl_context.verify_mode = ssl.CERT_REQUIRED
         ssl_context.check_hostname = True
         
-        # Get credentials from environment
-        username = os.environ.get('MAIL_USERNAME')
-        password = os.environ.get('MAIL_PASSWORD')
-        server = os.environ.get('MAIL_SERVER')
+        mail = imaplib.IMAP4_SSL(
+            host=settings.mail_server,
+            ssl_context=ssl_context
+        )
         
-        if not all([username, password, server]):
-            app.logger.error("Missing required email credentials")
-            return None
-            
-        # Connect using SSL context
         try:
-            mail = imaplib.IMAP4_SSL(
-                host=server,
-                ssl_context=ssl_context
-            )
-            
-            # Format login command properly
-            username = username.strip()
-            password = password.strip()
-            
-            # Authenticate using the raw login command
-            typ, data = mail.login(username, password)
-            
-            if typ != 'OK':
-                app.logger.error(f"Login failed: {data[0].decode()}")
-                return None
-                
-            # Select inbox
-            mail.select('inbox')
-            app.logger.info("Successfully connected to email server")
-            return mail
-            
+            mail.login(settings.mail_username, settings.mail_password)
         except imaplib.IMAP4.error as e:
-            app.logger.error(f"IMAP error: {str(e)}")
+            error_str = str(e)
+            if '[UNAVAILABLE]' in error_str:
+                app.logger.error(f"Server temporarily unavailable during login: {error_str}")
+            else:
+                app.logger.error(f"IMAP login error: {error_str}")
             return None
-            
+        
+        mail.select('inbox')
+        return mail
+        
     except ssl.SSLError as e:
         app.logger.error(f"SSL error connecting to mail server: {str(e)}")
+        return None
+    except imaplib.IMAP4.error as e:
+        error_str = str(e)
+        if '[UNAVAILABLE]' in error_str:
+            app.logger.error(f"Server temporarily unavailable: {error_str}")
+        else:
+            app.logger.error(f"IMAP error connecting to mail server: {error_str}")
         return None
     except Exception as e:
         app.logger.error(f"Unexpected error connecting to mail server: {str(e)}")
         return None
-
-# Rest of the code remains the same...
-def process_email(email_body, app):
-    """Process a single email with improved error handling and lead management"""
-    try:
-        msg = email.message_from_bytes(email_body)
-        subject = decode_email_header(msg['subject'])
-        sender = decode_email_header(msg['from'])
-        sender_name = extract_sender_name(sender)
-        sender_email = extract_email_address(sender)
-        
-        content = get_email_content(msg)
-        received_date = parse_email_date(msg.get('date'))
-        app.logger.info(f"Processing email from: {sender_name} <{sender_email}> Received at: {received_date}")
-
-        with db.session.begin_nested():  # Create savepoint
-            # Find existing lead or create new one
-            lead = Lead.query.filter_by(email=sender_email).first()
-            
-            if not lead:
-                # Find a reference user_id from existing leads
-                reference_lead = Lead.query.first()
-                if reference_lead:
-                    lead = Lead(
-                        name=sender_name,
-                        email=sender_email,
-                        status='New',
-                        score=0.0,
-                        user_id=reference_lead.user_id,
-                        last_contact=received_date or datetime.utcnow()
-                    )
-                    db.session.add(lead)
-                    db.session.flush()  # Get ID without committing
-                    app.logger.info(f"Created new lead for sender: {sender_email}")
-
-            if lead:
-                # Store email and update lead
-                email_record = Email(
-                    sender=sender_email,
-                    sender_name=sender_name,
-                    subject=subject,
-                    content=content,
-                    lead_id=lead.id,
-                    user_id=lead.user_id,
-                    received_date=received_date
-                )
-                lead.last_contact = received_date or datetime.utcnow()
-                
-                # Update empty lead name if available
-                if (not lead.name or lead.name.strip() == '') and sender_name:
-                    lead.name = sender_name
-                    app.logger.info(f"Updated empty lead name to: {sender_name}")
-                
-                db.session.add(email_record)
-                
-                # Skip AI analysis for spam leads
-                if lead.status != 'Spam':
-                    try:
-                        ai_response = analyze_email(subject, content, lead.user_id)
-                        process_ai_response(ai_response, lead, app)
-                    except Exception as ai_error:
-                        app.logger.error(f"AI analysis error for email {email_record.id}: {str(ai_error)}")
-                else:
-                    app.logger.info(f"Skipping AI analysis for spam lead: {sender_email}")
-            else:
-                # Store unknown email if we couldn't create a lead
-                unknown_email = UnknownEmail(
-                    sender=sender_email,
-                    sender_name=sender_name,
-                    subject=subject,
-                    content=content,
-                    received_date=received_date
-                )
-                db.session.add(unknown_email)
-                app.logger.info(f"Stored email from unknown sender: {sender_email}")
-
-            db.session.commit()
-
-    except Exception as e:
-        app.logger.error(f"Error processing email: {str(e)}")
-        db.session.rollback()
-        raise
 
 def decode_email_header(header):
     """Decode email header with improved error handling"""
@@ -279,7 +278,7 @@ def get_email_content(msg):
     return "\n".join(content)
 
 def extract_sender_name(sender):
-    """Extract sender name with enhanced parsing"""
+    """Extract sender name with improved parsing"""
     if not sender:
         return ""
     try:
@@ -314,7 +313,6 @@ def parse_email_date(date_str):
     if not date_str:
         return None
     try:
-        # Convert email date string to datetime
         from email.utils import parsedate_to_datetime
         return parsedate_to_datetime(date_str)
     except Exception as e:

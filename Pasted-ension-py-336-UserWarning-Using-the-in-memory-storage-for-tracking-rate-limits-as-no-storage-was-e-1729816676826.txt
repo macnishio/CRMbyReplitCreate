@@ -1,0 +1,27 @@
+ension.py:336: UserWarning: Using the in-memory storage for tracking rate limits as no storage was explicitly specified. This is not recommended for production use. See: https://flask-limiter.readthedocs.io#configuring-a-storage-backend for documentation about configuring the storage backend.
+  warnings.warn(
+INFO:app:Database connection successful
+INFO:app:Database tables already exist
+INFO:apscheduler.scheduler:Scheduler started
+INFO:app:Running initial email check on startup
+ERROR:app:Error processing email b'84403': A transaction is already begun on this Session.
+ERROR:app:Error processing email b'84404': A transaction is already begun on this Session.
+ERROR:app:Error processing email b'84405': A transaction is already begun on this Session.
+ERROR:app:Error processing email b'84406': A transaction is already begun on this Session.
+ERROR:app:Error processing email b'84407': A transaction is already begun on this Session.
+ERROR:app:Error processing email b'84408': A transaction is already begun on this Session.
+ERROR:app:Error processing email b'84409': A transaction is already begun on this Session.
+ERROR:app:Error processing email b'84410': A transaction is already begun on this Session.
+ERROR:app:Error processing email b'84411': A transaction is already begun on this Session.
+ERROR:app:Error processing email b'84412': A transaction is already begun on this Session.
+ERROR:app:Error processing email b'84413': A transaction is already begun on this Session.
+ERROR:app:Error processing email b'84414': A transaction is already begun on this Session.
+ERROR:app:Error processing email b'84415': A transaction is already begun on this Session.
+ERROR:app:Error updating tracker: A transaction is already begun on this Session.
+INFO:app:Processed 0 emails for user 2
+INFO:apscheduler.scheduler:Added job "setup_email_scheduler.<locals>.check_emails_task" to job store "default"
+INFO:app:Email scheduler started
+ * Debug mode: off
+INFO:werkzeug:WARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.
+ * Running on http://127.0.0.1:5000
+INFO:werkzeug:Press CTRL+C to quit
