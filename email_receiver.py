@@ -16,6 +16,16 @@ import time
 from contextlib import contextmanager
 from threading import Thread
 
+def clean_string(text):
+    """Remove NUL characters and other problematic characters from string"""
+    if text is None:
+        return ""
+    if isinstance(text, bytes):
+        text = text.replace(b'\x00', b'')
+    else:
+        text = str(text).replace('\x00', '')
+    return text.strip()
+
 @contextmanager
 def session_scope():
     """Provide a transactional scope around a series of operations."""
@@ -98,10 +108,10 @@ def process_emails_for_user(settings, parent_session, app):
                 if msg_data and msg_data[0] and msg_data[0][1]:
                     email_body = msg_data[0][1]
                     msg = email.message_from_bytes(email_body)
-                    
+
                     # メールの重複チェックのために必要な情報を取得
-                    message_id = msg.get('Message-ID', '')
-                    
+                    message_id = clean_string(msg.get('Message-ID', ''))
+
                     # 既に処理済みのメールかチェック
                     if message_id:
                         existing_email = parent_session.query(Email)\
@@ -109,16 +119,16 @@ def process_emails_for_user(settings, parent_session, app):
                                 message_id=message_id,
                                 user_id=settings.user_id
                             ).first()
-                        
+
                         if existing_email:
                             app.logger.info(f"Skipping already processed email: {message_id}")
                             continue
-                    
-                    subject = decode_email_header(msg['subject'])
-                    sender = decode_email_header(msg['from'])
-                    sender_name = extract_sender_name(sender)
-                    sender_email = extract_email_address(sender)
-                    content = get_email_content(msg)
+
+                    subject = clean_string(decode_email_header(msg['subject']))
+                    sender = clean_string(decode_email_header(msg['from']))
+                    sender_name = clean_string(extract_sender_name(sender))
+                    sender_email = clean_string(extract_email_address(sender))
+                    content = clean_string(get_email_content(msg))
                     received_date = parse_email_date(msg.get('date'))
                     
                     lead = parent_session.query(Lead).filter_by(email=sender_email, user_id=settings.user_id).first()
@@ -282,7 +292,7 @@ def decode_email_header(header):
         return str(header)
 
 def get_email_content(msg):
-    """Extract email content with improved MIME handling"""
+    """Extract email content with improved MIME handling and NUL character removal"""
     content = []
     if msg.is_multipart():
         for part in msg.walk():
@@ -290,9 +300,11 @@ def get_email_content(msg):
                 try:
                     part_content = part.get_payload(decode=True)
                     if isinstance(part_content, bytes):
+                        # NUL文字を除去してからデコード
+                        part_content = clean_string(part_content)
                         content.append(part_content.decode('utf-8', errors='replace'))
                     else:
-                        content.append(str(part_content))
+                        content.append(clean_string(part_content))
                 except Exception as e:
                     current_app.logger.warning(f"Error decoding email part: {str(e)}")
                     continue
@@ -300,14 +312,17 @@ def get_email_content(msg):
         try:
             payload = msg.get_payload(decode=True)
             if isinstance(payload, bytes):
+                # NUL文字を除去してからデコード
+                payload = clean_string(payload)
                 content.append(payload.decode('utf-8', errors='replace'))
             else:
-                content.append(str(payload))
+                content.append(clean_string(payload))
         except Exception as e:
             current_app.logger.warning(f"Error decoding email payload: {str(e)}")
-            content.append(msg.get_payload())
-    
-    return "\n".join(content)
+            content.append(clean_string(msg.get_payload()))
+
+    result = "\n".join(content)
+    return clean_string(result)
 
 def extract_sender_name(sender):
     """Extract sender name with improved parsing"""
