@@ -82,3 +82,12 @@ class TaskForm(FlaskForm):
     opportunity_id = SelectField('Opportunity', coerce=int, validators=[Optional()])
     account_id = SelectField('Account', coerce=int, validators=[Optional()])
     submit = SubmitField('Submit')
+
+class SettingsForm(FlaskForm):
+    claude_api_key = StringField('Claude API Key', validators=[Optional()])
+    mail_server = StringField('Mail Server')
+    mail_port = StringField('Mail Port')
+    mail_use_tls = BooleanField('Use TLS')
+    mail_username = StringField('Mail Username')
+    mail_password = PasswordField('Mail Password')
+    submit = SubmitField('Save Settings')
