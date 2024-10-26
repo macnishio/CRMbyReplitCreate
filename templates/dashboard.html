@@ -30,18 +30,31 @@
         <div class="dashboard-section">
             <h2>最近のリード</h2>
             <div class="dashboard-list">
-                {% for lead in leads %}
-                <a href="{{ url_for('leads.edit_lead', id=lead.id) }}" class="card-link">
-                    <div class="dashboard-item">
-                        <h3>{{ lead.name or '名前なし' }}</h3>
-                        <p>{{ lead.email }}</p>
-                        <p>スコア: {{ "%.1f"|format(lead.score or 0) }}</p>
-                        <p>ステータス: {{ lead.status }}</p>
+                {% if leads and leads.items %}
+                    {% for lead in leads.items %}
+                    <a href="{{ url_for('leads.edit_lead', id=lead.id) }}" class="card-link">
+                        <div class="dashboard-item">
+                            <h3>{{ lead.name or '名前なし' }}</h3>
+                            <p>{{ lead.email }}</p>
+                            <p>スコア: {{ "%.1f"|format(lead.score or 0) }}</p>
+                            <p>ステータス: {{ lead.status }}</p>
+                        </div>
+                    </a>
+                    {% endfor %}
+                    {% if leads.pages > 1 %}
+                    <div class="pagination">
+                        {% if leads.has_prev %}
+                            <a href="{{ url_for('main.dashboard', leads_page=leads.prev_num, tasks_page=request.args.get('tasks_page', 1), schedules_page=request.args.get('schedules_page', 1), emails_page=request.args.get('emails_page', 1)) }}" class="page-link">&laquo; 前へ</a>
+                        {% endif %}
+                        <span class="page-info">{{ leads.page }} / {{ leads.pages }}</span>
+                        {% if leads.has_next %}
+                            <a href="{{ url_for('main.dashboard', leads_page=leads.next_num, tasks_page=request.args.get('tasks_page', 1), schedules_page=request.args.get('schedules_page', 1), emails_page=request.args.get('emails_page', 1)) }}" class="page-link">次へ &raquo;</a>
+                        {% endif %}
                     </div>
-                </a>
+                    {% endif %}
                 {% else %}
-                <p>リードはありません</p>
-                {% endfor %}
+                    <p>リードはありません</p>
+                {% endif %}
             </div>
         </div>
 
@@ -65,55 +78,94 @@
         <div class="dashboard-section">
             <h2>直近のタスク</h2>
             <div class="dashboard-list">
-                {% for task in tasks %}
-                <a href="{{ url_for('tasks.edit_task', id=task.id) }}" class="card-link">
-                    <div class="dashboard-item">
-                        <h3>{{ task.title }}</h3>
-                        <p>期限: {{ task.due_date.strftime('%Y-%m-%d %H:%M') if task.due_date }}</p>
-                        <p>ステータス: {{ task.status }}</p>
+                {% if tasks and tasks.items %}
+                    {% for task in tasks.items %}
+                    <a href="{{ url_for('tasks.edit_task', id=task.id) }}" class="card-link">
+                        <div class="dashboard-item">
+                            <h3>{{ task.title }}</h3>
+                            <p>期限: {{ task.due_date.strftime('%Y-%m-%d %H:%M') if task.due_date }}</p>
+                            <p>ステータス: {{ task.status }}</p>
+                        </div>
+                    </a>
+                    {% endfor %}
+                    {% if tasks.pages > 1 %}
+                    <div class="pagination">
+                        {% if tasks.has_prev %}
+                            <a href="{{ url_for('main.dashboard', tasks_page=tasks.prev_num, leads_page=request.args.get('leads_page', 1), schedules_page=request.args.get('schedules_page', 1), emails_page=request.args.get('emails_page', 1)) }}" class="page-link">&laquo; 前へ</a>
+                        {% endif %}
+                        <span class="page-info">{{ tasks.page }} / {{ tasks.pages }}</span>
+                        {% if tasks.has_next %}
+                            <a href="{{ url_for('main.dashboard', tasks_page=tasks.next_num, leads_page=request.args.get('leads_page', 1), schedules_page=request.args.get('schedules_page', 1), emails_page=request.args.get('emails_page', 1)) }}" class="page-link">次へ &raquo;</a>
+                        {% endif %}
                     </div>
-                </a>
+                    {% endif %}
                 {% else %}
-                <p>タスクはありません</p>
-                {% endfor %}
+                    <p>タスクはありません</p>
+                {% endif %}
             </div>
         </div>
 
         <div class="dashboard-section">
             <h2>今後のスケジュール</h2>
             <div class="dashboard-list">
-                {% for schedule in schedules %}
-                <a href="{{ url_for('schedules.edit_schedule', id=schedule.id) }}" class="card-link">
-                    <div class="dashboard-item">
-                        <h3>{{ schedule.title }}</h3>
-                        <p>開始: {{ schedule.start_time.strftime('%Y-%m-%d %H:%M') if schedule.start_time }}</p>
-                        <p>終了: {{ schedule.end_time.strftime('%Y-%m-%d %H:%M') if schedule.end_time }}</p>
+                {% if schedules and schedules.items %}
+                    {% for schedule in schedules.items %}
+                    <a href="{{ url_for('schedules.edit_schedule', id=schedule.id) }}" class="card-link">
+                        <div class="dashboard-item">
+                            <h3>{{ schedule.title }}</h3>
+                            <p>開始: {{ schedule.start_time.strftime('%Y-%m-%d %H:%M') if schedule.start_time }}</p>
+                            <p>終了: {{ schedule.end_time.strftime('%Y-%m-%d %H:%M') if schedule.end_time }}</p>
+                        </div>
+                    </a>
+                    {% endfor %}
+                    {% if schedules.pages > 1 %}
+                    <div class="pagination">
+                        {% if schedules.has_prev %}
+                            <a href="{{ url_for('main.dashboard', schedules_page=schedules.prev_num, leads_page=request.args.get('leads_page', 1), tasks_page=request.args.get('tasks_page', 1), emails_page=request.args.get('emails_page', 1)) }}" class="page-link">&laquo; 前へ</a>
+                        {% endif %}
+                        <span class="page-info">{{ schedules.page }} / {{ schedules.pages }}</span>
+                        {% if schedules.has_next %}
+                            <a href="{{ url_for('main.dashboard', schedules_page=schedules.next_num, leads_page=request.args.get('leads_page', 1), tasks_page=request.args.get('tasks_page', 1), emails_page=request.args.get('emails_page', 1)) }}" class="page-link">次へ &raquo;</a>
+                        {% endif %}
                     </div>
-                </a>
+                    {% endif %}
                 {% else %}
-                <p>スケジュールはありません</p>
-                {% endfor %}
+                    <p>スケジュールはありません</p>
+                {% endif %}
             </div>
         </div>
 
         <div class="dashboard-section">
             <h2>最近のメール</h2>
             <div class="dashboard-list">
-                {% for email in emails %}
-                <div class="dashboard-item email-card" onclick="showEmailModal('{{ email.id }}')">
-                    <h3>{{ email.subject or '件名なし' }}</h3>
-                    <p>送信者: {{ email.sender_name or email.sender }}</p>
-                    <p>受信日時: {{ email.received_date.strftime('%Y-%m-%d %H:%M') if email.received_date }}</p>
-                </div>
+                {% if emails and emails.items %}
+                    {% for email in emails.items %}
+                    <div class="dashboard-item email-card" onclick="showEmailModal('{{ email.id }}')">
+                        <h3>{{ email.subject or '件名なし' }}</h3>
+                        <p>送信者: {{ email.sender_name or email.sender }}</p>
+                        <p>受信日時: {{ email.received_date.strftime('%Y-%m-%d %H:%M') if email.received_date }}</p>
+                    </div>
+                    {% endfor %}
+                    {% if emails.pages > 1 %}
+                    <div class="pagination">
+                        {% if emails.has_prev %}
+                            <a href="{{ url_for('main.dashboard', emails_page=emails.prev_num, leads_page=request.args.get('leads_page', 1), tasks_page=request.args.get('tasks_page', 1), schedules_page=request.args.get('schedules_page', 1)) }}" class="page-link">&laquo; 前へ</a>
+                        {% endif %}
+                        <span class="page-info">{{ emails.page }} / {{ emails.pages }}</span>
+                        {% if emails.has_next %}
+                            <a href="{{ url_for('main.dashboard', emails_page=emails.next_num, leads_page=request.args.get('leads_page', 1), tasks_page=request.args.get('tasks_page', 1), schedules_page=request.args.get('schedules_page', 1)) }}" class="page-link">次へ &raquo;</a>
+                        {% endif %}
+                    </div>
+                    {% endif %}
                 {% else %}
-                <p>メールはありません</p>
-                {% endfor %}
+                    <p>メールはありません</p>
+                {% endif %}
             </div>
         </div>
     </div>
 </div>
 
-<!-- Email Modal -->
+<!-- Email Modal (unchanged) -->
 <div id="emailModal" class="modal">
     <div class="modal-content">
         <span class="close-modal">&times;</span>
@@ -127,6 +179,7 @@
 </div>
 
 <style>
+/* Existing styles (unchanged) */
 .dashboard {
     padding: 20px;
 }
@@ -233,7 +286,36 @@
     box-shadow: 0 4px 6px rgba(0,0,0,0.1);
 }
 
-/* Modal Styles */
+/* New pagination styles */
+.pagination {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 10px;
+    margin-top: 15px;
+    padding: 10px;
+    background: #f8f9fa;
+    border-radius: 4px;
+}
+
+.page-link {
+    color: #007bff;
+    text-decoration: none;
+    padding: 5px 10px;
+    border-radius: 4px;
+    transition: background-color 0.2s ease;
+}
+
+.page-link:hover {
+    background-color: #e9ecef;
+}
+
+.page-info {
+    color: #666;
+    font-size: 14px;
+}
+
+/* Modal Styles (unchanged) */
 .modal {
     display: none;
     position: fixed;
