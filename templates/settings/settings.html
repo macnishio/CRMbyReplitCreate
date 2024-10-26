@@ -11,12 +11,12 @@
         <div class="settings-section">
             <h2>メール設定</h2>
             <div class="form-group">
-                <label for="mail_server">メールサーバー:</label>
+                <label for="mail_server">受信メールサーバー:</label>
                 <input type="text" id="mail_server" name="mail_server" value="{{ settings.mail_server if settings else '' }}" required>
             </div>
             <div class="form-group">
                 <label for="mail_port">ポート:</label>
-                <input type="number" id="mail_port" name="mail_port" value="{{ settings.mail_port if settings else 587 }}" required>
+                <input type="number" id="mail_port" name="mail_port" value="{{ settings.mail_port if settings else 993 }}" required>
             </div>
             <div class="form-group">
                 <label for="mail_use_tls">TLS を使用:</label>
@@ -42,7 +42,7 @@
                 <input type="password" id="claude_api_key" name="claude_api_key" placeholder="変更する場合のみ入力">
             </div>
             <div class="form-group">
-                <label for="clearbit_api_key">Clearbit API キー:</label>
+                <label for="clearbit_api_key">Clearbit API キー:（ 現在使えないので適当な文字を入れてください）/label>
                 <input type="password" id="clearbit_api_key" name="clearbit_api_key" placeholder="変更する場合のみ入力">
             </div>
         </div>
