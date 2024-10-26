@@ -17,6 +17,24 @@ from analytics import (
 
 bp = Blueprint('reports', __name__)
 
+def prepare_calendar_events(items, title_field='title', start_field='start_time', end_field='end_time', color=None):
+    """Helper function to prepare events for FullCalendar"""
+    events = []
+    for item in items:
+        event = {
+            'id': item.id,
+            'title': getattr(item, title_field),
+            'start': getattr(item, start_field).isoformat(),
+        }
+        if hasattr(item, end_field):
+            end_time = getattr(item, end_field)
+            if end_time:
+                event['end'] = end_time.isoformat()
+        if color:
+            event['backgroundColor'] = color
+        events.append(event)
+    return events
+
 @bp.route('/')
 @login_required
 def index():
@@ -46,6 +64,20 @@ def index():
     task_status_labels = list(task_statuses.keys())
     task_status_data = list(task_statuses.values())
 
+    # Get schedule events for calendar
+    schedules = Schedule.query.filter_by(user_id=current_user.id).all()
+    schedule_events = prepare_calendar_events(schedules, color='#007bff')
+
+    # Get task events for calendar
+    tasks = Task.query.filter_by(user_id=current_user.id).all()
+    task_events = prepare_calendar_events(
+        tasks,
+        title_field='title',
+        start_field='due_date',
+        end_field='due_date',
+        color='#28a745'
+    )
+
     return render_template('reports/index.html',
                          this_month_revenue=this_month_revenue,
                          sales_pipeline_value=sales_pipeline_value,
@@ -58,4 +90,6 @@ def index():
                          lead_score_labels=lead_score_labels,
                          lead_score_data=lead_score_data,
                          task_status_labels=task_status_labels,
-                         task_status_data=task_status_data)
+                         task_status_data=task_status_data,
+                         schedule_events=schedule_events,
+                         task_events=task_events)

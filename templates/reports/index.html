@@ -24,6 +24,19 @@
         </div>
     </div>
 
+    <div class="calendar-section">
+        <div class="calendar-grid">
+            <div class="calendar-container">
+                <h2>スケジュールカレンダー</h2>
+                <div id="scheduleCalendar"></div>
+            </div>
+            <div class="calendar-container">
+                <h2>タスクカレンダー</h2>
+                <div id="taskCalendar"></div>
+            </div>
+        </div>
+    </div>
+
     <div class="charts-grid">
         <div class="chart-container">
             <h2>売上推移</h2>
@@ -44,128 +57,175 @@
     </div>
 </div>
 
+<link href='https://cdn.jsdelivr.net/npm/fullcalendar@5.11.3/main.min.css' rel='stylesheet' />
+<script src='https://cdn.jsdelivr.net/npm/fullcalendar@5.11.3/main.min.js'></script>
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-
 <script>
-// Chart.jsの設定
-Chart.defaults.font.family = "'Helvetica Neue', 'Helvetica', 'Arial', sans-serif";
-Chart.defaults.color = '#666';
-
-// 売上推移チャート
-const revenueCtx = document.getElementById('revenueChart').getContext('2d');
-new Chart(revenueCtx, {
-    type: 'line',
-    data: {
-        labels: {{ revenue_trend_labels | tojson }},
-        datasets: [{
-            label: '月間売上',
-            data: {{ revenue_trend_data | tojson }},
-            borderColor: '#007bff',
-            backgroundColor: 'rgba(0, 123, 255, 0.1)',
-            tension: 0.4,
-            fill: true
-        }]
-    },
-    options: {
-        responsive: true,
-        plugins: {
-            legend: {
-                position: 'bottom'
-            }
+document.addEventListener('DOMContentLoaded', function() {
+    // Initialize Schedule Calendar
+    const scheduleCalendar = new FullCalendar.Calendar(document.getElementById('scheduleCalendar'), {
+        initialView: 'dayGridMonth',
+        headerToolbar: {
+            left: 'prev,next today',
+            center: 'title',
+            right: 'dayGridMonth,timeGridWeek,timeGridDay'
         },
-        scales: {
-            y: {
-                beginAtZero: true,
-                ticks: {
-                    callback: function(value) {
-                        return '¥' + value.toLocaleString();
+        events: {{ schedule_events | tojson | safe }},
+        eventClick: function(info) {
+            window.location.href = `/schedules/edit/${info.event.id}`;
+        },
+        locale: 'ja',
+        buttonText: {
+            today: '今日',
+            month: '月',
+            week: '週',
+            day: '日'
+        }
+    });
+    scheduleCalendar.render();
+
+    // Initialize Task Calendar
+    const taskCalendar = new FullCalendar.Calendar(document.getElementById('taskCalendar'), {
+        initialView: 'dayGridMonth',
+        headerToolbar: {
+            left: 'prev,next today',
+            center: 'title',
+            right: 'dayGridMonth,timeGridWeek,timeGridDay'
+        },
+        events: {{ task_events | tojson | safe }},
+        eventClick: function(info) {
+            window.location.href = `/tasks/edit/${info.event.id}`;
+        },
+        locale: 'ja',
+        buttonText: {
+            today: '今日',
+            month: '月',
+            week: '週',
+            day: '日'
+        }
+    });
+    taskCalendar.render();
+
+    // Chart.jsの設定
+    Chart.defaults.font.family = "'Helvetica Neue', 'Helvetica', 'Arial', sans-serif";
+    Chart.defaults.color = '#666';
+
+    // 売上推移チャート
+    const revenueCtx = document.getElementById('revenueChart').getContext('2d');
+    new Chart(revenueCtx, {
+        type: 'line',
+        data: {
+            labels: {{ revenue_trend_labels | tojson }},
+            datasets: [{
+                label: '月間売上',
+                data: {{ revenue_trend_data | tojson }},
+                borderColor: '#007bff',
+                backgroundColor: 'rgba(0, 123, 255, 0.1)',
+                tension: 0.4,
+                fill: true
+            }]
+        },
+        options: {
+            responsive: true,
+            plugins: {
+                legend: {
+                    position: 'bottom'
+                }
+            },
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    ticks: {
+                        callback: function(value) {
+                            return '¥' + value.toLocaleString();
+                        }
                     }
                 }
             }
         }
-    }
-});
+    });
 
-// 商談ステージ分布チャート
-const pipelineCtx = document.getElementById('pipelineChart').getContext('2d');
-new Chart(pipelineCtx, {
-    type: 'doughnut',
-    data: {
-        labels: {{ pipeline_labels | tojson }},
-        datasets: [{
-            data: {{ pipeline_data | tojson }},
-            backgroundColor: [
-                '#007bff',
-                '#28a745',
-                '#ffc107',
-                '#dc3545',
-                '#17a2b8'
-            ]
-        }]
-    },
-    options: {
-        responsive: true,
-        plugins: {
-            legend: {
-                position: 'bottom'
-            }
-        }
-    }
-});
-
-// リードスコア分布チャート
-const leadScoreCtx = document.getElementById('leadScoreChart').getContext('2d');
-new Chart(leadScoreCtx, {
-    type: 'bar',
-    data: {
-        labels: {{ lead_score_labels | tojson }},
-        datasets: [{
-            label: 'リード数',
-            data: {{ lead_score_data | tojson }},
-            backgroundColor: '#28a745'
-        }]
-    },
-    options: {
-        responsive: true,
-        plugins: {
-            legend: {
-                position: 'bottom'
-            }
+    // 商談ステージ分布チャート
+    const pipelineCtx = document.getElementById('pipelineChart').getContext('2d');
+    new Chart(pipelineCtx, {
+        type: 'doughnut',
+        data: {
+            labels: {{ pipeline_labels | tojson }},
+            datasets: [{
+                data: {{ pipeline_data | tojson }},
+                backgroundColor: [
+                    '#007bff',
+                    '#28a745',
+                    '#ffc107',
+                    '#dc3545',
+                    '#17a2b8'
+                ]
+            }]
         },
-        scales: {
-            y: {
-                beginAtZero: true,
-                ticks: {
-                    stepSize: 1
+        options: {
+            responsive: true,
+            plugins: {
+                legend: {
+                    position: 'bottom'
                 }
             }
         }
-    }
-});
+    });
 
-// タスクステータス分布チャート
-const taskStatusCtx = document.getElementById('taskStatusChart').getContext('2d');
-new Chart(taskStatusCtx, {
-    type: 'pie',
-    data: {
-        labels: {{ task_status_labels | tojson }},
-        datasets: [{
-            data: {{ task_status_data | tojson }},
-            backgroundColor: [
-                '#17a2b8',
-                '#ffc107',
-                '#28a745'
-            ]
-        }]
-    },
-    options: {
-        responsive: true,
-        plugins: {
-            legend: {
-                position: 'bottom'
+    // リードスコア分布チャート
+    const leadScoreCtx = document.getElementById('leadScoreChart').getContext('2d');
+    new Chart(leadScoreCtx, {
+        type: 'bar',
+        data: {
+            labels: {{ lead_score_labels | tojson }},
+            datasets: [{
+                label: 'リード数',
+                data: {{ lead_score_data | tojson }},
+                backgroundColor: '#28a745'
+            }]
+        },
+        options: {
+            responsive: true,
+            plugins: {
+                legend: {
+                    position: 'bottom'
+                }
+            },
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    ticks: {
+                        stepSize: 1
+                    }
+                }
             }
         }
-    }
+    });
+
+    // タスクステータス分布チャート
+    const taskStatusCtx = document.getElementById('taskStatusChart').getContext('2d');
+    new Chart(taskStatusCtx, {
+        type: 'pie',
+        data: {
+            labels: {{ task_status_labels | tojson }},
+            datasets: [{
+                data: {{ task_status_data | tojson }},
+                backgroundColor: [
+                    '#17a2b8',
+                    '#ffc107',
+                    '#28a745'
+                ]
+            }]
+        },
+        options: {
+            responsive: true,
+            plugins: {
+                legend: {
+                    position: 'bottom'
+                }
+            }
+        }
+    });
 });
 </script>
 
@@ -199,6 +259,29 @@ new Chart(taskStatusCtx, {
     margin: 10px 0;
 }
 
+.calendar-section {
+    margin-bottom: 30px;
+}
+
+.calendar-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+    gap: 20px;
+}
+
+.calendar-container {
+    background: white;
+    padding: 20px;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.calendar-container h2 {
+    margin: 0 0 20px 0;
+    color: #333;
+    font-size: 18px;
+}
+
 .charts-grid {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
@@ -219,6 +302,7 @@ new Chart(taskStatusCtx, {
 }
 
 @media (max-width: 768px) {
+    .calendar-grid,
     .charts-grid {
         grid-template-columns: 1fr;
     }
