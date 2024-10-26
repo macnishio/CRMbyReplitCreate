@@ -2,127 +2,183 @@ from flask_login import UserMixin
 from werkzeug.security import generate_password_hash, check_password_hash
 from extensions import db
 from datetime import datetime
-from sqlalchemy.sql import func
+import base64
+from cryptography.fernet import Fernet
+from flask import current_app
+from sqlalchemy.orm import Mapped, mapped_column
+from sqlalchemy import Integer, String, DateTime, Float, ForeignKey, Text, Boolean
+from typing import List, Optional
 
 class User(UserMixin, db.Model):
     __tablename__ = 'users'
-    id = db.Column(db.Integer, primary_key=True)
-    username = db.Column(db.String(80), unique=True, nullable=False)
-    email = db.Column(db.String(120), unique=True, nullable=False)
-    password_hash = db.Column(db.String(128))
-    role = db.Column(db.String(80), nullable=False, default='user')
-    
+    id: Mapped[int] = mapped_column(Integer, primary_key=True)
+    username: Mapped[str] = mapped_column(String(64), unique=True, nullable=False)
+    email: Mapped[str] = mapped_column(String(120), unique=True, nullable=False)
+    password_hash: Mapped[str] = mapped_column(String(128))
+    role: Mapped[str] = mapped_column(String(20), nullable=False, default='user')
+
+    # Relationships
+    leads = db.relationship('Lead', backref='user', lazy='dynamic')
+    opportunities = db.relationship('Opportunity', backref='user', lazy='dynamic')
+    accounts = db.relationship('Account', backref='user', lazy='dynamic')
+    settings = db.relationship("UserSettings", backref="user", uselist=False)
+
+    def __init__(self, **kwargs):
+        super(User, self).__init__(**kwargs)
+
     def set_password(self, password):
         self.password_hash = generate_password_hash(password)
-        
+
     def check_password(self, password):
         return check_password_hash(self.password_hash, password)
 
+class UserSettings(db.Model):
+    __tablename__ = 'user_settings'
+    id: Mapped[int] = mapped_column(Integer, primary_key=True)
+    user_id: Mapped[int] = mapped_column(Integer, ForeignKey('users.id'), nullable=False, unique=True)
+    mail_server: Mapped[str] = mapped_column(String(120))
+    mail_port: Mapped[int] = mapped_column(Integer)
+    mail_use_tls: Mapped[bool] = mapped_column(Boolean, default=True)
+    mail_username: Mapped[str] = mapped_column(String(120))
+    _mail_password: Mapped[str] = mapped_column('mail_password', String(255))
+    _claude_api_key: Mapped[Optional[str]] = mapped_column('claude_api_key', String(255), nullable=True)
+    _clearbit_api_key: Mapped[Optional[str]] = mapped_column('clearbit_api_key', String(255), nullable=True)
+    created_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow)
+    updated_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+
+    def _get_encryption_key(self):
+        key = current_app.config['SECRET_KEY']
+        return base64.urlsafe_b64encode(key.ljust(32)[:32].encode())
+
+    def _encrypt(self, data):
+        if not data:
+            return None
+        f = Fernet(self._get_encryption_key())
+        return f.encrypt(data.encode()).decode()
+
+    def _decrypt(self, data):
+        if not data:
+            return None
+        f = Fernet(self._get_encryption_key())
+        return f.decrypt(data.encode()).decode()
+
+    @property
+    def mail_password(self):
+        return self._decrypt(self._mail_password) if self._mail_password else None
+
+    @mail_password.setter
+    def mail_password(self, value):
+        self._mail_password = self._encrypt(value) if value else None
+
+    @property
+    def claude_api_key(self):
+        return self._decrypt(self._claude_api_key) if self._claude_api_key else None
+
+    @claude_api_key.setter
+    def claude_api_key(self, value):
+        self._claude_api_key = self._encrypt(value) if value else None
+
+    @property
+    def clearbit_api_key(self):
+        return self._decrypt(self._clearbit_api_key) if self._clearbit_api_key else None
+
+    @clearbit_api_key.setter
+    def clearbit_api_key(self, value):
+        self._clearbit_api_key = self._encrypt(value) if value else None
+
 class Lead(db.Model):
     __tablename__ = 'leads'
-    id = db.Column(db.Integer, primary_key=True)
-    name = db.Column(db.String(100))
-    email = db.Column(db.String(120))
-    phone = db.Column(db.String(20))
-    status = db.Column(db.String(20))
-    score = db.Column(db.Float)
-    user_id = db.Column(db.Integer, db.ForeignKey('users.id'))
-    created_at = db.Column(db.DateTime, default=datetime.utcnow)
-    last_contact = db.Column(db.DateTime)
-    last_followup_email = db.Column(db.DateTime)
-    
-    opportunities = db.relationship('Opportunity', backref='lead', lazy=True)
-    tasks = db.relationship('Task', backref='lead', lazy=True)
-    schedules = db.relationship('Schedule', backref='lead', lazy=True)
+    id: Mapped[int] = mapped_column(Integer, primary_key=True)
+    name: Mapped[str] = mapped_column(String(255), nullable=False)
+    email: Mapped[Optional[str]] = mapped_column(String(120), nullable=True)
+    phone: Mapped[Optional[str]] = mapped_column(String(20), nullable=True)
+    status: Mapped[str] = mapped_column(String(20), nullable=False, default='New')
+    score: Mapped[float] = mapped_column(Float, nullable=False, default=0.0)
+    user_id: Mapped[int] = mapped_column(Integer, ForeignKey('users.id'), nullable=False)
+    created_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow)
+    last_contact: Mapped[Optional[datetime]] = mapped_column(DateTime, nullable=True)
+    last_followup_email: Mapped[Optional[datetime]] = mapped_column(DateTime, nullable=True)
 
-class Opportunity(db.Model):
-    __tablename__ = 'opportunities'
-    id = db.Column(db.Integer, primary_key=True)
-    name = db.Column(db.String(100))
-    amount = db.Column(db.Float)
-    stage = db.Column(db.String(20))
-    close_date = db.Column(db.Date)
-    user_id = db.Column(db.Integer, db.ForeignKey('users.id'))
-    account_id = db.Column(db.Integer, db.ForeignKey('accounts.id'))
-    lead_id = db.Column(db.Integer, db.ForeignKey('leads.id'))
-    created_at = db.Column(db.DateTime, default=datetime.utcnow)
-
-class Account(db.Model):
-    __tablename__ = 'accounts'
-    id = db.Column(db.Integer, primary_key=True)
-    name = db.Column(db.String(100))
-    industry = db.Column(db.String(50))
-    website = db.Column(db.String(200))
-    user_id = db.Column(db.Integer, db.ForeignKey('users.id'))
-    created_at = db.Column(db.DateTime, default=datetime.utcnow)
-    
-    opportunities = db.relationship('Opportunity', backref='account', lazy=True)
-
-class Schedule(db.Model):
-    __tablename__ = 'schedules'
-    id = db.Column(db.Integer, primary_key=True)
-    title = db.Column(db.String(100))
-    description = db.Column(db.Text)
-    start_time = db.Column(db.DateTime)
-    end_time = db.Column(db.DateTime)
-    user_id = db.Column(db.Integer, db.ForeignKey('users.id'))
-    account_id = db.Column(db.Integer, db.ForeignKey('accounts.id'))
-    lead_id = db.Column(db.Integer, db.ForeignKey('leads.id'))
-    opportunity_id = db.Column(db.Integer, db.ForeignKey('opportunities.id'))
-    created_at = db.Column(db.DateTime, default=datetime.utcnow)
-
-class Task(db.Model):
-    __tablename__ = 'tasks'
-    id = db.Column(db.Integer, primary_key=True)
-    title = db.Column(db.String(100))
-    description = db.Column(db.Text)
-    due_date = db.Column(db.DateTime)
-    completed = db.Column(db.Boolean, default=False)
-    status = db.Column(db.String(20))
-    user_id = db.Column(db.Integer, db.ForeignKey('users.id'))
-    account_id = db.Column(db.Integer, db.ForeignKey('accounts.id'))
-    lead_id = db.Column(db.Integer, db.ForeignKey('leads.id'))
-    opportunity_id = db.Column(db.Integer, db.ForeignKey('opportunities.id'))
-    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+    # Relationships
+    opportunities = db.relationship('Opportunity', back_populates='lead', cascade='all, delete-orphan')
+    schedules = db.relationship('Schedule', back_populates='lead', cascade='all, delete-orphan')
+    tasks = db.relationship('Task', back_populates='lead', cascade='all, delete-orphan')
+    emails = db.relationship('Email', backref='lead', lazy='dynamic')
 
 class Email(db.Model):
     __tablename__ = 'emails'
-    id = db.Column(db.Integer, primary_key=True)
-    message_id = db.Column(db.String(200))
-    sender = db.Column(db.String(120))
-    sender_name = db.Column(db.String(100))
-    subject = db.Column(db.String(200))
-    content = db.Column(db.Text)
-    received_date = db.Column(db.DateTime)
-    lead_id = db.Column(db.Integer, db.ForeignKey('leads.id'))
-    user_id = db.Column(db.Integer, db.ForeignKey('users.id'))
-    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+    id: Mapped[int] = mapped_column(Integer, primary_key=True)
+    message_id: Mapped[str] = mapped_column(String(255), unique=True, nullable=True)  # 追加
+    sender: Mapped[str] = mapped_column(String(120), nullable=False)
+    sender_name: Mapped[str] = mapped_column(String(255))
+    subject: Mapped[str] = mapped_column(String(200))
+    content: Mapped[str] = mapped_column(Text)
+    received_date: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow)
+    lead_id: Mapped[int] = mapped_column(Integer, ForeignKey('leads.id'), nullable=False)
+    user_id: Mapped[int] = mapped_column(Integer, ForeignKey('users.id'), nullable=False)
 
 class UnknownEmail(db.Model):
     __tablename__ = 'unknown_emails'
-    id = db.Column(db.Integer, primary_key=True)
-    sender = db.Column(db.String(120))
-    sender_name = db.Column(db.String(100))
-    subject = db.Column(db.String(200))
-    content = db.Column(db.Text)
-    received_date = db.Column(db.DateTime)
-    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+    id: Mapped[int] = mapped_column(Integer, primary_key=True)
+    sender: Mapped[str] = mapped_column(String(120), nullable=False)
+    sender_name: Mapped[str] = mapped_column(String(255))
+    subject: Mapped[str] = mapped_column(String(200))
+    content: Mapped[str] = mapped_column(Text)
+    received_date: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow)
+
+class Opportunity(db.Model):
+    __tablename__ = 'opportunities'
+    id: Mapped[int] = mapped_column(Integer, primary_key=True)
+    name: Mapped[str] = mapped_column(String(100), nullable=False)
+    stage: Mapped[str] = mapped_column(String(20))
+    amount: Mapped[Optional[float]] = mapped_column(Float, nullable=True)
+    close_date: Mapped[Optional[datetime]] = mapped_column(DateTime, nullable=True)
+    user_id: Mapped[int] = mapped_column(Integer, ForeignKey('users.id'), nullable=False)
+    lead_id: Mapped[int] = mapped_column(Integer, ForeignKey('leads.id'), nullable=False)
+    account_id: Mapped[Optional[int]] = mapped_column(Integer, ForeignKey('accounts.id'), nullable=True)
+
+    # Relationships
+    lead = db.relationship('Lead', back_populates='opportunities')
+
+class Account(db.Model):
+    __tablename__ = 'accounts'
+    id: Mapped[int] = mapped_column(Integer, primary_key=True)
+    name: Mapped[str] = mapped_column(String(100), nullable=False)
+    industry: Mapped[str] = mapped_column(String(50))
+    website: Mapped[str] = mapped_column(String(200))
+    user_id: Mapped[int] = mapped_column(Integer, ForeignKey('users.id'), nullable=False)
+
+class Schedule(db.Model):
+    __tablename__ = 'schedules'
+    id: Mapped[int] = mapped_column(Integer, primary_key=True)
+    title: Mapped[str] = mapped_column(String(100), nullable=False)
+    description: Mapped[str] = mapped_column(Text)
+    start_time: Mapped[datetime] = mapped_column(DateTime, nullable=False)
+    end_time: Mapped[datetime] = mapped_column(DateTime, nullable=False)
+    user_id: Mapped[int] = mapped_column(Integer, ForeignKey('users.id'), nullable=False)
+    lead_id: Mapped[Optional[int]] = mapped_column(Integer, ForeignKey('leads.id'), nullable=True)
+
+    # Relationships
+    lead = db.relationship('Lead', back_populates='schedules')
+
+class Task(db.Model):
+    __tablename__ = 'tasks'
+    id: Mapped[int] = mapped_column(Integer, primary_key=True)
+    title: Mapped[str] = mapped_column(String(100), nullable=False)
+    description: Mapped[str] = mapped_column(Text)
+    due_date: Mapped[datetime] = mapped_column(DateTime)
+    status: Mapped[str] = mapped_column(String(20))
+    completed: Mapped[bool] = mapped_column(Boolean, default=False)
+    user_id: Mapped[int] = mapped_column(Integer, ForeignKey('users.id'), nullable=False)
+    lead_id: Mapped[Optional[int]] = mapped_column(Integer, ForeignKey('leads.id'), nullable=True)
+
+    # Relationships
+    lead = db.relationship('Lead', back_populates='tasks')
 
 class EmailFetchTracker(db.Model):
     __tablename__ = 'email_fetch_tracker'
-    id = db.Column(db.Integer, primary_key=True)
-    last_fetch_time = db.Column(db.DateTime, default=datetime.utcnow)
-    user_id = db.Column(db.Integer, db.ForeignKey('users.id'))
-
-class UserSettings(db.Model):
-    __tablename__ = 'user_settings'
-    id = db.Column(db.Integer, primary_key=True)
-    user_id = db.Column(db.Integer, db.ForeignKey('users.id'), unique=True)
-    claude_api_key = db.Column(db.String(200))
-    mail_server = db.Column(db.String(200))
-    mail_port = db.Column(db.String(10))
-    mail_use_tls = db.Column(db.Boolean, default=True)
-    mail_username = db.Column(db.String(200))
-    mail_password = db.Column(db.String(200))
-    created_at = db.Column(db.DateTime, default=datetime.utcnow)
-    updated_at = db.Column(db.DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+    id: Mapped[int] = mapped_column(Integer, primary_key=True)
+    last_fetch_time: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow)
+    user_id: Mapped[int] = mapped_column(Integer, ForeignKey('users.id'), nullable=False)
+    created_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow)
+    updated_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)

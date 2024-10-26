@@ -1,185 +1,129 @@
 {% extends "base.html" %}
 {% block title %}設定{% endblock %}
-
 {% block content %}
 <div class="settings-container">
-    <h1>設定</h1>
-    {% with messages = get_flashed_messages(with_categories=true) %}
-        {% if messages %}
-            {% for category, message in messages %}
-                <div class="alert alert-{{ category }}">{{ message }}</div>
-            {% endfor %}
-        {% endif %}
-    {% endwith %}
-
-    <form method="POST" class="settings-form">
-        {{ form.hidden_tag() }}
-        <div class="form-section">
-            <h2>AI設定</h2>
-            <div class="form-group">
-                {{ form.claude_api_key.label }}
-                {{ form.claude_api_key(class="form-control") }}
-                {% if form.claude_api_key.errors %}
-                    {% for error in form.claude_api_key.errors %}
-                        <div class="error-message">{{ error }}</div>
-                    {% endfor %}
-                {% endif %}
-            </div>
-        </div>
-
-        <div class="form-section">
+    <h1>ユーザー設定</h1>
+    <div class="settings-description">
+        <p>これらの設定はあなたのアカウント専用の設定です。機密情報は暗号化されて保存されます。</p>
+    </div>
+    
+    <form action="{{ url_for('settings.update_settings') }}" method="POST" class="settings-form">
+        <div class="settings-section">
             <h2>メール設定</h2>
             <div class="form-group">
-                {{ form.mail_server.label }}
-                {{ form.mail_server(class="form-control") }}
-                {% if form.mail_server.errors %}
-                    {% for error in form.mail_server.errors %}
-                        <div class="error-message">{{ error }}</div>
-                    {% endfor %}
-                {% endif %}
+                <label for="mail_server">メールサーバー:</label>
+                <input type="text" id="mail_server" name="mail_server" value="{{ settings.mail_server if settings else '' }}" required>
             </div>
-
             <div class="form-group">
-                {{ form.mail_port.label }}
-                {{ form.mail_port(class="form-control") }}
-                {% if form.mail_port.errors %}
-                    {% for error in form.mail_port.errors %}
-                        <div class="error-message">{{ error }}</div>
-                    {% endfor %}
-                {% endif %}
+                <label for="mail_port">ポート:</label>
+                <input type="number" id="mail_port" name="mail_port" value="{{ settings.mail_port if settings else 587 }}" required>
             </div>
-
             <div class="form-group">
-                <div class="checkbox-group">
-                    {{ form.mail_use_tls(class="form-check-input") }}
-                    {{ form.mail_use_tls.label(class="form-check-label") }}
-                </div>
-                {% if form.mail_use_tls.errors %}
-                    {% for error in form.mail_use_tls.errors %}
-                        <div class="error-message">{{ error }}</div>
-                    {% endfor %}
-                {% endif %}
+                <label for="mail_use_tls">TLS を使用:</label>
+                <select id="mail_use_tls" name="mail_use_tls">
+                    <option value="true" {% if settings and settings.mail_use_tls %}selected{% endif %}>はい</option>
+                    <option value="false" {% if settings and not settings.mail_use_tls %}selected{% endif %}>いいえ</option>
+                </select>
             </div>
-
             <div class="form-group">
-                {{ form.mail_username.label }}
-                {{ form.mail_username(class="form-control") }}
-                {% if form.mail_username.errors %}
-                    {% for error in form.mail_username.errors %}
-                        <div class="error-message">{{ error }}</div>
-                    {% endfor %}
-                {% endif %}
+                <label for="mail_username">メールユーザー名:</label>
+                <input type="text" id="mail_username" name="mail_username" value="{{ settings.mail_username if settings else '' }}" required>
             </div>
-
             <div class="form-group">
-                {{ form.mail_password.label }}
-                {{ form.mail_password(class="form-control") }}
-                {% if form.mail_password.errors %}
-                    {% for error in form.mail_password.errors %}
-                        <div class="error-message">{{ error }}</div>
-                    {% endfor %}
-                {% endif %}
+                <label for="mail_password">メールパスワード:</label>
+                <input type="password" id="mail_password" name="mail_password" placeholder="変更する場合のみ入力">
             </div>
         </div>
 
-        {{ form.submit(class="btn btn-primary") }}
+        <div class="settings-section">
+            <h2>API 設定</h2>
+            <div class="form-group">
+                <label for="claude_api_key">Claude API キー:</label>
+                <input type="password" id="claude_api_key" name="claude_api_key" placeholder="変更する場合のみ入力">
+            </div>
+            <div class="form-group">
+                <label for="clearbit_api_key">Clearbit API キー:</label>
+                <input type="password" id="clearbit_api_key" name="clearbit_api_key" placeholder="変更する場合のみ入力">
+            </div>
+        </div>
+
+        <div class="settings-actions">
+            <button type="submit" class="btn btn-primary">設定を保存</button>
+        </div>
     </form>
 </div>
+{% endblock %}
 
+{% block extra_head %}
 <style>
 .settings-container {
     max-width: 800px;
-    margin: 2rem auto;
-    padding: 2rem;
-    background: white;
-    border-radius: 8px;
-    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    margin: 0 auto;
+    padding: 20px;
+}
+
+.settings-description {
+    margin-bottom: 30px;
+    padding: 15px;
+    background-color: #f8f9fa;
+    border-radius: 5px;
 }
 
 .settings-form {
-    margin-top: 2rem;
+    display: flex;
+    flex-direction: column;
+    gap: 30px;
 }
 
-.form-section {
-    margin-bottom: 2rem;
-    padding: 1.5rem;
-    background: #f8f9fa;
+.settings-section {
+    background-color: white;
+    padding: 20px;
     border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
 
-.form-section h2 {
-    margin-bottom: 1.5rem;
-    color: #333;
-    font-size: 1.5rem;
+.settings-section h2 {
+    margin-bottom: 20px;
+    color: #2c3e50;
 }
 
 .form-group {
-    margin-bottom: 1.5rem;
+    margin-bottom: 15px;
 }
 
 .form-group label {
     display: block;
-    margin-bottom: 0.5rem;
+    margin-bottom: 5px;
     font-weight: bold;
-    color: #333;
 }
 
-.form-control {
+.form-group input,
+.form-group select {
     width: 100%;
-    padding: 0.75rem;
+    padding: 8px;
     border: 1px solid #ddd;
     border-radius: 4px;
-    font-size: 1rem;
+    font-size: 16px;
 }
 
-.checkbox-group {
-    display: flex;
-    align-items: center;
-    gap: 0.5rem;
-}
-
-.form-check-input {
-    margin-top: 0;
+.settings-actions {
+    text-align: center;
+    margin-top: 20px;
 }
 
 .btn-primary {
-    width: 100%;
-    padding: 0.75rem;
-    background: #007bff;
+    background-color: #3498db;
     color: white;
+    padding: 10px 20px;
     border: none;
     border-radius: 4px;
-    font-size: 1rem;
     cursor: pointer;
-    transition: background-color 0.2s;
+    font-size: 16px;
+    transition: background-color 0.3s;
 }
 
 .btn-primary:hover {
-    background: #0056b3;
-}
-
-.error-message {
-    color: #dc3545;
-    font-size: 0.875rem;
-    margin-top: 0.25rem;
-}
-
-.alert {
-    padding: 0.75rem;
-    margin-bottom: 1rem;
-    border-radius: 4px;
-}
-
-.alert-success {
-    background-color: #d4edda;
-    color: #155724;
-    border: 1px solid #c3e6cb;
-}
-
-.alert-error {
-    background-color: #f8d7da;
-    color: #721c24;
-    border: 1px solid #f5c6cb;
+    background-color: #2980b9;
 }
 </style>
 {% endblock %}
