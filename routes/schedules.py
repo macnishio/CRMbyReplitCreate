@@ -1,160 +1,158 @@
-from flask import Blueprint, render_template, redirect, url_for, flash, request, jsonify, current_app
+from flask import Blueprint, render_template, redirect, url_for, flash, request, current_app
 from flask_login import login_required, current_user
-from models import Schedule, Lead, Opportunity, Account, User
+from models import Schedule, Lead
 from extensions import db
-from forms import ScheduleForm
-from datetime import datetime
-from google_calendar import create_calendar_event, update_calendar_event, delete_calendar_event
-from sqlalchemy.exc import SQLAlchemyError
+from datetime import datetime, timedelta
+from sqlalchemy import func
+from ai_analysis import analyze_schedules
 
 bp = Blueprint('schedules', __name__)
 
 @bp.route('/')
+@bp.route('')
 @login_required
 def list_schedules():
-    schedules = Schedule.query.filter_by(user_id=current_user.id).order_by(Schedule.start_time).all()
-    return render_template('schedules/list_schedules.html', schedules=schedules)
+    query = Schedule.query.filter_by(user_id=current_user.id)
+
+    # Apply filters if provided
+    date_filter = request.args.get('date_filter')
+    if date_filter:
+        today = datetime.utcnow().replace(hour=0, minute=0, second=0, microsecond=0)
+        if date_filter == 'today':
+            query = query.filter(
+                Schedule.start_time >= today,
+                Schedule.start_time < today + timedelta(days=1)
+            )
+        elif date_filter == 'week':
+            query = query.filter(
+                Schedule.start_time >= today,
+                Schedule.start_time < today + timedelta(days=7)
+            )
+        elif date_filter == 'month':
+            query = query.filter(
+                Schedule.start_time >= today,
+                Schedule.start_time < today + timedelta(days=30)
+            )
+
+    # Order by start time and eager load lead relationship
+    schedules = query.options(db.joinedload(Schedule.lead)).order_by(Schedule.start_time.asc()).all()
+    
+    # Get AI analysis
+    ai_analysis = analyze_schedules(schedules)
+    
+    return render_template('schedules/list_schedules.html',
+                         schedules=schedules,
+                         ai_analysis=ai_analysis,
+                         now=datetime.utcnow,
+                         timedelta=timedelta)
+
+@bp.route('/bulk_action', methods=['POST'])
+@login_required
+def bulk_action():
+    action = request.form.get('action')
+    selected_schedules = request.form.getlist('selected_schedules[]')
+    
+    if not action or not selected_schedules:
+        flash('操作とスケジュールを選択してください。', 'error')
+        return redirect(url_for('schedules.list_schedules'))
+    
+    try:
+        schedules = Schedule.query.filter(
+            Schedule.id.in_(selected_schedules),
+            Schedule.user_id == current_user.id
+        ).all()
+        
+        if action == 'delete':
+            for schedule in schedules:
+                db.session.delete(schedule)
+            flash(f'{len(schedules)}件のスケジュールを削除しました。', 'success')
+            
+        elif action == 'reschedule':
+            new_date = request.form.get('new_date')
+            new_time = request.form.get('new_time')
+            
+            if not new_date or not new_time:
+                flash('新しい日時を選択してください。', 'error')
+                return redirect(url_for('schedules.list_schedules'))
+            
+            try:
+                new_datetime = datetime.strptime(f"{new_date} {new_time}", '%Y-%m-%d %H:%M')
+                for schedule in schedules:
+                    duration = schedule.end_time - schedule.start_time
+                    schedule.start_time = new_datetime
+                    schedule.end_time = new_datetime + duration
+                flash(f'{len(schedules)}件のスケジュールを変更しました。', 'success')
+            except ValueError:
+                flash('日時の形式が正しくありません。', 'error')
+                return redirect(url_for('schedules.list_schedules'))
+        
+        db.session.commit()
+        
+    except Exception as e:
+        db.session.rollback()
+        flash('操作中にエラーが発生しました。', 'error')
+        current_app.logger.error(f"Bulk action error: {str(e)}")
+    
+    return redirect(url_for('schedules.list_schedules'))
 
 @bp.route('/add', methods=['GET', 'POST'])
 @login_required
 def add_schedule():
-    form = ScheduleForm()
-    form.user_id.data = current_user.id
-    
-    if form.validate_on_submit():
+    if request.method == 'POST':
+        title = request.form['title']
+        description = request.form['description']
+        start_time = datetime.strptime(f"{request.form['start_date']} {request.form['start_time']}", '%Y-%m-%d %H:%M')
+        end_time = datetime.strptime(f"{request.form['end_date']} {request.form['end_time']}", '%Y-%m-%d %H:%M')
+        lead_id = request.form.get('lead_id')
+        
         schedule = Schedule(
-            title=form.title.data,
-            description=form.description.data,
-            start_time=form.start_time.data,
-            end_time=form.end_time.data,
+            title=title,
+            description=description,
+            start_time=start_time,
+            end_time=end_time,
             user_id=current_user.id,
-            lead_id=form.lead_id.data if form.lead_id.data else None,
-            opportunity_id=form.opportunity_id.data if form.opportunity_id.data else None,
-            account_id=form.account_id.data if form.account_id.data else None
+            lead_id=lead_id
         )
         
-        try:
-            db.session.add(schedule)
-            db.session.flush()  # Get ID without committing
-            
-            # Create Google Calendar event if integration is configured
-            if current_user.google_calendar_id and current_user.google_service_account_file:
-                event_id = create_calendar_event(current_user, schedule)
-                if event_id:
-                    schedule.google_event_id = event_id
-                else:
-                    flash('Failed to create Google Calendar event', 'error')
-            
-            db.session.commit()
-            flash('Schedule added successfully!', 'success')
-            return redirect(url_for('schedules.list_schedules'))
-        except Exception as e:
-            db.session.rollback()
-            current_app.logger.error(f"Error adding schedule: {str(e)}")
-            flash('Error adding schedule', 'error')
+        db.session.add(schedule)
+        db.session.commit()
+        flash('スケジュールが追加されました。', 'success')
+        return redirect(url_for('schedules.list_schedules'))
     
-    return render_template('schedules/add_schedule.html', form=form)
+    leads = Lead.query.filter_by(user_id=current_user.id).all()
+    return render_template('schedules/add_schedule.html', leads=leads)
 
 @bp.route('/edit/<int:id>', methods=['GET', 'POST'])
 @login_required
 def edit_schedule(id):
-    schedule = Schedule.query.filter_by(id=id, user_id=current_user.id).first_or_404()
-    form = ScheduleForm(obj=schedule)
+    schedule = Schedule.query.get_or_404(id)
+    if schedule.user_id != current_user.id:
+        flash('このスケジュールを編集する権限がありません。', 'error')
+        return redirect(url_for('schedules.list_schedules'))
     
-    if form.validate_on_submit():
-        try:
-            schedule.title = form.title.data
-            schedule.description = form.description.data
-            schedule.start_time = form.start_time.data
-            schedule.end_time = form.end_time.data
-            schedule.lead_id = form.lead_id.data if form.lead_id.data else None
-            schedule.opportunity_id = form.opportunity_id.data if form.opportunity_id.data else None
-            schedule.account_id = form.account_id.data if form.account_id.data else None
-            
-            # Update Google Calendar event if integration is configured
-            if current_user.google_calendar_id and current_user.google_service_account_file:
-                event_id = update_calendar_event(current_user, schedule)
-                if event_id:
-                    schedule.google_event_id = event_id
-                else:
-                    flash('Failed to update Google Calendar event', 'error')
-            
-            db.session.commit()
-            flash('Schedule updated successfully!', 'success')
-            return redirect(url_for('schedules.list_schedules'))
-        except Exception as e:
-            db.session.rollback()
-            current_app.logger.error(f"Error updating schedule: {str(e)}")
-            flash('Error updating schedule', 'error')
+    if request.method == 'POST':
+        schedule.title = request.form['title']
+        schedule.description = request.form['description']
+        schedule.start_time = datetime.strptime(f"{request.form['start_date']} {request.form['start_time']}", '%Y-%m-%d %H:%M')
+        schedule.end_time = datetime.strptime(f"{request.form['end_date']} {request.form['end_time']}", '%Y-%m-%d %H:%M')
+        schedule.lead_id = request.form.get('lead_id')
+        
+        db.session.commit()
+        flash('スケジュールが更新されました。', 'success')
+        return redirect(url_for('schedules.list_schedules'))
     
-    return render_template('schedules/edit_schedule.html', form=form, schedule=schedule)
+    leads = Lead.query.filter_by(user_id=current_user.id).all()
+    return render_template('schedules/edit_schedule.html', schedule=schedule, leads=leads)
 
 @bp.route('/delete/<int:id>', methods=['POST'])
 @login_required
 def delete_schedule(id):
-    schedule = Schedule.query.filter_by(id=id, user_id=current_user.id).first_or_404()
-    try:
-        # Delete from Google Calendar if integration is configured
-        if current_user.google_calendar_id and current_user.google_service_account_file:
-            if not delete_calendar_event(current_user, schedule):
-                flash('Failed to delete Google Calendar event', 'error')
-        
-        db.session.delete(schedule)
-        db.session.commit()
-        flash('Schedule deleted successfully!', 'success')
-    except Exception as e:
-        db.session.rollback()
-        current_app.logger.error(f"Error deleting schedule: {str(e)}")
-        flash('Error deleting schedule', 'error')
+    schedule = Schedule.query.get_or_404(id)
+    if schedule.user_id != current_user.id:
+        flash('このスケジュールを削除する権限がありません。', 'error')
+        return redirect(url_for('schedules.list_schedules'))
     
+    db.session.delete(schedule)
+    db.session.commit()
+    flash('スケジュールが削除されました。', 'success')
     return redirect(url_for('schedules.list_schedules'))
-
-@bp.route('/transfer_to_google', methods=['POST'])
-@login_required
-def transfer_to_google():
-    if not current_user.google_calendar_id or not current_user.google_service_account_file:
-        return jsonify({
-            "success": False,
-            "message": "Google Calendar integration not configured. Please configure it in settings."
-        })
-
-    data = request.get_json()
-    schedule_ids = data.get('schedules', [])
-    
-    if not schedule_ids:
-        return jsonify({
-            "success": False,
-            "message": "No schedules selected for transfer."
-        })
-    
-    success_count = 0
-    error_messages = []
-    
-    for schedule_id in schedule_ids:
-        schedule = Schedule.query.filter_by(id=schedule_id, user_id=current_user.id).first()
-        if schedule:
-            try:
-                event_id = create_calendar_event(current_user, schedule)
-                if event_id:
-                    schedule.google_event_id = event_id
-                    success_count += 1
-                else:
-                    error_messages.append(f"Failed to create event for schedule: {schedule.title}")
-            except Exception as e:
-                error_messages.append(f"Error processing schedule {schedule.title}: {str(e)}")
-    
-    try:
-        db.session.commit()
-    except SQLAlchemyError as e:
-        db.session.rollback()
-        return jsonify({
-            "success": False,
-            "message": "Database error while saving Google Calendar event IDs",
-            "errors": [str(e)]
-        })
-    
-    return jsonify({
-        "success": success_count > 0,
-        "message": f"Successfully transferred {success_count} events to Google Calendar",
-        "errors": error_messages
-    })
