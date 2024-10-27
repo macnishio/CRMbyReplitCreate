@@ -23,7 +23,7 @@ def add_task():
     opportunities = Opportunity.query.filter_by(user_id=current_user.id).all()
     accounts = Account.query.filter_by(user_id=current_user.id).all()
     
-    # Update the choices for dropdowns with proper typing
+    # Update the choices for dropdowns
     form.lead_id.choices = [('0', '選択してください')] + [(str(lead.id), f"{lead.name} ({lead.email})") for lead in leads]
     form.opportunity_id.choices = [('0', '選択してください')] + [(str(opp.id), opp.name) for opp in opportunities]
     form.account_id.choices = [('0', '選択してください')] + [(str(account.id), account.name) for account in accounts]
@@ -69,7 +69,7 @@ def edit_task(id):
     opportunities = Opportunity.query.filter_by(user_id=current_user.id).all()
     accounts = Account.query.filter_by(user_id=current_user.id).all()
     
-    # Update the choices for dropdowns with proper typing
+    # Update the choices for dropdowns
     form.lead_id.choices = [('0', '選択してください')] + [(str(lead.id), f"{lead.name} ({lead.email})") for lead in leads]
     form.opportunity_id.choices = [('0', '選択してください')] + [(str(opp.id), opp.name) for opp in opportunities]
     form.account_id.choices = [('0', '選択してください')] + [(str(account.id), account.name) for account in accounts]
@@ -127,4 +127,41 @@ def delete_task(id):
     except Exception as e:
         db.session.rollback()
         flash('タスクの削除中にエラーが発生しました。', 'error')
+    return redirect(url_for('tasks.list_tasks'))
+
+@tasks_bp.route('/bulk_action', methods=['POST'])
+@login_required
+def bulk_action():
+    action = request.form.get('action')
+    selected_ids = request.form.getlist('selected_tasks')
+    
+    if not selected_ids:
+        flash('タスクが選択されていません。', 'error')
+        return redirect(url_for('tasks.list_tasks'))
+    
+    try:
+        if action == 'delete':
+            for task_id in selected_ids:
+                task = Task.query.filter_by(id=task_id, user_id=current_user.id).first()
+                if task:
+                    db.session.delete(task)
+            flash('選択したタスクが正常に削除されました。', 'success')
+        elif action == 'complete':
+            for task_id in selected_ids:
+                task = Task.query.filter_by(id=task_id, user_id=current_user.id).first()
+                if task:
+                    task.completed = True
+            flash('選択したタスクが完了としてマークされました。', 'success')
+        elif action == 'incomplete':
+            for task_id in selected_ids:
+                task = Task.query.filter_by(id=task_id, user_id=current_user.id).first()
+                if task:
+                    task.completed = False
+            flash('選択したタスクが未完了としてマークされました。', 'success')
+        
+        db.session.commit()
+    except Exception as e:
+        db.session.rollback()
+        flash('一括操作中にエラーが発生しました。', 'error')
+    
     return redirect(url_for('tasks.list_tasks'))
