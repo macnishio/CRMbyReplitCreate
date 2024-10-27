@@ -3,7 +3,7 @@ from flask_login import login_required, current_user
 from datetime import datetime, timedelta
 from sqlalchemy import func
 from models import Lead, Opportunity, Task, Schedule
-from extensions import db, limiter
+from extensions import db
 from analytics import (
     get_sales_pipeline_value,
     get_monthly_revenue,
@@ -37,7 +37,6 @@ def prepare_calendar_events(items, title_field='title', start_field='start_time'
 
 @bp.route('/')
 @login_required
-@limiter.limit("30 per minute", error_message="レポート生成の制限を超過しました。しばらく時間をおいて再試行してください。")
 def index():
     # Get basic metrics
     this_month_revenue = get_monthly_revenue()

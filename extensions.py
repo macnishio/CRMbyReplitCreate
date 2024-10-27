@@ -9,15 +9,14 @@ db = SQLAlchemy()
 migrate = Migrate()
 login_manager = LoginManager()
 mail = Mail()
-
-# Configure rate limiter with defaults
-limiter = Limiter(
-    key_func=get_remote_address,
-    default_limits=["200 per day", "50 per hour"],
-    storage_uri="memory://"  # For production, use redis or memcached
-)
+limiter = Limiter(key_func=get_remote_address)
 
 # Configure login manager
 login_manager.login_view = 'auth.login'
 login_manager.login_message = 'このページにアクセスするにはログインが必要です。'
 login_manager.login_message_category = 'info'
+
+@login_manager.user_loader
+def load_user(user_id):
+    from models import User
+    return User.query.get(int(user_id))
