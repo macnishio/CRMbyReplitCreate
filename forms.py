@@ -65,8 +65,8 @@ class OpportunityForm(FlaskForm):
         ('Closed Lost', '失注')
     ])
     close_date = DateField('完了予定日', validators=[DataRequired(message='完了予定日を入力してください')])
-    account = SelectField('取引先', coerce=int)
-    lead = SelectField('リード', coerce=lambda x: int(x) if x else None, validators=[Optional()])
+    account = SelectField('取引先', coerce=str)  # Changed to str coerce
+    lead = SelectField('リード', coerce=str)  # Changed to str coerce
     submit = SubmitField('保存')
 
     def validate_close_date(self, close_date):
