@@ -298,7 +298,7 @@ agentRequireRestartOnSave = false
 
 [[workflows.workflow.tasks]]
 task = "shell.exec"
-args = "flask db migrate -m 'Add missing columns' && flask db upgrade"
+args = "flask db migrate -m 'Add google_event_id to Schedule' && flask db upgrade"
 
 [[workflows.workflow]]
 name = "Database Fix"
@@ -339,6 +339,7 @@ run = ["sh", "-c", "python3 app.py"]
 [[ports]]
 localPort = 5000
 externalPort = 80
+exposeLocalhost = true
 
 [[ports]]
 localPort = 5001

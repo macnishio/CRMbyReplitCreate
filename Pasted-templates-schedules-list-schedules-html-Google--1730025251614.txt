@@ -1,0 +1,330 @@
+templates/schedules/list_schedules.htmlこのページにGoogleカレンダーにスケジュールを転送する機能をつけたいので
+下記コードを参考にして設定してください
+
+    <button id="transfer-to-google" class="btn btn-success" disabled>Transfer to Google Calendar</button>
+
+
+document.addEventListener('DOMContentLoaded', function() {
+    const selectAllCheckbox = document.getElementById('select-all');
+    const scheduleCheckboxes = document.querySelectorAll('.schedule-checkbox');
+    const bulkDeleteBtn = document.getElementById('bulk-delete-btn');
+    const bulkDeleteForm = document.getElementById('bulk-delete-form');
+    const transferToGoogleBtn = document.getElementById('transfer-to-google');
+
+    function updateButtonState() {
+        const checkedCount = Array.from(scheduleCheckboxes).filter(cb => cb.checked).length;
+        bulkDeleteBtn.disabled = checkedCount === 0;
+        transferToGoogleBtn.disabled = checkedCount === 0;
+        selectAllCheckbox.checked = checkedCount === scheduleCheckboxes.length && checkedCount !== 0;
+    }
+
+    selectAllCheckbox.addEventListener('change', function() {
+        scheduleCheckboxes.forEach(checkbox => {
+            checkbox.checked = selectAllCheckbox.checked;
+        });
+        updateButtonState();
+    });
+
+    scheduleCheckboxes.forEach(checkbox => {
+        checkbox.addEventListener('change', updateButtonState);
+    });
+
+    bulkDeleteForm.addEventListener('submit', function(event) {
+        if (Array.from(scheduleCheckboxes).filter(cb => cb.checked).length === 0) {
+            event.preventDefault();
+            alert('Please select at least one event to delete.');
+        } else if (!confirm('Are you sure you want to delete the selected events?')) {
+            event.preventDefault();
+        }
+    });
+
+    transferToGoogleBtn.addEventListener('click', function() {
+        const selectedSchedules = Array.from(scheduleCheckboxes)
+            .filter(cb => cb.checked)
+            .map(cb => cb.value);
+
+        if (selectedSchedules.length === 0) {
+            alert('Please select at least one event to transfer.');
+            return;
+        }
+
+        if (!confirm('Are you sure you want to transfer the selected events to Google Calendar?')) {
+            return;
+        }
+
+        fetch("{{ url_for('schedule.transfer_to_google') }}", {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ schedules: selectedSchedules }),
+        })
+        .then(response => response.json())
+        .then(data => {
+            alert(data.message);
+            if (data.success) {
+                location.reload();
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            alert('An error occurred while transferring events.');
+        });
+    });
+
+    updateButtonState(); // 初期状態の設定
+});
+</script>
+{% endblock %}
+
+
+
+
+@bp.route('/transfer_to_google', methods=['POST'])
+@login_required
+def transfer_to_google():
+    data = request.json
+    selected_schedules = data.get('schedules', [])
+
+    if not selected_schedules:
+        current_app.logger.warning("No events selected for transfer.")
+        return jsonify(
+            {"success": False, "message": "No events selected for transfer."}
+        )
+
+    try:
+        service = get_google_calendar_service(current_user)  # current_user を引数に渡す
+        if not service:
+            return jsonify(
+                {"success": False, "message": "Failed to initialize Google Calendar service."}
+            )
+
+        # カレンダーリストを取得して表示
+        try:
+            calendar_list = service.calendarList().list().execute()
+            current_app.logger.info("Available calendars:")
+            for calendar_list_entry in calendar_list['items']:
+                current_app.logger.info(
+                    f"Calendar: {calendar_list_entry['summary']}, ID: {calendar_list_entry['id']}"
+                )
+        except HttpError as error:
+            current_app.logger.error(f"Error retrieving calendar list: {error}")
+            if error.resp.status == 403:
+                current_app.logger.warning(
+                    "Service account may not have permission to list calendars."
+                )
+
+        # サービスアカウントの詳細を表示
+        current_app.logger.info(
+            f"Using service account: {service._http.credentials.service_account_email}"
+        )
+    except ValueError as e:
+        current_app.logger.error(f"Error getting Google Calendar service: {str(e)}")
+        return jsonify({"success": False, "message": str(e)})
+
+    transferred_count = 0
+    errors = []
+
+    for schedule_id in selected_schedules:
+        schedule = Schedule.query.filter_by(
+            id=schedule_id, tenant_id=current_user.tenant_id
+        ).first()
+        if schedule:
+            event = {
+                'summary': schedule.title,
+                'description': schedule.description,
+                'start': {
+                    'dateTime': schedule.start_time.isoformat(),
+                    'timeZone': 'UTC',
+                },
+                'end': {
+                    'dateTime': schedule.end_time.isoformat(),
+                    'timeZone': 'UTC',
+                },
+            }
+            try:
+                # ユーザーのカレンダーIDを取得
+                calendar_id = current_user.google_calendar_id
+                if not calendar_id:
+                    raise ValueError("Google Calendar ID is not set.")
+
+                created_event = (
+                    service.events()
+                    .insert(calendarId=calendar_id, body=event)
+                    .execute()
+                )
+                transferred_count += 1
+                current_app.logger.info(
+                    f"Successfully transferred event {schedule.id} to Google Calendar. Event ID: {created_event.get('id')}"
+                )
+
+                # Google Calendar からイベントの詳細を取得
+                get_event_details(service, calendar_id, created_event.get('id'))
+
+            except Exception as e:
+                error_msg = f"Error transferring event {schedule.id}: {str(e)}"
+                current_app.logger.error(error_msg)
+                errors.append(error_msg)
+                current_app.logger.error(traceback.format_exc())
+        else:
+            current_app.logger.warning(
+                f"Schedule with ID {schedule_id} not found for current user."
+            )
+
+    response = {
+        "success": transferred_count > 0,
+        "message": f"Successfully transferred {transferred_count} events to Google Calendar.",
+        "transferred_count": transferred_count,
+        "total_selected": len(selected_schedules),
+        "errors": errors,
+    }
+
+    current_app.logger.info(
+        f"Transfer to Google Calendar completed. {response['message']}"
+    )
+    return jsonify(response)
+
+
+settingsには以下のようにしたい
+
+
+            # Google Calendar ID を保存
+            current_user.google_calendar_id = request.form.get('google_calendar_id')
+
+
+
+
+  <div class="mb-3" id="google_service_account_section">
+    <label for="google_service_account_file" class="form-label">Google Service Account JSON File</label>
+    <input type="file" class="form-control" id="google_service_account_file" name="google_service_account_file" accept=".json">
+    {% if user.google_service_account_file %}
+    <small class="form-text text-muted">A service account file is already uploaded.</small>
+    {% endif %}
+  </div>
+
+  <div class="mb-3" id="google_calendar_id_section" {% if not user.google_service_account_file %}style="display: none;"{% endif %}>
+    <label for="google_calendar_id" class="form-label">Google Calendar ID</label>
+    <input type="text" class="form-control" id="google_calendar_id" 
+            name="google_calendar_id" value="{{ user.google_calendar_id }}">
+    <small class="form-text text-muted">
+      Google Calendar の設定画面で、目的のカレンダーのIDを確認できます。
+    </small>
+  </div>
+
+  <div class="mb-3" id="google_tasks_service_account_section">
+    <label for="google_tasks_service_account_file" class="form-label">Google Tasks Service Account JSON File</label>
+    <input type="file" class="form-control" id="google_tasks_service_account_file" name="google_tasks_service_account_file" accept=".json" disabled style="background-color: #e9ecef;">
+    {% if user.google_tasks_service_account_file %}
+    <small class="form-text text-muted">A service account file is already uploaded.</small>
+    {% endif %}
+    <small class="form-text text-muted">* Under development</small>
+  </div>
+
+  <div class="mb-3" id="google_task_list_section" {% if not user.google_tasks_service_account_file %}style="display: none;"{% endif %}>
+    <label for="google_task_list_id" class="form-label">Google Task List</label>
+    <select class="form-select" id="google_task_list_id" name="google_task_list_id" disabled style="background-color: #e9ecef;">
+      {% for task_list in task_lists %}
+      <option value="{{ task_list['id'] }}" {% if user.google_task_list_id == task_list['id'] %}selected{% endif %}>
+        {{ task_list['title'] }}
+      </option>
+      {% endfor %}
+    </select>
+    <small class="form-text text-muted">* Under development</small>
+  </div>
+  <button type="submit" class="btn btn-primary">Save Settings</button>
+</form>
+
+<script>
+  $(document).ready(function() {
+    $('#google_service_account_file').change(function() {
+      if ($(this).val()) {
+        // ファイルが選択されたら、設定を保存してタスクリストとカレンダーID入力欄を表示
+        $.ajax({
+          url: "{{ url_for('settings.fetch_api_settings') }}",
+          type: 'POST',
+          data: new FormData($('form')[0]), // フォームデータを送信
+          processData: false,
+          contentType: false,
+          success: function(data) {
+            if (data.success) {
+              // タスクリスト選択セクションを表示
+              $('#google_task_list_section').show();
+              // カレンダーID入力欄を表示
+              $('#google_calendar_id_section').show();
+
+              // ドロップダウンリストにタスクリストを追加
+              var taskListSelect = $('#google_task_list_id');
+              taskListSelect.empty(); // 既存のオプションを削除
+              $.each(data.task_lists, function(index, task_list) {
+                taskListSelect.append($('<option>', {
+                  value: task_list.id,
+                  text: task_list.title
+                }));
+              });
+
+              // カレンダーID入力欄に値を設定 (もしあれば)
+              $('#google_calendar_id').val(data.calendar_id);
+
+              // イベントリスナーを解除 (追加)
+              $('#google_service_account_file').off('change'); 
+
+            } else {
+              alert(data.message);
+            }
+          },
+          error: function() {
+            alert('Error fetching API settings.');
+          }
+        });
+      } else {
+        // ファイルが選択されていない場合は、タスクリスト選択セクションを非表示
+        $('#google_task_list_section').hide();
+        // カレンダーID入力欄を非表示
+        $('#google_calendar_id_section').hide();
+      }
+    });
+
+    // Google Tasks Service Account JSON ファイルの変更も監視
+    $('#google_tasks_service_account_file').change(function() {
+      if ($(this).val()) {
+        // ファイルが選択されたら、タスクリストを取得して表示
+        $.ajax({
+          url: "{{ url_for('settings.fetch_api_settings') }}",
+          type: 'POST',
+          data: new FormData($('form')[0]), // フォームデータを送信
+          processData: false,
+          contentType: false,
+          success: function(data) {
+            if (data.success) {
+              // タスクリスト選択セクションを表示
+              $('#google_task_list_section').show();
+
+              // ドロップダウンリストにタスクリストを追加
+              var taskListSelect = $('#google_task_list_id');
+              taskListSelect.empty(); // 既存のオプションを削除
+              $.each(data.task_lists, function(index, task_list) {
+                taskListSelect.append($('<option>', {
+                  value: task_list.id,
+                  text: task_list.title
+                }));
+              });
+
+              // イベントリスナーを解除 (追加)
+              $('#google_tasks_service_account_file').off('change'); 
+
+            } else {
+              alert(data.message);
+            }
+          },
+          error: function() {
+            alert('Error fetching task lists.');
+          }
+        });
+      } else {
+        // ファイルが選択されていない場合は、タスクリスト選択セクションを非表示
+        $('#google_task_list_section').hide();
+      }
+    });
+  });
+  </script>
+{% endblock %}
