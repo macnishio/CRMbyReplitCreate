@@ -22,6 +22,10 @@
         <button type="submit" class="btn btn-primary" onclick="return confirmBulkAction()">適用</button>
     </div>
 
+    <!-- Google Calendar Transfer Button -->
+    <button id="transfer-to-google" class="btn btn-success" disabled>Transfer to Google Calendar</button>
+</form>
+
 <!-- AI Analysis Section -->
 <div class="ai-analysis-section">
     <div class="analysis-header" onclick="toggleAnalysis()">
@@ -83,7 +87,6 @@
     </div>
     {% endfor %}
 </div>
-</form>
 
 <div class="add-schedule">
     <a href="{{ url_for('schedules.add_schedule') }}" class="btn btn-add">新規スケジュールを追加</a>
@@ -93,7 +96,7 @@
 function toggleAnalysis() {
     const content = document.getElementById('analysisContent');
     const icon = document.querySelector('.toggle-icon');
-    
+
     if (content.style.maxHeight) {
         content.style.maxHeight = null;
         icon.style.transform = 'rotate(0deg)';
@@ -119,21 +122,21 @@ document.getElementById('bulk-action').addEventListener('change', function() {
 function confirmBulkAction() {
     const action = document.getElementById('bulk-action').value;
     const selectedSchedules = document.querySelectorAll('input[name="selected_schedules[]"]:checked').length;
-    
+
     if (!action) {
         alert('操作を選択してください。');
         return false;
     }
-    
+
     if (selectedSchedules === 0) {
         alert('スケジュールを選択してください。');
         return false;
     }
-    
+
     if (action === 'delete') {
         return confirm(`選択された${selectedSchedules}件のスケジュールを削除してもよろしいですか？`);
     }
-    
+
     if (action === 'reschedule') {
         const newDate = document.getElementById('new-date').value;
         const newTime = document.getElementById('new-time').value;
@@ -142,7 +145,7 @@ function confirmBulkAction() {
             return false;
         }
     }
-    
+
     return true;
 }
 
@@ -152,8 +155,52 @@ document.querySelectorAll('.schedule-checkbox').forEach(checkbox => {
         const checkboxes = document.querySelectorAll('.schedule-checkbox');
         const selectAll = document.getElementById('select-all');
         selectAll.checked = [...checkboxes].every(cb => cb.checked);
+        updateButtonStates(); // Google Calendar transfer button state
     });
 });
+
+// Google Calendar Transfer Logic
+document.getElementById('transfer-to-google').addEventListener('click', function() {
+    const selectedSchedules = Array.from(document.querySelectorAll('input[name="selected_schedules[]"]:checked'))
+        .map(checkbox => checkbox.value);
+
+    if (selectedSchedules.length === 0) {
+        alert('転送するイベントを選択してください。');
+        return;
+    }
+
+    if (!confirm('選択したイベントをGoogleカレンダーに転送してもよろしいですか？')) {
+        return;
+    }
+
+    fetch("{{ url_for('schedules.transfer_to_google') }}", {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ schedules: selectedSchedules }),
+    })
+    .then(response => response.json())
+    .then(data => {
+        alert(data.message);
+        if (data.success) {
+            location.reload();
+        }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        alert('イベントの転送中にエラーが発生しました。');
+    });
+});
+
+// Update button states on checkbox changes
+function updateButtonStates() {
+    const selectedCount = document.querySelectorAll('input[name="selected_schedules[]"]:checked').length;
+    document.getElementById('transfer-to-google').disabled = selectedCount === 0;
+}
+
+// Initial button state update
+updateButtonStates();
 </script>
 
 <style>

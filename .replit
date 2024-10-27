@@ -63,9 +63,10 @@ args = "Clean Migration"
 task = "workflow.run"
 args = "Init Migration"
 
-[[workflows.workflow.tasks]]
-task = "workflow.run"
-args = "Clean Migrations"
+# 削除された"Clean Migrations"ワークフロー
+# [[workflows.workflow.tasks]]
+# task = "workflow.run"
+# args = "Clean Migrations"
 
 [[workflows.workflow.tasks]]
 task = "workflow.run"
@@ -244,16 +245,17 @@ agentRequireRestartOnSave = false
 task = "shell.exec"
 args = "flask db init && flask db migrate -m 'Initial migration' && flask db upgrade"
 
-[[workflows.workflow]]
-name = "Clean Migrations"
-author = "agent"
+# 削除された"Clean Migrations"ワークフロー
+# [[workflows.workflow]]
+# name = "Clean Migrations"
+# author = "agent"
 
-[workflows.workflow.metadata]
-agentRequireRestartOnSave = false
+# [workflows.workflow.metadata]
+# agentRequireRestartOnSave = false
 
-[[workflows.workflow.tasks]]
-task = "shell.exec"
-args = "rm -rf migrations && flask db init && flask db migrate -m 'Initial migration' && flask db upgrade"
+# [[workflows.workflow.tasks]]
+# task = "shell.exec"
+# args = "rm -rf migrations && flask db init && flask db migrate -m 'Initial migration' && flask db upgrade"
 
 [[workflows.workflow]]
 name = "Create and Apply Migration"
@@ -339,6 +341,7 @@ run = ["sh", "-c", "python3 app.py"]
 [[ports]]
 localPort = 5000
 externalPort = 80
+exposeLocalhost = true
 
 [[ports]]
 localPort = 5001

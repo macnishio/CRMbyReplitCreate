@@ -6,8 +6,8 @@
     <div class="settings-description">
         <p>これらの設定はあなたのアカウント専用の設定です。機密情報は暗号化されて保存されます。</p>
     </div>
-    
-    <form action="{{ url_for('settings.update_settings') }}" method="POST" class="settings-form">
+
+    <form action="{{ url_for('settings.update_settings') }}" method="POST" enctype="multipart/form-data" class="settings-form">
         <div class="settings-section">
             <h2>メール設定</h2>
             <div class="form-group">
@@ -44,6 +44,24 @@
             <div class="form-group">
                 <label for="clearbit_api_key">Clearbit API キー:（ 現在使えないので適当な文字を入れてください）</label>
                 <input type="password" id="clearbit_api_key" name="clearbit_api_key" placeholder="変更する場合のみ入力">
+            </div>
+        </div>
+
+        <div class="settings-section">
+            <h2>Google Calendar 設定</h2>
+            <div class="form-group">
+                <label for="google_service_account_file">Google Service Account JSON File:</label>
+                <input type="file" id="google_service_account_file" name="google_service_account_file">
+                {% if current_user.google_service_account_file %}
+                    <small class="form-text text-muted">Google Service Account file is already uploaded.</small>
+                {% endif %}
+            </div>
+            <div class="form-group">
+                <label for="google_calendar_id">Google Calendar ID:</label>
+                <input type="text" id="google_calendar_id" name="google_calendar_id" value="{{ current_user.google_calendar_id if current_user.google_calendar_id else '' }}">
+                <small class="form-text text-muted">
+                    Google Calendar の設定画面で、目的のカレンダーのIDを確認できます。
+                </small>
             </div>
         </div>
 

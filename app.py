@@ -19,7 +19,15 @@ def create_app(config_name='default'):
         level=logging.DEBUG,
         format='%(asctime)s %(levelname)s: %(message)s [in %(pathname)s:%(lineno)d]'
     )
-    
+
+    # Upload folder configuration
+    BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+    UPLOAD_FOLDER = os.path.join(BASE_DIR, 'UPLOAD_FOLDER')
+    if not os.path.exists(UPLOAD_FOLDER):
+        os.makedirs(UPLOAD_FOLDER)
+    app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
+
+   
     # Initialize extensions
     db.init_app(app)
     migrate.init_app(app, db)
