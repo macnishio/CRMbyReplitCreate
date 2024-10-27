@@ -68,27 +68,3 @@ def delete_lead(id):
         db.session.rollback()
         flash('リードの削除中にエラーが発生しました。', 'error')
     return redirect(url_for('leads.list_leads'))
-    
-@bp.route('/update-empty-names', methods=['POST'])
-@login_required
-def update_empty_names():
-    try:
-        # Get all leads with empty names for current user
-        leads = Lead.query.filter_by(
-            user_id=current_user.id
-        ).filter(
-            (Lead.name == '') | (Lead.name == None)
-        ).all()
-
-        # Update empty names with email addresses
-        updated_count = 0
-        for lead in leads:
-            if lead.email and not lead.name:
-                lead.name = lead.email.split('@')[0]  # Use part before @ as name
-                updated_count += 1
-
-        if updated_count > 0:
-            db.session.commit()
-            flash(f'{updated_count}件のリードの名前を更新しました。', 'success')
-        else:
-            flash('更新が必要な空の名前はありませんでした。',
