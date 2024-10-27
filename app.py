@@ -1,6 +1,6 @@
 import os
 import socket
-from flask import Flask
+from flask import Flask, jsonify
 from config import config
 from extensions import db, migrate, login_manager, mail, limiter
 from email_receiver import setup_email_scheduler
@@ -8,6 +8,7 @@ import logging
 from sqlalchemy import text
 from db_utils import init_database
 from sqlalchemy.exc import SQLAlchemyError
+from flask_limiter.util import get_remote_address
 
 def create_app(config_name='default'):
     app = Flask(__name__)
@@ -26,6 +27,12 @@ def create_app(config_name='default'):
     login_manager.init_app(app)
     mail.init_app(app)
     limiter.init_app(app)
+
+    # Rate limit error handler
+    @app.errorhandler(429)
+    def ratelimit_handler(e):
+        return jsonify(error="アクセス制限を超過しました。しばらく時間をおいて再試行してください。", 
+                      details=str(e.description)), 429
 
     # Initialize database with error handling
     with app.app_context():

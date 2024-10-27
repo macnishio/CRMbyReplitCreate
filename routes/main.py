@@ -1,7 +1,7 @@
 from flask import Blueprint, render_template, redirect, url_for, flash, request, current_app, jsonify
 from flask_login import login_required, current_user
 from models import Lead, Opportunity, Task, Schedule, Email
-from extensions import db
+from extensions import db, limiter
 from datetime import datetime, timedelta
 from sqlalchemy import func, desc, and_
 from sqlalchemy.exc import SQLAlchemyError
@@ -50,7 +50,7 @@ def dashboard():
             Opportunity.close_date <= last_day_prev_month
         ).scalar() or 0.0
 
-        # Get opportunities by stage with proper error handling
+        # Rest of the dashboard data fetching...
         opportunities_by_stage = db.session.query(
             Opportunity.stage,
             func.count(Opportunity.id).label('count'),
@@ -59,7 +59,6 @@ def dashboard():
             Opportunity.user_id == current_user.id
         ).group_by(Opportunity.stage).all() or []
 
-        # Calculate total pipeline value
         total_pipeline = db.session.query(
             func.coalesce(func.sum(Opportunity.amount), 0.0)
         ).filter(
@@ -67,22 +66,16 @@ def dashboard():
             Opportunity.stage.in_(['Initial Contact', 'Qualification', 'Proposal', 'Negotiation'])
         ).scalar() or 0.0
 
-        # Get upcoming tasks with pagination
-        tasks = Task.query.filter_by(
-            user_id=current_user.id,
-            completed=False
-        ).filter(
-            Task.due_date >= datetime.utcnow()
-        ).order_by(Task.due_date)\
-        .paginate(page=tasks_page, per_page=per_page, error_out=False)
-        
-        # Get upcoming schedules with pagination
+        tasks = Task.query.filter_by(user_id=current_user.id)\
+            .filter(Task.due_date >= datetime.utcnow())\
+            .order_by(Task.due_date)\
+            .paginate(page=tasks_page, per_page=per_page, error_out=False)
+
         schedules = Schedule.query.filter_by(user_id=current_user.id)\
             .filter(Schedule.start_time >= datetime.utcnow())\
             .order_by(Schedule.start_time)\
             .paginate(page=schedules_page, per_page=per_page, error_out=False)
-        
-        # Get recent emails with pagination
+
         emails = Email.query.filter_by(user_id=current_user.id)\
             .order_by(Email.received_date.desc())\
             .paginate(page=emails_page, per_page=per_page, error_out=False)
@@ -109,21 +102,10 @@ def dashboard():
                             this_month_revenue=0.0,
                             previous_month_revenue=0.0,
                             total_pipeline=0.0)
-    except Exception as e:
-        current_app.logger.error(f"Unexpected error in dashboard: {str(e)}")
-        flash('予期せぬエラーが発生しました。', 'error')
-        return render_template('dashboard.html',
-                            leads=None,
-                            opportunities=[],
-                            tasks=None,
-                            schedules=None,
-                            emails=None,
-                            this_month_revenue=0.0,
-                            previous_month_revenue=0.0,
-                            total_pipeline=0.0)
 
 @bp.route('/api/emails/<int:email_id>')
 @login_required
+@limiter.limit("60 per minute", error_message="メール取得の制限を超過しました。しばらく時間をおいて再試行してください。")
 def get_email_content(email_id):
     try:
         email = Email.query.filter_by(

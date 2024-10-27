@@ -1,7 +1,7 @@
 from flask import Blueprint, render_template, redirect, url_for, flash, request, session
 from flask_login import login_user, logout_user, login_required, current_user
 from models import User
-from extensions import db
+from extensions import db, limiter
 from functools import wraps
 from werkzeug.security import check_password_hash
 from urllib.parse import urlparse, urljoin
@@ -15,6 +15,7 @@ def is_safe_url(target):
     return test_url.scheme in ('http', 'https') and ref_url.netloc == test_url.netloc
 
 @bp.route('/login', methods=['GET', 'POST'])
+@limiter.limit("5 per minute", error_message="ログイン試行回数が多すぎます。しばらく時間をおいて再試行してください。")
 def login():
     if current_user.is_authenticated:
         return redirect(url_for('main.dashboard'))
@@ -45,6 +46,7 @@ def logout():
     return redirect(url_for('auth.login'))
 
 @bp.route('/register', methods=['GET', 'POST'])
+@limiter.limit("3 per hour", error_message="アカウント登録の試行回数が多すぎます。1時間後に再試行してください。")
 def register():
     if current_user.is_authenticated:
         return redirect(url_for('main.dashboard'))

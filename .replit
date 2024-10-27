@@ -339,6 +339,7 @@ run = ["sh", "-c", "python3 app.py"]
 [[ports]]
 localPort = 5000
 externalPort = 80
+exposeLocalhost = true
 
 [[ports]]
 localPort = 5001
