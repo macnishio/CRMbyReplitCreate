@@ -18,17 +18,17 @@ def list_leads():
 def add_lead():
     form = LeadForm()
     if form.validate_on_submit():
-        lead = Lead(
-            name=form.name.data,
-            email=form.email.data,
-            phone=form.phone.data,
-            status=form.status.data,
-            score=form.score.data,
-            user_id=current_user.id,
-            created_at=datetime.utcnow(),
-            last_contact=datetime.utcnow()
-        )
         try:
+            lead = Lead(
+                name=form.name.data,
+                email=form.email.data,
+                phone=form.phone.data,
+                status=form.status.data,
+                score=form.score.data or 0.0,
+                user_id=current_user.id,
+                created_at=datetime.utcnow(),
+                last_contact=datetime.utcnow()
+            )
             db.session.add(lead)
             db.session.commit()
             flash('リードが正常に追加されました。', 'success')
