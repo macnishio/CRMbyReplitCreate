@@ -127,7 +127,7 @@ def add_task():
         return redirect(url_for('tasks.list_tasks'))
     
     leads = Lead.query.filter_by(user_id=current_user.id).all()
-    return render_template('tasks/add_task.html', leads=leads)
+    return render_template('tasks/create.html', leads=leads)
 
 @tasks_bp.route('/edit/<int:id>', methods=['GET', 'POST'])
 @login_required

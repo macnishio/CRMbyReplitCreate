@@ -129,7 +129,7 @@ def add_lead():
         db.session.commit()
         flash('リードが追加されました。', 'success')
         return redirect(url_for('leads.list_leads'))
-    return render_template('leads/add_lead.html')
+    return render_template('leads/create.html')
 
 @bp.route('/edit/<int:id>', methods=['GET', 'POST'])
 @login_required

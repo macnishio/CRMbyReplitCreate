@@ -47,7 +47,7 @@ body {
 .main-content {
     flex-grow: 1;
     padding: 20px;
-    margin-left: 50px; /* Match sidebar width */
+    margin-left: 50px;
 }
 
 /* Header styles */
@@ -90,30 +90,89 @@ body {
     width: 100%;
 }
 
-/* Responsive styles */
-@media (max-width: 768px) {
-    .dashboard-container {
-        flex-direction: column;
-    }
+/* Button Styles */
+.btn {
+    padding: 8px 15px;
+    border-radius: 4px;
+    text-decoration: none;
+    font-weight: bold;
+    cursor: pointer;
+    border: none;
+    transition: all 0.3s ease;
+    display: inline-block;
+    text-align: center;
+}
 
-    .sidebar {
-        width: 100%;
-        order: 2;
-    }
+/* Primary Button */
+.btn-primary {
+    background-color: #007bff;
+    color: #ffffff;
+    border: 1px solid #0056b3;
+}
 
-    .main-content {
-        margin-left: 0;
-        order: 1;
-    }
+.btn-primary:hover {
+    background-color: #0056b3;
+    border-color: #004085;
+}
 
-    .header {
-        flex-direction: column;
-        align-items: flex-start;
-    }
+/* Edit Button */
+.btn-edit {
+    background-color: #3498db;
+    color: #ffffff;
+    border: 1px solid #2980b9;
+}
 
-    .user-profile {
-        margin-top: 10px;
-    }
+.btn-edit:hover {
+    background-color: #2980b9;
+    border-color: #2472a4;
+}
+
+/* Delete Button */
+.btn-delete {
+    background-color: #e74c3c;
+    color: #ffffff;
+    border: 1px solid #c0392b;
+}
+
+.btn-delete:hover {
+    background-color: #c0392b;
+    border-color: #a93226;
+}
+
+/* Add Button */
+.btn-add {
+    background-color: #2ecc71;
+    color: #ffffff;
+    border: 1px solid #27ae60;
+    margin-top: 20px;
+    margin-left: 20px;
+}
+
+.btn-add:hover {
+    background-color: #27ae60;
+    border-color: #219a52;
+}
+
+/* Success Button (Google Calendar Transfer) */
+.btn-success {
+    background-color: #28a745;
+    color: #ffffff;
+    border: 1px solid #218838;
+    margin: 10px 0;
+    font-size: 14px;
+    padding: 10px 20px;
+}
+
+.btn-success:hover {
+    background-color: #218838;
+    border-color: #1e7e34;
+}
+
+.btn-success:disabled {
+    background-color: #6c757d;
+    border-color: #6c757d;
+    cursor: not-allowed;
+    opacity: 0.65;
 }
 
 /* Card Grid Styles */
@@ -167,29 +226,6 @@ body {
     margin-top: 15px;
 }
 
-.btn {
-    padding: 5px 10px;
-    border-radius: 4px;
-    text-decoration: none;
-    color: #fff;
-    font-weight: bold;
-}
-
-.btn-edit {
-    background-color: #3498db;
-}
-
-.btn-delete {
-    background-color: #e74c3c;
-}
-
-.btn-add {
-    background-color: #2ecc71;
-    display: inline-block;
-    margin-top: 20px;
-    margin-left: 20px;
-}
-
 /* Specific card styles */
 .lead-card {
     border-left: 5px solid #3498db;
@@ -241,4 +277,35 @@ body {
     padding: 20px;
     border-radius: 8px;
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+/* Responsive styles */
+@media (max-width: 768px) {
+    .dashboard-container {
+        flex-direction: column;
+    }
+
+    .sidebar {
+        width: 100%;
+        order: 2;
+    }
+
+    .main-content {
+        margin-left: 0;
+        order: 1;
+    }
+
+    .header {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+
+    .user-profile {
+        margin-top: 10px;
+    }
+
+    .btn {
+        padding: 12px 20px;
+        font-size: 16px;
+    }
 }

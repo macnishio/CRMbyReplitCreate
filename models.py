@@ -16,9 +16,8 @@ class User(UserMixin, db.Model):
     email: Mapped[str] = mapped_column(String(120), unique=True, nullable=False)
     password_hash: Mapped[str] = mapped_column(String(128))
     role: Mapped[str] = mapped_column(String(20), nullable=False, default='user')
-
-    google_service_account_file = db.Column(db.String(255), nullable=True) 
-    google_calendar_id = db.Column(db.String(255), nullable=True) 
+    google_calendar_id: Mapped[Optional[str]] = mapped_column(String(255), nullable=True)
+    google_service_account_file: Mapped[Optional[str]] = mapped_column(String(255), nullable=True)
     
     # Relationships
     leads = db.relationship('Lead', backref='user', lazy='dynamic')

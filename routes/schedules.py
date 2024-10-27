@@ -123,7 +123,7 @@ def add_schedule():
         return redirect(url_for('schedules.list_schedules'))
 
     leads = Lead.query.filter_by(user_id=current_user.id).all()
-    return render_template('schedules/add_schedule.html', leads=leads)
+    return render_template('schedules/create.html', leads=leads)
 
 @bp.route('/edit/<int:id>', methods=['GET', 'POST'])
 @login_required

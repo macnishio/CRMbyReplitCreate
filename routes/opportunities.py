@@ -98,7 +98,7 @@ def add_opportunity():
         return redirect(url_for('opportunities.list_opportunities'))
     
     leads = Lead.query.filter_by(user_id=current_user.id).all()
-    return render_template('opportunities/add_opportunity.html', leads=leads)
+    return render_template('opportunities/create.html', leads=leads)
 
 @bp.route('/edit/<int:id>', methods=['GET', 'POST'])
 @login_required
