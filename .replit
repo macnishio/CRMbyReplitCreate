@@ -275,7 +275,7 @@ agentRequireRestartOnSave = false
 
 [[workflows.workflow.tasks]]
 task = "shell.exec"
-args = "python3 app.py"
+args = "python app.py"
 waitForPort = 5000
 
 [[workflows.workflow]]
@@ -334,7 +334,7 @@ task = "shell.exec"
 args = "rm -rf migrations && flask db init && flask db migrate -m 'Email schema update' && flask db upgrade"
 
 [deployment]
-run = ["sh", "-c", "python3 app.py"]
+run = ["sh", "-c", "python app.py"]
 
 [[ports]]
 localPort = 5000

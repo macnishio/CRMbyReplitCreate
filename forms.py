@@ -30,55 +30,65 @@ class RegistrationForm(FlaskForm):
     submit = SubmitField('登録')
 
 class LeadForm(FlaskForm):
-    name = StringField('Name', validators=[DataRequired()])
-    email = StringField('Email', validators=[DataRequired(), Email()])
-    phone = StringField('Phone')
-    status = SelectField('Status', choices=[('New', 'New'), ('Contacted', 'Contacted'), ('Qualified', 'Qualified'), ('Lost', 'Lost')], validators=[DataRequired()])
-    score = FloatField('Score', validators=[Optional(), NumberRange(min=0, max=100)])
-    submit = SubmitField('Submit')
+    name = StringField('名前', validators=[DataRequired(message='名前を入力してください')])
+    email = StringField('メールアドレス', validators=[DataRequired(message='メールアドレスを入力してください'), Email(message='有効なメールアドレスを入力してください')])
+    phone = StringField('電話番号')
+    status = SelectField('ステータス', 
+                        choices=[('New', '新規'), 
+                                ('Contacted', '連絡済み'), 
+                                ('Qualified', '適格'), 
+                                ('Lost', '失注')],
+                        validators=[DataRequired(message='ステータスを選択してください')])
+    score = FloatField('スコア', validators=[Optional(), NumberRange(min=0, max=100, message='スコアは0から100の間で入力してください')])
+    submit = SubmitField('保存')
 
     def validate_email(self, email):
         lead = Lead.query.filter_by(email=email.data).first()
-        if lead:
-            raise ValidationError('That email is already in use. Please choose a different one.')
+        if lead and (not hasattr(self, '_obj') or lead.id != self._obj.id):
+            raise ValidationError('このメールアドレスは既に登録されています。')
+
+class AccountForm(FlaskForm):
+    name = StringField('会社名', validators=[DataRequired(message='会社名を入力してください')])
+    industry = StringField('業種')
+    website = StringField('Webサイト')
+    submit = SubmitField('保存')
 
 class OpportunityForm(FlaskForm):
-    name = StringField('Name', validators=[DataRequired()])
-    amount = FloatField('Amount', validators=[DataRequired(), NumberRange(min=0.01, message="Amount must be a positive number.")])
-    stage = SelectField('Stage', choices=[('Prospecting', 'Prospecting'), ('Qualification', 'Qualification'), ('Proposal', 'Proposal'), ('Negotiation', 'Negotiation'), ('Closed Won', 'Closed Won'), ('Closed Lost', 'Closed Lost')])
-    close_date = DateField('Close Date', validators=[DataRequired()])
-    account = SelectField('Account', coerce=int)
-    lead = SelectField('Lead', coerce=lambda x: int(x) if x else None, validators=[Optional()])
-    submit = SubmitField('Submit')
+    name = StringField('商談名', validators=[DataRequired(message='商談名を入力してください')])
+    amount = FloatField('金額', validators=[DataRequired(message='金額を入力してください'), NumberRange(min=0.01, message="金額は0より大きい値を入力してください")])
+    stage = SelectField('ステージ', choices=[
+        ('Initial Contact', '初回接触'),
+        ('Qualification', '案件化'),
+        ('Proposal', '提案'),
+        ('Negotiation', '交渉'),
+        ('Closed Won', '成約'),
+        ('Closed Lost', '失注')
+    ])
+    close_date = DateField('完了予定日', validators=[DataRequired(message='完了予定日を入力してください')])
+    account = SelectField('取引先', coerce=int)
+    lead = SelectField('リード', coerce=lambda x: int(x) if x else None, validators=[Optional()])
+    submit = SubmitField('保存')
 
     def validate_close_date(self, close_date):
         if close_date.data <= date.today():
-            raise ValidationError('Close date must be in the future.')
-
-class AccountForm(FlaskForm):
-    name = StringField('Name', validators=[DataRequired()])
-    industry = StringField('Industry')
-    website = StringField('Website')
-    submit = SubmitField('Submit')
+            raise ValidationError('完了予定日は未来の日付を選択してください')
 
 class ScheduleForm(FlaskForm):
-    title = StringField('Title', validators=[DataRequired()])
-    description = TextAreaField('Description')
-    start_time = DateTimeField('Start Time', format='%Y-%m-%dT%H:%M', validators=[DataRequired()])
-    end_time = DateTimeField('End Time', format='%Y-%m-%dT%H:%M', validators=[DataRequired()])
-    user_id = SelectField('User', coerce=int, validators=[DataRequired()])
-    account_id = SelectField('Account', coerce=int, validators=[Optional()])
-    lead_id = SelectField('Lead', coerce=int, validators=[Optional()])
-    opportunity_id = SelectField('Opportunity', coerce=int, validators=[Optional()])
-    submit = SubmitField('Submit')
+    title = StringField('タイトル', validators=[DataRequired(message='タイトルを入力してください')])
+    description = TextAreaField('説明')
+    start_time = DateTimeField('開始時間', format='%Y-%m-%dT%H:%M', validators=[DataRequired(message='開始時間を入力してください')])
+    end_time = DateTimeField('終了時間', format='%Y-%m-%dT%H:%M', validators=[DataRequired(message='終了時間を入力してください')])
+    lead_id = SelectField('リード', coerce=int, validators=[Optional()])
+    opportunity_id = SelectField('商談', coerce=int, validators=[Optional()])
+    account_id = SelectField('取引先', coerce=int, validators=[Optional()])
+    submit = SubmitField('保存')
 
 class TaskForm(FlaskForm):
-    title = StringField('Title', validators=[DataRequired()])
-    description = TextAreaField('Description')
-    due_date = DateTimeField('Due Date', format='%Y-%m-%dT%H:%M', validators=[DataRequired()])
-    completed = BooleanField('Completed')
-    user_id = SelectField('User', coerce=int, validators=[DataRequired()])
-    lead_id = SelectField('Lead', coerce=int, validators=[Optional()])
-    opportunity_id = SelectField('Opportunity', coerce=int, validators=[Optional()])
-    account_id = SelectField('Account', coerce=int, validators=[Optional()])
-    submit = SubmitField('Submit')
+    title = StringField('タイトル', validators=[DataRequired(message='タイトルを入力してください')])
+    description = TextAreaField('説明')
+    due_date = DateTimeField('期限', format='%Y-%m-%dT%H:%M', validators=[DataRequired(message='期限を入力してください')])
+    completed = BooleanField('完了')
+    lead_id = SelectField('リード', coerce=int, validators=[Optional()])
+    opportunity_id = SelectField('商談', coerce=int, validators=[Optional()])
+    account_id = SelectField('取引先', coerce=int, validators=[Optional()])
+    submit = SubmitField('保存')
