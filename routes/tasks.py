@@ -1,4 +1,4 @@
-from flask import Blueprint, render_template, redirect, url_for, flash, request
+from flask import Blueprint, render_template, redirect, url_for, flash, request, jsonify
 from flask_login import login_required, current_user
 from models import Task, Lead, Opportunity, Account
 from extensions import db
@@ -55,7 +55,7 @@ def add_task():
         except Exception as e:
             db.session.rollback()
             flash('タスクの追加中にエラーが発生しました。', 'error')
-
+            
     return render_template('tasks/add_task.html', form=form)
 
 @tasks_bp.route('/edit/<int:id>', methods=['GET', 'POST'])
@@ -82,21 +82,10 @@ def edit_task(id):
             task.due_date = form.due_date.data
             task.completed = form.completed.data
             
-            # Update relationships with proper type conversion
-            if not form.lead_id.data or form.lead_id.data == '0':
-                task.lead_id = None
-            else:
-                task.lead_id = int(form.lead_id.data)
-                
-            if not form.opportunity_id.data or form.opportunity_id.data == '0':
-                task.opportunity_id = None
-            else:
-                task.opportunity_id = int(form.opportunity_id.data)
-                
-            if not form.account_id.data or form.account_id.data == '0':
-                task.account_id = None
-            else:
-                task.account_id = int(form.account_id.data)
+            # Update relationships
+            task.lead_id = int(form.lead_id.data) if form.lead_id.data and form.lead_id.data != '0' else None
+            task.opportunity_id = int(form.opportunity_id.data) if form.opportunity_id.data and form.opportunity_id.data != '0' else None
+            task.account_id = int(form.account_id.data) if form.account_id.data and form.account_id.data != '0' else None
                 
             db.session.commit()
             flash('タスクが正常に更新されました。', 'success')
