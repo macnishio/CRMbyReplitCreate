@@ -1,6 +1,6 @@
 from flask import Blueprint, render_template, redirect, url_for, flash, request
 from flask_login import login_required, current_user
-from models import Lead, Email
+from models import Lead
 from extensions import db
 from forms import LeadForm
 from datetime import datetime
@@ -67,37 +67,4 @@ def delete_lead(id):
     except Exception as e:
         db.session.rollback()
         flash('リードの削除中にエラーが発生しました。', 'error')
-    return redirect(url_for('leads.list_leads'))
-
-@bp.route('/update_empty_names', methods=['POST'])
-@login_required
-def update_empty_names():
-    try:
-        # Find all leads with empty names for the current user
-        empty_name_leads = Lead.query.filter_by(user_id=current_user.id).filter(
-            (Lead.name == '') | (Lead.name == None)
-        ).all()
-        
-        updated_count = 0
-        for lead in empty_name_leads:
-            # Find the most recent email from this lead
-            email = Email.query.filter_by(
-                lead_id=lead.id,
-                user_id=current_user.id
-            ).order_by(Email.received_date.desc()).first()
-            
-            if email and email.sender_name:
-                lead.name = email.sender_name
-                updated_count += 1
-        
-        if updated_count > 0:
-            db.session.commit()
-            flash(f'{updated_count}件のリード名が更新されました。', 'success')
-        else:
-            flash('更新が必要なリードはありませんでした。', 'info')
-            
-    except Exception as e:
-        db.session.rollback()
-        flash('リード名の更新中にエラーが発生しました。', 'error')
-        
     return redirect(url_for('leads.list_leads'))

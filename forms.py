@@ -65,8 +65,8 @@ class OpportunityForm(FlaskForm):
         ('Closed Lost', '失注')
     ])
     close_date = DateField('完了予定日', validators=[DataRequired(message='完了予定日を入力してください')])
-    account = SelectField('取引先', coerce=str)
-    lead = SelectField('リード', coerce=str)
+    account = SelectField('取引先', coerce=int)
+    lead = SelectField('リード', coerce=lambda x: int(x) if x else None, validators=[Optional()])
     submit = SubmitField('保存')
 
     def validate_close_date(self, close_date):
@@ -78,9 +78,9 @@ class ScheduleForm(FlaskForm):
     description = TextAreaField('説明')
     start_time = DateTimeField('開始時間', format='%Y-%m-%dT%H:%M', validators=[DataRequired(message='開始時間を入力してください')])
     end_time = DateTimeField('終了時間', format='%Y-%m-%dT%H:%M', validators=[DataRequired(message='終了時間を入力してください')])
-    lead_id = SelectField('リード', coerce=str, validators=[Optional()])
-    opportunity_id = SelectField('商談', coerce=str, validators=[Optional()])
-    account_id = SelectField('取引先', coerce=str, validators=[Optional()])
+    lead_id = SelectField('リード', coerce=int, validators=[Optional()])
+    opportunity_id = SelectField('商談', coerce=int, validators=[Optional()])
+    account_id = SelectField('取引先', coerce=int, validators=[Optional()])
     submit = SubmitField('保存')
 
 class TaskForm(FlaskForm):
@@ -88,7 +88,7 @@ class TaskForm(FlaskForm):
     description = TextAreaField('説明')
     due_date = DateTimeField('期限', format='%Y-%m-%dT%H:%M', validators=[DataRequired(message='期限を入力してください')])
     completed = BooleanField('完了')
-    lead_id = SelectField('リード', coerce=str, validators=[Optional()])
-    opportunity_id = SelectField('商談', coerce=str, validators=[Optional()])
-    account_id = SelectField('取引先', coerce=str, validators=[Optional()])
+    lead_id = SelectField('リード', coerce=int, validators=[Optional()])
+    opportunity_id = SelectField('商談', coerce=int, validators=[Optional()])
+    account_id = SelectField('取引先', coerce=int, validators=[Optional()])
     submit = SubmitField('保存')
