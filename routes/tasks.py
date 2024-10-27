@@ -76,9 +76,13 @@ def edit_task(id):
 
     if form.validate_on_submit():
         try:
-            form.populate_obj(task)
+            # Update basic fields
+            task.title = form.title.data
+            task.description = form.description.data
+            task.due_date = form.due_date.data
+            task.completed = form.completed.data
             
-            # Handle relationships with proper type conversion
+            # Update relationships with proper type conversion
             if not form.lead_id.data or form.lead_id.data == '0':
                 task.lead_id = None
             else:
