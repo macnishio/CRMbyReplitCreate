@@ -63,11 +63,6 @@ args = "Clean Migration"
 task = "workflow.run"
 args = "Init Migration"
 
-# 削除された"Clean Migrations"ワークフロー
-# [[workflows.workflow.tasks]]
-# task = "workflow.run"
-# args = "Clean Migrations"
-
 [[workflows.workflow.tasks]]
 task = "workflow.run"
 args = "Create and Apply Migration"
