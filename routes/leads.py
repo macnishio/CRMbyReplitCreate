@@ -5,6 +5,7 @@ from extensions import db
 from datetime import datetime
 from sqlalchemy import func
 from ai_analysis import analyze_leads
+from forms import LeadForm
 
 bp = Blueprint('leads', __name__)
 
@@ -116,20 +117,21 @@ def bulk_action():
 @bp.route('/add', methods=['GET', 'POST'])
 @login_required
 def add_lead():
-    if request.method == 'POST':
+    form = LeadForm()  # フォームのインスタンスを作成
+    if form.validate_on_submit():  # POSTリクエストとバリデーションチェック
         lead = Lead(
-            name=request.form['name'],
-            email=request.form['email'],
-            phone=request.form['phone'],
-            status=request.form['status'],
-            score=float(request.form['score']) if request.form['score'] else 0.0,
+            name=form.name.data,  # request.form[] の代わりに form.name.data を使用
+            email=form.email.data,
+            phone=form.phone.data,
+            status=form.status.data,
+            score=form.score.data if form.score.data is not None else 0.0,
             user_id=current_user.id
         )
         db.session.add(lead)
         db.session.commit()
         flash('リードが追加されました。', 'success')
         return redirect(url_for('leads.list_leads'))
-    return render_template('leads/create.html')
+    return render_template('leads/create.html', form=form)
 
 @bp.route('/edit/<int:id>', methods=['GET', 'POST'])
 @login_required

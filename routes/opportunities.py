@@ -5,6 +5,7 @@ from extensions import db
 from datetime import datetime
 from sqlalchemy import func
 from ai_analysis import analyze_opportunities
+from forms import OpportunityForm  # OpportunityFormをインポート
 
 bp = Blueprint('opportunities', __name__)
 
@@ -96,9 +97,9 @@ def add_opportunity():
         db.session.commit()
         flash('商談が追加されました。', 'success')
         return redirect(url_for('opportunities.list_opportunities'))
-    
+    form = OpportunityForm() 
     leads = Lead.query.filter_by(user_id=current_user.id).all()
-    return render_template('opportunities/create.html', leads=leads)
+    return render_template('opportunities/create.html', form=form, leads=leads)
 
 @bp.route('/edit/<int:id>', methods=['GET', 'POST'])
 @login_required

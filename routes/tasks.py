@@ -5,6 +5,7 @@ from extensions import db
 from datetime import datetime, timedelta
 from sqlalchemy import func
 from ai_analysis import analyze_tasks
+from forms import TaskForm
 
 tasks_bp = Blueprint('tasks', __name__)
 
@@ -106,6 +107,7 @@ def bulk_action():
 @tasks_bp.route('/add', methods=['GET', 'POST'])
 @login_required
 def add_task():
+    form = TaskForm()  # フォームのインスタンスを作成
     if request.method == 'POST':
         title = request.form['title']
         description = request.form['description']
@@ -127,7 +129,7 @@ def add_task():
         return redirect(url_for('tasks.list_tasks'))
     
     leads = Lead.query.filter_by(user_id=current_user.id).all()
-    return render_template('tasks/create.html', leads=leads)
+    return render_template('tasks/create.html',form=form , leads=leads)
 
 @tasks_bp.route('/edit/<int:id>', methods=['GET', 'POST'])
 @login_required

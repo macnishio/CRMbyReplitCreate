@@ -4,7 +4,7 @@
 
 {% block content %}
     <h1>Create Schedule</h1>
-    <form method="POST" action="{{ url_for('schedules.create_schedule') }}">
+    <form method="POST" action="{{ url_for('schedules.add_schedule') }}">
         {{ form.hidden_tag() }}
         <div>
             {{ form.title.label }}
