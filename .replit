@@ -218,16 +218,16 @@ agentRequireRestartOnSave = false
 task = "shell.exec"
 args = "flask db migrate -m 'Add user_id to EmailFetchTracker' && flask db upgrade"
 
-[[workflows.workflow]]
-name = "Clean Migration"
-author = "agent"
+#[[workflows.workflow]]
+#name = "Clean Migration"
+#author = "agent"
 
-[workflows.workflow.metadata]
-agentRequireRestartOnSave = false
+#[workflows.workflow.metadata]
+#agentRequireRestartOnSave = false
 
-[[workflows.workflow.tasks]]
-task = "shell.exec"
-args = "rm -rf migrations/versions/*"
+#[[workflows.workflow.tasks]]
+#task = "shell.exec"
+#args = "rm -rf migrations/versions/*"
 
 [[workflows.workflow]]
 name = "Init Migration"
@@ -308,8 +308,23 @@ agentRequireRestartOnSave = false
 task = "shell.exec"
 args = "flask db init && flask db migrate -m 'Fix email schema' && flask db upgrade"
 
+#[[workflows.workflow]]
+#name = "Fix Database Schema"
+#author = "agent"
+
+#[workflows.workflow.metadata]
+#agentRequireRestartOnSave = false
+
+#[[workflows.workflow.tasks]]
+#task = "shell.exec"
+#args = "rm -rf migrations && flask db init && flask db migrate -m 'Fix email schema' && flask db upgrade"
+
+#[[workflows.workflow]]
+#name = "Clean and Migrate"
+#author = "agent"
+
 [[workflows.workflow]]
-name = "Fix Database Schema"
+name = "Safe Migration"
 author = "agent"
 
 [workflows.workflow.metadata]
@@ -317,10 +332,17 @@ agentRequireRestartOnSave = false
 
 [[workflows.workflow.tasks]]
 task = "shell.exec"
-args = "rm -rf migrations && flask db init && flask db migrate -m 'Fix email schema' && flask db upgrade"
+args = "flask db migrate -m 'Update schema' && flask db upgrade"
+
+#[workflows.workflow.metadata]
+#agentRequireRestartOnSave = false
+
+#[[workflows.workflow.tasks]]
+#task = "shell.exec"
+#args = "rm -rf migrations && flask db init && flask db migrate -m 'Email #schema update' && flask db upgrade"
 
 [[workflows.workflow]]
-name = "Clean and Migrate"
+name = "Database Management"
 author = "agent"
 
 [workflows.workflow.metadata]
@@ -328,7 +350,19 @@ agentRequireRestartOnSave = false
 
 [[workflows.workflow.tasks]]
 task = "shell.exec"
-args = "rm -rf migrations && flask db init && flask db migrate -m 'Email schema update' && flask db upgrade"
+args = """
+# バックアップの作成
+pg_dump $DATABASE_URL > backup_$(date +%Y%m%d_%H%M%S).sql
+
+# マイグレーションステータスの確認
+flask db current
+
+# 必要に応じて新しいマイグレーションを作成
+# flask db migrate -m 'Describe changes'
+
+# マイグレーションの適用
+flask db upgrade
+"""
 
 [deployment]
 run = ["sh", "-c", "python3 app.py"]
