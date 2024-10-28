@@ -1,6 +1,5 @@
 {% extends "base.html" %}
-
-{% block title %}タスク編集{% endblock %}
+{% block title %}{{ '商談編集' if opportunity else '商談作成' }}{% endblock %}
 
 {% block styles %}
 <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
@@ -34,14 +33,6 @@
     border: 1px solid #ddd;
     border-radius: 4px;
     font-size: 1rem;
-}
-
-.form-check {
-    margin-top: 0.5rem;
-}
-
-.form-check-input {
-    margin-right: 0.5rem;
 }
 
 .button-group {
@@ -81,6 +72,13 @@
     border-radius: 4px !important;
     padding: 4px 8px !important;
 }
+
+.invalid-feedback {
+    display: block;
+    color: #dc3545;
+    font-size: 0.875rem;
+    margin-top: 0.25rem;
+}
 </style>
 {% endblock %}
 
@@ -88,28 +86,18 @@
 <div class="edit-container">
     <div class="card">
         <div class="card-header bg-primary text-white">
-            <h1 class="h3 mb-0">タスク編集</h1>
+            <h1 class="h3 mb-0">{{ '商談編集' if opportunity else '新規商談作成' }}</h1>
         </div>
         <div class="card-body">
-            <form method="POST" action="{{ url_for('tasks.edit_task', id=task.id) }}" class="edit-form">
-                {{ form.csrf_token }}
-                
+            <form method="POST" class="edit-form" action="{{ url_for('opportunities.edit_opportunity', id=opportunity.id) if opportunity else url_for('opportunities.add_opportunity') }}">
+                {{ form.csrf_token if form }}
+
                 <div class="row">
                     <div class="col-md-12 mb-3">
                         <div class="form-group">
-                            <label for="title">タイトル</label>
-                            <input type="text" id="title" name="title" class="form-control" 
-                                   value="{{ task.title }}" required>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="row">
-                    <div class="col-12 mb-3">
-                        <div class="form-group">
-                            <label for="description">説明</label>
-                            <textarea id="description" name="description" class="form-control" 
-                                    rows="3">{{ task.description }}</textarea>
+                            <label for="name">商談名</label>
+                            <input type="text" id="name" name="name" class="form-control" 
+                                   value="{{ opportunity.name if opportunity else '' }}" required>
                         </div>
                     </div>
                 </div>
@@ -117,50 +105,51 @@
                 <div class="row">
                     <div class="col-md-6 mb-3">
                         <div class="form-group">
-                            <label for="due_date">期限</label>
-                            <input type="date" id="due_date" name="due_date" class="form-control" 
-                                   value="{{ task.due_date.strftime('%Y-%m-%d') }}" required>
-                        </div>
-                    </div>
-                    <div class="col-md-6 mb-3">
-                        <div class="form-group">
-                            <label for="status">ステータス</label>
-                            <select name="status" id="status" class="form-control" required>
-                                <option value="New" {% if task.status == 'New' %}selected{% endif %}>新規</option>
-                                <option value="In Progress" {% if task.status == 'In Progress' %}selected{% endif %}>進行中</option>
-                                <option value="Completed" {% if task.status == 'Completed' %}selected{% endif %}>完了</option>
+                            <label for="stage">ステージ</label>
+                            <select name="stage" id="stage" class="form-control" required>
+                                <option value="Initial Contact" {% if opportunity and opportunity.stage == 'Initial Contact' %}selected{% endif %}>初期接触</option>
+                                <option value="Qualification" {% if opportunity and opportunity.stage == 'Qualification' %}selected{% endif %}>資格確認</option>
+                                <option value="Proposal" {% if opportunity and opportunity.stage == 'Proposal' %}selected{% endif %}>提案</option>
+                                <option value="Negotiation" {% if opportunity and opportunity.stage == 'Negotiation' %}selected{% endif %}>交渉</option>
+                                <option value="Closed Won" {% if opportunity and opportunity.stage == 'Closed Won' %}selected{% endif %}>成約</option>
+                                <option value="Closed Lost" {% if opportunity and opportunity.stage == 'Closed Lost' %}selected{% endif %}>失注</option>
                             </select>
                         </div>
                     </div>
+                    <div class="col-md-6 mb-3">
+                        <div class="form-group">
+                            <label for="amount">金額</label>
+                            <input type="number" id="amount" name="amount" class="form-control" 
+                                   value="{{ opportunity.amount if opportunity else '' }}" min="0">
+                        </div>
+                    </div>
                 </div>
 
                 <div class="row">
+                    <div class="col-md-6 mb-3">
+                        <div class="form-group">
+                            <label for="close_date">完了予定日</label>
+                            <input type="date" id="close_date" name="close_date" class="form-control" 
+                                   value="{{ opportunity.close_date.strftime('%Y-%m-%d') if opportunity and opportunity.close_date else '' }}">
+                        </div>
+                    </div>
                     <div class="col-md-6 mb-3">
                         <div class="form-group">
                             <label for="lead_id">リード</label>
                             <select name="lead_id" id="lead_id" class="form-control select2">
                                 <option value="">リードを選択してください</option>
                                 {% for lead in leads %}
-                                    <option value="{{ lead.id }}" {% if task.lead_id == lead.id %}selected{% endif %}>
+                                    <option value="{{ lead.id }}" {% if opportunity and opportunity.lead_id == lead.id %}selected{% endif %}>
                                         {{ lead.name }} ({{ lead.email }})
                                     </option>
                                 {% endfor %}
                             </select>
                         </div>
                     </div>
-                    <div class="col-md-6 mb-3">
-                        <div class="form-group">
-                            <div class="form-check mt-4">
-                                <input type="checkbox" id="completed" name="completed" class="form-check-input" 
-                                       {% if task.completed %}checked{% endif %}>
-                                <label class="form-check-label" for="completed">完了済み</label>
-                            </div>
-                        </div>
-                    </div>
                 </div>
 
                 <div class="button-group">
-                    <a href="{{ url_for('tasks.list_tasks') }}" class="btn btn-secondary">
+                    <a href="{{ url_for('opportunities.list_opportunities') }}" class="btn btn-secondary">
                         <i class="fas fa-arrow-left"></i> 戻る
                     </a>
                     <button type="submit" class="btn btn-primary">
@@ -192,19 +181,13 @@ $(document).ready(function() {
         width: '100%'
     });
 
-    // completedチェックボックスの変更時の処理
-    $('#completed').change(function() {
-        if ($(this).is(':checked')) {
-            $('#status').val('Completed');
-        }
-    });
-
-    // statusセレクトの変更時の処理
-    $('#status').change(function() {
-        if ($(this).val() === 'Completed') {
-            $('#completed').prop('checked', true);
-        }
-    });
+    // 新規作成時のデフォルト日付設定
+    if (!$('#close_date').val()) {
+        const today = new Date();
+        today.setDate(today.getDate() + 30); // デフォルトで30日後
+        const defaultDate = today.toISOString().split('T')[0];
+        $('#close_date').val(defaultDate);
+    }
 });
 </script>
 {% endblock %}

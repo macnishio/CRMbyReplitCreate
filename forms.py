@@ -1,8 +1,9 @@
 from flask_wtf import FlaskForm
-from wtforms import StringField, PasswordField, SubmitField, FloatField, DateField, SelectField, TextAreaField, DateTimeField, BooleanField
+from wtforms import StringField, PasswordField, SubmitField, FloatField, DateField, SelectField, TextAreaField, DateTimeField, BooleanField, IntegerField
 from wtforms.validators import DataRequired, Email, EqualTo, Length, Optional, NumberRange, ValidationError
 from models import Lead
 from datetime import date
+from wtforms.fields import DateTimeLocalField
 
 class LoginForm(FlaskForm):
     username = StringField('Username', validators=[DataRequired()])
@@ -62,23 +63,26 @@ class AccountForm(FlaskForm):
     submit = SubmitField('Submit')
 
 class ScheduleForm(FlaskForm):
-    title = StringField('Title', validators=[DataRequired()])
-    description = TextAreaField('Description')
-    start_time = DateTimeField('Start Time', format='%Y-%m-%dT%H:%M', validators=[DataRequired()])
-    end_time = DateTimeField('End Time', format='%Y-%m-%dT%H:%M', validators=[DataRequired()])
-    user_id = SelectField('User', coerce=int, validators=[DataRequired()])
-    account_id = SelectField('Account', coerce=int, validators=[Optional()])
-    lead_id = SelectField('Lead', coerce=int, validators=[Optional()])
-    opportunity_id = SelectField('Opportunity', coerce=int, validators=[Optional()])
-    submit = SubmitField('Submit')
+    title = StringField('タイトル', validators=[DataRequired()], render_kw={"class": "form-control"})
+    description = TextAreaField('説明', render_kw={"class": "form-control", "rows": 3})
+    start_time = DateTimeLocalField('開始時間', format='%Y-%m-%dT%H:%M', validators=[DataRequired()], render_kw={"class": "form-control"})
+    end_time = DateTimeLocalField('終了時間', format='%Y-%m-%dT%H:%M', validators=[DataRequired()], render_kw={"class": "form-control"})
+    # lead_idはフォームでは直接HTMLで描画するので、ここではバリデーションのみ定義
+    lead_id = IntegerField('リード', validators=[Optional()])
+    submit = SubmitField('保存', render_kw={"class": "btn btn-primary"})
 
 class TaskForm(FlaskForm):
-    title = StringField('Title', validators=[DataRequired()])
-    description = TextAreaField('Description')
-    due_date = DateTimeField('Due Date', format='%Y-%m-%dT%H:%M', validators=[DataRequired()])
-    completed = BooleanField('Completed')
-    user_id = SelectField('User', coerce=int, validators=[DataRequired()])
-    lead_id = SelectField('Lead', coerce=int, validators=[Optional()])
-    opportunity_id = SelectField('Opportunity', coerce=int, validators=[Optional()])
-    account_id = SelectField('Account', coerce=int, validators=[Optional()])
-    submit = SubmitField('Submit')
+    title = StringField('タイトル', validators=[DataRequired()], render_kw={"class": "form-control"})
+    description = TextAreaField('説明', render_kw={"class": "form-control", "rows": 3})
+    due_date = DateField('期限', validators=[DataRequired()], render_kw={"class": "form-control"})
+    status = SelectField('ステータス', 
+                        choices=[
+                            ('New', '新規'),
+                            ('In Progress', '進行中'),
+                            ('Completed', '完了')
+                        ],
+                        validators=[DataRequired()],
+                        render_kw={"class": "form-control"})
+    completed = BooleanField('完了済み', render_kw={"class": "form-check-input"})
+    lead_id = IntegerField('リード', validators=[Optional()])
+    submit = SubmitField('保存', render_kw={"class": "btn btn-primary"})

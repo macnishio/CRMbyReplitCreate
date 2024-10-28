@@ -1,45 +1,220 @@
+{# templates/schedules/create.html #}
 {% extends "base.html" %}
 
-{% block title %}Create Schedule{% endblock %}
+{% block title %}スケジュール作成{% endblock %}
+
+{% block styles %}
+<link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
+<style>
+/* Select2のカスタマイズ */
+.select2-container .select2-selection--single {
+    height: 38px;
+    border: 1px solid #ced4da;
+    border-radius: 5px;
+}
+
+.select2-container--default .select2-selection--single .select2-selection__rendered {
+    line-height: 38px;
+    padding-left: 12px;
+}
+
+.select2-container--default .select2-selection--single .select2-selection__arrow {
+    height: 36px;
+}
+
+.select2-container--default .select2-results__option--highlighted[aria-selected] {
+    background-color: #0d6efd;
+}
+
+.select2-dropdown {
+    border: 1px solid #ced4da;
+    border-radius: 5px;
+}
+
+.select2-search__field {
+    border: 1px solid #ced4da !important;
+    border-radius: 4px !important;
+    padding: 4px 8px !important;
+}
+
+.card {
+    border: none;
+    border-radius: 10px;
+}
+
+.card-header {
+    border-radius: 10px 10px 0 0;
+}
+
+.form-control, .form-select {
+    border-radius: 5px;
+    border: 1px solid #ced4da;
+    padding: 0.5rem;
+}
+
+.form-control:focus, .form-select:focus {
+    border-color: #80bdff;
+    box-shadow: 0 0 0 0.2rem rgba(0,123,255,.25);
+}
+
+.btn {
+    padding: 0.5rem 1.5rem;
+    border-radius: 5px;
+}
+
+.btn-primary {
+    background-color: #0d6efd;
+    border-color: #0d6efd;
+}
+
+.btn-secondary {
+    background-color: #6c757d;
+    border-color: #6c757d;
+}
+
+.invalid-feedback {
+    color: #dc3545;
+    font-size: 0.875rem;
+}
+</style>
+{% endblock %}
 
 {% block content %}
-    <h1>Create Schedule</h1>
-    <form method="POST" action="{{ url_for('schedules.add_schedule') }}">
-        {{ form.hidden_tag() }}
-        <div>
-            {{ form.title.label }}
-            {{ form.title() }}
+<div class="container mt-4">
+    <div class="card shadow">
+        <div class="card-header bg-primary text-white">
+            <h1 class="h3 mb-0">新規スケジュール作成</h1>
         </div>
-        <div>
-            {{ form.description.label }}
-            {{ form.description() }}
+        <div class="card-body">
+            <form method="POST" action="{{ url_for('schedules.add_schedule') }}" class="needs-validation" novalidate>
+                {{ form.hidden_tag() }}
+
+                {# フラッシュメッセージ #}
+                {% with messages = get_flashed_messages(with_categories=true) %}
+                    {% if messages %}
+                        {% for category, message in messages %}
+                            <div class="alert alert-{{ category }}">{{ message }}</div>
+                        {% endfor %}
+                    {% endif %}
+                {% endwith %}
+
+                <div class="row">
+                    <div class="col-md-6 mb-3">
+                        <div class="form-group">
+                            {{ form.title.label(class="form-label") }}
+                            {{ form.title }}
+                            {% if form.title.errors %}
+                                {% for error in form.title.errors %}
+                                    <div class="invalid-feedback d-block">{{ error }}</div>
+                                {% endfor %}
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+
+                <div class="row">
+                    <div class="col-12 mb-3">
+                        <div class="form-group">
+                            {{ form.description.label(class="form-label") }}
+                            {{ form.description }}
+                        </div>
+                    </div>
+                </div>
+
+                <div class="row">
+                    <div class="col-md-6 mb-3">
+                        <div class="form-group">
+                            {{ form.start_time.label(class="form-label") }}
+                            {{ form.start_time }}
+                            {% if form.start_time.errors %}
+                                {% for error in form.start_time.errors %}
+                                    <div class="invalid-feedback d-block">{{ error }}</div>
+                                {% endfor %}
+                            {% endif %}
+                        </div>
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        <div class="form-group">
+                            {{ form.end_time.label(class="form-label") }}
+                            {{ form.end_time }}
+                            {% if form.end_time.errors %}
+                                {% for error in form.end_time.errors %}
+                                    <div class="invalid-feedback d-block">{{ error }}</div>
+                                {% endfor %}
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+
+                <div class="row">
+                    <div class="col-md-6 mb-3">
+                        <div class="form-group">
+                            {{ form.lead_id.label(class="form-label") }}
+                            <select class="form-select select2" name="lead_id" id="lead_id">
+                                <option value="">リードを選択してください</option>
+                                {% for lead in leads %}
+                                    <option value="{{ lead.id }}">{{ lead.name }} ({{ lead.email }})</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="d-flex justify-content-between mt-4">
+                    <a href="{{ url_for('schedules.list_schedules') }}" class="btn btn-secondary">
+                        <i class="fas fa-arrow-left"></i> 戻る
+                    </a>
+                    {{ form.submit(class="btn btn-primary") }}
+                </div>
+            </form>
         </div>
-        <div>
-            {{ form.start_time.label }}
-            {{ form.start_time(type="datetime-local") }}
-        </div>
-        <div>
-            {{ form.end_time.label }}
-            {{ form.end_time(type="datetime-local") }}
-        </div>
-        <div>
-            {{ form.user_id.label }}
-            {{ form.user_id() }}
-        </div>
-        <div>
-            {{ form.account_id.label }}
-            {{ form.account_id() }}
-        </div>
-        <div>
-            {{ form.lead_id.label }}
-            {{ form.lead_id() }}
-        </div>
-        <div>
-            {{ form.opportunity_id.label }}
-            {{ form.opportunity_id() }}
-        </div>
-        <div>
-            {{ form.submit() }}
-        </div>
-    </form>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
+<script>
+$(document).ready(function() {
+    // Select2の初期化
+    $('.select2').select2({
+        placeholder: 'リードを検索...',
+        allowClear: true,
+        language: {
+            noResults: function() {
+                return "該当するリードが見つかりません";
+            },
+            searching: function() {
+                return "検索中...";
+            }
+        },
+        width: '100%'
+    });
+});
+
+// 日時入力フィールドのデフォルト値を設定
+document.addEventListener('DOMContentLoaded', function() {
+    const now = new Date();
+    const year = now.getFullYear();
+    const month = String(now.getMonth() + 1).padStart(2, '0');
+    const day = String(now.getDate()).padStart(2, '0');
+    const hours = String(now.getHours()).padStart(2, '0');
+    const minutes = String(now.getMinutes()).padStart(2, '0');
+
+    const defaultDateTime = `${year}-${month}-${day}T${hours}:${minutes}`;
+
+    if (!document.getElementById('start_time').value) {
+        document.getElementById('start_time').value = defaultDateTime;
+    }
+
+    if (!document.getElementById('end_time').value) {
+        // デフォルトで1時間後を終了時間に設定
+        now.setHours(now.getHours() + 1);
+        const endHours = String(now.getHours()).padStart(2, '0');
+        const endMinutes = String(now.getMinutes()).padStart(2, '0');
+        document.getElementById('end_time').value = `${year}-${month}-${day}T${endHours}:${endMinutes}`;
+    }
+});
+</script>
 {% endblock %}

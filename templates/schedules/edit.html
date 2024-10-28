@@ -1,45 +1,185 @@
 {% extends "base.html" %}
 
-{% block title %}Edit Schedule{% endblock %}
+{% block title %}スケジュール編集{% endblock %}
+
+{% block styles %}
+<link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
+<style>
+.edit-container {
+    max-width: 800px;
+    margin: 2rem auto;
+    padding: 2rem;
+    background: #fff;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.edit-form {
+    margin-top: 1rem;
+}
+
+.form-group {
+    margin-bottom: 1rem;
+}
+
+.form-group label {
+    display: block;
+    margin-bottom: 0.5rem;
+    font-weight: bold;
+}
+
+.form-control {
+    width: 100%;
+    padding: 0.5rem;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    font-size: 1rem;
+}
+
+.button-group {
+    margin-top: 2rem;
+    display: flex;
+    gap: 1rem;
+    justify-content: flex-end;
+}
+
+/* Select2のカスタマイズ */
+.select2-container .select2-selection--single {
+    height: 38px;
+    border: 1px solid #ced4da;
+    border-radius: 5px;
+}
+
+.select2-container--default .select2-selection--single .select2-selection__rendered {
+    line-height: 38px;
+    padding-left: 12px;
+}
+
+.select2-container--default .select2-selection--single .select2-selection__arrow {
+    height: 36px;
+}
+
+.select2-container--default .select2-results__option--highlighted[aria-selected] {
+    background-color: #0d6efd;
+}
+
+.select2-dropdown {
+    border: 1px solid #ced4da;
+    border-radius: 5px;
+}
+
+.select2-search__field {
+    border: 1px solid #ced4da !important;
+    border-radius: 4px !important;
+    padding: 4px 8px !important;
+}
+</style>
+{% endblock %}
 
 {% block content %}
-    <h1>Edit Schedule</h1>
-    <form method="POST">
-        {{ form.hidden_tag() }}
-        <div>
-            {{ form.title.label }}
-            {{ form.title() }}
+<div class="edit-container">
+    <div class="card">
+        <div class="card-header bg-primary text-white">
+            <h1 class="h3 mb-0">スケジュール編集</h1>
         </div>
-        <div>
-            {{ form.description.label }}
-            {{ form.description() }}
+        <div class="card-body">
+            <form method="POST" action="{{ url_for('schedules.edit_schedule', id=schedule.id) }}" class="edit-form">
+                {{ form.hidden_tag() }}
+
+                <div class="row">
+                    <div class="col-md-6 mb-3">
+                        <div class="form-group">
+                            {{ form.title.label(class="form-label") }}
+                            {{ form.title(class="form-control") }}
+                            {% if form.title.errors %}
+                                {% for error in form.title.errors %}
+                                    <div class="invalid-feedback d-block">{{ error }}</div>
+                                {% endfor %}
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+
+                <div class="row">
+                    <div class="col-12 mb-3">
+                        <div class="form-group">
+                            {{ form.description.label(class="form-label") }}
+                            {{ form.description(class="form-control", rows="3") }}
+                        </div>
+                    </div>
+                </div>
+
+                <div class="row">
+                    <div class="col-md-6 mb-3">
+                        <div class="form-group">
+                            {{ form.start_time.label(class="form-label") }}
+                            {{ form.start_time(class="form-control", type="datetime-local") }}
+                            {% if form.start_time.errors %}
+                                {% for error in form.start_time.errors %}
+                                    <div class="invalid-feedback d-block">{{ error }}</div>
+                                {% endfor %}
+                            {% endif %}
+                        </div>
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        <div class="form-group">
+                            {{ form.end_time.label(class="form-label") }}
+                            {{ form.end_time(class="form-control", type="datetime-local") }}
+                            {% if form.end_time.errors %}
+                                {% for error in form.end_time.errors %}
+                                    <div class="invalid-feedback d-block">{{ error }}</div>
+                                {% endfor %}
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+
+                <div class="row">
+                    <div class="col-md-6 mb-3">
+                        <div class="form-group">
+                            {{ form.lead_id.label(class="form-label") }}
+                            <select class="form-select select2" name="lead_id" id="lead_id">
+                                <option value="">リードを選択してください</option>
+                                {% for lead in leads %}
+                                    <option value="{{ lead.id }}" {% if schedule.lead_id == lead.id %}selected{% endif %}>
+                                        {{ lead.name }} ({{ lead.email }})
+                                    </option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="button-group">
+                    <a href="{{ url_for('schedules.list_schedules') }}" class="btn btn-secondary">
+                        <i class="fas fa-arrow-left"></i> 戻る
+                    </a>
+                    {{ form.submit(class="btn btn-primary") }}
+                </div>
+            </form>
         </div>
-        <div>
-            {{ form.start_time.label }}
-            {{ form.start_time() }}
-        </div>
-        <div>
-            {{ form.end_time.label }}
-            {{ form.end_time() }}
-        </div>
-        <div>
-            {{ form.user_id.label }}
-            {{ form.user_id() }}
-        </div>
-        <div>
-            {{ form.account_id.label }}
-            {{ form.account_id() }}
-        </div>
-        <div>
-            {{ form.lead_id.label }}
-            {{ form.lead_id() }}
-        </div>
-        <div>
-            {{ form.opportunity_id.label }}
-            {{ form.opportunity_id() }}
-        </div>
-        <div>
-            {{ form.submit() }}
-        </div>
-    </form>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
+<script>
+$(document).ready(function() {
+    // Select2の初期化
+    $('.select2').select2({
+        placeholder: 'リードを検索...',
+        allowClear: true,
+        language: {
+            noResults: function() {
+                return "該当するリードが見つかりません";
+            },
+            searching: function() {
+                return "検索中...";
+            }
+        },
+        width: '100%'
+    });
+});
+</script>
 {% endblock %}

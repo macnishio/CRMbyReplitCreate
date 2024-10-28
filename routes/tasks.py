@@ -107,29 +107,32 @@ def bulk_action():
 @tasks_bp.route('/add', methods=['GET', 'POST'])
 @login_required
 def add_task():
-    form = TaskForm()  # フォームのインスタンスを作成
-    if request.method == 'POST':
-        title = request.form['title']
-        description = request.form['description']
-        due_date = datetime.strptime(request.form['due_date'], '%Y-%m-%d')
-        status = request.form['status']
-        lead_id = request.form.get('lead_id')
-        
-        task = Task(
-            title=title,
-            description=description,
-            due_date=due_date,
-            status=status,
-            user_id=current_user.id,
-            lead_id=lead_id
-        )
-        db.session.add(task)
-        db.session.commit()
-        flash('新しいタスクが追加されました。', 'success')
-        return redirect(url_for('tasks.list_tasks'))
+    form = TaskForm()
+    leads = Lead.query.filter_by(user_id=current_user.id).order_by(Lead.name).all()
     
-    leads = Lead.query.filter_by(user_id=current_user.id).all()
-    return render_template('tasks/create.html',form=form , leads=leads)
+    if request.method == 'POST':
+        try:
+            task = Task(
+                title=request.form['title'],
+                description=request.form['description'],
+                due_date=datetime.strptime(request.form['due_date'], '%Y-%m-%d'),
+                status=request.form['status'],
+                completed='completed' in request.form,
+                user_id=current_user.id,
+                lead_id=request.form.get('lead_id') if request.form.get('lead_id') else None
+            )
+            
+            db.session.add(task)
+            db.session.commit()
+            flash('新しいタスクが追加されました。', 'success')
+            return redirect(url_for('tasks.list_tasks'))
+            
+        except Exception as e:
+            db.session.rollback()
+            current_app.logger.error(f"Task creation error: {str(e)}")
+            flash('タスクの作成中にエラーが発生しました。', 'error')
+    
+    return render_template('tasks/create.html', form=form, leads=leads)
 
 @tasks_bp.route('/edit/<int:id>', methods=['GET', 'POST'])
 @login_required
@@ -138,21 +141,35 @@ def edit_task(id):
     if task.user_id != current_user.id:
         flash('このタスクを編集する権限がありません。', 'error')
         return redirect(url_for('tasks.list_tasks'))
-        
+
+    form = TaskForm(obj=task)
+    leads = Lead.query.filter_by(user_id=current_user.id).order_by(Lead.name).all()
+
     if request.method == 'POST':
-        task.title = request.form['title']
-        task.description = request.form['description']
-        task.due_date = datetime.strptime(request.form['due_date'], '%Y-%m-%d')
-        task.status = request.form['status']
-        task.completed = 'completed' in request.form
-        task.lead_id = request.form.get('lead_id')
-        
-        db.session.commit()
-        flash('タスクが更新されました。', 'success')
-        return redirect(url_for('tasks.list_tasks'))
-    
-    leads = Lead.query.filter_by(user_id=current_user.id).all()
-    return render_template('tasks/edit_task.html', task=task, leads=leads)
+        try:
+            form = TaskForm(request.form)
+            if form.validate():
+                task.title = form.title.data
+                task.description = form.description.data
+                task.due_date = form.due_date.data
+                task.status = form.status.data
+                task.completed = 'completed' in request.form
+                lead_id = request.form.get('lead_id')
+                task.lead_id = int(lead_id) if lead_id else None
+
+                db.session.commit()
+                flash('タスクが更新されました。', 'success')
+                return redirect(url_for('tasks.list_tasks'))
+            else:
+                for field, errors in form.errors.items():
+                    for error in errors:
+                        flash(f'{getattr(form, field).label.text}: {error}', 'error')
+        except Exception as e:
+            db.session.rollback()
+            current_app.logger.error(f"Task update error: {str(e)}")
+            flash('タスクの更新中にエラーが発生しました。', 'error')
+
+    return render_template('tasks/edit.html', form=form, task=task, leads=leads)
 
 @tasks_bp.route('/delete/<int:id>', methods=['POST'])
 @login_required

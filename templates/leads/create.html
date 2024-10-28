@@ -1,48 +1,211 @@
 {% extends "base.html" %}
 
-{% block title %}{% if form.name.data %}Edit{% else %}Create{% endif %} Lead{% endblock %}
+{% block title %}{% if form.name.data %}リード編集{% else %}新規リード作成{% endif %}{% endblock %}
+
+{% block styles %}
+<style>
+.edit-container {
+    max-width: 800px;
+    margin: 2rem auto;
+    padding: 2rem;
+    background: #fff;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.edit-form {
+    margin-top: 1rem;
+}
+
+.form-group {
+    margin-bottom: 1rem;
+}
+
+.form-group label {
+    display: block;
+    margin-bottom: 0.5rem;
+    font-weight: bold;
+}
+
+.form-control {
+    width: 100%;
+    padding: 0.5rem;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    font-size: 1rem;
+}
+
+.form-control:focus {
+    border-color: #80bdff;
+    box-shadow: 0 0 0 0.2rem rgba(0,123,255,.25);
+    outline: 0;
+}
+
+.button-group {
+    margin-top: 2rem;
+    display: flex;
+    gap: 1rem;
+    justify-content: flex-end;
+}
+
+.btn {
+    padding: 0.5rem 1.5rem;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 1rem;
+    text-decoration: none;
+    transition: all 0.3s ease;
+}
+
+.btn-primary {
+    background: #007bff;
+    color: white;
+}
+
+.btn-secondary {
+    background: #6c757d;
+    color: white;
+}
+
+.btn-primary:hover {
+    background: #0056b3;
+}
+
+.btn-secondary:hover {
+    background: #545b62;
+}
+
+.error {
+    color: #dc3545;
+    font-size: 0.875rem;
+    margin-top: 0.25rem;
+    display: block;
+}
+
+.card-header {
+    background-color: #007bff;
+    color: white;
+    padding: 1rem;
+    border-radius: 8px 8px 0 0;
+}
+
+.card-body {
+    padding: 2rem;
+}
+
+.form-label {
+    font-weight: 500;
+    color: #495057;
+}
+
+.input-group {
+    position: relative;
+    margin-bottom: 1rem;
+}
+
+.input-group-text {
+    background-color: #f8f9fa;
+    border: 1px solid #ced4da;
+    border-right: none;
+}
+</style>
+{% endblock %}
 
 {% block content %}
-    <h1>{% if form.name.data %}Edit{% else %}Create{% endif %} Lead</h1>
-    <form method="POST">
-        {{ form.hidden_tag() }}
-        <div>
-            {{ form.name.label }}
-            {{ form.name() }}
-            {% for error in form.name.errors %}
-                <span class="error">{{ error }}</span>
-            {% endfor %}
+<div class="edit-container">
+    <div class="card">
+        <div class="card-header">
+            <h1 class="h3 mb-0">{% if form.name.data %}リード編集{% else %}新規リード作成{% endif %}</h1>
         </div>
-        <div>
-            {{ form.email.label }}
-            {{ form.email() }}
-            {% for error in form.email.errors %}
-                <span class="error">{{ error }}</span>
-            {% endfor %}
+        <div class="card-body">
+            <form method="POST" class="edit-form">
+                {{ form.hidden_tag() }}
+                
+                <div class="row">
+                    <div class="col-md-6 mb-3">
+                        <div class="form-group">
+                            {{ form.name.label(class="form-label") }}
+                            {{ form.name(class="form-control") }}
+                            {% for error in form.name.errors %}
+                                <span class="error">{{ error }}</span>
+                            {% endfor %}
+                        </div>
+                    </div>
+                    
+                    <div class="col-md-6 mb-3">
+                        <div class="form-group">
+                            {{ form.email.label(class="form-label") }}
+                            {{ form.email(class="form-control") }}
+                            {% for error in form.email.errors %}
+                                <span class="error">{{ error }}</span>
+                            {% endfor %}
+                        </div>
+                    </div>
+                </div>
+
+                <div class="row">
+                    <div class="col-md-6 mb-3">
+                        <div class="form-group">
+                            {{ form.phone.label(class="form-label") }}
+                            {{ form.phone(class="form-control") }}
+                            {% for error in form.phone.errors %}
+                                <span class="error">{{ error }}</span>
+                            {% endfor %}
+                        </div>
+                    </div>
+                    
+                    <div class="col-md-6 mb-3">
+                        <div class="form-group">
+                            {{ form.status.label(class="form-label") }}
+                            {{ form.status(class="form-control") }}
+                            {% for error in form.status.errors %}
+                                <span class="error">{{ error }}</span>
+                            {% endfor %}
+                        </div>
+                    </div>
+                </div>
+
+                <div class="row">
+                    <div class="col-md-6 mb-3">
+                        <div class="form-group">
+                            {{ form.score.label(class="form-label") }}
+                            {{ form.score(class="form-control") }}
+                            {% for error in form.score.errors %}
+                                <span class="error">{{ error }}</span>
+                            {% endfor %}
+                        </div>
+                    </div>
+                </div>
+
+                <div class="button-group">
+                    <a href="{{ url_for('leads.list_leads') }}" class="btn btn-secondary">
+                        <i class="fas fa-arrow-left"></i> 戻る
+                    </a>
+                    {{ form.submit(class="btn btn-primary") }}
+                </div>
+            </form>
         </div>
-        <div>
-            {{ form.phone.label }}
-            {{ form.phone() }}
-            {% for error in form.phone.errors %}
-                <span class="error">{{ error }}</span>
-            {% endfor %}
-        </div>
-        <div>
-            {{ form.status.label }}
-            {{ form.status() }}
-            {% for error in form.status.errors %}
-                <span class="error">{{ error }}</span>
-            {% endfor %}
-        </div>
-        <div>
-            {{ form.score.label }}
-            {{ form.score() }}
-            {% for error in form.score.errors %}
-                <span class="error">{{ error }}</span>
-            {% endfor %}
-        </div>
-        <div>
-            {{ form.submit() }}
-        </div>
-    </form>
+    </div>
+</div>
+
+{% endblock %}
+
+{% block scripts %}
+<script>
+$(document).ready(function() {
+    // フォームフィールドのスタイリング強化
+    $('input, select').addClass('form-control');
+    
+    // エラーメッセージのアニメーション
+    $('.error').hide().fadeIn(500);
+    
+    // フォーカス時のビジュアルフィードバック
+    $('.form-control').focus(function() {
+        $(this).closest('.form-group').addClass('focused');
+    }).blur(function() {
+        $(this).closest('.form-group').removeClass('focused');
+    });
+});
+</script>
 {% endblock %}

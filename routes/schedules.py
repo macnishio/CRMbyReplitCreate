@@ -112,7 +112,8 @@ def bulk_action():
 @login_required
 def add_schedule():
     form = ScheduleForm()
-    leads = Lead.query.filter_by(user_id=current_user.id).all()
+    leads = Lead.query.filter_by(user_id=current_user.id).order_by(Lead.name).all()
+    form.lead_id.choices = [(0, '選択してください')] + [(lead.id, f"{lead.name} ({lead.email})") for lead in leads]
     
     if form.validate_on_submit():
         try:
@@ -121,8 +122,8 @@ def add_schedule():
                 description=form.description.data,
                 start_time=form.start_time.data,
                 end_time=form.end_time.data,
-                user_id=current_user.id,
-                lead_id=form.lead_id.data if form.lead_id.data else None
+                user_id=current_user.id,  # 現在のユーザーIDを自動設定
+                lead_id=form.lead_id.data if form.lead_id.data and form.lead_id.data != 0 else None
             )
             db.session.add(schedule)
             db.session.commit()
@@ -132,7 +133,7 @@ def add_schedule():
             db.session.rollback()
             current_app.logger.error(f"Schedule creation error: {str(e)}")
             flash('スケジュールの作成中にエラーが発生しました。', 'error')
-            
+    
     return render_template('schedules/create.html', form=form, leads=leads)
 
 @bp.route('/edit/<int:id>', methods=['GET', 'POST'])
@@ -144,7 +145,7 @@ def edit_schedule(id):
         return redirect(url_for('schedules.list_schedules'))
 
     form = ScheduleForm(obj=schedule)
-    leads = Lead.query.filter_by(user_id=current_user.id).all()
+    leads = Lead.query.filter_by(user_id=current_user.id).order_by(Lead.name).all()
 
     if form.validate_on_submit():
         try:
@@ -152,8 +153,10 @@ def edit_schedule(id):
             schedule.description = form.description.data
             schedule.start_time = form.start_time.data
             schedule.end_time = form.end_time.data
-            schedule.lead_id = form.lead_id.data if form.lead_id.data else None
-            
+            # フォームから送信されたlead_idを直接取得
+            lead_id = request.form.get('lead_id')
+            schedule.lead_id = int(lead_id) if lead_id else None
+
             db.session.commit()
             flash('スケジュールが更新されました。', 'success')
             return redirect(url_for('schedules.list_schedules'))

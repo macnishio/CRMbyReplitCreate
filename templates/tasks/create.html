@@ -1,41 +1,211 @@
+{# templates/tasks/create.html #}
 {% extends "base.html" %}
 
-{% block title %}Create Task{% endblock %}
+{% block title %}タスク作成{% endblock %}
+
+{% block styles %}
+<link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
+<style>
+.edit-container {
+    max-width: 800px;
+    margin: 2rem auto;
+    padding: 2rem;
+    background: #fff;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.edit-form {
+    margin-top: 1rem;
+}
+
+.form-group {
+    margin-bottom: 1rem;
+}
+
+.form-group label {
+    display: block;
+    margin-bottom: 0.5rem;
+    font-weight: bold;
+}
+
+.form-control {
+    width: 100%;
+    padding: 0.5rem;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    font-size: 1rem;
+}
+
+.form-check {
+    margin-top: 0.5rem;
+}
+
+.form-check-input {
+    margin-right: 0.5rem;
+}
+
+.button-group {
+    margin-top: 2rem;
+    display: flex;
+    gap: 1rem;
+    justify-content: flex-end;
+}
+
+/* Select2のカスタマイズ */
+.select2-container .select2-selection--single {
+    height: 38px;
+    border: 1px solid #ced4da;
+    border-radius: 5px;
+}
+
+.select2-container--default .select2-selection--single .select2-selection__rendered {
+    line-height: 38px;
+    padding-left: 12px;
+}
+
+.select2-container--default .select2-selection--single .select2-selection__arrow {
+    height: 36px;
+}
+
+.select2-container--default .select2-results__option--highlighted[aria-selected] {
+    background-color: #0d6efd;
+}
+
+.select2-dropdown {
+    border: 1px solid #ced4da;
+    border-radius: 5px;
+}
+
+.select2-search__field {
+    border: 1px solid #ced4da !important;
+    border-radius: 4px !important;
+    padding: 4px 8px !important;
+}
+</style>
+{% endblock %}
 
 {% block content %}
-    <h1>Create Task</h1>
-    <form method="POST">
-        {{ form.hidden_tag() }}
-        <div>
-            {{ form.title.label }}
-            {{ form.title() }}
+<div class="edit-container">
+    <div class="card">
+        <div class="card-header bg-primary text-white">
+            <h1 class="h3 mb-0">新規タスク作成</h1>
         </div>
-        <div>
-            {{ form.description.label }}
-            {{ form.description() }}
+        <div class="card-body">
+            <form method="POST" action="{{ url_for('tasks.add_task') }}" class="edit-form">
+                {{ form.csrf_token }}
+                
+                <div class="row">
+                    <div class="col-md-12 mb-3">
+                        <div class="form-group">
+                            <label for="title">タイトル</label>
+                            <input type="text" id="title" name="title" class="form-control" required>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="row">
+                    <div class="col-12 mb-3">
+                        <div class="form-group">
+                            <label for="description">説明</label>
+                            <textarea id="description" name="description" class="form-control" rows="3"></textarea>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="row">
+                    <div class="col-md-6 mb-3">
+                        <div class="form-group">
+                            <label for="due_date">期限</label>
+                            <input type="date" id="due_date" name="due_date" class="form-control" required>
+                        </div>
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        <div class="form-group">
+                            <label for="status">ステータス</label>
+                            <select name="status" id="status" class="form-control" required>
+                                <option value="New">新規</option>
+                                <option value="In Progress">進行中</option>
+                                <option value="Completed">完了</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="row">
+                    <div class="col-md-6 mb-3">
+                        <div class="form-group">
+                            <label for="lead_id">リード</label>
+                            <select name="lead_id" id="lead_id" class="form-control select2">
+                                <option value="">リードを選択してください</option>
+                                {% for lead in leads %}
+                                    <option value="{{ lead.id }}">
+                                        {{ lead.name }} ({{ lead.email }})
+                                    </option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        <div class="form-group">
+                            <div class="form-check mt-4">
+                                <input type="checkbox" id="completed" name="completed" class="form-check-input">
+                                <label class="form-check-label" for="completed">完了済み</label>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="button-group">
+                    <a href="{{ url_for('tasks.list_tasks') }}" class="btn btn-secondary">
+                        <i class="fas fa-arrow-left"></i> 戻る
+                    </a>
+                    <button type="submit" class="btn btn-primary">
+                        <i class="fas fa-save"></i> 保存
+                    </button>
+                </div>
+            </form>
         </div>
-        <div>
-            {{ form.due_date.label }}
-            {{ form.due_date(type="datetime-local") }}
-        </div>
-        <div>
-            {{ form.user_id.label }}
-            {{ form.user_id() }}
-        </div>
-        <div>
-            {{ form.lead_id.label }}
-            {{ form.lead_id() }}
-        </div>
-        <div>
-            {{ form.opportunity_id.label }}
-            {{ form.opportunity_id() }}
-        </div>
-        <div>
-            {{ form.account_id.label }}
-            {{ form.account_id() }}
-        </div>
-        <div>
-            {{ form.submit() }}
-        </div>
-    </form>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
+<script>
+$(document).ready(function() {
+    // Select2の初期化
+    $('.select2').select2({
+        placeholder: 'リードを検索...',
+        allowClear: true,
+        language: {
+            noResults: function() {
+                return "該当するリードが見つかりません";
+            },
+            searching: function() {
+                return "検索中...";
+            }
+        },
+        width: '100%'
+    });
+
+    // 現在の日付をデフォルトで設定
+    const today = new Date().toISOString().split('T')[0];
+    document.getElementById('due_date').value = today;
+
+    // completedチェックボックスの変更時の処理
+    $('#completed').change(function() {
+        if ($(this).is(':checked')) {
+            $('#status').val('Completed');
+        }
+    });
+
+    // statusセレクトの変更時の処理
+    $('#status').change(function() {
+        if ($(this).val() === 'Completed') {
+            $('#completed').prop('checked', true);
+        }
+    });
+});
+</script>
 {% endblock %}
