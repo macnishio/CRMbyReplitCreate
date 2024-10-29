@@ -43,14 +43,24 @@ class LeadForm(FlaskForm):
         if lead:
             raise ValidationError('That email is already in use. Please choose a different one.')
 
+
 class OpportunityForm(FlaskForm):
-    name = StringField('Name', validators=[DataRequired()])
-    amount = FloatField('Amount', validators=[DataRequired(), NumberRange(min=0.01, message="Amount must be a positive number.")])
-    stage = SelectField('Stage', choices=[('Prospecting', 'Prospecting'), ('Qualification', 'Qualification'), ('Proposal', 'Proposal'), ('Negotiation', 'Negotiation'), ('Closed Won', 'Closed Won'), ('Closed Lost', 'Closed Lost')])
-    close_date = DateField('Close Date', validators=[DataRequired()])
-    account = SelectField('Account', coerce=int)
-    lead = SelectField('Lead', coerce=lambda x: int(x) if x else None, validators=[Optional()])
-    submit = SubmitField('Submit')
+    name = StringField('名前', validators=[DataRequired()])
+    amount = FloatField('金額', validators=[Optional()])
+    stage = SelectField('ステージ', 
+                       choices=[
+                           ('Initial Contact', '初期接触'),
+                           ('Qualification', '適格性確認'),
+                           ('Proposal', '提案'),
+                           ('Negotiation', '交渉'),
+                           ('Closed Won', '成約'),
+                           ('Closed Lost', '失注')
+                       ],
+                       validators=[DataRequired()])
+    close_date = DateField('完了予定日', validators=[Optional()])
+    account = SelectField('取引先', coerce=int, validators=[Optional()])
+    lead = SelectField('リード', coerce=lambda x: int(x) if x else None, validators=[DataRequired()])
+    submit = SubmitField('保存')
 
     def validate_close_date(self, close_date):
         if close_date.data <= date.today():

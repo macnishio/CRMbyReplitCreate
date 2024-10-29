@@ -86,7 +86,7 @@ def dashboard():
         # Get recent emails with pagination
         emails = Email.query.filter_by(user_id=current_user.id)\
             .order_by(Email.received_date.desc())\
-            .paginate(page=emails_page, per_page=per_page, error_out=False)
+            .paginate(page=emails_page, per_page=20, error_out=False)
 
         return render_template('dashboard.html',
                             leads=leads,

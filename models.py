@@ -12,18 +12,20 @@ from typing import List, Optional
 class User(UserMixin, db.Model):
     __tablename__ = 'users'
     id: Mapped[int] = mapped_column(Integer, primary_key=True)
-    username: Mapped[str] = mapped_column(String(64), unique=True, nullable=False)
+    username: Mapped[str] = mapped_column(String(80), unique=True, nullable=False)
     email: Mapped[str] = mapped_column(String(120), unique=True, nullable=False)
     password_hash: Mapped[str] = mapped_column(String(128))
-    role: Mapped[str] = mapped_column(String(20), nullable=False, default='user')
+    role: Mapped[str] = mapped_column(String(20), default='user')
     google_calendar_id: Mapped[Optional[str]] = mapped_column(String(255), nullable=True)
     google_service_account_file: Mapped[Optional[str]] = mapped_column(String(255), nullable=True)
-    
-    # Relationships
-    leads = db.relationship('Lead', backref='user', lazy='dynamic')
-    opportunities = db.relationship('Opportunity', backref='user', lazy='dynamic')
-    accounts = db.relationship('Account', backref='user', lazy='dynamic')
-    settings = db.relationship("UserSettings", backref="user", uselist=False)
+    # リレーションシップ
+    opportunities = db.relationship('Opportunity', backref='owner', lazy='dynamic')
+    leads = db.relationship('Lead', backref='owner', lazy='dynamic')
+    accounts = db.relationship('Account', backref='owner', lazy='dynamic')
+    settings = db.relationship('UserSettings', backref='user', uselist=False)
+    emails = db.relationship('Email', backref='user', lazy='dynamic')
+    schedules = db.relationship('Schedule', backref='user', lazy='dynamic')
+    tasks = db.relationship('Task', backref='user', lazy='dynamic')
 
     def __init__(self, **kwargs):
         super(User, self).__init__(**kwargs)
@@ -134,20 +136,24 @@ class UnknownEmail(db.Model):
     subject: Mapped[str] = mapped_column(String(200))
     content: Mapped[str] = mapped_column(Text)
     received_date: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow)
+    is_ai_generated = db.Column(db.Boolean, default=False)
 
 class Opportunity(db.Model):
     __tablename__ = 'opportunities'
     id: Mapped[int] = mapped_column(Integer, primary_key=True)
     name: Mapped[str] = mapped_column(String(100), nullable=False)
-    stage: Mapped[str] = mapped_column(String(20))
+    stage: Mapped[str] = mapped_column(String(20), nullable=False)
     amount: Mapped[Optional[float]] = mapped_column(Float, nullable=True)
     close_date: Mapped[Optional[datetime]] = mapped_column(DateTime, nullable=True)
     user_id: Mapped[int] = mapped_column(Integer, ForeignKey('users.id'), nullable=False)
     lead_id: Mapped[int] = mapped_column(Integer, ForeignKey('leads.id'), nullable=False)
     account_id: Mapped[Optional[int]] = mapped_column(Integer, ForeignKey('accounts.id'), nullable=True)
+    is_ai_generated: Mapped[bool] = mapped_column(Boolean, default=False, nullable=False)
 
-    # Relationships
+    # リレーションシップ
     lead = db.relationship('Lead', back_populates='opportunities')
+    account = db.relationship('Account', back_populates='opportunities')
+    # owner = db.relationship('User', back_populates='opportunities')  # これは不要（User側のbackrefで定義済み）
 
 class Account(db.Model):
     __tablename__ = 'accounts'
@@ -157,6 +163,8 @@ class Account(db.Model):
     website: Mapped[str] = mapped_column(String(200))
     user_id: Mapped[int] = mapped_column(Integer, ForeignKey('users.id'), nullable=False)
 
+    # リレーションシップを追加
+    opportunities = db.relationship('Opportunity', back_populates='account')
 class Schedule(db.Model):
     __tablename__ = 'schedules'
     id: Mapped[int] = mapped_column(Integer, primary_key=True)

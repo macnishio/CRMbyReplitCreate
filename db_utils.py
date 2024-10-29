@@ -6,8 +6,18 @@ from sqlalchemy import inspect, text
 from functools import wraps
 from sqlalchemy.exc import OperationalError
 from time import sleep
+from flask import current_app
 
 __all__ = ['retry_on_exception', 'init_database']
+
+def reset_database():
+    """Reset the database"""
+    with current_app.app_context():
+        # Drop all tables
+        db.drop_all()
+        # Create all tables
+        db.create_all()
+        current_app.logger.info("Database has been reset")
 
 def retry_on_exception(retries=3, delay=1):
     """Decorator to retry database operations on failure"""

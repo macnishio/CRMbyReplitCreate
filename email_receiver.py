@@ -93,6 +93,7 @@ def process_emails_for_user(settings, parent_session, app):
 
         # Process each email
         processed_count = 0
+        error_count = 0
         for num in message_numbers[0].split():
             try:
                 with parent_session.begin_nested():  # Create savepoint for each email
@@ -110,7 +111,6 @@ def process_emails_for_user(settings, parent_session, app):
                             .filter_by(message_id=message_id, user_id=settings.user_id)\
                             .first()
                         if existing_email:
-                            app.logger.info(f"Skipping already processed email: {message_id}")
                             continue
 
                     # Extract email data
@@ -128,7 +128,7 @@ def process_emails_for_user(settings, parent_session, app):
 
                     if not lead:
                         lead = Lead(
-                            name=sender_name,
+                            name=sender_name or sender_email.split('@')[0],
                             email=sender_email,
                             status='New',
                             score=0.0,
@@ -147,7 +147,7 @@ def process_emails_for_user(settings, parent_session, app):
                         content=content,
                         lead_id=lead.id,
                         user_id=settings.user_id,
-                        received_date=received_date
+                        received_date=received_date or datetime.utcnow()
                     )
                     parent_session.add(email_record)
                     parent_session.flush()
@@ -156,18 +156,21 @@ def process_emails_for_user(settings, parent_session, app):
                     if lead.status != 'Spam':
                         try:
                             ai_response = analyze_email(subject, content, lead.user_id)
-                            email_record.ai_analysis = ai_response
-                            email_record.ai_analysis_date = datetime.utcnow()
-                            email_record.ai_model_used = "claude-3-haiku-20240307"
-                            process_ai_response(ai_response, email_record, app)
+                            if ai_response:
+                                email_record.ai_analysis = ai_response
+                                email_record.ai_analysis_date = datetime.utcnow()
+                                email_record.ai_model_used = "claude-3-haiku-20240307"
+                                process_ai_response(ai_response, email_record, app)
                         except Exception as e:
-                            app.logger.error(f"AI analysis error: {str(e)}")
+                            app.logger.error(f"AI analysis error for email {message_id}: {str(e)}")
+                            error_count += 1
 
                     processed_count += 1
                     app.logger.info(f"Processed email: {message_id} from {sender_email}")
 
             except Exception as e:
                 app.logger.error(f"Error processing email {num}: {str(e)}")
+                error_count += 1
                 continue
 
         # Update tracker
@@ -175,7 +178,10 @@ def process_emails_for_user(settings, parent_session, app):
             with parent_session.begin_nested():
                 tracker.last_fetch_time = datetime.utcnow()
             parent_session.commit()
-            app.logger.info(f"Processed {processed_count} emails for user {settings.user_id}")
+            app.logger.info(
+                f"Completed processing for user {settings.user_id}. "
+                f"Processed: {processed_count}, Errors: {error_count}"
+            )
         except Exception as e:
             app.logger.error(f"Error updating tracker: {str(e)}")
             parent_session.rollback()
@@ -190,8 +196,8 @@ def process_emails_for_user(settings, parent_session, app):
             try:
                 mail.close()
                 mail.logout()
-            except Exception:
-                pass
+            except Exception as e:
+                app.logger.warning(f"Error closing mail connection: {str(e)}")
 
 def check_emails_task(app):
     """Task to check for new emails"""

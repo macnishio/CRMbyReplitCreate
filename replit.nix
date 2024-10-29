@@ -1,5 +1,6 @@
 {pkgs}: {
   deps = [
+    pkgs.yakut
     pkgs.lsof
     pkgs.postgresql
     pkgs.rustc
