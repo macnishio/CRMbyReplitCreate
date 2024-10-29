@@ -13,20 +13,231 @@
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     {% block styles %}{% endblock %}
     {% block extra_head %}{% endblock %}
+    <style>
+        /* ベースレイアウト */
+        body {
+            margin: 0;
+            padding: 0;
+            font-family: 'Hiragino Kaku Gothic Pro', 'メイリオ', sans-serif;
+        }
+
+        .dashboard-container {
+            display: flex;
+            min-height: 100vh;
+        }
+
+        /* サイドバー */
+        .sidebar {
+            background-color: #333;
+            color: white;
+            width: 250px;
+            transition: all 0.3s ease;
+            z-index: 1000;
+        }
+
+        .sidebar ul {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+
+        .sidebar li a {
+            color: white;
+            text-decoration: none;
+            padding: 15px 20px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            transition: background-color 0.3s ease;
+        }
+
+        .sidebar li a:hover {
+            background-color: #444;
+        }
+
+        .sidebar li a i {
+            width: 20px;
+            text-align: center;
+        }
+
+        /* メインコンテンツ */
+        .main-content {
+            flex: 1;
+            background-color: #f4f4f4;
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* ヘッダー */
+        .header {
+            background-color: #fff;
+            padding: 15px 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+
+        .logo {
+            font-size: 1.5em;
+            font-weight: bold;
+            color: #333;
+        }
+
+        .user-profile {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .btn-logout, .btn-login, .btn-register {
+            padding: 8px 16px;
+            border-radius: 4px;
+            text-decoration: none;
+            transition: all 0.3s ease;
+        }
+
+        .btn-logout {
+            background-color: #dc3545;
+            color: white;
+        }
+
+        .btn-login {
+            background-color: #007bff;
+            color: white;
+        }
+
+        .btn-register {
+            background-color: #28a745;
+            color: white;
+        }
+
+        .avatar {
+            font-size: 1.5em;
+            color: #666;
+        }
+
+        /* アラート */
+        .alert {
+            margin-bottom: 1rem;
+        }
+
+        /* メインコンテンツエリア */
+        main {
+            flex: 1;
+            padding: 20px;
+        }
+
+        /* レスポンシブデザイン */
+        @media (max-width: 768px) {
+            .dashboard-container {
+                flex-direction: column;
+            }
+
+            .sidebar {
+                width: 100%;
+                position: sticky;
+                top: 0;
+                order: -1; /* サイドバーを最上部に */
+            }
+
+            .sidebar ul {
+                display: flex;
+                flex-wrap: wrap;
+                justify-content: center;
+            }
+
+            .sidebar li {
+                flex: 1 1 auto;
+                min-width: 80px;
+                max-width: 120px;
+            }
+
+            .sidebar li a {
+                padding: 10px;
+                flex-direction: column;
+                text-align: center;
+                font-size: 0.8em;
+            }
+
+            .sidebar li a i {
+                width: auto;
+                font-size: 1.2em;
+                margin-bottom: 5px;
+            }
+
+            .header {
+                flex-direction: column;
+                text-align: center;
+                padding: 10px;
+                gap: 10px;
+            }
+
+            .user-profile {
+                flex-direction: column;
+                gap: 10px;
+            }
+
+            .btn-logout, .btn-login, .btn-register {
+                width: 100%;
+                text-align: center;
+            }
+        }
+
+        /* ダークモード対応 */
+        @media (prefers-color-scheme: dark) {
+            body {
+                background-color: #1a1a1a;
+                color: #fff;
+            }
+
+            .main-content {
+                background-color: #2d2d2d;
+            }
+
+            .header {
+                background-color: #222;
+                color: #fff;
+            }
+
+            .logo {
+                color: #fff;
+            }
+
+            .alert {
+                background-color: #333;
+                border-color: #444;
+            }
+        }
+
+        /* アニメーション */
+        @keyframes slideIn {
+            from {
+                transform: translateX(-100%);
+            }
+            to {
+                transform: translateX(0);
+            }
+        }
+
+        .sidebar {
+            animation: slideIn 0.3s ease-out;
+        }
+    </style>
 </head>
 <body>
     <div class="dashboard-container">
         <nav class="sidebar">
             <ul>
-                <li><a href="{{ url_for('main.dashboard') }}"><i class="fas fa-tachometer-alt"></i> ダッシュボード</a></li>
-                <li><a href="{{ url_for('leads.list_leads') }}"><i class="fas fa-user-friends"></i> リード</a></li>
-                <li><a href="{{ url_for('reports.index') }}"><i class="fas fa-chart-bar"></i> 報告</a></li>
-                <li><a href="#"><i class="fas fa-yen-sign"></i> 売上</a></li>
-                <li><a href="{{ url_for('opportunities.list_opportunities') }}"><i class="fas fa-briefcase"></i> 案件</a></li>
-                <li><a href="#"><i class="fas fa-bullhorn"></i> キャンペーン</a></li>
-                <li><a href="{{ url_for('tasks.list_tasks') }}"><i class="fas fa-tasks"></i> タスク</a></li>
-                <li><a href="{{ url_for('schedules.list_schedules') }}"><i class="fas fa-calendar-alt"></i> スケジュール</a></li>
-                <li><a href="{{ url_for('settings.settings') }}"><i class="fas fa-cog"></i> 設定</a></li>
+                <li><a href="{{ url_for('main.dashboard') }}"><i class="fas fa-tachometer-alt"></i> <span>ダッシュボード</span></a></li>
+                <li><a href="{{ url_for('leads.list_leads') }}"><i class="fas fa-user-friends"></i> <span>リード</span></a></li>
+                <li><a href="{{ url_for('reports.index') }}"><i class="fas fa-chart-bar"></i> <span>報告</span></a></li>
+                <li><a href="#"><i class="fas fa-yen-sign"></i> <span>売上</span></a></li>
+                <li><a href="{{ url_for('opportunities.list_opportunities') }}"><i class="fas fa-briefcase"></i> <span>案件</span></a></li>
+                <li><a href="#"><i class="fas fa-bullhorn"></i> <span>キャンペーン</span></a></li>
+                <li><a href="{{ url_for('tasks.list_tasks') }}"><i class="fas fa-tasks"></i> <span>タスク</span></a></li>
+                <li><a href="{{ url_for('schedules.list_schedules') }}"><i class="fas fa-calendar-alt"></i> <span>スケジュール</span></a></li>
+                <li><a href="{{ url_for('settings.settings') }}"><i class="fas fa-cog"></i> <span>設定</span></a></li>
             </ul>
         </nav>
         <div class="main-content">
@@ -70,7 +281,7 @@
     $(document).ready(function() {
         // アラートの自動消去
         $('.alert').not('.alert-permanent').delay(5000).fadeOut(500);
-        
+
         // ツールチップの初期化
         var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'))
         var tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {

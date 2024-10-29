@@ -110,7 +110,7 @@ class Lead(db.Model):
 class Email(db.Model):
     __tablename__ = 'emails'
     id: Mapped[int] = mapped_column(Integer, primary_key=True)
-    message_id: Mapped[str] = mapped_column(String(255), unique=True, nullable=True)  # 追加
+    message_id: Mapped[str] = mapped_column(String(255), unique=True, nullable=True)
     sender: Mapped[str] = mapped_column(String(120), nullable=False)
     sender_name: Mapped[str] = mapped_column(String(255))
     subject: Mapped[str] = mapped_column(String(200))
@@ -118,6 +118,13 @@ class Email(db.Model):
     received_date: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow)
     lead_id: Mapped[int] = mapped_column(Integer, ForeignKey('leads.id'), nullable=False)
     user_id: Mapped[int] = mapped_column(Integer, ForeignKey('users.id'), nullable=False)
+    # AI分析関連フィールドを追加
+    ai_analysis: Mapped[Optional[str]] = mapped_column(Text, nullable=True)
+    ai_analysis_date: Mapped[Optional[datetime]] = mapped_column(DateTime, nullable=True)
+    ai_model_used: Mapped[Optional[str]] = mapped_column(String(50), nullable=True)
+    # リレーションシップを追加
+    tasks = db.relationship('Task', back_populates='email', lazy='dynamic')
+    schedules = db.relationship('Schedule', back_populates='email', lazy='dynamic')
 
 class UnknownEmail(db.Model):
     __tablename__ = 'unknown_emails'
@@ -159,9 +166,12 @@ class Schedule(db.Model):
     end_time: Mapped[datetime] = mapped_column(DateTime, nullable=False)
     user_id: Mapped[int] = mapped_column(Integer, ForeignKey('users.id'), nullable=False)
     lead_id: Mapped[Optional[int]] = mapped_column(Integer, ForeignKey('leads.id'), nullable=True)
-
-    # Relationships
+    # 新しいフィールドを追加
+    email_id: Mapped[Optional[int]] = mapped_column(Integer, ForeignKey('emails.id'), nullable=True)
+    is_ai_generated: Mapped[bool] = mapped_column(Boolean, default=False)
+    # リレーションシップ
     lead = db.relationship('Lead', back_populates='schedules')
+    email = db.relationship('Email', back_populates='schedules')
 
 class Task(db.Model):
     __tablename__ = 'tasks'
@@ -173,9 +183,12 @@ class Task(db.Model):
     completed: Mapped[bool] = mapped_column(Boolean, default=False)
     user_id: Mapped[int] = mapped_column(Integer, ForeignKey('users.id'), nullable=False)
     lead_id: Mapped[Optional[int]] = mapped_column(Integer, ForeignKey('leads.id'), nullable=True)
-
-    # Relationships
+    # 新しいフィールドを追加
+    email_id: Mapped[Optional[int]] = mapped_column(Integer, ForeignKey('emails.id'), nullable=True)
+    is_ai_generated: Mapped[bool] = mapped_column(Boolean, default=False)
+    # リレーションシップ
     lead = db.relationship('Lead', back_populates='tasks')
+    email = db.relationship('Email', back_populates='tasks')
 
 class EmailFetchTracker(db.Model):
     __tablename__ = 'email_fetch_tracker'

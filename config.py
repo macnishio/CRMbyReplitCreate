@@ -29,7 +29,7 @@ class Config:
     # Session configuration
     PERMANENT_SESSION_LIFETIME = timedelta(days=int(os.environ.get('SESSION_LIFETIME_DAYS', 30)))
     # API rate limiting
-    RATELIMIT_DEFAULT = os.environ.get('RATELIMIT_DEFAULT', "200 per day;50 per hour")
+    RATELIMIT_DEFAULT = os.environ.get('RATELIMIT_DEFAULT', "1000 per day;200 per hour")
     # CSRF protection
     WTF_CSRF_ENABLED = True
     WTF_CSRF_TIME_LIMIT = int(os.environ.get('CSRF_TIME_LIMIT', 3600))

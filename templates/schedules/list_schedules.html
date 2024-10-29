@@ -16,7 +16,7 @@
             <option value="reschedule">日時変更</option>
         </select>
         <div id="reschedule-inputs" style="display: none;">
-            <input type="date" name="new_date" id="new-date">
+            <input type="date" name="new_date" id="new-date">toggleAnalysis()
             <input type="time" name="new_time" id="new-time">
         </div>
         <button type="submit" class="btn btn-primary" id="bulk-apply-btn">適用</button>
@@ -55,31 +55,70 @@
     <!-- Schedule Grid -->
     <div class="schedule-grid">
         {% for schedule in schedules %}
-        <div class="schedule-card">
+        <div class="schedule-card {% if schedule.is_ai_generated %}ai-generated{% endif %}">
             <div class="schedule-select">
                 <input type="checkbox" name="selected_schedules[]" value="{{ schedule.id }}" class="schedule-checkbox">
             </div>
-            <h2>{{ schedule.title }}</h2>
-            <p><strong>説明:</strong> {{ schedule.description }}</p>
-            <p><strong>開始時間:</strong> {{ schedule.start_time.strftime('%Y-%m-%d %H:%M') }}</p>
-            <p><strong>終了時間:</strong> {{ schedule.end_time.strftime('%Y-%m-%d %H:%M') }}</p>
-            {% if schedule.lead %}
-            <div class="lead-info">
-                <p><strong>リード情報:</strong></p>
-                <ul>
-                    <li><strong>名前:</strong> {{ schedule.lead.name }}</li>
-                    <li><strong>メール:</strong> {{ schedule.lead.email }}</li>
-                    <li><strong>スコア:</strong> {{ "%.1f"|format(schedule.lead.score) }}</li>
-                    <li><strong>ステータス:</strong> {{ schedule.lead.status }}</li>
-                    <li><strong>最終接触:</strong> {{ schedule.lead.last_contact.strftime('%Y-%m-%d %H:%M') if schedule.lead.last_contact else '未接触' }}</li>
-                </ul>
+
+            <!-- メインコンテンツ -->
+            <div class="schedule-main">
+                <h2>{{ schedule.title }}</h2>
+                {% if schedule.is_ai_generated %}
+                    <div class="ai-badge">
+                        <i class="fas fa-robot"></i> AI生成
+                    </div>
+                {% endif %}
+
+                <div class="schedule-time">
+                    <span>{{ schedule.start_time.strftime('%Y-%m-%d %H:%M') }} - 
+                          {{ schedule.end_time.strftime('%H:%M') }}</span>
+                </div>
+
+                <p class="schedule-description">{{ schedule.description }}</p>
             </div>
-            {% else %}
-            <p class="no-lead">リードが関連付けられていません</p>
-            {% endif %}
+
+            <!-- 関連情報セクション -->
+            <div class="related-content">
+                {% if schedule.email %}
+                <div class="email-section">
+                    <h4><i class="fas fa-envelope"></i> 関連メール</h4>
+                    <div class="email-preview" onclick="showEmailModal('{{ schedule.email.id }}')">
+                        <p class="email-subject">{{ schedule.email.subject }}</p>
+                        <p class="email-metadata">
+                            <span><i class="fas fa-user"></i> {{ schedule.email.sender_name }}</span>
+                            <span><i class="fas fa-calendar"></i> {{ schedule.email.received_date.strftime('%Y-%m-%d') }}</span>
+                        </p>
+                    </div>
+                </div>
+                {% endif %}
+
+                {% if schedule.lead %}
+                <div class="lead-info">
+                    <h4><i class="fas fa-user-tie"></i> リード情報</h4>
+                    <div class="lead-details">
+                        <div class="lead-header">
+                            <span class="lead-name">{{ schedule.lead.name }}</span>
+                            <span class="lead-score">スコア: {{ "%.1f"|format(schedule.lead.score) }}</span>
+                        </div>
+                        <div class="lead-contact">
+                            <span><i class="fas fa-envelope"></i> {{ schedule.lead.email }}</span>
+                            <span><i class="fas fa-clock"></i> 最終接触: 
+                                {{ schedule.lead.last_contact.strftime('%Y-%m-%d %H:%M') if schedule.lead.last_contact else '未接触' }}
+                            </span>
+                        </div>
+                    </div>
+                </div>
+                {% endif %}
+            </div>
+
+            <!-- アクションボタン -->
             <div class="card-actions">
-                <a href="{{ url_for('schedules.edit_schedule', id=schedule.id) }}" class="btn btn-edit">編集</a>
-                <button type="button" onclick="deleteSchedule({{ schedule.id }})" class="btn btn-delete">削除</button>
+                <a href="{{ url_for('schedules.edit_schedule', id=schedule.id) }}" class="btn btn-edit">
+                    <i class="fas fa-edit"></i> 編集
+                </a>
+                <button type="button" onclick="deleteSchedule({{ schedule.id }})" class="btn btn-delete">
+                    <i class="fas fa-trash"></i> 削除
+                </button>
             </div>
         </div>
         {% endfor %}
@@ -88,6 +127,61 @@
 
 <div class="add-schedule">
     <a href="{{ url_for('schedules.add_schedule') }}" class="btn btn-add">新規スケジュールを追加</a>
+</div>
+
+<!-- メールモーダルを追加 -->
+<div id="emailModal" class="modal">
+    <div class="modal-content">
+        <span class="close-modal">×</span>
+        <div class="email-header">
+            <h2 id="modalSubject"></h2>
+            <div class="email-metadata">
+                <p id="modalSender"></p>
+                <p id="modalDate"></p>
+            </div>
+        </div>
+        <div class="email-content" id="modalContent"></div>
+
+        {% if email and email.ai_analysis %}
+        <div class="ai-analysis-section">
+            <h3><i class="fas fa-robot"></i> AI分析結果</h3>
+            <div class="analysis-content">{{ email.ai_analysis }}</div>
+
+            <div id="generatedItems">
+                {% if email.tasks %}
+                <div class="generated-tasks">
+                    <h4>関連タスク</h4>
+                    <ul>
+                        {% for task in email.tasks %}
+                        <li>
+                            <a href="{{ url_for('tasks.edit_task', id=task.id) }}">
+                                {{ task.title }} (期限: {{ task.due_date.strftime('%Y-%m-%d') }})
+                            </a>
+                        </li>
+                        {% endfor %}
+                    </ul>
+                </div>
+                {% endif %}
+
+                {% if email.schedules %}
+                <div class="generated-schedules">
+                    <h4>関連予定</h4>
+                    <ul>
+                        {% for schedule in email.schedules %}
+                        <li>
+                            <a href="{{ url_for('schedules.edit_schedule', id=schedule.id) }}">
+                                {{ schedule.title }} 
+                                ({{ schedule.start_time.strftime('%Y-%m-%d %H:%M') }})
+                            </a>
+                        </li>
+                        {% endfor %}
+                    </ul>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+        {% endif %}
+    </div>
 </div>
 
 <script>
@@ -217,6 +311,44 @@ document.getElementById('transfer-to-google').addEventListener('click', function
         alert('イベントの転送中にエラーが発生しました。');
     });
 });
+
+function showEmailModal(emailId) {
+    fetch(`/api/emails/${emailId}`)
+        .then(response => response.json())
+        .then(data => {
+            if (data.error) {
+                console.error('Error:', data.error);
+                return;
+            }
+
+            const modal = document.getElementById('emailModal');
+            document.getElementById('modalSubject').textContent = data.subject || '(件名なし)';
+            document.getElementById('modalSender').textContent = 
+                `送信者: ${data.sender_name || data.sender}`;
+            document.getElementById('modalDate').textContent = 
+                `受信日時: ${new Date(data.received_date).toLocaleString('ja-JP')}`;
+            document.getElementById('modalContent').innerHTML = 
+                data.content.replace(/\n/g, '<br>') || '(本文なし)';
+
+            modal.style.display = 'block';
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            alert('メール情報の取得中にエラーが発生しました。');
+        });
+}
+
+// モーダルを閉じる処理
+document.querySelector('.close-modal').onclick = function() {
+    document.getElementById('emailModal').style.display = 'none';
+}
+
+window.onclick = function(event) {
+    const modal = document.getElementById('emailModal');
+    if (event.target == modal) {
+        modal.style.display = 'none';
+    }
+}
 </script>
 
 <style>
@@ -384,6 +516,97 @@ document.getElementById('transfer-to-google').addEventListener('click', function
 .add-schedule {
     margin: 20px 0;
     text-align: center;
+}
+
+/* 既存のスタイルに追加 */
+.ai-badge {
+    background-color: #6c5ce7;
+    color: white;
+    padding: 4px 8px;
+    border-radius: 12px;
+    font-size: 0.8em;
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+}
+
+.schedule-card.ai-generated {
+    border-left: 4px solid #6c5ce7;
+}
+
+.related-content {
+    margin-top: 15px;
+    padding: 15px;
+    background: #f8f9fa;
+    border-radius: 8px;
+}
+
+.email-preview {
+    cursor: pointer;
+    padding: 12px;
+    background: white;
+    border-radius: 6px;
+    border: 1px solid #dee2e6;
+    transition: all 0.2s ease;
+}
+
+.email-preview:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.ai-analysis-section {
+    margin-top: 20px;
+    padding: 15px;
+    background: #f8f9fa;
+    border-radius: 8px;
+    border-left: 4px solid #6c5ce7;
+}
+
+.modal {
+    display: none;
+    position: fixed;
+    z-index: 1000;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0,0,0,0.5);
+}
+
+.modal-content {
+    position: relative;
+    background-color: #fff;
+    margin: 5% auto;
+    padding: 20px;
+    width: 80%;
+    max-width: 800px;
+    border-radius: 8px;
+    box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+}
+
+.close-modal {
+    position: absolute;
+    right: 20px;
+    top: 10px;
+    font-size: 28px;
+    font-weight: bold;
+    color: #666;
+    cursor: pointer;
+}
+
+.email-metadata {
+    display: flex;
+    gap: 10px;
+    color: #666;
+    font-size: 0.9em;
+}
+
+.lead-details {
+    background: white;
+    padding: 12px;
+    border-radius: 6px;
+    border: 1px solid #dee2e6;
 }
 </style>
 {% endblock %}

@@ -5,6 +5,7 @@ from extensions import db
 from datetime import datetime, timedelta
 from sqlalchemy import func, desc, and_
 from sqlalchemy.exc import SQLAlchemyError
+from ai_analysis import analyze_email, process_ai_response
 
 bp = Blueprint('main', __name__)
 
@@ -130,19 +131,88 @@ def get_email_content(email_id):
             id=email_id,
             user_id=current_user.id
         ).first()
-        
+
         if not email:
             return jsonify({'error': 'メールが見つかりません'}), 404
-            
+
+        # コンテンツのデコード処理
+        content = email.content
+        if isinstance(content, bytes):
+            try:
+                content = content.decode('iso-2022-jp')
+            except UnicodeDecodeError:
+                try:
+                    content = content.decode('utf-8')
+                except UnicodeDecodeError:
+                    try:
+                        content = content.decode('cp932')
+                    except UnicodeDecodeError:
+                        content = '(文字化けしたコンテンツ)'
+
         return jsonify({
             'id': email.id,
             'subject': email.subject,
             'sender': email.sender,
             'sender_name': email.sender_name,
-            'content': email.content,
+            'content': content,
             'received_date': email.received_date.isoformat() if email.received_date else None
         })
-        
+
     except Exception as e:
         current_app.logger.error(f"Error fetching email content: {str(e)}")
         return jsonify({'error': 'メール内容の取得中にエラーが発生しました'}), 500
+
+
+@bp.route('/api/emails/<int:email_id>/analyze', methods=['POST'])
+@login_required
+def analyze_email_endpoint(email_id):
+    try:
+        email = Email.query.filter_by(
+            id=email_id,
+            user_id=current_user.id
+        ).first_or_404()
+
+        # AI分析を実行
+        analysis_result = analyze_email(
+            email.subject,
+            email.content,
+            current_user.id
+        )
+
+        # メールの分析情報を更新
+        email.ai_analysis = analysis_result
+        email.ai_analysis_date = datetime.now()
+
+        # process_ai_responseを使用して自動的にタスクとスケジュールを作成
+        process_ai_response(analysis_result, email, current_app)
+        
+        db.session.commit()
+
+        # 作成されたアイテムをレスポンスに含める
+        return jsonify({
+            'success': True,
+            'analysis': analysis_result,
+            'tasks': [{
+                'title': task.title,
+                'due_date': task.due_date.isoformat()
+            } for task in Task.query.filter_by(
+                email_id=email.id,
+                is_ai_generated=True
+            ).all()],
+            'schedules': [{
+                'title': schedule.title,
+                'start_time': schedule.start_time.isoformat(),
+                'end_time': schedule.end_time.isoformat()
+            } for schedule in Schedule.query.filter_by(
+                email_id=email.id,
+                is_ai_generated=True
+            ).all()]
+        })
+
+    except Exception as e:
+        current_app.logger.error(f"Error analyzing email: {str(e)}", exc_info=True)
+        db.session.rollback()
+        return jsonify({
+            'error': 'メールの分析中にエラーが発生しました',
+            'details': str(e)
+        }), 500

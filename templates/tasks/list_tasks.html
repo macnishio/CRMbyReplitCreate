@@ -1,146 +1,487 @@
 {% extends "base.html" %}
 {% block title %}タスク一覧{% endblock %}
+
 {% block content %}
-<h1>タスク一覧</h1>
+<div class="task-manager">
+    <!-- 分析セクション -->
+    <div class="analysis-section">
+        <div class="analysis-header" onclick="toggleAnalysis()">
+            <h2>タスク分析<span class="toggle-icon">▼</span></h2>
+        </div>
+        <div class="analysis-content" id="analysisContent">
+            <div class="analysis-grid">
+                <!-- タスクの概要 -->
+                <div class="analysis-card">
+                    <h3>タスクの概要</h3>
+                    <p>完了タスク: {{ tasks|selectattr('completed', 'eq', true)|list|length }}</p>
+                    <p>未完了タスク: {{ tasks|selectattr('completed', 'eq', false)|list|length }}</p>
+                    <p>期限切れタスク: {{ tasks|selectattr('completed', 'eq', false)|selectattr('due_date', 'le', utcnow())|list|length }}</p>
+                </div>
 
-<!-- Filter Section -->
-<div class="filter-section">
-    <form method="GET" action="{{ url_for('tasks.list_tasks') }}" class="filter-form">
-        <div class="filter-group">
-            <label for="status">ステータス:</label>
-            <select name="status" id="status">
-                <option value="">すべて</option>
-                <option value="New" {% if request.args.get('status') == 'New' %}selected{% endif %}>新規</option>
-                <option value="In Progress" {% if request.args.get('status') == 'In Progress' %}selected{% endif %}>進行中</option>
-                <option value="Completed" {% if request.args.get('status') == 'Completed' %}selected{% endif %}>完了</option>
-            </select>
+                <!-- ステータス分布 -->
+                <div class="analysis-card">
+                    <h3>ステータス分布</h3>
+                    <ul>
+                    {% for status in task_status_counts %}
+                        <li>{{ status.status }}: {{ status.count }}件</li>
+                    {% endfor %}
+                    </ul>
+                </div>
+
+                <!-- AI Insights -->
+                <div class="analysis-card">
+                    <h3>AI分析結果</h3>
+                    {% if ai_analysis %}
+                        {{ ai_analysis|safe }}
+                    {% else %}
+                        <p>分析データがありません</p>
+                    {% endif %}
+                </div>
+            </div>
         </div>
-        <div class="filter-group">
-            <label for="due_date">期限:</label>
-            <select name="due_date" id="due_date">
-                <option value="">すべて</option>
-                <option value="today" {% if request.args.get('due_date') == 'today' %}selected{% endif %}>今日</option>
-                <option value="week" {% if request.args.get('due_date') == 'week' %}selected{% endif %}>今週</option>
-                <option value="month" {% if request.args.get('due_date') == 'month' %}selected{% endif %}>今月</option>
-                <option value="overdue" {% if request.args.get('due_date') == 'overdue' %}selected{% endif %}>期限超過</option>
+    </div>
+
+    <!-- 一括操作セクション -->
+    <form method="POST" action="{{ url_for('tasks.bulk_action') }}" id="bulkForm">
+        <div class="bulk-actions">
+            <div class="select-all-container">
+                <input type="checkbox" id="select-all" onclick="toggleAllCheckboxes()">
+                <label for="select-all">すべて選択</label>
+            </div>
+            <select name="action" id="bulk-action">
+                <option value="">一括操作を選択...</option>
+                <option value="complete">完了にする</option>
+                <option value="delete">削除</option>
+                <option value="change_status">ステータス変更</option>
             </select>
+            <select name="new_status" id="new-status" style="display: none;">
+                <option value="New">新規</option>
+                <option value="In Progress">進行中</option>
+                <option value="Completed">完了</option>
+            </select>
+            <button type="submit" class="btn btn-primary" onclick="return confirmBulkAction()">適用</button>
         </div>
-        <button type="submit" class="btn btn-primary">フィルター適用</button>
-        <a href="{{ url_for('tasks.list_tasks') }}" class="btn btn-secondary">リセット</a>
+
+        <!-- タスクグリッド -->
+        <div class="task-grid">
+            {% for task in tasks %}
+            <div class="task-card {% if task.completed %}completed{% endif %} {% if task.is_ai_generated %}ai-generated{% endif %}">
+                <div class="task-select">
+                    <input type="checkbox" name="selected_tasks[]" value="{{ task.id }}" class="task-checkbox">
+                </div>
+                
+                <!-- タスクのメインコンテンツ -->
+                <div class="task-main">
+                    <h2>{{ task.title }}</h2>
+                    {% if task.is_ai_generated %}
+                    <span class="ai-badge">
+                        <i class="fas fa-robot"></i> AI生成
+                    </span>
+                    {% endif %}
+                    <div class="task-metadata">
+                        <span class="due-date {% if task.due_date < utcnow() and not task.completed %}overdue{% endif %}">
+                            <i class="fas fa-calendar"></i> {{ task.due_date.strftime('%Y-%m-%d') }}
+                        </span>
+                        <span class="status-badge status-{{ task.status|lower }}">
+                            {{ task.status }}
+                        </span>
+                        <span class="completion-status {{ 'completed' if task.completed else 'not-completed' }}">
+                            <i class="fas {{ 'fa-check-circle' if task.completed else 'fa-clock' }}"></i>
+                            {{ '完了' if task.completed else '未完了' }}
+                        </span>
+                    </div>
+                    {% if task.description %}
+                    <div class="task-description">
+                        <p>{{ task.description }}</p>
+                    </div>
+                    {% endif %}
+                </div>
+
+                <!-- 関連情報セクション -->
+                <div class="related-content">
+                    {% if task.email %}
+                    <div class="related-email">
+                        <h4><i class="fas fa-envelope"></i> 関連メール</h4>
+                        <div class="email-preview" onclick="showEmailModal('{{ task.email.id }}')">
+                            <div class="email-header">
+                                <span class="email-subject">{{ task.email.subject }}</span>
+                                <span class="email-date">{{ task.email.received_date.strftime('%Y-%m-%d %H:%M') }}</span>
+                            </div>
+                            <div class="email-sender">
+                                <i class="fas fa-user"></i> {{ task.email.sender_name }}
+                            </div>
+                        </div>
+                    </div>
+                    {% endif %}
+
+                    {% if task.lead %}
+                    <div class="lead-info">
+                        <h4><i class="fas fa-user-tie"></i> リード情報</h4>
+                        <div class="lead-details">
+                            <div class="lead-header">
+                                <span class="lead-name">{{ task.lead.name }}</span>
+                                <span class="lead-score">スコア: {{ "%.1f"|format(task.lead.score) }}</span>
+                            </div>
+                            <div class="lead-contact">
+                                <span><i class="fas fa-envelope"></i> {{ task.lead.email }}</span>
+                                <span><i class="fas fa-clock"></i> 最終接触: 
+                                    {{ task.lead.last_contact.strftime('%Y-%m-%d %H:%M') if task.lead.last_contact else '未接触' }}
+                                </span>
+                            </div>
+                        </div>
+                    </div>
+                    {% endif %}
+                </div>
+
+                <!-- アクションボタン -->
+                <div class="card-actions">
+                    <button type="button" class="btn btn-complete" onclick="toggleTaskCompletion('{{ task.id }}')"
+                            title="{{ '未完了に戻す' if task.completed else '完了にする' }}">
+                        <i class="fas {{ 'fa-undo' if task.completed else 'fa-check' }}"></i>
+                    </button>
+                    <a href="{{ url_for('tasks.edit_task', id=task.id) }}" class="btn btn-edit" title="編集">
+                        <i class="fas fa-edit"></i>
+                    </a>
+                    <button type="button" class="btn btn-delete" onclick="deleteTask('{{ task.id }}')" title="削除">
+                        <i class="fas fa-trash"></i>
+                    </button>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
     </form>
-</div>
 
-<!-- Bulk Operations Form -->
-<form method="POST" action="{{ url_for('tasks.bulk_action') }}" id="bulkForm">
-    <div class="bulk-actions">
-        <div class="select-all-container">
-            <input type="checkbox" id="select-all" onclick="toggleAllCheckboxes()">
-            <label for="select-all">すべて選択</label>
-        </div>
-        <select name="action" id="bulk-action">
-            <option value="">一括操作を選択...</option>
-            <option value="complete">完了にする</option>
-            <option value="delete">削除</option>
-            <option value="change_status">ステータス変更</option>
-        </select>
-        <select name="new_status" id="new-status" style="display: none;">
-            <option value="New">新規</option>
-            <option value="In Progress">進行中</option>
-            <option value="Completed">完了</option>
-        </select>
-        <button type="submit" class="btn btn-primary" onclick="return confirmBulkAction()">適用</button>
+    <!-- 新規タスク追加ボタン -->
+    <div class="add-task">
+        <a href="{{ url_for('tasks.add_task') }}" class="btn btn-add">
+            <i class="fas fa-plus"></i> 新規タスクを追加
+        </a>
     </div>
 
-<!-- AI Analysis Section -->
-<div class="ai-analysis-section">
-    <div class="analysis-header" onclick="toggleAnalysis()">
-        <h2>タスク分析 <span class="toggle-icon">▼</span></h2>
-    </div>
-    <div class="analysis-content" id="analysisContent">
-        <div class="analysis-grid">
-            <!-- タスクの概要 -->
-            <div class="analysis-card">
-                <h3>タスクの概要</h3>
-                <p>完了タスク: {{ tasks|selectattr('completed', 'eq', true)|list|length }}</p>
-                <p>未完了タスク: {{ tasks|selectattr('completed', 'eq', false)|list|length }}</p>
-                <p>期限切れタスク: {{ tasks|selectattr('completed', 'eq', false)|selectattr('due_date', 'le', utcnow())|list|length }}</p>
+    <!-- メールモーダル -->
+    <div id="emailModal" class="modal">
+        <div class="modal-content">
+            <span class="close-modal">&times;</span>
+            <h2 id="modalSubject"></h2>
+            <div class="email-info">
+                <p id="modalSender"></p>
+                <p id="modalDate"></p>
             </div>
-
-            <!-- ステータス分布 -->
-            <div class="analysis-card">
-                <h3>ステータス分布</h3>
-                <ul>
-                {% for status in task_status_counts %}
-                    <li>{{ status.status }}: {{ status.count }}件</li>
-                {% endfor %}
-                </ul>
-            </div>
-
-            <!-- AI Insights -->
-            <div class="analysis-card">
-                <h3>AI分析結果</h3>
-                {% if ai_analysis %}
-                    {{ ai_analysis|safe }}
-                {% else %}
-                    <p>AI分析を実行できませんでした。</p>
-                {% endif %}
-            </div>
+            <div class="email-content" id="modalContent"></div>
         </div>
     </div>
 </div>
 
-<!-- Task Grid -->
-<div class="task-grid">
-    {% for task in tasks %}
-    <div class="task-card {% if task.completed %}completed{% endif %}">
-        <div class="task-select">
-            <input type="checkbox" name="selected_tasks[]" value="{{ task.id }}" class="task-checkbox">
-        </div>
-        <h2>{{ task.title }}</h2>
-        <p><strong>説明:</strong> {{ task.description }}</p>
-        <p><strong>期限:</strong> {{ task.due_date.strftime('%Y-%m-%d') }}</p>
-        <p><strong>ステータス:</strong> {{ task.status }}</p>
-        <p><strong>完了:</strong> <span class="{{ 'completed' if task.completed else 'not-completed' }}">
-            {{ '完了' if task.completed else '未完了' }}</span></p>
-        {% if task.lead %}
-        <div class="lead-info">
-            <p><strong>リード情報:</strong></p>
-            <ul>
-                <li><strong>名前:</strong> {{ task.lead.name }}</li>
-                <li><strong>メール:</strong> {{ task.lead.email }}</li>
-                <li><strong>スコア:</strong> {{ "%.1f"|format(task.lead.score) }}</li>
-                <li><strong>最終接触:</strong> {{ task.lead.last_contact.strftime('%Y-%m-%d %H:%M') if task.lead.last_contact else '未接触' }}</li>
-            </ul>
-        </div>
-        {% else %}
-        <p class="no-lead">リードが関連付けられていません</p>
-        {% endif %}
-        <div class="card-actions">
-            <a href="{{ url_for('tasks.edit_task', id=task.id) }}" class="btn btn-edit">編集</a>
-            <form method="POST" action="{{ url_for('tasks.delete_task', id=task.id) }}" style="display: inline;">
-                <button type="submit" class="btn btn-delete" onclick="return confirm('本当にこのタスクを削除しますか？');">削除</button>
-            </form>
-        </div>
-    </div>
-    {% endfor %}
-</div>
-</form>
+<!-- スタイル定義 -->
+<style>
+.task-manager {
+    padding: 20px;
+    max-width: 1200px;
+    margin: 0 auto;
+}
 
-<div class="add-task">
-    <a href="{{ url_for('tasks.add_task') }}" class="btn btn-add">新規タスクを追加</a>
-</div>
+/* 既存のスタイルはそのままで、以下を変更・追加 */
 
+.analysis-section {
+    margin-bottom: 30px;
+    background: white;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    overflow: hidden; /* 追加 */
+}
+
+.analysis-header {
+    padding: 15px 20px;
+    cursor: pointer;
+    background-color: #f8f9fa;
+    border-bottom: 1px solid #eee;
+    display: flex; /* 追加 */
+    justify-content: space-between; /* 追加 */
+    align-items: center; /* 追加 */
+    transition: background-color 0.3s ease; /* 追加 */
+}
+
+.analysis-header:hover {
+    background-color: #e9ecef; /* 追加 */
+}
+
+.analysis-content {
+    display: none; /* 追加 */
+    max-height: 0;
+    overflow: hidden;
+    transition: max-height 0.3s ease-out;
+}
+
+.analysis-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 20px;
+    padding: 20px;
+    background-color: #fff; /* 追加 */
+}
+
+.toggle-icon {
+    display: inline-block;
+    transition: transform 0.3s ease;
+    margin-left: 10px;
+    font-size: 1.2em; /* 追加 */
+    color: #666; /* 追加 */
+}
+
+/* レスポンシブ対応を強化 */
+@media (max-width: 768px) {
+    .task-metadata {
+        flex-direction: column;
+    }
+
+    .bulk-actions {
+        flex-direction: column;
+    }
+
+    .btn-add {
+        bottom: 20px;
+        right: 20px;
+        padding: 10px 20px;
+    }
+
+    .analysis-grid {
+        grid-template-columns: 1fr; /* 追加 */
+    }
+
+    .analysis-header {
+        padding: 12px 15px; /* 追加 */
+    }
+
+    .analysis-card {
+        margin: 0 5px; /* 追加 */
+    }
+}
+
+/* ダークモード対応（オプション） */
+@media (prefers-color-scheme: dark) {
+    .analysis-section {
+        background: #2d2d2d;
+    }
+
+    .analysis-header {
+        background-color: #333;
+        border-bottom-color: #444;
+    }
+
+    .analysis-header:hover {
+        background-color: #404040;
+    }
+
+    .analysis-card {
+        background: #333;
+        color: #fff;
+    }
+
+    .analysis-content {
+        background-color: #2d2d2d;
+    }
+}
+
+.task-card {
+    position: relative;
+    padding: 20px;
+    background: white;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    margin-bottom: 20px;
+    border-left: 4px solid #007bff;
+    transition: all 0.3s ease;
+}
+
+.task-card.completed {
+    border-left-color: #28a745;
+    background-color: #f8f9fa;
+}
+
+.task-card.ai-generated {
+    border-left-color: #6c5ce7;
+}
+
+.task-main {
+    margin-bottom: 15px;
+}
+
+.task-metadata {
+    display: flex;
+    gap: 15px;
+    margin: 10px 0;
+    flex-wrap: wrap;
+}
+
+.status-badge {
+    padding: 4px 8px;
+    border-radius: 12px;
+    font-size: 0.9em;
+    font-weight: 500;
+}
+
+.status-new { background-color: #e3f2fd; color: #1976d2; }
+.status-in-progress { background-color: #fff3e0; color: #f57c00; }
+.status-completed { background-color: #e8f5e9; color: #388e3c; }
+
+.ai-badge {
+    background-color: #6c5ce7;
+    color: white;
+    padding: 4px 8px;
+    border-radius: 12px;
+    font-size: 0.8em;
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    margin-left: 10px;
+}
+
+.related-content {
+    margin-top: 15px;
+    padding: 15px;
+    background: #f8f9fa;
+    border-radius: 8px;
+    display: grid;
+    gap: 15px;
+}
+
+.email-preview {
+    cursor: pointer;
+    padding: 12px;
+    background: white;
+    border-radius: 6px;
+    border: 1px solid #dee2e6;
+    transition: all 0.2s ease;
+}
+
+.email-preview:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.bulk-actions {
+    margin-bottom: 20px;
+    padding: 15px;
+    background: white;
+    border-radius: 8px;
+    display: flex;
+    gap: 15px;
+    align-items: center;
+}
+
+.card-actions {
+    margin-top: 15px;
+    display: flex;
+    gap: 8px;
+    justify-content: flex-end;
+}
+
+.btn {
+    padding: 8px 16px;
+    border-radius: 4px;
+    border: none;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 0.9em;
+    transition: all 0.2s ease;
+}
+
+.btn-add {
+    background: #007bff;
+    color: white;
+    position: fixed;
+    bottom: 30px;
+    right: 30px;
+    padding: 12px 24px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+}
+
+.btn-add:hover {
+    background: #0056b3;
+    transform: translateY(-2px);
+}
+
+.btn-complete { background: #28a745; color: white; }
+.btn-edit { background: #17a2b8; color: white; }
+.btn-delete { background: #dc3545; color: white; }
+
+.overdue {
+    color: #dc3545;
+    font-weight: bold;
+}
+
+.modal {
+    display: none;
+    position: fixed;
+    z-index: 1000;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0,0,0,0.5);
+}
+
+.modal-content {
+    position: relative;
+    background-color: #fff;
+    margin: 5% auto;
+    padding: 20px;
+    width: 80%;
+    max-width: 800px;
+    border-radius: 8px;
+    box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+}
+
+.close-modal {
+    position: absolute;
+    right: 20px;
+    top: 10px;
+    font-size: 28px;
+    font-weight: bold;
+    color: #666;
+    cursor: pointer;
+}
+
+@media (max-width: 768px) {
+    .task-metadata {
+        flex-direction: column;
+    }
+    
+    .bulk-actions {
+        flex-direction: column;
+    }
+    
+    .btn-add {
+        bottom: 20px;
+        right: 20px;
+        padding: 10px 20px;
+    }
+}
+</style>
+
+<!-- スクリプト定義 -->
 <script>
+let currentEmailId = null;
+
 function toggleAnalysis() {
     const content = document.getElementById('analysisContent');
     const icon = document.querySelector('.toggle-icon');
     
-    if (content.style.maxHeight) {
-        content.style.maxHeight = null;
-        icon.style.transform = 'rotate(0deg)';
-    } else {
+    // contentの現在の表示状態を確認
+    const isHidden = window.getComputedStyle(content).display === 'none';
+    
+    if (isHidden) {
+        // 表示する
+        content.style.display = 'block';
         content.style.maxHeight = content.scrollHeight + "px";
         icon.style.transform = 'rotate(180deg)';
+    } else {
+        // 非表示にする
+        content.style.maxHeight = '0';
+        content.style.display = 'none';
+        icon.style.transform = 'rotate(0deg)';
     }
 }
 
@@ -152,120 +493,104 @@ function toggleAllCheckboxes() {
     });
 }
 
-document.getElementById('bulk-action').addEventListener('change', function() {
-    const newStatusSelect = document.getElementById('new-status');
-    newStatusSelect.style.display = this.value === 'change_status' ? 'inline-block' : 'none';
-});
-
 function confirmBulkAction() {
     const action = document.getElementById('bulk-action').value;
-    const selectedTasks = document.querySelectorAll('input[name="selected_tasks[]"]:checked').length;
-    
     if (!action) {
         alert('操作を選択してください。');
         return false;
     }
     
-    if (selectedTasks === 0) {
+    const selectedTasks = document.querySelectorAll('.task-checkbox:checked');
+    if (selectedTasks.length === 0) {
         alert('タスクを選択してください。');
         return false;
     }
     
-    if (action === 'delete') {
-        return confirm(`選択された${selectedTasks}件のタスクを削除してもよろしいですか？`);
-    }
-    
-    return true;
+    return confirm('選択したタスクに対して操作を実行してもよろしいですか？');
 }
 
-// Update select-all checkbox state when individual checkboxes change
-document.querySelectorAll('.task-checkbox').forEach(checkbox => {
-    checkbox.addEventListener('change', function() {
-        const checkboxes = document.querySelectorAll('.task-checkbox');
-        const selectAll = document.getElementById('select-all');
-        selectAll.checked = [...checkboxes].every(cb => cb.checked);
+function toggleTaskCompletion(taskId) {
+    fetch(`/tasks/${taskId}/toggle-completion`, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        }
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            location.reload();
+        }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        alert('操作中にエラーが発生しました。');
+    });
+}
+
+function deleteTask(taskId) {
+    if (confirm('このタスクを削除してもよろしいですか？')) {
+        fetch(`/tasks/${taskId}`, {
+            method: 'DELETE',
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                location.reload();
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            alert('削除中にエラーが発生しました。');
+        });
+    }
+}
+
+function showEmailModal(emailId) {
+    fetch(`/api/emails/${emailId}`)
+        .then(response => response.json())
+        .then(data => {
+            if (data.error) {
+                console.error('Error:', data.error);
+                return;
+            }
+            
+            const modal = document.getElementById('emailModal');
+            document.getElementById('modalSubject').textContent = data.subject || '(件名なし)';
+            document.getElementById('modalSender').textContent = 
+                `送信者: ${data.sender_name || data.sender}`;
+            document.getElementById('modalDate').textContent = 
+                `受信日時: ${new Date(data.received_date).toLocaleString('ja-JP')}`;
+            document.getElementById('modalContent').innerHTML = 
+                data.content.replace(/\n/g, '<br>') || '(本文なし)';
+            
+            modal.style.display = 'block';
+            currentEmailId = emailId;
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            alert('メール情報の取得中にエラーが発生しました。');
+        });
+}
+
+document.addEventListener('DOMContentLoaded', function() {
+    const modal = document.getElementById('emailModal');
+    const closeBtn = document.querySelector('.close-modal');
+    
+    closeBtn.onclick = function() {
+        modal.style.display = 'none';
+    }
+    
+    window.onclick = function(event) {
+        if (event.target == modal) {
+            modal.style.display = 'none';
+        }
+    }
+    
+    document.getElementById('bulk-action').addEventListener('change', function() {
+        const newStatusSelect = document.getElementById('new-status');
+        newStatusSelect.style.display = this.value === 'change_status' ? 'inline-block' : 'none';
     });
 });
 </script>
-
-<style>
-.filter-section {
-    margin-bottom: 20px;
-    padding: 15px;
-    background-color: #f8f9fa;
-    border-radius: 5px;
-}
-
-.filter-form {
-    display: flex;
-    gap: 15px;
-    align-items: center;
-    flex-wrap: wrap;
-}
-
-.filter-group {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-}
-
-.bulk-actions {
-    margin: 20px 0;
-    padding: 10px;
-    background-color: #f8f9fa;
-    border-radius: 5px;
-    display: flex;
-    gap: 10px;
-    align-items: center;
-}
-
-.select-all-container {
-    display: flex;
-    align-items: center;
-    gap: 5px;
-    margin-right: 15px;
-}
-
-.task-select {
-    position: absolute;
-    top: 10px;
-    right: 10px;
-}
-
-.task-card {
-    position: relative;
-    padding-top: 40px;
-}
-
-.lead-info {
-    margin-top: 15px;
-    padding: 10px;
-    background-color: #f8f9fa;
-    border-radius: 5px;
-}
-
-.lead-info ul {
-    list-style: none;
-    padding-left: 0;
-    margin: 5px 0;
-}
-
-.lead-info li {
-    margin: 5px 0;
-}
-
-.no-lead {
-    color: #6c757d;
-    font-style: italic;
-    margin-top: 10px;
-}
-
-.completed {
-    color: #28a745;
-}
-
-.not-completed {
-    color: #dc3545;
-}
-</style>
 {% endblock %}

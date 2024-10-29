@@ -165,7 +165,7 @@
     </div>
 </div>
 
-<!-- Email Modal (unchanged) -->
+<!-- Email Modal の修正 -->
 <div id="emailModal" class="modal">
     <div class="modal-content">
         <span class="close-modal">&times;</span>
@@ -175,6 +175,32 @@
             <p id="modalDate"></p>
         </div>
         <div class="email-content" id="modalContent"></div>
+        
+        <!-- AI分析セクション追加 -->
+        <div id="aiAnalysisSection">
+            <div id="analysisContent" style="display: none;">
+                <h4>AI分析結果</h4>
+                <div id="analysisResult"></div>
+                
+                <div id="generatedItems" class="mt-3">
+                    <div id="tasksList" style="display: none;">
+                        <h5>作成されたタスク</h5>
+                        <ul class="list-group" id="tasksContainer"></ul>
+                    </div>
+                    
+                    <div id="schedulesList" style="display: none;">
+                        <h5>作成された予定</h5>
+                        <ul class="list-group" id="schedulesContainer"></ul>
+                    </div>
+                </div>
+            </div>
+            
+            <div id="analysisButton" class="mt-3">
+                <button onclick="analyzeEmail()" class="btn btn-primary">
+                    <i class="fas fa-robot"></i> AI分析を実行
+                </button>
+            </div>
+        </div>
     </div>
 </div>
 
@@ -363,9 +389,13 @@
 .email-content {
     margin-top: 20px;
     white-space: pre-wrap;
-    font-family: Arial, sans-serif;
+    font-family: "Hiragino Kaku Gothic Pro", "ヒラギノ角ゴ Pro W3", Meiryo, "メイリオ", sans-serif;
     line-height: 1.6;
+    padding: 15px;
+    background-color: #f8f9fa;
+    border-radius: 4px;
 }
+    
 </style>
 
 <script>
@@ -373,25 +403,119 @@ async function showEmailModal(emailId) {
     try {
         const response = await fetch(`/api/emails/${emailId}`);
         const data = await response.json();
-        
+
         if (data.error) {
             console.error('Error fetching email:', data.error);
             return;
         }
-        
-        // Update modal content
+
+        // メールの内容を更新
         document.getElementById('modalSubject').textContent = data.subject || '(件名なし)';
         document.getElementById('modalSender').textContent = `送信者: ${data.sender_name || data.sender}`;
         document.getElementById('modalDate').textContent = `受信日時: ${new Date(data.received_date).toLocaleString('ja-JP')}`;
-        document.getElementById('modalContent').textContent = data.content || '(本文なし)';
+        document.getElementById('modalContent').innerHTML = data.content.replace(/\n/g, '<br>') || '(本文なし)';
+
+        // AI分析セクションの表示制御
+        const analysisContent = document.getElementById('analysisContent');
+        const analysisButton = document.getElementById('analysisButton');
         
-        // Show modal
+        if (data.ai_analysis) {
+            document.getElementById('analysisResult').innerHTML = data.ai_analysis;
+            analysisContent.style.display = 'block';
+            analysisButton.style.display = 'none';
+            
+            // タスクとスケジュールの表示
+            updateGeneratedItems(data.tasks, data.schedules);
+        } else {
+            analysisContent.style.display = 'none';
+            analysisButton.style.display = 'block';
+        }
+
+        // 現在のメールIDを保存
+        currentEmailId = emailId;
+
+        // モーダルを表示
         const modal = document.getElementById('emailModal');
         modal.style.display = 'block';
     } catch (error) {
         console.error('Error:', error);
     }
 }
+
+async function analyzeEmail() {
+    if (!currentEmailId) return;
+
+    const button = document.querySelector('#analysisButton button');
+    button.disabled = true;
+    button.innerHTML = '<i class="fas fa-spinner fa-spin"></i> 分析中...';
+
+    try {
+        const response = await fetch(`/api/emails/${currentEmailId}/analyze`, {
+            method: 'POST',
+        });
+        const data = await response.json();
+
+        if (data.error) {
+            alert(data.error);
+            return;
+        }
+
+        // 分析結果の表示
+        document.getElementById('analysisResult').innerHTML = data.analysis;
+        document.getElementById('analysisContent').style.display = 'block';
+        document.getElementById('analysisButton').style.display = 'none';
+
+        // 生成されたアイテムの表示
+        updateGeneratedItems(data.tasks, data.schedules);
+
+    } catch (error) {
+        console.error('Error:', error);
+        alert('分析中にエラーが発生しました');
+    } finally {
+        button.disabled = false;
+        button.innerHTML = '<i class="fas fa-robot"></i> AI分析を実行';
+    }
+}
+
+function updateGeneratedItems(tasks, schedules) {
+    const tasksDiv = document.getElementById('tasksList');
+    const schedulesDiv = document.getElementById('schedulesList');
+    const tasksContainer = document.getElementById('tasksContainer');
+    const schedulesContainer = document.getElementById('schedulesContainer');
+
+    // タスクの表示
+    if (tasks && tasks.length > 0) {
+        tasksContainer.innerHTML = tasks.map(task => `
+            <li class="list-group-item">
+                <i class="fas fa-tasks"></i>
+                ${task.title}
+                <small class="text-muted">（期限: ${new Date(task.due_date).toLocaleDateString()}）</small>
+            </li>
+        `).join('');
+        tasksDiv.style.display = 'block';
+    } else {
+        tasksDiv.style.display = 'none';
+    }
+
+    // スケジュールの表示
+    if (schedules && schedules.length > 0) {
+        schedulesContainer.innerHTML = schedules.map(schedule => `
+            <li class="list-group-item">
+                <i class="fas fa-calendar"></i>
+                ${schedule.title}
+                <small class="text-muted">
+                    （${new Date(schedule.start_time).toLocaleString()} - 
+                     ${new Date(schedule.end_time).toLocaleTimeString()}）
+                </small>
+            </li>
+        `).join('');
+        schedulesDiv.style.display = 'block';
+    } else {
+        schedulesDiv.style.display = 'none';
+    }
+}
+
+let currentEmailId = null;
 
 // Close modal when clicking on X or outside the modal
 document.addEventListener('DOMContentLoaded', function() {
