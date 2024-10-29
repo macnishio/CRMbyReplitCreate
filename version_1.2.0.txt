@@ -1,0 +1,14 @@
+1.2.0
+Release Date: 2024-10-28
+
+Major Features:
+- User Authentication
+- Lead Management
+- Opportunity Tracking
+- Account Management
+- Advanced Analytics
+- Email Integration
+- AI Analysis
+- Mobile Interface
+- Task Management
+- Schedule Management
