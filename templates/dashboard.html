@@ -140,31 +140,32 @@
             <div class="dashboard-list email-grid">
                 {% if emails and emails.items %}
                     {% for email in emails.items %}
-                    <div class="dashboard-item email-card" onclick="showEmailModal('{{ email.id }}')">
-                        <h3>{{ email.subject or '件名なし' }}</h3>
-                        <p>送信者: {{ email.sender_name or email.sender }}</p>
-                        <p>受信日時: {{ email.received_date.strftime('%Y-%m-%d %H:%M') if email.received_date }}</p>
-                    </div>
-                    {% endfor %}
-                    {% if emails.pages > 1 %}
-                    <div class="pagination">
-                        {% if emails.has_prev %}
-                            <a href="{{ url_for('main.dashboard', emails_page=emails.prev_num, leads_page=request.args.get('leads_page', 1), tasks_page=request.args.get('tasks_page', 1), schedules_page=request.args.get('schedules_page', 1)) }}" class="page-link">&laquo; 前へ</a>
-                        {% endif %}
-                        <span class="page-info">{{ emails.page }} / {{ emails.pages }}</span>
-                        {% if emails.has_next %}
-                            <a href="{{ url_for('main.dashboard', emails_page=emails.next_num, leads_page=request.args.get('leads_page', 1), tasks_page=request.args.get('tasks_page', 1), schedules_page=request.args.get('schedules_page', 1)) }}" class="page-link">次へ &raquo;</a>
-                        {% endif %}
-                    </div>
-                    {% endif %}
-                {% else %}
-                    <p>メールはありません</p>
+            <div class="dashboard-item email-card" onclick="showEmailModal('{{ email.id }}')">
+                <h3>{{ email.subject or '件名なし' }}</h3>
+                <p>送信者: {{ email.sender_name or email.sender }}</p>
+                <p>受信日時: {{ email.received_date.strftime('%Y-%m-%d %H:%M') if email.received_date }}</p>
+            </div>
+            {% endfor %}
+            {% if emails.pages > 1 %}
+            <div class="pagination">
+                {% if emails.has_prev %}
+                    <a href="{{ url_for('main.dashboard', emails_page=emails.prev_num, leads_page=request.args.get('leads_page', 1), tasks_page=request.args.get('tasks_page', 1), schedules_page=request.args.get('schedules_page', 1)) }}" class="page-link">&laquo; 前へ</a>
+                {% endif %}
+                <span class="page-info">{{ emails.page }} / {{ emails.pages }}</span>
+                {% if emails.has_next %}
+                    <a href="{{ url_for('main.dashboard', emails_page=emails.next_num, leads_page=request.args.get('leads_page', 1), tasks_page=request.args.get('tasks_page', 1), schedules_page=request.args.get('schedules_page', 1)) }}" class="page-link">次へ &raquo;</a>
                 {% endif %}
             </div>
-        </div>
+            {% endif %}
+        {% else %}
+            <p>メールはありません</p>
+        {% endif %}
+    </div>
+</div>
     </div>
 </div>
 
+<!-- Email Modal の修正 -->
 <div id="emailModal" class="modal">
     <div class="modal-content">
         <span class="close-modal">&times;</span>
@@ -175,6 +176,7 @@
         </div>
         <div class="email-content" id="modalContent"></div>
         
+        <!-- AI分析セクション追加 -->
         <div id="aiAnalysisSection">
             <div id="analysisContent" style="display: none;">
                 <h4>AI分析結果</h4>
@@ -203,7 +205,278 @@
 </div>
 
 <style>
-/* Original styles... */
+/* Existing styles (unchanged) */
+.dashboard {
+    padding: 20px;
+}
+
+.metrics-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 20px;
+    margin-bottom: 30px;
+}
+
+.metric-card {
+    background: white;
+    padding: 20px;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.metric-card h3 {
+    margin: 0 0 10px 0;
+    color: #666;
+}
+
+.metric-value {
+    font-size: 24px;
+    font-weight: bold;
+    margin: 10px 0;
+}
+
+.metric-change {
+    font-size: 14px;
+    margin: 5px 0;
+}
+
+.metric-change.positive {
+    color: #28a745;
+}
+
+.metric-change.negative {
+    color: #dc3545;
+}
+
+/* メールセクション用の特別なスタイル */
+.dashboard-section.email-section {
+    grid-column: 1 / -1;  /* グリッド全体を使用 */
+    width: 100%;
+    max-width: 100%;
+}
+
+/* 既存のダッシュボードグリッドの調整 */
+.dashboard-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 20px;
+    margin-bottom: 20px;
+}
+
+/* メールグリッドの調整 */
+.email-grid {
+    display: grid;
+    grid-template-columns: repeat(5, 1fr);
+    gap: 15px;
+    margin-bottom: 20px;
+    width: 100%;
+}
+    
+.dashboard-section {
+    background: white;
+    padding: 20px;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.dashboard-section h2 {
+    margin: 0 0 20px 0;
+    color: #333;
+}
+
+.dashboard-list {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+}
+
+.dashboard-item {
+    padding: 15px;
+    background: #f8f9fa;
+    border-radius: 4px;
+}
+
+.dashboard-item h3 {
+    margin: 0 0 10px 0;
+    font-size: 16px;
+    color: #333;
+}
+
+.dashboard-item p {
+    margin: 5px 0;
+    color: #666;
+    font-size: 14px;
+}
+
+.card-link {
+    text-decoration: none;
+    color: inherit;
+    display: block;
+}
+
+.card-link:hover .dashboard-item {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+    transition: all 0.2s ease;
+}
+
+.email-card {
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.email-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+}
+
+/* New pagination styles */
+.pagination {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 10px;
+    margin-top: 15px;
+    padding: 10px;
+    background: #f8f9fa;
+    border-radius: 4px;
+}
+
+.page-link {
+    color: #007bff;
+    text-decoration: none;
+    padding: 5px 10px;
+    border-radius: 4px;
+    transition: background-color 0.2s ease;
+}
+
+.page-link:hover {
+    background-color: #e9ecef;
+}
+
+.page-info {
+    color: #666;
+    font-size: 14px;
+}
+
+/* Modal Styles (unchanged) */
+.modal {
+    display: none;
+    position: fixed;
+    z-index: 1000;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0,0,0,0.5);
+}
+
+.modal-content {
+    position: relative;
+    background-color: #fff;
+    margin: 5% auto;
+    padding: 20px;
+    width: 80%;
+    max-width: 800px;
+    border-radius: 8px;
+    box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+    max-height: 80vh;
+    overflow-y: auto;
+}
+
+.close-modal {
+    position: absolute;
+    right: 20px;
+    top: 10px;
+    font-size: 28px;
+    font-weight: bold;
+    color: #666;
+    cursor: pointer;
+}
+
+.close-modal:hover {
+    color: #333;
+}
+
+.email-info {
+    margin: 10px 0;
+    padding-bottom: 10px;
+    border-bottom: 1px solid #eee;
+}
+
+.email-content {
+    margin-top: 20px;
+    white-space: pre-wrap;
+    font-family: "Hiragino Kaku Gothic Pro", "ヒラギノ角ゴ Pro W3", Meiryo, "メイリオ", sans-serif;
+    line-height: 1.6;
+    padding: 15px;
+    background-color: #f8f9fa;
+    border-radius: 4px;
+}
+
+/* 既存のスタイルに追加 */
+.email-grid {
+    display: grid;
+    grid-template-columns: repeat(5, 1fr); /* 5列のグリッド */
+    gap: 15px;
+    margin-bottom: 20px;
+}
+
+.email-card {
+    height: 150px; /* カードの高さを固定 */
+    overflow: hidden; /* 長いコンテンツをカット */
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+}
+
+.email-card h3 {
+    font-size: 14px;
+    margin: 0 0 8px 0;
+    /* 2行で省略 */
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+}
+
+.email-card p {
+    font-size: 12px;
+    margin: 4px 0;
+}
+
+/* ページネーションを全幅に */
+.pagination {
+    grid-column: 1 / -1; /* グリッドの全幅を使用 */
+    margin-top: 20px;
+}
+
+/* レスポンシブ対応 */
+@media (max-width: 1200px) {
+    .email-grid {
+        grid-template-columns: repeat(4, 1fr);
+    }
+}
+
+@media (max-width: 992px) {
+    .email-grid {
+        grid-template-columns: repeat(3, 1fr);
+    }
+}
+
+@media (max-width: 768px) {
+    .email-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+}
+
+@media (max-width: 576px) {
+    .email-grid {
+        grid-template-columns: 1fr;
+    }
+}
+
+    
 </style>
 
 <script>
@@ -217,11 +490,13 @@ async function showEmailModal(emailId) {
             return;
         }
 
+        // メールの内容を更新
         document.getElementById('modalSubject').textContent = data.subject || '(件名なし)';
         document.getElementById('modalSender').textContent = `送信者: ${data.sender_name || data.sender}`;
         document.getElementById('modalDate').textContent = `受信日時: ${new Date(data.received_date).toLocaleString('ja-JP')}`;
-        document.getElementById('modalContent').innerHTML = data.content || '(本文なし)';
+        document.getElementById('modalContent').innerHTML = data.content.replace(/\n/g, '<br>') || '(本文なし)';
 
+        // AI分析セクションの表示制御
         const analysisContent = document.getElementById('analysisContent');
         const analysisButton = document.getElementById('analysisButton');
         
@@ -229,14 +504,20 @@ async function showEmailModal(emailId) {
             document.getElementById('analysisResult').innerHTML = data.ai_analysis;
             analysisContent.style.display = 'block';
             analysisButton.style.display = 'none';
+            
+            // タスクとスケジュールの表示
             updateGeneratedItems(data.tasks, data.schedules);
         } else {
             analysisContent.style.display = 'none';
             analysisButton.style.display = 'block';
         }
 
+        // 現在のメールIDを保存
         currentEmailId = emailId;
-        document.getElementById('emailModal').style.display = 'block';
+
+        // モーダルを表示
+        const modal = document.getElementById('emailModal');
+        modal.style.display = 'block';
     } catch (error) {
         console.error('Error:', error);
     }
@@ -260,9 +541,12 @@ async function analyzeEmail() {
             return;
         }
 
+        // 分析結果の表示
         document.getElementById('analysisResult').innerHTML = data.analysis;
         document.getElementById('analysisContent').style.display = 'block';
         document.getElementById('analysisButton').style.display = 'none';
+
+        // 生成されたアイテムの表示
         updateGeneratedItems(data.tasks, data.schedules);
 
     } catch (error) {
@@ -280,6 +564,7 @@ function updateGeneratedItems(tasks, schedules) {
     const tasksContainer = document.getElementById('tasksContainer');
     const schedulesContainer = document.getElementById('schedulesContainer');
 
+    // タスクの表示
     if (tasks && tasks.length > 0) {
         tasksContainer.innerHTML = tasks.map(task => `
             <li class="list-group-item">
@@ -293,6 +578,7 @@ function updateGeneratedItems(tasks, schedules) {
         tasksDiv.style.display = 'none';
     }
 
+    // スケジュールの表示
     if (schedules && schedules.length > 0) {
         schedulesContainer.innerHTML = schedules.map(schedule => `
             <li class="list-group-item">
@@ -312,6 +598,7 @@ function updateGeneratedItems(tasks, schedules) {
 
 let currentEmailId = null;
 
+// Close modal when clicking on X or outside the modal
 document.addEventListener('DOMContentLoaded', function() {
     const modal = document.getElementById('emailModal');
     const closeBtn = document.querySelector('.close-modal');
