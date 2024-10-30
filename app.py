@@ -1,6 +1,6 @@
 import os
 import socket
-from flask import Flask,render_template
+from flask import Flask, render_template
 from config import config
 from extensions import db, migrate, login_manager, mail, limiter
 from email_receiver import setup_email_scheduler
@@ -97,29 +97,21 @@ def create_app(config_name='default'):
 
     return app
 
-@login_manager.user_loader
-def load_user(user_id):
-    from models import User
-    return User.query.get(int(user_id))
-
-def cleanup_socket(port):
-    """Cleanup any existing socket binding"""
-    try:
-        s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        s.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
-        s.bind(('0.0.0.0', port))
-        s.close()
-    except Exception as e:
-        logging.error(f"Socket cleanup error: {str(e)}")
+def find_available_port(start_port=5000, max_attempts=10):
+    """Find an available port starting from start_port"""
+    for port in range(start_port, start_port + max_attempts):
+        try:
+            with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
+                s.bind(('0.0.0.0', port))
+                return port
+        except socket.error:
+            continue
+    raise RuntimeError(f"Could not find an available port after {max_attempts} attempts")
 
 if __name__ == '__main__':
     app = create_app()
-    port = 5000
-
-    # Cleanup socket before starting
-    cleanup_socket(port)
-
     try:
+        port = find_available_port()
         app.run(host='0.0.0.0', port=port, debug=True)
     except Exception as e:
         logging.error(f"Failed to start Flask server: {str(e)}")

@@ -7,6 +7,7 @@ from sqlalchemy import func, desc, and_
 from sqlalchemy.exc import SQLAlchemyError
 from ai_analysis import analyze_email, process_ai_response
 import html
+import re
 
 bp = Blueprint('main', __name__)
 
@@ -136,36 +137,58 @@ def get_email_content(email_id):
         if not email:
             return jsonify({'error': 'メールが見つかりません'}), 404
 
-        # Content decoding with improved handling
+        # Content decoding with improved Japanese encoding handling
         content = email.content
         decoded_content = None
-        
+        encoding_used = None
+
         if isinstance(content, bytes):
-            # List of encodings to try, in order of preference
-            encodings = [
-                'utf-8',
-                'iso-2022-jp',
-                'shift_jis',
-                'cp932',
-                'euc_jp',
-                'ascii'
-            ]
-            
-            for encoding in encodings:
+            # Check for $B marker which indicates iso-2022-jp encoding
+            if b'$B' in content:
                 try:
-                    decoded_content = content.decode(encoding)
-                    if decoded_content and not all(c == '?' for c in decoded_content):
-                        break
-                except (UnicodeDecodeError, LookupError):
-                    continue
-            
+                    decoded_content = content.decode('iso-2022-jp')
+                    encoding_used = 'iso-2022-jp'
+                except UnicodeDecodeError:
+                    pass
+
+            # If $B marker decode failed or wasn't present, try ordered encodings
+            if not decoded_content:
+                encodings = [
+                    'iso-2022-jp',
+                    'shift_jis',
+                    'euc_jp',
+                    'utf-8',
+                    'cp932'
+                ]
+
+                for encoding in encodings:
+                    try:
+                        decoded = content.decode(encoding)
+                        # Check if decode produced meaningful content
+                        if decoded and not all(c == '?' for c in decoded):
+                            decoded_content = decoded
+                            encoding_used = encoding
+                            break
+                    except (UnicodeDecodeError, LookupError):
+                        continue
+
+            # If all specific encodings fail, use utf-8 with error handling
             if not decoded_content:
                 decoded_content = content.decode('utf-8', errors='replace')
+                encoding_used = 'utf-8 (with replacements)'
+
         else:
             decoded_content = str(content) if content else ''
+            encoding_used = 'text'
 
+        # Clean and format content
+        decoded_content = decoded_content or ''
+        
+        # Remove any remaining escape sequences
+        decoded_content = re.sub(r'\x1b\[[0-9;]*[a-zA-Z]', '', decoded_content)
+        
         # Sanitize content
-        sanitized_content = html.escape(decoded_content or '')
+        sanitized_content = html.escape(decoded_content)
         
         # Replace newlines with <br> tags for proper display
         formatted_content = sanitized_content.replace('\n', '<br>')
@@ -177,7 +200,7 @@ def get_email_content(email_id):
             'sender_name': email.sender_name,
             'content': formatted_content,
             'received_date': email.received_date.isoformat() if email.received_date else None,
-            'encoding_used': encoding if 'encoding' in locals() else 'text'
+            'encoding_used': encoding_used
         })
 
     except Exception as e:

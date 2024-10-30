@@ -25,14 +25,24 @@ def fix_email_encoding():
                         
                     # Handle bytes content
                     if isinstance(content, bytes):
+                        # Check for $B marker which indicates iso-2022-jp encoding
+                        if b'$B' in content:
+                            try:
+                                decoded = content.decode('iso-2022-jp')
+                                if decoded and not all(c == '?' for c in decoded):
+                                    email.content = clean_string(decoded)
+                                    fixed_count += 1
+                                    continue
+                            except UnicodeDecodeError:
+                                pass
+
                         # Try different encodings in order of likelihood for Japanese content
                         encodings = [
-                            'utf-8',
                             'iso-2022-jp',
                             'shift_jis',
-                            'cp932',
                             'euc_jp',
-                            'ascii'
+                            'utf-8',
+                            'cp932'
                         ]
                         
                         decoded = None
@@ -40,14 +50,13 @@ def fix_email_encoding():
                             try:
                                 decoded = content.decode(encoding)
                                 if decoded and not all(c == '?' for c in decoded):
+                                    email.content = clean_string(decoded)
+                                    fixed_count += 1
                                     break
                             except (UnicodeDecodeError, LookupError):
                                 continue
                                 
-                        if decoded:
-                            email.content = clean_string(decoded)
-                            fixed_count += 1
-                        else:
+                        if not decoded:
                             # Use utf-8 with error handling as last resort
                             email.content = clean_string(content.decode('utf-8', errors='replace'))
                             error_count += 1
