@@ -5,8 +5,8 @@ from flask import current_app
 
 def analyze_iso2022jp_text(text: bytes) -> bool:
     """
-    Analyze if text contains ISO-2022-JP markers and validate content
-    Returns True if text appears to be valid ISO-2022-JP encoded
+    Analyze if text contains ISO-2022-JP markers and validate content.
+    Returns True if text appears to be valid ISO-2022-JP encoded.
     """
     if not text:
         current_app.logger.debug(f"Empty content received in analyze_iso2022jp_text")
@@ -47,7 +47,7 @@ def analyze_iso2022jp_text(text: bytes) -> bool:
 
 def convert_encoding(content: Union[str, bytes], default_encoding: str = 'utf-8') -> Tuple[str, Optional[str]]:
     """
-    Convert content to proper encoding with Japanese encoding support
+    Convert content to proper encoding with Japanese encoding support.
     Returns tuple of (decoded_content, encoding_used)
     """
     if content is None:
