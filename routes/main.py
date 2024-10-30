@@ -129,30 +129,44 @@ def get_email_content(email_id):
             return jsonify({'error': 'メールが見つかりません'}), 404
 
         content = email.content
+        current_app.logger.debug(f"Processing email {email_id} content type: {type(content)}")
+        if isinstance(content, bytes):
+            current_app.logger.debug(f"Content length: {len(content)} bytes")
+
         encoding_used = None
         decoded_content = None
 
         # Handle bytes content
         if isinstance(content, bytes):
             # First check for ISO-2022-JP content using markers
+            current_app.logger.debug("Checking for ISO-2022-JP markers")
             if analyze_iso2022jp_text(content):
                 try:
+                    current_app.logger.debug("Attempting ISO-2022-JP decoding")
                     decoded_content = content.decode('iso-2022-jp')
                     encoding_used = 'iso-2022-jp'
+                    current_app.logger.debug("Successfully decoded using ISO-2022-JP")
                 except UnicodeDecodeError as e:
                     current_app.logger.warning(f"ISO-2022-JP decoding failed: {str(e)}")
 
             # If ISO-2022-JP decoding failed or wasn't applicable, try other encodings
             if not decoded_content:
+                current_app.logger.debug("Trying alternative encodings")
                 decoded_content, encoding_used = convert_encoding(content)
+                current_app.logger.debug(f"Content decoded using {encoding_used}")
         else:
             decoded_content = str(content) if content else ''
             encoding_used = 'text'
+            current_app.logger.debug("Content was already in text format")
 
         # Clean and sanitize the content
+        current_app.logger.debug("Cleaning and sanitizing content")
         cleaned_content = clean_email_content(decoded_content)
+        current_app.logger.debug(f"Cleaned content length: {len(cleaned_content)}")
+        
         sanitized_content = html.escape(cleaned_content)
         formatted_content = sanitized_content.replace('\n', '<br>')
+        current_app.logger.debug(f"Final formatted content length: {len(formatted_content)}")
 
         return jsonify({
             'id': email.id,
