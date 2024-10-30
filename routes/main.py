@@ -8,7 +8,7 @@ from sqlalchemy.exc import SQLAlchemyError
 from ai_analysis import analyze_email, process_ai_response
 import html
 import re
-from email_encoding import convert_encoding, clean_email_content
+from email_encoding import convert_encoding, clean_email_content, analyze_iso2022jp_text
 
 bp = Blueprint('main', __name__)
 
@@ -128,8 +128,28 @@ def get_email_content(email_id):
         if not email:
             return jsonify({'error': 'メールが見つかりません'}), 404
 
-        decoded_content, encoding_used = convert_encoding(email.content)
-        
+        content = email.content
+        encoding_used = None
+        decoded_content = None
+
+        # Handle bytes content
+        if isinstance(content, bytes):
+            # First check for ISO-2022-JP content using markers
+            if analyze_iso2022jp_text(content):
+                try:
+                    decoded_content = content.decode('iso-2022-jp')
+                    encoding_used = 'iso-2022-jp'
+                except UnicodeDecodeError as e:
+                    current_app.logger.warning(f"ISO-2022-JP decoding failed: {str(e)}")
+
+            # If ISO-2022-JP decoding failed or wasn't applicable, try other encodings
+            if not decoded_content:
+                decoded_content, encoding_used = convert_encoding(content)
+        else:
+            decoded_content = str(content) if content else ''
+            encoding_used = 'text'
+
+        # Clean and sanitize the content
         cleaned_content = clean_email_content(decoded_content)
         sanitized_content = html.escape(cleaned_content)
         formatted_content = sanitized_content.replace('\n', '<br>')
@@ -146,7 +166,10 @@ def get_email_content(email_id):
 
     except Exception as e:
         current_app.logger.error(f"Error fetching email content: {str(e)}")
-        return jsonify({'error': 'メール内容の取得中にエラーが発生しました'}), 500
+        return jsonify({
+            'error': 'メール内容の取得中にエラーが発生しました',
+            'details': str(e)
+        }), 500
 
 @bp.route('/api/emails/<int:email_id>/analyze', methods=['POST'])
 @login_required
