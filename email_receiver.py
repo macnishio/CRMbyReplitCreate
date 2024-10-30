@@ -15,7 +15,7 @@ import re
 import time
 from contextlib import contextmanager
 from threading import Thread
-from email_encoding import convert_encoding, clean_email_content
+from email_encoding import convert_encoding, clean_email_content, analyze_iso2022jp_text
 
 def clean_string(text):
     """Remove NUL characters and other problematic characters from string"""
@@ -316,14 +316,32 @@ def decode_email_header(header):
 def get_email_content(msg):
     """Extract email content with improved encoding handling"""
     content = []
+    current_app.logger.debug("Processing email content")
+    
     if msg.is_multipart():
         for part in msg.walk():
             if part.get_content_type() == "text/plain":
                 try:
                     part_content = part.get_payload(decode=True)
                     if part_content:
-                        decoded_content, _ = convert_encoding(part_content)
-                        content.append(clean_email_content(decoded_content))
+                        current_app.logger.debug(f"Processing multipart content of length {len(part_content)}")
+                        
+                        # Check for ISO-2022-JP markers
+                        if isinstance(part_content, bytes) and analyze_iso2022jp_text(part_content):
+                            try:
+                                current_app.logger.debug("ISO-2022-JP markers found, attempting decode")
+                                decoded_content = part_content.decode('iso-2022-jp')
+                                current_app.logger.debug("Successfully decoded using ISO-2022-JP")
+                            except UnicodeDecodeError as e:
+                                current_app.logger.warning(f"ISO-2022-JP decoding failed: {str(e)}")
+                                decoded_content, encoding = convert_encoding(part_content)
+                                current_app.logger.debug(f"Fallback decoding using {encoding}")
+                        else:
+                            decoded_content, encoding = convert_encoding(part_content)
+                            current_app.logger.debug(f"Content decoded using {encoding}")
+                        
+                        cleaned_content = clean_email_content(decoded_content)
+                        content.append(cleaned_content)
                 except Exception as e:
                     current_app.logger.warning(f"Error decoding email part: {str(e)}")
                     continue
@@ -331,13 +349,31 @@ def get_email_content(msg):
         try:
             payload = msg.get_payload(decode=True)
             if payload:
-                decoded_content, _ = convert_encoding(payload)
-                content.append(clean_email_content(decoded_content))
+                current_app.logger.debug(f"Processing single part content of length {len(payload)}")
+                
+                # Check for ISO-2022-JP markers
+                if isinstance(payload, bytes) and analyze_iso2022jp_text(payload):
+                    try:
+                        current_app.logger.debug("ISO-2022-JP markers found, attempting decode")
+                        decoded_content = payload.decode('iso-2022-jp')
+                        current_app.logger.debug("Successfully decoded using ISO-2022-JP")
+                    except UnicodeDecodeError as e:
+                        current_app.logger.warning(f"ISO-2022-JP decoding failed: {str(e)}")
+                        decoded_content, encoding = convert_encoding(payload)
+                        current_app.logger.debug(f"Fallback decoding using {encoding}")
+                else:
+                    decoded_content, encoding = convert_encoding(payload)
+                    current_app.logger.debug(f"Content decoded using {encoding}")
+                
+                cleaned_content = clean_email_content(decoded_content)
+                content.append(cleaned_content)
         except Exception as e:
             current_app.logger.warning(f"Error decoding email payload: {str(e)}")
             content.append(clean_email_content(msg.get_payload()))
     
-    return "\n".join(content)
+    final_content = "\n".join(content)
+    current_app.logger.debug(f"Final content length: {len(final_content)}")
+    return final_content
 
 def extract_sender_name(sender):
     """Extract sender name with improved parsing"""
