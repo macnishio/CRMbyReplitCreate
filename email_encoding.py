@@ -9,41 +9,86 @@ def analyze_iso2022jp_text(text: bytes) -> bool:
     Returns True if text appears to be valid ISO-2022-JP encoded.
     """
     if not text:
-        current_app.logger.debug(f"Empty content received in analyze_iso2022jp_text")
+        current_app.logger.debug("Empty content received in analyze_iso2022jp_text")
         return False
-        
-    # Check for ISO-2022-JP escape sequences
-    has_jis_marker = b'$B' in text and b'(B' in text
-    current_app.logger.debug(f"ISO-2022-JP markers check: start=$B ({text.count(b'$B')}), end=(B ({text.count(b'(B')})")
-    
-    # Additional validation - check if markers are properly paired
-    if has_jis_marker:
-        # Count occurrences of start/end markers
-        start_markers = text.count(b'$B')
-        end_markers = text.count(b'(B')
-        
-        current_app.logger.debug(f"ISO-2022-JP marker count: start={start_markers}, end={end_markers}")
-        
-        # Markers should be roughly balanced (allowing for some malformed content)
-        if abs(start_markers - end_markers) > start_markers // 2:
-            current_app.logger.debug("ISO-2022-JP markers are not properly balanced")
-            return False
-            
-        # Check if content between markers looks valid
-        parts = text.split(b'$B')
-        for i, part in enumerate(parts[1:], 1):  # Skip first part before marker
-            if b'(B' in part:
-                jis_content = part.split(b'(B')[0]
-                valid_bytes = sum(0x21 <= b <= 0x7E for b in jis_content)
-                validity_ratio = valid_bytes / len(jis_content) if jis_content else 0
-                current_app.logger.debug(f"Part {i} validity check: {validity_ratio:.2%} valid bytes")
-                if validity_ratio < 0.7:  # At least 70% should be valid
-                    current_app.logger.debug(f"Part {i} failed validity check")
-                    return False
-                    
-        current_app.logger.debug("ISO-2022-JP content validation successful")
-        return True
+
+    # すべてのISO-2022-JP関連のエスケープシーケンスを定義
+    ESC_SEQUENCES = {
+        'ESC_JIS1978': b'\x1b$@',    # JIS X 0208-1978
+        'ESC_JIS1983': b'\x1b$B',    # JIS X 0208-1983
+        'ESC_ASCII': b'\x1b(B',      # ASCII
+        'ESC_JISX0201': b'\x1b(J',   # JIS X 0201-1976 Roman
+        'JIS_MARKER': b'$B',         # 代替JISマーカー
+        'ASCII_MARKER': b'(B'        # 代替ASCIIマーカー
+    }
+
+    # マーカーの存在チェック
+    markers_found = {name: count for name, seq in ESC_SEQUENCES.items() 
+                    if (count := text.count(seq)) > 0}
+
+    if markers_found:
+        current_app.logger.debug(f"Found markers: {markers_found}")
+
+        # 特定のパターンのチェック（例：$B...(B の繰り返し）
+        if ESC_SEQUENCES['JIS_MARKER'] in text and ESC_SEQUENCES['ASCII_MARKER'] in text:
+            marker_positions = []
+            pos = 0
+            while True:
+                jis_pos = text.find(ESC_SEQUENCES['JIS_MARKER'], pos)
+                if jis_pos == -1:
+                    break
+                ascii_pos = text.find(ESC_SEQUENCES['ASCII_MARKER'], jis_pos)
+                if ascii_pos == -1:
+                    break
+                marker_positions.append((jis_pos, ascii_pos))
+                pos = ascii_pos + 2
+
+            if marker_positions:
+                current_app.logger.debug(f"Found {len(marker_positions)} JIS-ASCII marker pairs")
+
+        # 正規化の試行
+        normalized = text
+        if ESC_SEQUENCES['JIS_MARKER'] in text and ESC_SEQUENCES['ESC_JIS1983'] not in text:
+            normalized = text.replace(ESC_SEQUENCES['JIS_MARKER'], ESC_SEQUENCES['ESC_JIS1983'])
+        if ESC_SEQUENCES['ASCII_MARKER'] in text and ESC_SEQUENCES['ESC_ASCII'] not in text:
+            normalized = normalized.replace(ESC_SEQUENCES['ASCII_MARKER'], ESC_SEQUENCES['ESC_ASCII'])
+
+        try:
+            # 正規化されたコンテンツでデコード試行
+            decoded = normalized.decode('iso-2022-jp', errors='strict')
+            if has_japanese_chars(decoded):
+                current_app.logger.debug(f"Normalized decode successful: {len(decoded)} chars")
+                return True
+            else:
+                current_app.logger.debug("Decoded but no Japanese characters found")
+        except UnicodeDecodeError:
+            current_app.logger.debug("Normalized decode failed, trying original content")
+            try:
+                # オリジナルコンテンツでデコード試行
+                decoded = text.decode('iso-2022-jp', errors='strict')
+                if has_japanese_chars(decoded):
+                    current_app.logger.debug(f"Original decode successful: {len(decoded)} chars")
+                    return True
+                else:
+                    current_app.logger.debug("Original decode succeeded but no Japanese characters found")
+            except UnicodeDecodeError as e:
+                current_app.logger.debug(f"All decode attempts failed: {str(e)}")
+                return False
+
+    current_app.logger.debug("No valid ISO-2022-JP markers found")
     return False
+
+def has_japanese_chars(text: str) -> bool:
+    """
+    Check if text contains Japanese characters
+    """
+    ranges = [
+        ('\u3040', '\u309F'),  # ひらがな
+        ('\u30A0', '\u30FF'),  # カタカナ
+        ('\u4E00', '\u9FFF'),  # 漢字
+        ('\uFF00', '\uFFEF'),  # 全角文字
+    ]
+    return any(any(start <= char <= end for start, end in ranges) for char in text)
 
 def convert_encoding(content: Union[str, bytes], default_encoding: str = 'utf-8') -> Tuple[str, Optional[str]]:
     """
@@ -51,76 +96,122 @@ def convert_encoding(content: Union[str, bytes], default_encoding: str = 'utf-8'
     Returns tuple of (decoded_content, encoding_used)
     """
     if content is None:
-        current_app.logger.debug("Received None content in convert_encoding")
+        current_app.logger.debug("Received None content")
         return "", None
-        
+
     if isinstance(content, str):
         current_app.logger.debug("Content is already string type")
         return content, 'text'
-        
+
     if not isinstance(content, bytes):
-        current_app.logger.debug(f"Content is neither string nor bytes: {type(content)}")
+        current_app.logger.debug(f"Content type is {type(content)}, converting to string")
         return str(content), 'text'
-        
-    current_app.logger.debug(f"Processing bytes content of length {len(content)}")
-    
-    # First check specifically for ISO-2022-JP content
+
+    current_app.logger.debug(f"Processing {len(content)} bytes")
+
+    # ISO-2022-JPの検出とデコード
     if analyze_iso2022jp_text(content):
         try:
-            decoded = content.decode('iso-2022-jp')
-            if decoded and not all(c == '?' for c in decoded):
-                current_app.logger.debug("Successfully decoded using ISO-2022-JP")
+            # ESCシーケンスの正規化
+            normalized = content.replace(b'$B', b'\x1b$B').replace(b'(B', b'\x1b(B')
+            decoded = normalized.decode('iso-2022-jp', errors='strict')
+            if has_japanese_chars(decoded):
+                current_app.logger.debug("ISO-2022-JP decode successful")
                 return decoded, 'iso-2022-jp'
-        except UnicodeDecodeError as e:
-            current_app.logger.debug(f"ISO-2022-JP decoding failed: {str(e)}")
-    
-    # List of encodings to try in order of preference
+        except UnicodeDecodeError:
+            current_app.logger.debug("ISO-2022-JP decode failed, trying alternatives")
+
+    # エンコーディング優先順位
     encodings = [
-        'iso-2022-jp',  # JIS
-        'shift_jis',    # SJIS
-        'euc_jp',       # EUC-JP
-        'utf-8',        # UTF-8
-        'cp932'         # Microsoft's Japanese encoding
+        ('cp932', 'strict'),          # Windows日本語
+        ('shift_jis', 'strict'),      # Shift-JIS
+        ('euc_jp', 'strict'),         # EUC-JP
+        ('iso-2022-jp', 'strict'),    # ISO-2022-JP
+        ('utf-8', 'strict'),          # UTF-8
+        ('cp932', 'replace'),         # フォールバック
+        ('shift_jis', 'replace'),
+        ('euc_jp', 'replace'),
+        ('iso-2022-jp', 'replace'),
+        ('utf-8', 'replace')
     ]
-    
-    # Try each encoding
-    for encoding in encodings:
+
+    # 各エンコーディングを試行
+    for encoding, error_handler in encodings:
         try:
-            decoded = content.decode(encoding)
-            # Verify decoded content is valid
-            if decoded and not all(c == '?' for c in decoded):
-                current_app.logger.debug(f"Successfully decoded using {encoding}")
-                return decoded, encoding
-        except (UnicodeDecodeError, LookupError) as e:
-            current_app.logger.debug(f"Failed to decode with {encoding}: {str(e)}")
+            decoded = content.decode(encoding, errors=error_handler)
+            if has_japanese_chars(decoded):
+                current_app.logger.debug(f"Decoded using {encoding} ({error_handler})")
+                return decoded, f"{encoding}{' (with replacements)' if error_handler == 'replace' else ''}"
+        except (UnicodeDecodeError, LookupError):
             continue
-            
-    # Fallback to default encoding with error handling
+
+    # 最終フォールバック
     try:
-        current_app.logger.debug(f"Falling back to {default_encoding} with replacement")
-        return content.decode(default_encoding, errors='replace'), f'{default_encoding} (with replacements)'
+        fallback = content.decode(default_encoding, errors='replace')
+        current_app.logger.debug("Using fallback encoding")
+        return fallback, f'{default_encoding} (fallback)'
     except Exception as e:
-        current_app.logger.error(f"Failed to decode content: {str(e)}")
+        current_app.logger.error(f"Decoding failed: {str(e)}")
         return "(デコードできないコンテンツ)", 'failed'
 
 def clean_email_content(content: Union[str, bytes]) -> str:
-    """Clean and normalize email content"""
     current_app.logger.debug(f"Cleaning content of type: {type(content)}")
-    
+
+    # デコード処理
     decoded, encoding = convert_encoding(content)
-    current_app.logger.debug(f"Content decoded using {encoding}")
-    
-    # Remove null bytes
-    cleaned = decoded.replace('\x00', '')
-    current_app.logger.debug(f"Removed {len(decoded) - len(cleaned)} null bytes")
-    
-    # Remove ANSI escape sequences
-    original_length = len(cleaned)
-    cleaned = re.sub(r'\x1b\[[0-9;]*[a-zA-Z]', '', cleaned)
-    current_app.logger.debug(f"Removed {original_length - len(cleaned)} ANSI escape sequences")
-    
-    # Normalize newlines
+    current_app.logger.debug(f"Decoded using {encoding}")
+
+    if not decoded or encoding == 'failed':
+        current_app.logger.warning("Decoding failed or empty content")
+        return "(デコードできないコンテンツ)"
+
+    # 日本語文字の存在確認を追加（オプション）
+    has_japanese = any('\u3000' <= c <= '\u9fff' for c in decoded)
+    if not has_japanese:
+        current_app.logger.debug("No Japanese characters found in content")
+
+    # 以下は現在の実装と同じ
+    printable_chars = ''.join(char for char in decoded 
+                            if ord(char) >= 32 or char in '\n\r\t')
+
+    cleaned = re.sub(r'\x1b\[[0-9;]*[a-zA-Z]', '', printable_chars)
+    cleaned = re.sub(r'\x1b[\$\(][BJ@]', '', cleaned)
+
     cleaned = cleaned.replace('\r\n', '\n').replace('\r', '\n')
-    
-    current_app.logger.debug(f"Final cleaned content length: {len(cleaned)}")
-    return cleaned.strip()
+    cleaned = re.sub(r'\n{3,}', '\n\n', cleaned)
+
+    final = cleaned.strip()
+    current_app.logger.debug(f"Cleaning complete: {len(final)} chars")
+    return final
+
+def debug_content(content: bytes) -> None:
+    """
+    Debug helper to analyze content encoding issues
+    """
+    print("=== Content Debug ===")
+    print(f"Length: {len(content)} bytes")
+    print(f"First 100 bytes (hex): {content[:100].hex()}")
+
+    # 既知のマーカーをチェック
+    markers = [
+        (b'\x1b$@', "ESC$@ (JIS X 0208-1978)"),
+        (b'\x1b$B', "ESC$B (JIS X 0208-1983)"),
+        (b'\x1b(B', "ESC(B (ASCII)"),
+        (b'\x1b(J', "ESC(J (JIS X 0201)"),
+        (b'$B', "Plain $B"),
+        (b'(B', "Plain (B")
+    ]
+
+    for marker, desc in markers:
+        count = content.count(marker)
+        if count > 0:
+            print(f"Found {desc}: {count} occurrences")
+
+    # 各エンコーディングでデコードを試行
+    for encoding in ['utf-8', 'shift_jis', 'euc_jp', 'iso-2022-jp', 'cp932']:
+        try:
+            decoded = content.decode(encoding)
+            print(f"\n{encoding} decode preview: {decoded[:100]}")
+        except UnicodeDecodeError:
+            print(f"{encoding} decode failed")
+
