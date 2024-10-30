@@ -6,7 +6,6 @@ from datetime import datetime, timedelta
 from sqlalchemy import func, desc, and_
 from sqlalchemy.exc import SQLAlchemyError
 from ai_analysis import analyze_email, process_ai_response
-import html
 
 bp = Blueprint('main', __name__)
 
@@ -136,53 +135,33 @@ def get_email_content(email_id):
         if not email:
             return jsonify({'error': 'メールが見つかりません'}), 404
 
-        # Content decoding with improved handling
+        # コンテンツのデコード処理
         content = email.content
-        decoded_content = None
-        
         if isinstance(content, bytes):
-            # List of encodings to try, in order of preference
-            encodings = [
-                'utf-8',
-                'iso-2022-jp',
-                'shift_jis',
-                'cp932',
-                'euc_jp',
-                'ascii'
-            ]
-            
-            for encoding in encodings:
+            try:
+                content = content.decode('iso-2022-jp')
+            except UnicodeDecodeError:
                 try:
-                    decoded_content = content.decode(encoding)
-                    if decoded_content and not all(c == '?' for c in decoded_content):
-                        break
-                except (UnicodeDecodeError, LookupError):
-                    continue
-            
-            if not decoded_content:
-                decoded_content = content.decode('utf-8', errors='replace')
-        else:
-            decoded_content = str(content) if content else ''
-
-        # Sanitize content
-        sanitized_content = html.escape(decoded_content or '')
-        
-        # Replace newlines with <br> tags for proper display
-        formatted_content = sanitized_content.replace('\n', '<br>')
+                    content = content.decode('utf-8')
+                except UnicodeDecodeError:
+                    try:
+                        content = content.decode('cp932')
+                    except UnicodeDecodeError:
+                        content = '(文字化けしたコンテンツ)'
 
         return jsonify({
             'id': email.id,
             'subject': email.subject,
             'sender': email.sender,
             'sender_name': email.sender_name,
-            'content': formatted_content,
-            'received_date': email.received_date.isoformat() if email.received_date else None,
-            'encoding_used': encoding if 'encoding' in locals() else 'text'
+            'content': content,
+            'received_date': email.received_date.isoformat() if email.received_date else None
         })
 
     except Exception as e:
         current_app.logger.error(f"Error fetching email content: {str(e)}")
         return jsonify({'error': 'メール内容の取得中にエラーが発生しました'}), 500
+
 
 @bp.route('/api/emails/<int:email_id>/analyze', methods=['POST'])
 @login_required
