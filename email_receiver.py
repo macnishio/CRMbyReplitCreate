@@ -15,12 +15,12 @@ import re
 import time
 from contextlib import contextmanager
 from threading import Thread
+from email_encoding import convert_encoding, clean_email_content
 
 def clean_string(text):
     """Remove NUL characters and other problematic characters from string"""
     if text is None:
         return ""
-    # 整数型の場合は文字列に変換
     if isinstance(text, int):
         return str(text)
     if isinstance(text, bytes):
@@ -49,7 +49,6 @@ def process_emails_for_user(settings, parent_session, app):
     """Process emails for a single user with exponential backoff"""
     mail = None
     try:
-        # Get or create tracker within a transaction
         with parent_session.begin_nested():
             tracker = parent_session.query(EmailFetchTracker)\
                 .filter_by(user_id=settings.user_id)\
@@ -64,7 +63,6 @@ def process_emails_for_user(settings, parent_session, app):
                 parent_session.add(tracker)
                 parent_session.flush()
 
-        # Connect to email server with exponential backoff
         mail = None
         retry_delays = [5, 10, 20]
 
@@ -87,16 +85,14 @@ def process_emails_for_user(settings, parent_session, app):
             app.logger.error(f"Failed to connect to email server for user {settings.user_id} after all retries")
             return
 
-        # Search for new emails
         date_str = tracker.last_fetch_time.strftime("%d-%b-%Y")
         _, message_numbers = mail.search(None, f'(SINCE "{date_str}")')
 
-        # Process each email
         processed_count = 0
         error_count = 0
         for num in message_numbers[0].split():
             try:
-                with parent_session.begin_nested():  # Create savepoint for each email
+                with parent_session.begin_nested():
                     _, msg_data = mail.fetch(num, '(RFC822)')
                     if not (msg_data and msg_data[0] and msg_data[0][1]):
                         continue
@@ -105,7 +101,6 @@ def process_emails_for_user(settings, parent_session, app):
                     msg = email.message_from_bytes(email_body)
                     message_id = clean_string(msg.get('Message-ID', ''))
 
-                    # Skip if already processed
                     if message_id:
                         existing_email = parent_session.query(Email)\
                             .filter_by(message_id=message_id, user_id=settings.user_id)\
@@ -113,7 +108,6 @@ def process_emails_for_user(settings, parent_session, app):
                         if existing_email:
                             continue
 
-                    # Extract email data
                     subject = clean_string(decode_email_header(msg['subject']))
                     sender = clean_string(decode_email_header(msg['from']))
                     sender_name = clean_string(extract_sender_name(sender))
@@ -121,7 +115,6 @@ def process_emails_for_user(settings, parent_session, app):
                     content = clean_string(get_email_content(msg))
                     received_date = parse_email_date(msg.get('date'))
 
-                    # Get or create lead
                     lead = parent_session.query(Lead)\
                         .filter_by(email=sender_email, user_id=settings.user_id)\
                         .first()
@@ -138,7 +131,6 @@ def process_emails_for_user(settings, parent_session, app):
                         parent_session.add(lead)
                         parent_session.flush()
 
-                    # Create email record
                     email_record = Email(
                         message_id=message_id,
                         sender=sender_email,
@@ -152,7 +144,6 @@ def process_emails_for_user(settings, parent_session, app):
                     parent_session.add(email_record)
                     parent_session.flush()
 
-                    # AI analysis
                     if lead.status != 'Spam':
                         try:
                             ai_response = analyze_email(subject, content, lead.user_id)
@@ -173,7 +164,6 @@ def process_emails_for_user(settings, parent_session, app):
                 error_count += 1
                 continue
 
-        # Update tracker
         try:
             with parent_session.begin_nested():
                 tracker.last_fetch_time = datetime.utcnow()
@@ -228,10 +218,8 @@ def setup_email_scheduler(app):
             app.logger.info("Running initial email check on startup")
             check_emails_task(app)
     
-    # Run initial check in a background thread
     Thread(target=run_initial_check).start()
     
-    # Schedule email checking every 5 minutes
     scheduler.add_job(lambda: check_emails_task(app), 'interval', minutes=5)
     scheduler.start()
     app.logger.info("Email scheduler started")
@@ -279,9 +267,7 @@ def connect_to_email_server(app, settings):
         return None
 
 def decode_email_header(header):
-    """
-    Decode email header with improved Japanese encoding support and error handling
-    """
+    """Decode email header with improved Japanese encoding support and error handling"""
     if not header:
         return ""
     
@@ -290,7 +276,6 @@ def decode_email_header(header):
         for part, encoding in decode_header(header):
             if isinstance(part, bytes):
                 try:
-                    # 日本語エンコーディングの優先順位付き処理
                     if encoding and encoding.lower() in ['iso-2022-jp', 'iso2022_jp', 'iso2022jp']:
                         decoded_parts.append(part.decode('iso-2022-jp', errors='replace'))
                     elif encoding and encoding.lower() in ['shift_jis', 'shift-jis', 'sjis', 'cp932']:
@@ -300,7 +285,6 @@ def decode_email_header(header):
                     elif encoding:
                         decoded_parts.append(part.decode(encoding, errors='replace'))
                     else:
-                        # エンコーディングが指定されていない場合の処理
                         for enc in ['utf-8', 'iso-2022-jp', 'cp932', 'euc_jp']:
                             try:
                                 decoded_text = part.decode(enc)
@@ -309,23 +293,19 @@ def decode_email_header(header):
                             except UnicodeDecodeError:
                                 continue
                         else:
-                            # どのエンコーディングでも失敗した場合
                             decoded_parts.append(part.decode('utf-8', errors='replace'))
                 except (UnicodeDecodeError, LookupError) as e:
                     current_app.logger.warning(f"Decoding error with {encoding}: {str(e)}")
-                    # フォールバック: UTF-8でデコード
                     decoded_parts.append(part.decode('utf-8', errors='replace'))
             else:
                 decoded_parts.append(str(part))
         
-        # 空白で結合する前に不要な空白を削除
         cleaned_parts = [part.strip() for part in decoded_parts if part.strip()]
         return " ".join(cleaned_parts)
         
     except Exception as e:
         current_app.logger.error(f"Header decoding error: {str(e)}")
         try:
-            # 最後の手段として元のヘッダーを文字列として返す
             if isinstance(header, bytes):
                 return header.decode('utf-8', errors='replace')
             return str(header)
@@ -334,7 +314,7 @@ def decode_email_header(header):
             return "（件名を表示できません）"
 
 def get_email_content(msg):
-    """Extract email content with improved MIME handling and NUL character removal"""
+    """Extract email content with improved encoding handling"""
     content = []
     if msg.is_multipart():
         for part in msg.walk():
@@ -342,14 +322,8 @@ def get_email_content(msg):
                 try:
                     part_content = part.get_payload(decode=True)
                     if part_content:
-                        # 型チェックと変換を追加
-                        if isinstance(part_content, int):
-                            content.append(str(part_content))
-                        elif isinstance(part_content, bytes):
-                            decoded = clean_string(part_content)
-                            content.append(decoded)
-                        else:
-                            content.append(clean_string(part_content))
+                        decoded_content, _ = convert_encoding(part_content)
+                        content.append(clean_email_content(decoded_content))
                 except Exception as e:
                     current_app.logger.warning(f"Error decoding email part: {str(e)}")
                     continue
@@ -357,54 +331,39 @@ def get_email_content(msg):
         try:
             payload = msg.get_payload(decode=True)
             if payload:
-                # 型チェックと変換を追加
-                if isinstance(payload, int):
-                    content.append(str(payload))
-                elif isinstance(payload, bytes):
-                    decoded = clean_string(payload)
-                    content.append(decoded)
-                else:
-                    content.append(clean_string(payload))
+                decoded_content, _ = convert_encoding(payload)
+                content.append(clean_email_content(decoded_content))
         except Exception as e:
             current_app.logger.warning(f"Error decoding email payload: {str(e)}")
-            content.append(clean_string(msg.get_payload()))
-    result = "\n".join(content)
-    return clean_string(result)
+            content.append(clean_email_content(msg.get_payload()))
+    
+    return "\n".join(content)
 
 def extract_sender_name(sender):
     """Extract sender name with improved parsing"""
     if not sender:
         return ""
     try:
-        # まず、エンコードされたヘッダーをデコード
         decoded_sender = decode_email_header(sender)
 
-        # 一般的なパターンを処理
-        # 1. "Name" <email@example.com>
-        # 2. Name <email@example.com>
-        # 3. 'Name' <email@example.com>
-        # 4. name@example.com
         name_patterns = [
-            r'"([^"]+)"?\s*<[^>]+>',  # "Name" <email>
-            r'([^<>]+?)\s*<[^>]+>',   # Name <email>
-            r"'([^']+)'\s*<[^>]+>",   # 'Name' <email>
+            r'"([^"]+)"?\s*<[^>]+>',
+            r'([^<>]+?)\s*<[^>]+>',
+            r"'([^']+)'\s*<[^>]+>",
         ]
 
         for pattern in name_patterns:
             match = re.match(pattern, decoded_sender)
             if match:
                 name = match.group(1)
-                # 余分な文字を削除
                 name = name.strip().strip('"').strip("'").strip()
-                if name and len(name) > 1:  # 名前が1文字以上あることを確認
+                if name and len(name) > 1:
                     return name
 
-        # メールアドレスのみの場合
         email_match = re.search(r'[\w\.-]+@[\w\.-]+\.\w+', decoded_sender)
         if email_match:
-            return email_match.group(0).split('@')[0]  # メールアドレスのユーザー名部分を返す
+            return email_match.group(0).split('@')[0]
 
-        # どのパターンにも一致しない場合は、デコードされた送信者情報をそのまま返す
         return decoded_sender.strip()
 
     except Exception as e:
@@ -416,11 +375,9 @@ def extract_email_address(sender):
     if not sender:
         return ""
     try:
-        # Try to match <email> format
         match = re.search(r'<([^>]+)>', sender)
         if match:
             return match.group(1).strip()
-        # Try to match plain email format
         match = re.search(r'[\w\.-]+@[\w\.-]+\.\w+', sender)
         if match:
             return match.group(0).strip()
