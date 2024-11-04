@@ -33,7 +33,7 @@ cryptography = "^43.0.3"
 apscheduler = "^3.10.4"
 alembic = "^1.13.3"
 click = "^8.1.7"
-
+psutil = "*"
 
 [build-system]
 requires = ["poetry-core"]
