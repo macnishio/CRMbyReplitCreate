@@ -164,7 +164,11 @@ def analyze_email(subject, content, user_id=None):
 
     except Exception as e:
         current_app.logger.error(f"AI analysis error: {str(e)}")
-        return handle_ai_error("analyze_email", e) # handle_ai_error を呼び出す
+        return json.dumps({
+            "Opportunities": [],
+            "Schedules": [],
+            "Tasks": []
+        })
 
 def create_or_get_lead(email_data, user_id):
     """Create a new lead if it doesn't exist or get existing lead"""
@@ -192,56 +196,82 @@ def create_or_get_lead(email_data, user_id):
         db.session.rollback()
         return None
 
-def create_opportunities_from_ai(opportunities, lead): #修正
-    """Create opportunities from AI analysis data"""
-    if not lead or not lead.id or not lead.user_id:
-        raise ValueError("Invalid lead data for opportunity creation")
+def create_opportunities_from_ai(opportunities, lead):
+    """Create opportunities from AI analysis"""
+    try:
+        # leadが存在することを確認
+        if not Lead.query.get(lead.id):
+            current_app.logger.error(f"Lead ID {lead.id} not found")
+            return
 
-    for opp_desc in opportunities:
-        opportunity = Opportunity(
-            lead_id=lead.id,
-            user_id=lead.user_id,
-            description=opp_desc,
-            status="New",
-            created_at=datetime.utcnow(),
-            is_ai_generated=True #is_ai_generatedフラグを追加
-        )
-        db.session.add(opportunity)
+        for opp_desc in opportunities:
+            if ':' in opp_desc:
+                _, desc = opp_desc.split(':', 1)
+                try:
+                    opportunity = Opportunity(
+                        name=desc.strip(),
+                        stage='Initial Contact',
+                        user_id=lead.user_id,
+                        lead_id=lead.id,
+                        is_ai_generated=True  # is_ai_generated を追加
+                    )
+                    db.session.add(opportunity)
+                    db.session.flush()  # エラーを早期に検出するためにflush
+                except SQLAlchemyError as e:
+                    current_app.logger.error(f"Error creating opportunity: {str(e)}")
+                    db.session.rollback()
+                    continue
 
-def create_schedules_from_ai(schedules, lead):  #修正
-    """Create schedules from AI analysis data"""
-    if not lead or not lead.id or not lead.user_id:
-        raise ValueError("Invalid lead data for schedule creation")
+    except Exception as e:
+        current_app.logger.error(f"Error in create_opportunities_from_ai: {str(e)}")
+        db.session.rollback()
+        raise
 
-    for schedule_data in schedules:
-        schedule = Schedule(
-            lead_id=lead.id,
-            user_id=lead.user_id,
-            description=schedule_data.get("Description", ""),
-            start_time=parse_datetime(schedule_data.get("Start Time")),
-            end_time=parse_datetime(schedule_data.get("End Time")),
-            created_at=datetime.utcnow(),
-            is_ai_generated=True #is_ai_generatedフラグを追加
-        )
-        db.session.add(schedule)
+def create_schedules_from_ai(schedules, lead):
+    """Create schedules from AI analysis"""
+    for schedule in schedules:
+        if isinstance(schedule, dict) and ':' in schedule.get('Description', ''):
+            _, desc = schedule['Description'].split(':', 1)
+            try:
+                start_time = datetime.strptime(schedule.get('Start Time', ''), '%Y-%m-%d %H:%M')
+                end_time = datetime.strptime(schedule.get('End Time', ''), '%Y-%m-%d %H:%M')
+            except ValueError:
+                start_time = datetime.utcnow()
+                end_time = start_time + timedelta(hours=1)
 
+            schedule_record = Schedule(
+                title=desc.strip(),
+                description=desc.strip(),
+                start_time=start_time,
+                end_time=end_time,
+                user_id=lead.user_id,
+                lead_id=lead.id,
+                is_ai_generated=True  # is_ai_generated を追加
+            )
+            db.session.add(schedule_record)
+            db.session.flush()
 
-def create_tasks_from_ai(tasks, lead):  #修正
-    """Create tasks from AI analysis data"""
-    if not lead or not lead.id or not lead.user_id:
-        raise ValueError("Invalid lead data for task creation")
+def create_tasks_from_ai(tasks, lead):
+    """Create tasks from AI analysis"""
+    for task in tasks:
+        if isinstance(task, dict) and ':' in task.get('Description', ''):
+            _, desc = task['Description'].split(':', 1)
+            try:
+                due_date = datetime.strptime(task.get('Due Date', ''), '%Y-%m-%d')
+            except ValueError:
+                due_date = datetime.utcnow() + timedelta(days=7)
 
-    for task_data in tasks:
-        task = Task(
-            lead_id=lead.id,
-            user_id=lead.user_id,
-            description=task_data.get("Description", ""),
-            due_date=parse_datetime(task_data.get("Due Date")),
-            status="New",
-            created_at=datetime.utcnow(),
-            is_ai_generated=True #is_ai_generatedフラグを追加
-        )
-        db.session.add(task)
+            task_record = Task(
+                title=desc.strip(),
+                description=desc.strip(),
+                due_date=due_date,
+                status='New',
+                user_id=lead.user_id,
+                lead_id=lead.id,
+                is_ai_generated=True  # is_ai_generated を追加
+            )
+            db.session.add(task_record)
+            db.session.flush()
 
 def normalize_json_response(response_text):
     """AIレスポンスのJSON形式を正規化する"""
@@ -313,232 +343,49 @@ def normalize_json_response(response_text):
         current_app.logger.error(f"Error normalizing JSON response: {str(e)}")
         return '<p class="error-message">AI分析の結果を取得できませんでした。</p>'
 
-def create_opportunities_from_ai(opportunities, lead):
-    """Create opportunities from AI analysis data"""
-    if not lead or not lead.id or not lead.user_id:
-        raise ValueError("Invalid lead data for opportunity creation")
-
-    for opp_desc in opportunities:
-        opportunity = Opportunity(
-            lead_id=lead.id,
-            user_id=lead.user_id,
-            description=opp_desc,
-            status="New",
-            created_at=datetime.utcnow()
-        )
-        db.session.add(opportunity)
-
-def create_schedules_from_ai(schedules, lead):
-    """Create schedules from AI analysis data"""
-    if not lead or not lead.id or not lead.user_id:
-        raise ValueError("Invalid lead data for schedule creation")
-
-    for schedule_data in schedules:
-        schedule = Schedule(
-            lead_id=lead.id,
-            user_id=lead.user_id,
-            description=schedule_data.get("Description", ""),
-            start_time=parse_datetime(schedule_data.get("Start Time")),
-            end_time=parse_datetime(schedule_data.get("End Time")),
-            created_at=datetime.utcnow()
-        )
-        db.session.add(schedule)
-
-def create_tasks_from_ai(tasks, lead):
-    """Create tasks from AI analysis data"""
-    if not lead or not lead.id or not lead.user_id:
-        raise ValueError("Invalid lead data for task creation")
-
-    for task_data in tasks:
-        task = Task(
-            lead_id=lead.id,
-            user_id=lead.user_id,
-            description=task_data.get("Description", ""),
-            due_date=parse_datetime(task_data.get("Due Date")),
-            status="New",
-            created_at=datetime.utcnow()
-        )
-        db.session.add(task)
-
-def process_ai_response(response: str, email_record: Email, app: Flask) -> None:
-    """Process AI analysis response with improved transaction handling"""
-    if not isinstance(response, str):
-        app.logger.error(f"Invalid response type: {type(response)}")
-        return
-
-    if not email_record or not email_record.lead_id or not email_record.user_id:
-        app.logger.error("Invalid email record for AI processing")
-        return
-
-    # 新しいセッションを作成
-    new_session = db.session()
+def process_ai_response(response, email_data, app):
+    """Process AI analysis response and create corresponding records"""
     try:
-        # JSON解析とバリデーション
-        try:
-            data = json.loads(response)
-            app.logger.debug(f"Parsed AI response data: {data}")
-        except json.JSONDecodeError as e:
-            app.logger.error(f"Failed to parse AI response JSON: {str(e)}")
+        if not isinstance(response, str):
+            app.logger.error("Invalid response type")
             return
 
-        # メールレコードを新しいセッションにマージ
-        email_record = new_session.merge(email_record)
+        normalized_response = normalize_json_response(response)
+        if not normalized_response:
+            app.logger.error("Failed to normalize AI response")
+            return
 
-        # トランザクションを明示的に管理
-        if new_session.is_active:
-            app.logger.debug("Rolling back existing transaction")
-            new_session.rollback()
+        data = json.loads(normalized_response)
 
+        # Create opportunities
+        if data.get('Opportunities'):
+            try:
+                create_opportunities_from_ai(data['Opportunities'], email_data.lead)
+            except Exception as e:
+                app.logger.error(f"Error creating opportunities: {str(e)}")
+
+        # Create schedules
+        if data.get('Schedules'):
+            try:
+                create_schedules_from_ai(data['Schedules'], email_data.lead)
+            except Exception as e:
+                app.logger.error(f"Error creating schedules: {str(e)}")
+
+        # Create tasks
+        if data.get('Tasks'):
+            try:
+                create_tasks_from_ai(data['Tasks'], email_data.lead)
+            except Exception as e:
+                app.logger.error(f"Error creating tasks: {str(e)}")
+
+        # Commit all changes
         try:
-            # AI分析情報の更新
-            email_record.ai_analysis = response
-            email_record.ai_analysis_date = datetime.utcnow()
-            email_record.ai_model_used = "claude-3-haiku-20240307"
-            new_session.add(email_record)
-
-            # 検出されたアイテムの作成
-            if 'Opportunities' in data:
-                for opp in data['Opportunities']:
-                    if isinstance(opp, str) and opp.strip():
-                        opportunity = Opportunity(
-                            lead_id=email_record.lead_id,
-                            user_id=email_record.user_id,
-                            description=opp.strip(),
-                            status="New",
-                            email_id=email_record.id,
-                            created_at=datetime.utcnow()
-                        )
-                        new_session.add(opportunity)
-
-            if 'Schedules' in data:
-                for schedule_data in data['Schedules']:
-                    if isinstance(schedule_data, dict):
-                        schedule = Schedule(
-                            lead_id=email_record.lead_id,
-                            user_id=email_record.user_id,
-                            description=schedule_data.get('Description', '').strip(),
-                            start_time=parse_datetime(schedule_data.get('Start Time')),
-                            end_time=parse_datetime(schedule_data.get('End Time')),
-                            email_id=email_record.id,
-                            created_at=datetime.utcnow()
-                        )
-                        new_session.add(schedule)
-
-            if 'Tasks' in data:
-                for task_data in data['Tasks']:
-                    if isinstance(task_data, dict):
-                        task = Task(
-                            lead_id=email_record.lead_id,
-                            user_id=email_record.user_id,
-                            description=task_data.get('Description', '').strip(),
-                            due_date=parse_datetime(task_data.get('Due Date')),
-                            status="New",
-                            email_id=email_record.id,
-                            created_at=datetime.utcnow()
-                        )
-                        new_session.add(task)
-
-            # 変更をコミット
-            new_session.commit()
-            app.logger.info(f"Successfully processed AI response for email {email_record.id}")
-
-        except Exception as e:
-            app.logger.error(f"Error processing AI data: {str(e)}", exc_info=True)
-            new_session.rollback()
-            raise
+            db.session.commit()
+            app.logger.info(f"Successfully processed AI response for email {email_data.id}")
+        except SQLAlchemyError as e:
+            app.logger.error(f"Error committing changes: {str(e)}")
+            db.session.rollback()
 
     except Exception as e:
-        app.logger.error(f"Error in process_ai_response: {str(e)}", exc_info=True)
-        if new_session.is_active:
-            new_session.rollback()
-    finally:
-        new_session.close()
-
-
-def parse_datetime(date_str):
-    """Parse datetime string with improved error handling"""
-    if not date_str:
-        return None
-
-    try:
-        if isinstance(date_str, str):
-            # YYYY-MM-DD形式の場合
-            if len(date_str) == 10 and date_str[4] == '-' and date_str[7] == '-':
-                return datetime.strptime(date_str, '%Y-%m-%d').replace(
-                    tzinfo=timezone.utc
-                )
-            # YYYY-MM-DD HH:MM:SS形式の場合
-            return datetime.strptime(date_str, '%Y-%m-%d %H:%M:%S').replace(
-                tzinfo=timezone.utc
-            )
-    except ValueError as e:
-        app.logger.warning(f"Error parsing datetime {date_str}: {str(e)}")
-        return None
-
-def analyze_email_endpoint(email_id):
-    """Analyze email endpoint with improved session handling"""
-    session = db.session()
-    try:
-        email = session.query(Email).get(email_id)
-        if not email:
-            return jsonify({"error": "Email not found"}), 404
-
-        # セッションにアタッチされた状態でデータを取得
-        email_data = {
-            "email_id": email.id,
-            "subject": email.subject,
-            "content": email.content,
-            "user_id": email.user_id
-        }
-
-        try:
-            ai_response = analyze_email(
-                email_data["subject"],
-                email_data["content"],
-                email_data["user_id"]
-            )
-
-            if ai_response:
-                email.ai_analysis = ai_response
-                email.ai_analysis_date = datetime.utcnow()
-                email.ai_model_used = "claude-3-haiku-20240307"
-                session.add(email)
-                session.commit()
-
-                # 新しいセッションでAIレスポンスの処理
-                process_ai_response(ai_response, email, current_app)
-
-                return jsonify({"success": True, "analysis": ai_response})
-
-            return jsonify({"error": "AI analysis failed"}), 500
-
-        except Exception as e:
-            current_app.logger.error(f"Error analyzing email: {str(e)}", exc_info=True)
-            session.rollback()
-            return jsonify({"error": str(e)}), 500
-
-    except Exception as e:
-        current_app.logger.error(f"Error in analyze_email_endpoint: {str(e)}", exc_info=True)
-        return jsonify({"error": "Internal server error"}), 500
-    finally:
-        session.close()
-
-def parse_datetime(date_str):  #修正
-    """Parse date string to datetime with timezone"""
-    if not date_str:
-        return None
-
-    try:
-        # まずYYYY-MM-DD形式を試す
-        return datetime.strptime(date_str, '%Y-%m-%d').replace(
-            hour=0, minute=0, second=0,
-            tzinfo=timezone.utc
-        )
-    except ValueError:
-        try:
-            # YYYY-MM-DD HH:MM:SS形式を試す
-            return datetime.strptime(date_str, '%Y-%m-%d %H:%M:%S').replace(
-                tzinfo=timezone.utc
-            )
-        except ValueError:
-            return None
+        app.logger.error(f"Error processing AI response: {str(e)}")
+        db.session.rollback()

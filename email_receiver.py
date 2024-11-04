@@ -1,1078 +1,21 @@
-# Standard library imports
 import os
-import re
-import json
-import ssl
-import time
-import uuid
-import email
-import hashlib
-import logging
 import imaplib
-import codecs
-import unicodedata
-from email import message_from_bytes, utils
+import email
 from email.header import decode_header
-from email.utils import parsedate_tz, parsedate_to_datetime
-from datetime import datetime, timedelta, timezone
-from contextlib import contextmanager
-from threading import Thread
-from typing import Tuple, Union, Optional, List, Dict
-
-# Third-party imports
-import psutil
-import chardet
-
-# Flask and extensions
+import logging
+import ssl
+from datetime import datetime, timedelta
+from models import Lead, Email, UnknownEmail, EmailFetchTracker, UserSettings
+from extensions import db
 from flask import current_app
 from apscheduler.schedulers.background import BackgroundScheduler
-from anthropic import APIError, APIConnectionError, AuthenticationError
-
-# Local application imports
-from models import (
-    Lead,
-    Email,
-    User,
-    UnknownEmail,
-    EmailFetchTracker,
-    UserSettings
-)
-from extensions import db
 from ai_analysis import analyze_email, process_ai_response
-from email_encoding import (
-    convert_encoding,
-    clean_email_content,
-    analyze_iso2022jp_text
-)
-
-# Constants
-RETRY_MAX_ATTEMPTS = 3
-RETRY_BASE_DELAY = 5  # seconds
-DEFAULT_TIMEOUT = 30  # seconds
-JAPANESE_TZ = timezone(timedelta(hours=9))  # JST
-
-# Initialize logger
-logger = logging.getLogger(__name__)
-
-def get_email_content(msg):
-    """Extract and process email content with improved encoding handling and error recovery"""
-    content_parts = []
-    current_app.logger.debug("Starting email content processing")
-
-    def process_content(raw_content, charset=None):
-        """Process raw email content with enhanced encoding detection and handling"""
-        if not raw_content:
-            return ""
-        try:
-            # バイト列への変換確認
-            if not isinstance(raw_content, bytes):
-                try:
-                    raw_content = raw_content.encode('utf-8', errors='replace')
-                except Exception as e:
-                    current_app.logger.warning(f"Error encoding content to bytes: {str(e)}")
-                    return str(raw_content)
-
-            # エンコーディング検出と変換
-            detected_encoding = detect_encoding(raw_content)
-            if detected_encoding:
-                try:
-                    decoded = raw_content.decode(detected_encoding)
-                    current_app.logger.debug(f"Successfully decoded using detected encoding: {detected_encoding}")
-                    return decoded
-                except UnicodeDecodeError:
-                    current_app.logger.warning(
-                        f"Failed to decode with detected encoding: {detected_encoding}"
-                    )
-
-            # ISO-2022-JPの特別処理
-            if analyze_iso2022jp_text(raw_content):
-                try:
-                    normalized = normalize_iso2022jp(raw_content)
-                    decoded = normalized.decode('iso-2022-jp', errors='strict')
-                    current_app.logger.debug("Successfully decoded ISO-2022-JP content")
-                    return decoded
-                except UnicodeDecodeError as e:
-                    current_app.logger.warning(f"ISO-2022-JP decoding failed: {str(e)}")
-
-            # フォールバックエンコーディングの試行
-            encodings = [
-                ('cp932', 'strict'),
-                ('shift_jis', 'strict'),
-                ('euc_jp', 'strict'),
-                ('utf-8', 'strict'),
-                ('iso-2022-jp', 'replace'),
-                ('cp932', 'replace'),
-                ('utf-8', 'replace')
-            ]
-
-            for encoding, error_handler in encodings:
-                try:
-                    decoded = raw_content.decode(encoding, errors=error_handler)
-                    if contains_japanese(decoded):
-                        current_app.logger.debug(f"Successfully decoded using {encoding}")
-                        return decoded
-                except UnicodeDecodeError:
-                    continue
-
-            # 最終手段
-            return raw_content.decode('utf-8', errors='replace')
-
-        except Exception as e:
-            current_app.logger.error(f"Content processing error: {str(e)}", exc_info=True)
-            return str(raw_content)
-
-    try:
-        if msg.is_multipart():
-            for part in msg.walk():
-                if part.get_content_type() == "text/plain":
-                    try:
-                        charset = part.get_content_charset()
-                        part_content = part.get_payload(decode=True)
-
-                        if part_content:
-                            current_app.logger.debug(
-                                f"Processing multipart content of length {len(part_content)}, "
-                                f"charset: {charset}"
-                            )
-                            decoded_content = process_content(part_content, charset)
-                            # clean_email_contentの呼び出しを改善
-                            cleaned_content = clean_email_content(decoded_content)
-                            if cleaned_content.strip():
-                                # 引用文の除去（オプション）
-                                final_content = remove_quoted_text(cleaned_content)
-                                if final_content.strip():
-                                    content_parts.append(final_content)
-                                    current_app.logger.debug(
-                                        f"Added cleaned content: {len(final_content)} chars"
-                                    )
-
-                    except Exception as e:
-                        current_app.logger.warning(
-                            f"Error processing email part: {str(e)}", 
-                            exc_info=True
-                        )
-                        continue
-        else:
-            try:
-                charset = msg.get_content_charset()
-                payload = msg.get_payload(decode=True)
-
-                if payload:
-                    current_app.logger.debug(
-                        f"Processing single part content of length {len(payload)}, "
-                        f"charset: {charset}"
-                    )
-                    decoded_content = process_content(payload, charset)
-                    # clean_email_contentの呼び出しを改善
-                    cleaned_content = clean_email_content(decoded_content)
-                    if cleaned_content.strip():
-                        # 引用文の除去（オプション）
-                        final_content = remove_quoted_text(cleaned_content)
-                        if final_content.strip():
-                            content_parts.append(final_content)
-                            current_app.logger.debug(
-                                f"Added cleaned content: {len(final_content)} chars"
-                            )
-
-            except Exception as e:
-                current_app.logger.warning(
-                    f"Error processing email payload: {str(e)}", 
-                    exc_info=True
-                )
-
-        # 最終的な内容の組み立て
-        final_content = "\n".join(filter(None, content_parts))
-        current_app.logger.debug(f"Final content length: {len(final_content)}")
-
-        # 内容の検証
-        if not final_content:
-            return "（メール内容を取得できませんでした）"
-
-        # 日本語文字の存在確認
-        if not any('\u3000' <= c <= '\u9fff' for c in final_content):
-            current_app.logger.warning("No Japanese characters found in content")
-
-        return final_content
-
-    except Exception as e:
-        current_app.logger.error(f"Error in get_email_content: {str(e)}", exc_info=True)
-        return "（メール内容の処理中にエラーが発生しました）"
-
-def remove_quoted_text(content: str) -> str:
-    """
-    Remove quoted text from email content with improved pattern matching and handling
-
-    Args:
-        content: Email content to process
-
-    Returns:
-        str: Content with quoted text removed
-    """
-    if not content:
-        return ""
-
-    try:
-        # 元のコンテンツを保持
-        original_content = content
-        cleaned_content = content
-
-        # 基本的な引用パターン
-        quote_patterns = [
-            # > による引用
-            r'(?m)^>+[ ]?.+$',  # 標準的な引用記号
-            r'(?m)^＞+[ ]?.+$',  # 全角の引用記号
-
-            # 日本語の引用ヘッダー
-            r'(?m)^-----Original Message-----$',
-            r'(?m)^----- 元のメッセージ -----$',
-            r'(?m)^--------------------$',
-            r'(?m)^[0-9]{4}[/-][0-9]{1,2}[/-][0-9]{1,2}.*?>$',
-            r'(?m)^[0-9]{4}年[0-9]{1,2}月[0-9]{1,2}日.*様.*:$',
-            r'(?m)^[0-9]{4}年[0-9]{1,2}月[0-9]{1,2}日.*のメッセージ:$',
-            r'(?m)^[0-9]{4}年[0-9]{1,2}月[0-9]{1,2}日.*に.*様は書きました：$',
-
-            # 英語の引用ヘッダー
-            r'(?m)^On.*wrote:$',
-            r'(?m)^On.*at.*wrote:$',
-            r'(?m)^From: .*$\n^Sent: .*$\n^To: .*$',
-            r'(?m)^Date: .*$\n^From: .*$\n^To: .*$',
-
-            # メールクライアント固有のパターン
-            r'(?m)^________________________________$',  # Outlook
-            r'(?m)^--- Below this line is a copy of the message\.$',  # その他
-            r'(?m)^Begin forwarded message:$',  # 転送メール
-            r'(?m)^________________________________________$',  # 区切り線
-        ]
-
-        # 引用ブロックの検出と削除
-        for pattern in quote_patterns:
-            # 引用部分を含む行を検出
-            matches = list(re.finditer(pattern, cleaned_content, re.MULTILINE))
-            if matches:
-                # 引用開始位置を記録
-                quote_positions = []
-                for match in matches:
-                    # 引用開始位置から次の空行までを引用ブロックとみなす
-                    start = match.start()
-                    next_content = cleaned_content[start:]
-                    end = start + next_content.find('\n\n')
-                    if end == start - 1:  # 空行が見つからない場合
-                        end = len(cleaned_content)
-                    quote_positions.append((start, end))
-
-                # 引用部分を削除（後ろから処理して位置のズレを防ぐ）
-                for start, end in sorted(quote_positions, reverse=True):
-                    cleaned_content = cleaned_content[:start] + cleaned_content[end:]
-
-        # メールクライアント特有の署名や区切り行の削除
-        signature_patterns = [
-            r'\n-- \n.*$',  # 標準的な署名区切り
-            r'\n__+\n.*$',  # アンダースコアによる区切り
-            r'\n━+\n.*$',  # 全角の区切り線
-            r'\n─+\n.*$',  # 罫線による区切り
-            r'\n\n.*[Ss]ent from .*$',  # モバイル署名
-            r'\n\n.*[Ff]rom my .*$',    # モバイル署名
-        ]
-
-        for pattern in signature_patterns:
-            cleaned_content = re.sub(pattern, '', cleaned_content, flags=re.DOTALL)
-
-        # 空行の正規化
-        cleaned_content = re.sub(r'\n{3,}', '\n\n', cleaned_content)
-        cleaned_content = cleaned_content.strip()
-
-        # 内容が大幅に削除された場合のチェック
-        if len(cleaned_content) < len(original_content) * 0.1:  # 90%以上削除された場合
-            current_app.logger.warning(
-                "Quoted text removal resulted in very short content. "
-                f"Original: {len(original_content)}, "
-                f"Cleaned: {len(cleaned_content)}"
-            )
-            # 極端な削除の場合は元のコンテンツを返す
-            if len(cleaned_content.strip()) < 10:  # 実質的に空
-                return original_content
-
-        # デバッグ情報
-        removed_chars = len(original_content) - len(cleaned_content)
-        if removed_chars > 0:
-            current_app.logger.debug(
-                f"Removed {removed_chars} characters of quoted text "
-                f"({(removed_chars/len(original_content))*100:.1f}%)"
-            )
-
-        return cleaned_content
-
-    except Exception as e:
-        current_app.logger.error(
-            f"Error removing quoted text: {str(e)}", 
-            exc_info=True
-        )
-        return content
-
-def is_quoted_line(line: str) -> bool:
-    """
-    Check if a line appears to be quoted text
-
-    Args:
-        line: Line of text to check
-
-    Returns:
-        bool: True if line appears to be quoted
-    """
-    quote_indicators = [
-        r'^>+\s',           # 通常の引用記号
-        r'^＞+\s',          # 全角の引用記号
-        r'^\s*On\s.+wrote:', # 英語の引用ヘッダー
-        r'^\s*\d{4}[/-]\d{1,2}[/-]\d{1,2}.*>$',  # 日付ベースの引用
-        r'^\s*-----Original Message-----$',  # 元のメッセージ
-        r'^\s*From:.*\n^\s*Sent:.*\n^\s*To:.*$'  # メールヘッダー形式
-    ]
-
-    return any(re.match(pattern, line) for pattern in quote_indicators)
-
-def split_content_and_quotes(content: str) -> Tuple[str, str]:
-    """
-    Split email content into main content and quoted text
-
-    Args:
-        content: Email content to split
-
-    Returns:
-        Tuple[str, str]: (main_content, quoted_content)
-    """
-    try:
-        lines = content.split('\n')
-        main_lines = []
-        quote_lines = []
-        in_quote_block = False
-
-        for line in lines:
-            if is_quoted_line(line):
-                in_quote_block = True
-                quote_lines.append(line)
-            elif in_quote_block and not line.strip():
-                # 引用ブロック内の空行は引用部分とみなす
-                quote_lines.append(line)
-            else:
-                in_quote_block = False
-                main_lines.append(line)
-
-        return '\n'.join(main_lines).strip(), '\n'.join(quote_lines).strip()
-
-    except Exception as e:
-        current_app.logger.error(f"Error splitting content: {str(e)}")
-        return content, ""
-
-def detect_encoding(raw_content: bytes) -> Optional[str]:
-    """
-    Detect the encoding of content with improved accuracy and fallback mechanisms
-
-    Args:
-        raw_content: Raw bytes content to analyze
-
-    Returns:
-        Optional[str]: Detected encoding name or None if detection fails
-    """
-    try:
-        if not isinstance(raw_content, bytes):
-            current_app.logger.warning(f"Expected bytes, got {type(raw_content)}")
-            return None
-
-        # BOMによる検出を最初に試行
-        if raw_content.startswith(codecs.BOM_UTF8):
-            current_app.logger.debug("UTF-8 BOM detected")
-            return 'utf-8-sig'
-        elif raw_content.startswith(codecs.BOM_UTF16_LE):
-            current_app.logger.debug("UTF-16 LE BOM detected")
-            return 'utf-16-le'
-        elif raw_content.startswith(codecs.BOM_UTF16_BE):
-            current_app.logger.debug("UTF-16 BE BOM detected")
-            return 'utf-16-be'
-
-        # ISO-2022-JPの検出（エスケープシーケンスによる）
-        iso_jp_markers = {
-            b'\x1b$B': 'iso-2022-jp',  # JIS X 0208-1983
-            b'\x1b$@': 'iso-2022-jp',  # JIS X 0208-1978
-            b'\x1b(J': 'iso-2022-jp',  # JIS X 0201-1976 Roman
-            b'\x1b(B': 'iso-2022-jp'   # ASCII
-        }
-
-        for marker, encoding in iso_jp_markers.items():
-            if marker in raw_content:
-                current_app.logger.debug(f"ISO-2022-JP marker detected: {marker!r}")
-                return encoding
-
-        # chardetによる検出
-        result = chardet.detect(raw_content)
-        if result and result['confidence'] > 0.7:
-            encoding = result['encoding']
-            # エンコーディング名の正規化
-            normalized_encoding = normalize_encoding_name(encoding)
-            if normalized_encoding:
-                current_app.logger.debug(
-                    f"Detected {normalized_encoding} with "
-                    f"confidence {result['confidence']:.2f}"
-                )
-                return normalized_encoding
-
-        # ヒューリスティック検出
-        # 日本語エンコーディングの特徴的なバイトパターンをチェック
-        if is_likely_japanese_encoding(raw_content):
-            encodings_to_try = ['cp932', 'euc_jp', 'iso-2022-jp']
-            for enc in encodings_to_try:
-                try:
-                    decoded = raw_content.decode(enc)
-                    if contains_japanese_chars(decoded):
-                        current_app.logger.debug(
-                            f"Heuristically detected {enc} based on content"
-                        )
-                        return enc
-                except UnicodeDecodeError:
-                    continue
-
-        # UTF-8の検証
-        try:
-            decoded = raw_content.decode('utf-8')
-            if any('\u0080' <= c <= '\uffff' for c in decoded):
-                current_app.logger.debug("Valid UTF-8 with non-ASCII chars detected")
-                return 'utf-8'
-        except UnicodeDecodeError:
-            pass
-
-        current_app.logger.warning("Failed to detect encoding")
-        return None
-
-    except Exception as e:
-        current_app.logger.error(
-            f"Error in detect_encoding: {str(e)}", 
-            exc_info=True
-        )
-        return None
-
-def normalize_encoding_name(encoding: Optional[str]) -> Optional[str]:
-    """
-    Normalize encoding names to standard format
-
-    Args:
-        encoding: Raw encoding name
-
-    Returns:
-        Optional[str]: Normalized encoding name or None
-    """
-    if not encoding:
-        return None
-
-    encoding = encoding.lower().replace('-', '_')
-
-    # エンコーディング名のマッピング
-    encoding_map = {
-        'shift_jis': 'cp932',
-        'sjis': 'cp932',
-        'shift': 'cp932',
-        'x_sjis': 'cp932',
-        'japanese': 'cp932',
-        'csshiftjis': 'cp932',
-
-        'euc': 'euc_jp',
-        'eucjp': 'euc_jp',
-        'x_euc': 'euc_jp',
-        'eucjp_linux': 'euc_jp',
-
-        'iso2022jp': 'iso-2022-jp',
-        'iso_2022_jp': 'iso-2022-jp',
-        'iso2022_jp': 'iso-2022-jp',
-        'jis': 'iso-2022-jp',
-
-        'utf8': 'utf-8',
-        'u8': 'utf-8',
-        'utf': 'utf-8',
-
-        'ascii': 'ascii',
-        'us_ascii': 'ascii',
-        'us': 'ascii'
-    }
-
-    return encoding_map.get(encoding, encoding)
-
-def is_likely_japanese_encoding(content: bytes) -> bool:
-    """
-    Check if content is likely to be Japanese encoded
-
-    Args:
-        content: Bytes content to analyze
-
-    Returns:
-        bool: True if content appears to be Japanese encoded
-    """
-    try:
-        # SJIS/CP932の特徴的なバイトパターン
-        sjis_chars = len([i for i in range(len(content)-1) 
-                         if 0x81 <= content[i] <= 0x9F or 0xE0 <= content[i] <= 0xFC])
-
-        # EUC-JPの特徴的なバイトパターン
-        eucjp_chars = len([i for i in range(len(content)-1) 
-                          if 0x8E <= content[i] <= 0x8F or 0xA1 <= content[i] <= 0xFE])
-
-        # ISO-2022-JPのエスケープシーケンス
-        iso2022jp_sequences = (
-            content.count(b'\x1b$B') +
-            content.count(b'\x1b$@') +
-            content.count(b'\x1b(J')
-        )
-
-        # いずれかの特徴が強く現れている場合
-        threshold = len(content) * 0.1  # コンテンツの10%以上
-        return (
-            sjis_chars > threshold or
-            eucjp_chars > threshold or
-            iso2022jp_sequences > 0
-        )
-
-    except Exception:
-        return False
-
-def contains_japanese_chars(text: str) -> bool:
-    """
-    Check if text contains Japanese characters
-
-    Args:
-        text: String to check
-
-    Returns:
-        bool: True if text contains Japanese characters
-    """
-    return any(
-        '\u3040' <= c <= '\u309F' or  # ひらがな
-        '\u30A0' <= c <= '\u30FF' or  # カタカナ
-        '\u4E00' <= c <= '\u9FFF'     # 漢字
-        for c in text
-    )
-
-def is_mass_email(msg, content, app):
-    """
-    Enhanced spam detection with improved pattern matching and scoring system
-
-    Args:
-        msg: Email message object
-        content: Processed email content
-        app: Flask app for logging
-
-    Returns:
-        tuple: (is_spam: bool, reason: str)
-    """
-    spam_score = 0
-    spam_indicators = []
-    try:
-        # スコアリング閾値の設定
-        SPAM_THRESHOLD = 2
-
-        # ドメインチェック（重み: 1）
-        spam_domains = [
-            # メール配信サービス
-            'mailout.', 'mailchimp.', 'sendgrid.', 'marketo.', 'salesforce.',
-            'campaign-', 'newsletter.', 'info.', 'amazonses.com', 'bounce.',
-            'mailer.', 'mta.', 'spark.',
-
-            # 日本のサービス
-            'mail.rakuten.com', 'cuenote.jp', 'mpse.jp', 'itmedia.co.jp',
-            'bizmkt.jp', 'hansoku.jp',
-
-            # 中国系サービス
-            '.qq.com', '.163.com', '.sina.com', '.sohu.com', 'edm.',
-            'mail.hk', '.alibaba.com', '.taobao.com', '.tmall.com',
-
-            # 一般的なメールサービス（追加の確認が必要）
-            'noreply', 'no-reply', 'donotreply', 'notifications.'
-        ]
-
-        sender = msg.get('from', '').lower()
-        if any(domain in sender for domain in spam_domains):
-            spam_score += 1
-            spam_indicators.append(f'Mass mail domain detected: {sender}')
-
-        # ヘッダーチェック（重み: 1）
-        bulk_headers = [
-            # 標準的なリストメールヘッダー
-            'List-Unsubscribe', 'List-Id', 'List-Post', 'List-Owner',
-            'List-Subscribe', 'List-Help', 'Precedence', 'X-Campaign',
-
-            # マーケティングメール関連
-            'X-Marketing', 'X-Campaign-ID', 'X-Newsletter',
-            'X-Mailer', 'Bulk-Sender', 'X-Report-Abuse',
-
-            # 自動送信関連
-            'Auto-Submitted', 'X-Auto-Response-Suppress',
-
-            # その他の判定用ヘッダー
-            'X-MC-User', 'Feedback-ID', 'X-SES-Outgoing',
-            'X-CSA-Complaints', 'X-EDM-Key', 'X-CNDM', 'X-CN-List'
-        ]
-
-        for header in bulk_headers:
-            if msg.get(header):
-                spam_score += 1
-                spam_indicators.append(f'Bulk mail header found: {header}')
-                break  # 1つのヘッダーの存在で十分
-
-        # Precedenceヘッダーの特別チェック（重み: 1）
-        precedence = msg.get('Precedence', '').lower()
-        if precedence in ['bulk', 'list', 'junk']:
-            spam_score += 1
-            spam_indicators.append(f'Bulk mail precedence: {precedence}')
-
-        # コンテンツ内のキーフレーズチェック（重み: 1）
-        unsubscribe_phrases = [
-            # 英語
-            'unsubscribe', 'opt-out', 'opt out', 'email preferences',
-            'notification settings', 'manage subscriptions',
-            'you received this email because',
-            'this is an automated message',
-            'do not reply to this email',
-
-            # 日本語
-            '配信停止', 'メール配信を停止', '退会',
-            'このメールの配信を停止',
-            '※本メールは自動送信されています',
-            'このメールに返信されても回答できません',
-            'このアドレスは送信専用です',
-            'お問い合わせはこちら',
-            'メールの変更・停止',
-            'メールマガジン',
-            'ニュースレター',
-
-            # 中国語（簡体字）
-            '取消订阅', '退订', '停止订阅',
-            '系统自动发送', '请勿直接回复',
-
-            # 中国語（繁体字）
-            '取消訂閱', '退訂', '停止訂閱',
-            '系統自動發送', '請勿直接回覆'
-        ]
-
-        if content:
-            content_lower = content.lower()
-            found_phrases = [
-                phrase for phrase in unsubscribe_phrases 
-                if phrase.lower() in content_lower
-            ]
-            if found_phrases:
-                spam_score += 1
-                spam_indicators.append(
-                    f'Unsubscribe phrases found: {", ".join(found_phrases[:3])}'
-                )
-
-        # 宛先数のチェック（重み: 1）
-        recipient_count = sum(
-            len(msg.get_all(field, [])) 
-            for field in ['to', 'cc', 'bcc']
-        )
-        if recipient_count > 2:
-            spam_score += 1
-            spam_indicators.append(f'Multiple recipients: {recipient_count}')
-
-        # HTMLコンテンツのチェック（重み: 0.5）
-        if msg.get_content_type() == 'text/html':
-            spam_score += 0.5
-            spam_indicators.append('HTML formatted email')
-
-        # 件名のパターンチェック
-        subject = msg.get('subject', '').lower()
-        newsletter_patterns = [
-            # 英語
-            'newsletter', 'bulletin', 'update', 'digest',
-            'notification', 'subscription', 'campaign',
-            'special offer', 'announcement', 'weekly',
-            'monthly', 'breaking news', 'alert',
-
-            # 日本語
-            'ニュース', 'マガジン', '配信', 'special',
-            'キャンペーン', 'セール', '[pr]', '(pr)',
-            'お知らせ', 'ご案内', 'まとめ', 'レポート',
-            '速報',
-
-            # 中国語
-            '电子报', '通讯', '快讯', '周报', '月报',
-            '公告', '通知', '优惠', '促销', '限时',
-            '電子報', '通訊', '快訊', '週報', '優惠'
-        ]
-
-        if any(pattern in subject for pattern in newsletter_patterns):
-            spam_score += 1
-            spam_indicators.append(f'Newsletter-like subject: {subject[:50]}')
-
-        # 送信時刻のチェック（深夜は自動送信の可能性が高い）
-        try:
-            date_tuple = parsedate_tz(msg.get('date'))
-            if date_tuple:
-                hour = date_tuple[3]
-                if 0 <= hour < 6:
-                    spam_score += 0.5
-                    spam_indicators.append(f'Sent during off-hours: {hour}:00')
-        except Exception as e:
-            app.logger.debug(f"Error checking send time: {str(e)}")
-
-        # 最終判定
-        is_spam = spam_score >= SPAM_THRESHOLD
-        reason = ' | '.join(spam_indicators) if spam_indicators else 'No spam indicators found'
-
-        # 詳細なログ記録
-        app.logger.debug(
-            f"Spam check result - Score: {spam_score}, "
-            f"Is spam: {is_spam}, Indicators: {len(spam_indicators)}"
-        )
-
-        return is_spam, reason
-
-    except Exception as e:
-        app.logger.error(f"Error in spam detection: {str(e)}", exc_info=True)
-        return False, "Error in spam detection"
-
-def connect_to_email_server(app, settings):
-    """
-    Connect to email server with enhanced security and error handling
-
-    Args:
-        app: Flask app object
-        settings: UserSettings object containing connection details
-
-    Returns:
-        imaplib.IMAP4_SSL object or None if connection fails
-    """
-    mail = None
-    try:
-        # SSL context の設定
-        ssl_context = ssl.create_default_context()
-        ssl_context.verify_mode = ssl.CERT_REQUIRED
-        ssl_context.check_hostname = True
-
-        # 一般的なセキュリティプロトコルの設定
-        ssl_context.options |= ssl.OP_NO_SSLv2 | ssl.OP_NO_SSLv3
-
-        # 接続タイムアウトの設定
-        timeout = 30  # seconds
-
-        app.logger.debug(f"Connecting to {settings.mail_server}")
-
-        mail = imaplib.IMAP4_SSL(
-            host=settings.mail_server,
-            ssl_context=ssl_context,
-            timeout=timeout
-        )
-
-        try:
-            # ログイン試行
-            mail.login(settings.mail_username, settings.mail_password)
-            status, capabilities = mail.capability()
-
-            if status != 'OK':
-                app.logger.error(f"Failed to get server capabilities: {capabilities}")
-                return None
-
-            app.logger.debug(f"Connected successfully to {settings.mail_server}")
-
-            # メールボックスの選択
-            status, messages = mail.select('inbox')
-            if status != 'OK':
-                app.logger.error(f"Failed to select inbox: {messages}")
-                return None
-
-            return mail
-
-        except imaplib.IMAP4.error as e:
-            error_str = str(e)
-
-            if '[UNAVAILABLE]' in error_str:
-                app.logger.error(
-                    f"Server temporarily unavailable during login: {error_str}"
-                )
-            elif '[AUTHENTICATIONFAILED]' in error_str:
-                app.logger.error(
-                    f"Authentication failed for {settings.mail_username}"
-                )
-            else:
-                app.logger.error(f"IMAP login error: {error_str}")
-
-            return None
-
-    except ssl.SSLError as e:
-        app.logger.error(
-            f"SSL error connecting to {settings.mail_server}: {str(e)}",
-            exc_info=True
-        )
-        return None
-
-    except imaplib.IMAP4.error as e:
-        error_str = str(e)
-        if '[UNAVAILABLE]' in error_str:
-            app.logger.error(f"Server temporarily unavailable: {error_str}")
-        else:
-            app.logger.error(
-                f"IMAP error connecting to {settings.mail_server}: {error_str}"
-            )
-        return None
-
-    except Exception as e:
-        app.logger.error(
-            f"Unexpected error connecting to {settings.mail_server}: {str(e)}",
-            exc_info=True
-        )
-        return None
-
-
-def update_lead_status_for_mass_email(lead, is_spam, reason, session, app):
-    """Update lead status if email is determined to be mass mail"""
-    try:
-        if not lead:
-            app.logger.error("Cannot update status: Lead object is None")
-            return
-
-        if is_spam and lead.status != 'Spam':
-            try:
-                with session.begin_nested():
-                    previous_status = lead.status
-                    lead.status = 'Spam'
-                    lead.last_updated = datetime.utcnow()
-                    session.add(lead)
-
-                    app.logger.info(
-                        f"Updated lead {lead.id} status from {previous_status} to Spam. "
-                        f"Reason: {reason}"
-                    )
-
-            except Exception as e:
-                app.logger.error(
-                    f"Error updating lead status: {str(e)}", 
-                    exc_info=True
-                )
-                raise
-
-    except Exception as e:
-        app.logger.error(
-            f"Error in update_lead_status_for_mass_email: {str(e)}", 
-            exc_info=True
-        )
-        raise
-
-@contextmanager
-def session_scope(app=None):
-    """
-    Provide a transactional scope with improved error handling and monitoring
-
-    Args:
-        app: Optional Flask app object for logging
-
-    Yields:
-        SQLAlchemy session
-    """
-    session = db.session()
-    start_time = time.time()
-
-    try:
-        yield session
-
-        if session.is_active:
-            session.commit()
-            if app:
-                duration = time.time() - start_time
-                app.logger.debug(f"Session committed successfully. Duration: {duration:.2f}s")
-
-    except Exception as e:
-        if session.is_active:
-            session.rollback()
-            if app:
-                app.logger.error(
-                    f"Session rolled back due to error: {str(e)}", 
-                    exc_info=True
-                )
-        raise
-
-    finally:
-        session.close()
-        if app:
-            final_duration = time.time() - start_time
-            app.logger.debug(f"Session closed. Total duration: {final_duration:.2f}s")
-
-def handle_ai_error(func_name, error, app):
-    """
-    Handle AI analysis errors with improved error classification and localization
-
-    Args:
-        func_name: Name of the function where error occurred
-        error: Exception object
-        app: Flask app object
-
-    Returns:
-        str: Localized error message
-    """
-    try:
-        error_msg = None
-        error_code = None
-
-        if isinstance(error, AuthenticationError):
-            error_msg = "APIキーが無効です。システム管理者に連絡してください。"
-            error_code = "AUTH_ERROR"
-            app.logger.error(
-                f"{func_name}: Invalid API key - {str(error)}", 
-                extra={'error_code': error_code}
-            )
-
-        elif isinstance(error, APIConnectionError):
-            error_msg = "AI分析サービスに接続できません。しばらく待ってから再試行してください。"
-            error_code = "CONN_ERROR"
-            app.logger.error(
-                f"{func_name}: Connection error - {str(error)}", 
-                extra={'error_code': error_code}
-            )
-
-        elif isinstance(error, APIError):
-            error_msg = "AI分析中にエラーが発生しました。しばらく待ってから再試行してください。"
-            error_code = "API_ERROR"
-            app.logger.error(
-                f"{func_name}: API error - {str(error)}", 
-                extra={'error_code': error_code}
-            )
-
-        else:
-            error_msg = "予期せぬエラーが発生しました。システム管理者に連絡してください。"
-            error_code = "UNKNOWN_ERROR"
-            app.logger.error(
-                f"{func_name}: Unexpected error - {str(error)}", 
-                extra={'error_code': error_code},
-                exc_info=True
-            )
-
-        # エラー統計の更新
-        update_error_stats(error_code, app)
-
-        return render_error_message(error_msg, error_code)
-
-    except Exception as e:
-        app.logger.error(f"Error in handle_ai_error: {str(e)}", exc_info=True)
-        return '<p class="error-message">システムエラーが発生しました。</p>'
-
-def update_error_stats(error_code, app):
-    """Update error statistics for monitoring"""
-    try:
-        stats_key = f"error_stats:{error_code}:{datetime.utcnow().date()}"
-
-        # Redis or similar cache for stats
-        if hasattr(app, 'cache'):
-            app.cache.incr(stats_key)
-
-    except Exception as e:
-        app.logger.warning(f"Failed to update error stats: {str(e)}")
-
-def render_error_message(message, error_code):
-    """Render error message with consistent styling"""
-    return f'''
-    <div class="error-message" data-error-code="{error_code}">
-        <p class="error-text">{message}</p>
-        <p class="error-code">エラーコード: {error_code}</p>
-    </div>
-    '''
-
-class EmailProcessingMetrics:
-    """Track and report email processing metrics"""
-
-    def __init__(self, app):
-        self.app = app
-        self.start_time = time.time()
-        self.processed_count = 0
-        self.error_count = 0
-        self.spam_count = 0
-        self.initial_memory = self._get_memory_usage()
-
-    def _get_memory_usage(self):
-        """Get current memory usage"""
-        try:
-            process = psutil.Process()
-            return process.memory_info().rss / 1024 / 1024  # MB
-        except Exception:
-            return 0
-
-    def increment_processed(self):
-        """Increment processed email count"""
-        self.processed_count += 1
-
-    def increment_error(self):
-        """Increment error count"""
-        self.error_count += 1
-
-    def increment_spam(self):
-        """Increment spam count"""
-        self.spam_count += 1
-
-    def get_report(self):
-        """Generate processing report"""
-        try:
-            duration = time.time() - self.start_time
-            final_memory = self._get_memory_usage()
-            memory_diff = final_memory - self.initial_memory
-
-            return {
-                'duration_seconds': round(duration, 2),
-                'processed_count': self.processed_count,
-                'error_count': self.error_count,
-                'spam_count': self.spam_count,
-                'memory_diff_mb': round(memory_diff, 2),
-                'success_rate': round(
-                    (self.processed_count - self.error_count) / 
-                    max(self.processed_count, 1) * 100, 
-                    1
-                )
-            }
-
-        except Exception as e:
-            self.app.logger.error(f"Error generating metrics report: {str(e)}")
-            return {}
-
-class DatabaseHealthCheck:
-    """Monitor and maintain database connection health"""
-
-    def __init__(self, app):
-        self.app = app
-        self.last_check = None
-        self.error_count = 0
-
-    def check_connection(self):
-        """Check database connection health"""
-        try:
-            with session_scope(self.app) as session:
-                session.execute('SELECT 1')
-                self.last_check = datetime.utcnow()
-                self.error_count = 0
-                return True
-
-        except Exception as e:
-            self.error_count += 1
-            self.app.logger.error(
-                f"Database health check failed: {str(e)}", 
-                exc_info=True
-            )
-            return False
-
-    def need_reconnect(self):
-        """Determine if database reconnection is needed"""
-        return (
-            self.error_count >= 3 or
-            (self.last_check and 
-             datetime.utcnow() - self.last_check > timedelta(minutes=30))
-        )
-
-    def reset(self):
-        """Reset health check status"""
-        self.error_count = 0
-        self.last_check = datetime.utcnow()
-
-def generate_fallback_message_id(msg, sender_email):
-    """Generate a fallback message_id when original is empty or missing"""
-    # Try to get date from email header
-    date = parse_email_date(msg.get('date')) or datetime.utcnow()
-    date_str = date.strftime('%Y%m%d%H%M%S')
-
-    # Create a unique identifier using timestamp, sender and random uuid
-    unique_id = f"{date_str}-{sender_email}-{str(uuid.uuid4())[:8]}"
-    return f"<{unique_id}@generated.local>"
+import json
+import re
+import time
+from contextlib import contextmanager
+from threading import Thread
+from email_encoding import convert_encoding, clean_email_content, analyze_iso2022jp_text
 
 def clean_string(text):
     """Remove NUL characters and other problematic characters from string"""
@@ -1089,497 +32,155 @@ def clean_string(text):
     else:
         return str(text).replace('\x00', '').strip()
 
-def get_fetch_window(tracker, app):
-    """Get appropriate time window for fetching emails"""
-    if not tracker or not tracker.last_fetch_time:
-        # 初回の場合は5分前から
-        return datetime.utcnow() - timedelta(minutes=5)
-
-    last_fetch = tracker.last_fetch_time
-    now = datetime.utcnow()
-
-    # 最後の取得から24時間以上経過している場合は24時間前からに制限
-    if now - last_fetch > timedelta(hours=24):
-        app.logger.warning(f"Last fetch was more than 24 hours ago. Limiting to last 24 hours.")
-        return now - timedelta(hours=24)
-
-    return last_fetch
-
-
-def check_duplicate_email(message_id, sender, received_date, content, user_id, session, app):
-    """Check for duplicate email with enhanced detection methods"""
+@contextmanager
+def session_scope():
+    """Provide a transactional scope around a series of operations."""
+    session = db.session()
     try:
-        # 1. メッセージIDによる重複チェック（存在する場合）
-        if message_id:
-            existing = session.query(Email.id, Email.lead_id)\
-                .filter(
-                    Email.message_id == message_id,
-                    Email.user_id == user_id
-                )\
-                .first()
-
-            if existing:
-                app.logger.info(
-                    f"Found existing email with message_id: {message_id}, "
-                    f"lead_id: {existing.lead_id}"
-                )
-                return True, None
-
-        # 2. コンテンツと時間に基づく重複チェック
-        content_hash = hashlib.sha256(content.encode('utf-8')).hexdigest()[:12]
-        time_window = timedelta(minutes=5)
-
-        existing = session.query(Email)\
-            .filter(
-                Email.sender == sender,
-                Email.user_id == user_id,
-                Email.received_date.between(
-                    received_date - time_window,
-                    received_date + time_window
-                )
-            ).all()
-
-        # 存在する各メールのコンテンツをチェック
-        for email in existing:
-            existing_hash = hashlib.sha256(email.content.encode('utf-8')).hexdigest()[:12]
-            if existing_hash == content_hash:
-                app.logger.info(
-                    f"Found content-based duplicate from {sender} "
-                    f"around {received_date}, hash: {content_hash}"
-                )
-                return True, content_hash
-
-        # 3. 完全に新しいメール
-        app.logger.debug(
-            f"No duplicate found for message from {sender} "
-            f"at {received_date}"
-        )
-        return False, content_hash
-
+        yield session
+        session.commit()
     except Exception as e:
-        app.logger.error(
-            f"Error checking for duplicate email: {str(e)}", 
-            exc_info=True
-        )
-        # エラーの場合は安全のため重複として扱う
-        return True, None
-
-def generate_message_id(msg, sender_email, received_date, content_hash=None, app=None):
-    """
-    Generate a unique message ID with improved uniqueness guarantees and error handling
-
-    Args:
-        msg: Email message object
-        sender_email: Sender's email address
-        received_date: Date the email was received
-        content_hash: Pre-computed content hash (optional)
-        app: Flask app object for logging (optional)
-
-    Returns:
-        str: A unique message ID
-    """
-    try:
-        # まず、元のMessage-IDを確認
-        message_id = clean_string(msg.get('Message-ID', ''))
-        if message_id:
-            return message_id
-
-        # 必須パラメータの検証
-        if not sender_email:
-            raise ValueError("Sender email is required for message ID generation")
-
-        # タイムスタンプの生成（マイクロ秒まで）
-        timestamp = received_date.strftime('%Y%m%d%H%M%S%f')
-
-        # ユニーク性を高めるための追加情報の収集
-        components = [
-            ('date', timestamp),
-            ('from', sender_email),
-            ('subject', clean_string(decode_email_header(msg.get('subject', '')))[:32]),  # 長すぎる件名を制限
-        ]
-
-        # コンテンツハッシュの生成または使用
-        if content_hash is None:
-            content = clean_string(get_email_content(msg))
-            content_hash = hashlib.sha256(
-                f"{components[2][1]}{content}".encode('utf-8')
-            ).hexdigest()[:12]
-
-        components.extend([
-            ('hash', content_hash),
-            ('uuid', str(uuid.uuid4())[:8])
-        ])
-
-        # ドメイン部分の決定（送信者のドメインを使用）
-        try:
-            domain = sender_email.split('@')[1]
-        except (IndexError, AttributeError):
-            domain = 'generated.local'
-
-        # 最終的なメッセージIDの生成
-        # RFC 2822に準拠したフォーマット
-        id_local_part = '.'.join(f"{k}-{v}" for k, v in components)
-        message_id = f"<{id_local_part}@{domain}>"
-
-        # 生成されたIDの検証
-        if not is_valid_message_id(message_id):
-            # バックアップメカニズム: より単純だが確実な形式
-            fallback_id = f"<{timestamp}.{uuid.uuid4()}@generated.local>"
-            if app:
-                app.logger.warning(
-                    f"Generated message ID was invalid, using fallback. "
-                    f"Original: {message_id}, Fallback: {fallback_id}"
-                )
-            return fallback_id
-
-        if app:
-            app.logger.debug(f"Generated message ID: {message_id}")
-        return message_id
-
-    except Exception as e:
-        if app:
-            app.logger.error(f"Error generating message ID: {str(e)}", exc_info=True)
-        # 最終的なフォールバック: 必ず一意になる最小限の形式
-        emergency_id = f"<{datetime.utcnow().strftime('%Y%m%d%H%M%S%f')}.{uuid.uuid4()}@emergency.local>"
-        if app:
-            app.logger.error(f"Using emergency message ID: {emergency_id}")
-        return emergency_id
-
-def is_valid_message_id(message_id):
-    """
-    Check if a message ID is valid according to RFC 2822
-
-    Args:
-        message_id: Message ID to validate
-
-    Returns:
-        bool: True if valid, False otherwise
-    """
-    try:
-        # 基本的な構造の確認
-        if not message_id.startswith('<') or not message_id.endswith('>'):
-            return False
-
-        # 内容の取り出し
-        content = message_id[1:-1]
-
-        # @による分割の確認
-        if '@' not in content:
-            return False
-
-        local_part, domain = content.split('@', 1)
-
-        # 長さの制限
-        if len(message_id) > 998:  # RFC 2822の制限
-            return False
-
-        # 禁止文字のチェック
-        prohibited_chars = set('()<>[]\\,;:')
-        if any(char in message_id for char in prohibited_chars):
-            return False
-
-        # ドメイン部分の基本的な検証
-        if not re.match(r'^[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$', domain):
-            return False
-
-        return True
-
-    except Exception:
-        return False
-
-def generate_content_hash(subject, content):
-    """
-    Generate a consistent hash from email content
-
-    Args:
-        subject: Email subject
-        content: Email content
-
-    Returns:
-        str: Content hash
-    """
-    try:
-        # 正規化
-        normalized_subject = clean_string(subject or '').lower()
-        normalized_content = clean_string(content or '').lower()
-
-        # ハッシュ生成
-        combined = f"{normalized_subject}\n{normalized_content}"
-        return hashlib.sha256(combined.encode('utf-8')).hexdigest()[:12]
-
-    except Exception:
-        # エラーの場合はタイムスタンプベースのハッシュを返す
-        return hashlib.sha256(
-            datetime.utcnow().isoformat().encode('utf-8')
-        ).hexdigest()[:12]
-
-def process_email_message(msg, user_id, session, app):
-    """Process single email message with improved error handling and duplicate detection"""
-    try:
-        # 基本情報の取得と検証
-        message_id = clean_string(msg.get('Message-ID', ''))
-        sender = clean_string(decode_email_header(msg['from']))
-        sender_email = clean_string(extract_email_address(sender))
-        received_date = parse_email_date(msg.get('date')) or datetime.utcnow()
-        content = clean_string(get_email_content(msg))
-
-        if not sender_email:
-            app.logger.error("Invalid email: Missing sender email address")
-            return None
-
-        # トランザクションの開始
-        with session.begin_nested():
-            # 重複チェックを実行
-            is_duplicate, content_hash = check_duplicate_email(
-                message_id=message_id,
-                sender=sender_email,
-                received_date=received_date,
-                content=content,
-                user_id=user_id,
-                session=session,
-                app=app
-            )
-
-            if is_duplicate:
-                app.logger.info(f"Skipping duplicate email: {message_id or 'No ID'} from {sender_email}")
-                return None
-
-            # message_idが空または重複の場合、新しい一意のIDを生成
-            if not message_id:
-                message_id = generate_message_id(
-                    msg=msg,
-                    sender_email=sender_email,
-                    received_date=received_date,
-                    content_hash=content_hash
-                )
-                app.logger.info(f"Generated new message_id: {message_id}")
-
-            # 重複IDの最終チェック
-            existing_id = session.query(Email.id)\
-                .filter_by(message_id=message_id)\
-                .first()
-            if existing_id:
-                app.logger.warning(f"Detected duplicate message_id after generation: {message_id}")
-                return None
-
-            # 残りの情報を処理
-            sender_name = clean_string(extract_sender_name(sender))
-            subject = clean_string(decode_email_header(msg['subject']))
-
-            # Leadの取得または作成（FOR UPDATE ロックで）
-            lead = session.query(Lead)\
-                .filter_by(email=sender_email, user_id=user_id)\
-                .with_for_update()\
-                .first()
-
-            if not lead:
-                lead = Lead(
-                    name=sender_name or sender_email.split('@')[0],
-                    email=sender_email,
-                    status='New',
-                    score=0.0,
-                    user_id=user_id,
-                    last_contact=received_date
-                )
-                session.add(lead)
-                # Lead作成の確認
-                session.flush()
-                session.refresh(lead)
-                app.logger.info(f"Created new lead for {sender_email}: {lead.id}")
-
-            if not lead or not lead.id:
-                raise ValueError(f"Failed to create/retrieve lead for {sender_email}")
-
-            # Emailレコードの作成
-            email_record = Email(
-                message_id=message_id,
-                sender=sender_email,
-                sender_name=sender_name,
-                subject=subject,
-                content=content,
-                lead_id=lead.id,
-                user_id=user_id,
-                received_date=received_date
-            )
-
-            session.add(email_record)
-            # メール保存の確認
-            session.flush()
-            session.refresh(email_record)
-            app.logger.debug(
-                f"Created email record: id={email_record.id}, "
-                f"message_id={message_id}, lead_id={lead.id}"
-            )
-
-            return email_record, lead
-
-    except Exception as e:
-        app.logger.error(f"Error in process_email_message: {str(e)}", exc_info=True)
-        if session.is_active:
-            session.rollback()
+        session.rollback()
         raise
+    finally:
+        session.close()
 
 def process_emails_for_user(settings, parent_session, app):
-    """Process emails with improved error handling and session management"""
+    """Process emails for a single user with exponential backoff"""
     mail = None
-    processed_messages = set()  # 処理済みメッセージの追跡
-    retry_count = 0
-    max_retries = 3
-
     try:
-        # トラッカー情報の取得と検証
-        tracker = parent_session.query(EmailFetchTracker)\
-            .filter_by(user_id=settings.user_id)\
-            .with_for_update()\
-            .first()
+        with parent_session.begin_nested():
+            tracker = parent_session.query(EmailFetchTracker)\
+                .filter_by(user_id=settings.user_id)\
+                .order_by(EmailFetchTracker.last_fetch_time.desc())\
+                .first()
 
-        last_fetch_time = get_fetch_window(tracker, app)
+            if not tracker:
+                tracker = EmailFetchTracker(
+                    user_id=settings.user_id,
+                    last_fetch_time=datetime.utcnow() - timedelta(minutes=5)
+                )
+                parent_session.add(tracker)
+                parent_session.flush()
 
-        if not tracker:
-            tracker = EmailFetchTracker(
-                user_id=settings.user_id,
-                last_fetch_time=last_fetch_time
-            )
-            parent_session.add(tracker)
-            parent_session.commit()
-            app.logger.info(f"Created new fetch tracker for user {settings.user_id}")
+        mail = None
+        retry_delays = [5, 10, 20]
 
-        # メールサーバーへの接続（リトライロジック付き）
-        while retry_count < max_retries and not mail:
+        for attempt, delay in enumerate(retry_delays):
             try:
                 mail = connect_to_email_server(app, settings)
                 if mail:
                     break
-                retry_count += 1
-                if retry_count < max_retries:
-                    sleep_time = 2 ** retry_count  # 指数バックオフ
-                    app.logger.warning(
-                        f"Failed to connect to mail server, retry {retry_count}/{max_retries} "
-                        f"after {sleep_time} seconds"
-                    )
-                    time.sleep(sleep_time)
-            except Exception as e:
-                app.logger.error(f"Connection attempt {retry_count} failed: {str(e)}")
-                retry_count += 1
-                if retry_count < max_retries:
-                    time.sleep(2 ** retry_count)
+                app.logger.warning(f"Failed to connect on attempt {attempt + 1}, waiting {delay}s before retry...")
+                time.sleep(delay)
+            except (imaplib.IMAP4.error, Exception) as e:
+                app.logger.error(f"Connection attempt {attempt + 1} failed: {str(e)}")
+                if attempt < len(retry_delays) - 1:
+                    time.sleep(delay)
+                    continue
+                app.logger.error("Failed all connection attempts")
+                return
 
         if not mail:
-            app.logger.error(f"Failed to connect to email server for user {settings.user_id} after {max_retries} attempts")
+            app.logger.error(f"Failed to connect to email server for user {settings.user_id} after all retries")
             return
 
-        # 検索条件の設定
-        date_str = last_fetch_time.strftime("%d-%b-%Y")
-        search_criteria = f'(SINCE "{date_str}")'
+        date_str = tracker.last_fetch_time.strftime("%d-%b-%Y")
+        _, message_numbers = mail.search(None, f'(SINCE "{date_str}")')
 
-        # メールボックスの選択
-        status, messages = mail.select('inbox')
-        if status != 'OK':
-            app.logger.error(f"Failed to select inbox: {messages}")
-            return
-
-        # メッセージの検索
-        status, message_numbers = mail.search(None, search_criteria)
-        if status != 'OK':
-            app.logger.error(f"Failed to search messages: {message_numbers}")
-            return
-
-        if not message_numbers[0]:
-            app.logger.info(f"No new messages found for user {settings.user_id} since {date_str}")
-            return
-
-        # 処理状況の追跡
         processed_count = 0
         error_count = 0
-        duplicate_count = 0
-        spam_count = 0
-
-        # 各メールの処理
         for num in message_numbers[0].split():
-            session = db.session()
             try:
-                # メールデータの取得
-                _, msg_data = mail.fetch(num, '(RFC822)')
-                if not (msg_data and msg_data[0] and msg_data[0][1]):
-                    app.logger.warning(f"Invalid message data for message {num}")
-                    continue
+                with parent_session.begin_nested():
+                    _, msg_data = mail.fetch(num, '(RFC822)')
+                    if not (msg_data and msg_data[0] and msg_data[0][1]):
+                        continue
 
-                email_body = msg_data[0][1]
-                if not isinstance(email_body, bytes):
-                    app.logger.error(f"Unexpected type for email_body: {type(email_body)}. Skipping.")
-                    continue
+                    email_body = msg_data[0][1]
+                    msg = email.message_from_bytes(email_body)
+                    message_id = clean_string(msg.get('Message-ID', ''))
 
-                msg = email.message_from_bytes(email_body)
-                message_id = clean_string(msg.get('Message-ID', ''))
+                    if message_id:
+                        existing_email = parent_session.query(Email)\
+                            .filter_by(message_id=message_id, user_id=settings.user_id)\
+                            .first()
+                        if existing_email:
+                            continue
 
-                # メモリ内の重複チェック
-                if message_id and message_id in processed_messages:
-                    app.logger.info(f"Skipping already processed message: {message_id}")
-                    duplicate_count += 1
-                    continue
+                    subject = clean_string(decode_email_header(msg['subject']))
+                    sender = clean_string(decode_email_header(msg['from']))
+                    sender_name = clean_string(extract_sender_name(sender))
+                    sender_email = clean_string(extract_email_address(sender))
+                    content = clean_string(get_email_content(msg))
+                    received_date = parse_email_date(msg.get('date'))
 
-                # メール処理の実行
-                result = process_email_message(msg, settings.user_id, session, app)
-                if not result:
-                    duplicate_count += 1
-                    continue
+                    lead = parent_session.query(Lead)\
+                        .filter_by(email=sender_email, user_id=settings.user_id)\
+                        .first()
 
-                email_record, lead = result
+                    if not lead:
+                        lead = Lead(
+                            name=sender_name or sender_email.split('@')[0],
+                            email=sender_email,
+                            status='New',
+                            score=0.0,
+                            user_id=settings.user_id,
+                            last_contact=received_date or datetime.utcnow()
+                        )
+                        parent_session.add(lead)
+                        parent_session.flush()
 
-                # スパムチェックとAI分析
-                is_mass_mail, spam_reason = is_mass_email(msg, email_record.content)
-                if is_mass_mail:
-                    update_lead_status_for_mass_email(lead, is_mass_mail, spam_reason, session, app)
-                    spam_count += 1
-                elif lead.status != 'Spam':
-                    try:
-                        ai_response = analyze_email(email_record.subject, email_record.content, lead.user_id)
-                        if ai_response:
-                            email_record.ai_analysis = ai_response
-                            email_record.ai_analysis_date = datetime.utcnow()
-                            email_record.ai_model_used = "claude-3-haiku-20240307"
-                            process_ai_response(ai_response, email_record, app)
-                    except Exception as e:
-                        app.logger.error(f"AI analysis error: {str(e)}", exc_info=True)
+                    email_record = Email(
+                        message_id=message_id,
+                        sender=sender_email,
+                        sender_name=sender_name,
+                        subject=subject,
+                        content=content,
+                        lead_id=lead.id,
+                        user_id=settings.user_id,
+                        received_date=received_date or datetime.utcnow()
+                    )
+                    parent_session.add(email_record)
+                    parent_session.flush()
 
-                session.add(email_record)
-                session.commit()
-                processed_count += 1
+                    if lead.status != 'Spam':
+                        try:
+                            ai_response = analyze_email(subject, content, lead.user_id)
+                            if ai_response:
+                                email_record.ai_analysis = ai_response
+                                email_record.ai_analysis_date = datetime.utcnow()
+                                email_record.ai_model_used = "claude-3-haiku-20240307"
+                                process_ai_response(ai_response, email_record, app)
+                        except Exception as e:
+                            app.logger.error(f"AI analysis error for email {message_id}: {str(e)}")
+                            error_count += 1
 
-                if message_id:
-                    processed_messages.add(message_id)
-
-                app.logger.debug(
-                    f"Successfully processed email: {email_record.message_id}, "
-                    f"lead: {lead.id}, spam: {is_mass_mail}"
-                )
+                    processed_count += 1
+                    app.logger.info(f"Processed email: {message_id} from {sender_email}")
 
             except Exception as e:
+                app.logger.error(f"Error processing email {num}: {str(e)}")
                 error_count += 1
-                app.logger.error(f"Error processing email {num}: {str(e)}", exc_info=True)
-                if session.is_active:
-                    session.rollback()
-            finally:
-                session.close()
+                continue
 
-        # トラッカーの更新
         try:
-            tracker.last_fetch_time = datetime.utcnow()
+            with parent_session.begin_nested():
+                tracker.last_fetch_time = datetime.utcnow()
             parent_session.commit()
-
             app.logger.info(
                 f"Completed processing for user {settings.user_id}. "
-                f"Processed: {processed_count}, Duplicates: {duplicate_count}, "
-                f"Spam: {spam_count}, Errors: {error_count}"
+                f"Processed: {processed_count}, Errors: {error_count}"
             )
         except Exception as e:
+            app.logger.error(f"Error updating tracker: {str(e)}")
             parent_session.rollback()
-            app.logger.error(f"Error updating tracker: {str(e)}", exc_info=True)
+            raise
 
     except Exception as e:
-        app.logger.error(f"Error in process_emails_for_user: {str(e)}", exc_info=True)
-        if parent_session.is_active:
-            parent_session.rollback()
+        app.logger.error(f"Error checking emails for user {settings.user_id}: {str(e)}")
+        raise
+
     finally:
         if mail:
             try:
@@ -1588,102 +189,248 @@ def process_emails_for_user(settings, parent_session, app):
             except Exception as e:
                 app.logger.warning(f"Error closing mail connection: {str(e)}")
 
+def check_emails_task(app):
+    """Task to check for new emails"""
+    with app.app_context():
+        try:
+            with session_scope() as session:
+                settings_list = session.query(UserSettings).all()
+                processed_count = 0
+                
+                for settings in settings_list:
+                    try:
+                        process_emails_for_user(settings, session, app)
+                        processed_count += 1
+                    except Exception as e:
+                        app.logger.error(f"Error processing emails for user {settings.user_id}: {str(e)}")
+                        continue
+                        
+                app.logger.info(f"Processed emails for {processed_count} users")
+        except Exception as e:
+            app.logger.error(f"Error in check_emails_task: {str(e)}")
+
+def setup_email_scheduler(app):
+    """Setup scheduler for periodic email checking with immediate first run"""
+    scheduler = BackgroundScheduler()
+    
+    def run_initial_check():
+        with app.app_context():
+            app.logger.info("Running initial email check on startup")
+            check_emails_task(app)
+    
+    Thread(target=run_initial_check).start()
+    
+    scheduler.add_job(lambda: check_emails_task(app), 'interval', minutes=5)
+    scheduler.start()
+    app.logger.info("Email scheduler started")
+
+def connect_to_email_server(app, settings):
+    """Connect to email server with improved error handling"""
+    try:
+        ssl_context = ssl.create_default_context()
+        ssl_context.verify_mode = ssl.CERT_REQUIRED
+        ssl_context.check_hostname = True
+        
+        mail = imaplib.IMAP4_SSL(
+            host=settings.mail_server,
+            ssl_context=ssl_context
+        )
+        
+        try:
+            mail.login(settings.mail_username, settings.mail_password)
+            status, messages = mail.select('inbox')
+            if status != 'OK':
+                app.logger.error(f"Failed to select inbox: {messages}")
+                return None
+            return mail
+            
+        except imaplib.IMAP4.error as e:
+            error_str = str(e)
+            if '[UNAVAILABLE]' in error_str:
+                app.logger.error(f"Server temporarily unavailable during login: {error_str}")
+            else:
+                app.logger.error(f"IMAP login error: {error_str}")
+            return None
+        
+    except ssl.SSLError as e:
+        app.logger.error(f"SSL error connecting to mail server: {str(e)}")
+        return None
+    except imaplib.IMAP4.error as e:
+        error_str = str(e)
+        if '[UNAVAILABLE]' in error_str:
+            app.logger.error(f"Server temporarily unavailable: {error_str}")
+        else:
+            app.logger.error(f"IMAP error connecting to mail server: {error_str}")
+        return None
+    except Exception as e:
+        app.logger.error(f"Unexpected error connecting to mail server: {str(e)}")
+        return None
+
 def decode_email_header(header):
-    """
-    Decode email header with comprehensive encoding support and error recovery
-    Handles various Japanese encodings and complex MIME headers
-    """
+    """Decode email header with improved Japanese encoding support and error handling"""
     if not header:
         return ""
-
+    
     try:
         decoded_parts = []
-        raw_parts = decode_header(header)
-
-        for part, encoding in raw_parts:
-            try:
-                if isinstance(part, bytes):
-                    # 日本語エンコーディングの優先的な処理
+        for part, encoding in decode_header(header):
+            if isinstance(part, bytes):
+                try:
                     if encoding and encoding.lower() in ['iso-2022-jp', 'iso2022_jp', 'iso2022jp']:
-                        try:
-                            # ISO-2022-JPの特別処理
-                            normalized = normalize_iso2022jp_header(part)
-                            decoded = normalized.decode('iso-2022-jp', errors='strict')
-                            decoded_parts.append(decoded)
-                            continue
-                        except UnicodeDecodeError:
-                            current_app.logger.debug("ISO-2022-JP decoding failed, trying alternatives")
-
-                    # その他の日本語エンコーディング
-                    if encoding and encoding.lower() in ['shift_jis', 'shift-jis', 'sjis', 'cp932']:
-                        try:
-                            decoded_parts.append(part.decode('cp932', errors='strict'))
-                            continue
-                        except UnicodeDecodeError:
-                            current_app.logger.debug("CP932 decoding failed, trying alternatives")
-
-                    if encoding and encoding.lower() in ['euc_jp', 'euc-jp', 'eucjp']:
-                        try:
-                            decoded_parts.append(part.decode('euc_jp', errors='strict'))
-                            continue
-                        except UnicodeDecodeError:
-                            current_app.logger.debug("EUC-JP decoding failed, trying alternatives")
-
-                    # 指定されたエンコーディングでの試行
-                    if encoding:
-                        try:
-                            decoded_parts.append(part.decode(encoding, errors='strict'))
-                            continue
-                        except (UnicodeDecodeError, LookupError):
-                            current_app.logger.debug(f"Specified encoding {encoding} failed, trying alternatives")
-
-                    # フォールバックエンコーディングの試行
-                    for enc in ['utf-8', 'iso-2022-jp', 'cp932', 'euc_jp']:
-                        try:
-                            decoded = part.decode(enc, errors='strict')
-                            if contains_japanese(decoded):
-                                decoded_parts.append(decoded)
-                                break
-                        except UnicodeDecodeError:
-                            continue
+                        decoded_parts.append(part.decode('iso-2022-jp', errors='replace'))
+                    elif encoding and encoding.lower() in ['shift_jis', 'shift-jis', 'sjis', 'cp932']:
+                        decoded_parts.append(part.decode('cp932', errors='replace'))
+                    elif encoding and encoding.lower() in ['euc_jp', 'euc-jp', 'eucjp']:
+                        decoded_parts.append(part.decode('euc_jp', errors='replace'))
+                    elif encoding:
+                        decoded_parts.append(part.decode(encoding, errors='replace'))
                     else:
-                        # すべてのエンコーディングが失敗した場合
-                        decoded_parts.append(part.decode('utf-8', errors='replace'))
-
-                else:
-                    # バイト列でない場合は文字列として追加
-                    decoded_parts.append(str(part))
-
-            except Exception as e:
-                current_app.logger.warning(
-                    f"Error decoding header part: {str(e)}, "
-                    f"encoding: {encoding}", 
-                    exc_info=True
-                )
-                if isinstance(part, bytes):
+                        for enc in ['utf-8', 'iso-2022-jp', 'cp932', 'euc_jp']:
+                            try:
+                                decoded_text = part.decode(enc)
+                                decoded_parts.append(decoded_text)
+                                break
+                            except UnicodeDecodeError:
+                                continue
+                        else:
+                            decoded_parts.append(part.decode('utf-8', errors='replace'))
+                except (UnicodeDecodeError, LookupError) as e:
+                    current_app.logger.warning(f"Decoding error with {encoding}: {str(e)}")
                     decoded_parts.append(part.decode('utf-8', errors='replace'))
-                else:
-                    decoded_parts.append(str(part))
-
-        # デコードされた部分を結合
-        cleaned_parts = [part.strip() for part in decoded_parts if part and part.strip()]
-        result = " ".join(cleaned_parts)
-
-        # 結果の検証
-        if not result:
-            return "（件名を表示できません）"
-
-        return result
-
+            else:
+                decoded_parts.append(str(part))
+        
+        cleaned_parts = [part.strip() for part in decoded_parts if part.strip()]
+        return " ".join(cleaned_parts)
+        
     except Exception as e:
-        current_app.logger.error(f"Header decoding error: {str(e)}", exc_info=True)
+        current_app.logger.error(f"Header decoding error: {str(e)}")
         try:
             if isinstance(header, bytes):
                 return header.decode('utf-8', errors='replace')
             return str(header)
         except Exception as e:
-            current_app.logger.error(f"Final fallback error: {str(e)}", exc_info=True)
+            current_app.logger.error(f"Final fallback error: {str(e)}")
             return "（件名を表示できません）"
+
+def get_email_content(msg):
+    """Extract email content with improved encoding handling"""
+    content = []
+    current_app.logger.debug("Processing email content")
+    
+    if msg.is_multipart():
+        for part in msg.walk():
+            if part.get_content_type() == "text/plain":
+                try:
+                    part_content = part.get_payload(decode=True)
+                    if part_content:
+                        current_app.logger.debug(f"Processing multipart content of length {len(part_content)}")
+                        
+                        # Check for ISO-2022-JP markers
+                        if isinstance(part_content, bytes) and analyze_iso2022jp_text(part_content):
+                            try:
+                                current_app.logger.debug("ISO-2022-JP markers found, attempting decode")
+                                decoded_content = part_content.decode('iso-2022-jp')
+                                current_app.logger.debug("Successfully decoded using ISO-2022-JP")
+                            except UnicodeDecodeError as e:
+                                current_app.logger.warning(f"ISO-2022-JP decoding failed: {str(e)}")
+                                decoded_content, encoding = convert_encoding(part_content)
+                                current_app.logger.debug(f"Fallback decoding using {encoding}")
+                        else:
+                            decoded_content, encoding = convert_encoding(part_content)
+                            current_app.logger.debug(f"Content decoded using {encoding}")
+                        
+                        cleaned_content = clean_email_content(decoded_content)
+                        content.append(cleaned_content)
+                except Exception as e:
+                    current_app.logger.warning(f"Error decoding email part: {str(e)}")
+                    continue
+    else:
+        try:
+            payload = msg.get_payload(decode=True)
+            if payload:
+                current_app.logger.debug(f"Processing single part content of length {len(payload)}")
+                
+                # Check for ISO-2022-JP markers
+                if isinstance(payload, bytes) and analyze_iso2022jp_text(payload):
+                    try:
+                        current_app.logger.debug("ISO-2022-JP markers found, attempting decode")
+                        decoded_content = payload.decode('iso-2022-jp')
+                        current_app.logger.debug("Successfully decoded using ISO-2022-JP")
+                    except UnicodeDecodeError as e:
+                        current_app.logger.warning(f"ISO-2022-JP decoding failed: {str(e)}")
+                        decoded_content, encoding = convert_encoding(payload)
+                        current_app.logger.debug(f"Fallback decoding using {encoding}")
+                else:
+                    decoded_content, encoding = convert_encoding(payload)
+                    current_app.logger.debug(f"Content decoded using {encoding}")
+                
+                cleaned_content = clean_email_content(decoded_content)
+                content.append(cleaned_content)
+        except Exception as e:
+            current_app.logger.warning(f"Error decoding email payload: {str(e)}")
+            content.append(clean_email_content(msg.get_payload()))
+    
+    final_content = "\n".join(content)
+    current_app.logger.debug(f"Final content length: {len(final_content)}")
+    return final_content
+
+def extract_sender_name(sender):
+    """Extract sender name with improved parsing"""
+    if not sender:
+        return ""
+    try:
+        decoded_sender = decode_email_header(sender)
+
+        name_patterns = [
+            r'"([^"]+)"?\s*<[^>]+>',
+            r'([^<>]+?)\s*<[^>]+>',
+            r"'([^']+)'\s*<[^>]+>",
+        ]
+
+        for pattern in name_patterns:
+            match = re.match(pattern, decoded_sender)
+            if match:
+                name = match.group(1)
+                name = name.strip().strip('"').strip("'").strip()
+                if name and len(name) > 1:
+                    return name
+
+        email_match = re.search(r'[\w\.-]+@[\w\.-]+\.\w+', decoded_sender)
+        if email_match:
+            return email_match.group(0).split('@')[0]
+
+        return decoded_sender.strip()
+
+    except Exception as e:
+        current_app.logger.warning(f"Error extracting sender name: {str(e)} from sender: {sender}")
+        return sender or ""
+
+def extract_email_address(sender):
+    """Extract email address with improved validation"""
+    if not sender:
+        return ""
+    try:
+        match = re.search(r'<([^>]+)>', sender)
+        if match:
+            return match.group(1).strip()
+        match = re.search(r'[\w\.-]+@[\w\.-]+\.\w+', sender)
+        if match:
+            return match.group(0).strip()
+        return sender.strip()
+    except Exception:
+        return sender
+
+def parse_email_date(date_str):
+    """Parse email date string to datetime"""
+    if not date_str:
+        return None
+    try:
+        from email.utils import parsedate_to_datetime
+        return parsedate_to_datetime(date_str)
+    except Exception as e:
+        current_app.logger.warning(f"Error parsing email date: {str(e)}")
+        return None
 
 def handle_ai_error(func_name, error):
     """Handle AI analysis errors with proper logging and localized messages"""
@@ -1701,384 +448,3 @@ def handle_ai_error(func_name, error):
         error_msg = "予期せぬエラーが発生しました。システム管理者に連絡してください。"
         current_app.logger.error(f"{func_name}: Unexpected error - {str(error)}")
     return f'<p class="error-message">{error_msg}</p>'
-
-def extract_sender_name(sender):
-    """
-    Extract sender name with improved parsing and validation
-    Handles various email address formats and encodings
-    """
-    if not sender:
-        return ""
-
-    try:
-        # エンコードされたヘッダーのデコード
-        decoded_sender = decode_email_header(sender)
-
-        # 一般的なパターンでの抽出試行
-        patterns = [
-            # 標準的なフォーマット
-            (r'"([^"]+)"?\s*<[^>]+>', 1),  # "Name" <email>
-            (r'([^<>]+?)\s*<[^>]+>', 1),   # Name <email>
-            (r"'([^']+)'\s*<[^>]+>", 1),   # 'Name' <email>
-
-            # 日本語名フォーマット
-            (r'"([^"]*[\u3000-\u9fff][^"]*)"?\s*<[^>]+>', 1),  # 日本語名を含む
-            (r'=\?[^?]+\?[BQ]\?([^?]+)\?=\s*<[^>]+>', 1),      # MIME encoded
-
-            # 特殊フォーマット
-            (r'\(([^)]+)\)\s*<?[^>]*>?', 1),  # (Name) email
-            (r'<?[^>]*>?\s*\(([^)]+)\)', 1),  # email (Name)
-        ]
-
-        for pattern, group in patterns:
-            match = re.match(pattern, decoded_sender)
-            if match:
-                name = match.group(group)
-                # 追加のクリーニング
-                name = clean_sender_name(name)
-                if name and len(name) > 1:
-                    return name
-
-        # メールアドレスのみの場合、ユーザー名部分を抽出
-        email_match = re.search(r'[\w\.-]+@[\w\.-]+\.\w+', decoded_sender)
-        if email_match:
-            local_part = email_match.group(0).split('@')[0]
-            # ユーザー名の整形
-            return format_username(local_part)
-
-        # どのパターンにも一致しない場合
-        cleaned = clean_sender_name(decoded_sender)
-        if cleaned:
-            return cleaned
-
-        return decoded_sender.strip()
-
-    except Exception as e:
-        current_app.logger.warning(
-            f"Error extracting sender name: {str(e)} from sender: {sender}", 
-            exc_info=True
-        )
-        return sender or ""
-
-def extract_email_address(sender):
-    """
-    Extract email address with improved validation and error handling
-    Supports various email address formats
-    """
-    if not sender:
-        return ""
-
-    try:
-        # 基本的なパターンでの抽出試行
-        patterns = [
-            r'<([\w\.-]+@[\w\.-]+\.\w+)>',              # <email>
-            r'([\w\.-]+@[\w\.-]+\.\w+)',                # email
-            r'"?[^"]*"?\s*<([\w\.-]+@[\w\.-]+\.\w+)>',  # "Name" <email>
-            r'=\?[^?]+\?[BQ]\?[^?]+\?=\s*<([\w\.-]+@[\w\.-]+\.\w+)>'  # MIME encoded
-        ]
-
-        for pattern in patterns:
-            match = re.search(pattern, sender)
-            if match:
-                email = match.group(1).strip()
-                if validate_email_address(email):
-                    return email
-
-        # 最後の手段として、任意の文字列からメールアドレスらしき部分を抽出
-        words = sender.split()
-        for word in words:
-            if '@' in word:
-                email = re.sub(r'[<>"\'\(\)]', '', word).strip()
-                if validate_email_address(email):
-                    return email
-
-        return sender.strip()
-
-    except Exception as e:
-        current_app.logger.warning(
-            f"Error extracting email address: {str(e)} from sender: {sender}", 
-            exc_info=True
-        )
-        return sender
-
-# Helper functions
-
-def normalize_iso2022jp_header(raw_content):
-    """Normalize ISO-2022-JP encoded header content"""
-    normalized = raw_content
-    if b'$B' in raw_content and b'\x1b$B' not in raw_content:
-        normalized = raw_content.replace(b'$B', b'\x1b$B')
-    if b'(B' in raw_content and b'\x1b(B' not in raw_content:
-        normalized = normalized.replace(b'(B', b'\x1b(B')
-    return normalized
-
-def clean_sender_name(name):
-    """Clean and normalize sender name"""
-    if not name:
-        return ""
-
-    # 特殊文字の削除
-    name = re.sub(r'["\'\(\)<>]', '', name)
-
-    # 余分な空白の削除
-    name = re.sub(r'\s+', ' ', name)
-
-    # 制御文字の削除
-    name = ''.join(char for char in name if unicodedata.category(char)[0] != 'C')
-
-    return name.strip()
-
-def format_username(username):
-    """Format username from email address"""
-    # 数字やドットで区切られた部分を分割
-    parts = re.split(r'[\d\._-]+', username)
-
-    # 最も長い意味のある部分を選択
-    meaningful_part = max(parts, key=len, default=username)
-
-    # キャメルケースやスネークケースを空白で分割
-    words = re.findall(r'[A-Z][a-z]*|[a-z]+', meaningful_part)
-
-    if words:
-        # 単語の先頭を大文字に
-        return ' '.join(word.capitalize() for word in words)
-
-    return username
-
-def validate_email_address(email):
-    """Validate email address format"""
-    pattern = r'^[\w\.-]+@[\w\.-]+\.\w+$'
-    return bool(re.match(pattern, email))
-
-def contains_japanese(text):
-    """Check if text contains Japanese characters"""
-    return any('\u3000' <= c <= '\u9fff' for c in text)
-
-def parse_email_date(date_str):
-    """
-    Parse email date string to datetime with improved timezone handling and validation
-
-    Args:
-        date_str: Date string from email header
-
-    Returns:
-        datetime: Parsed datetime object with timezone info, or None if parsing fails
-    """
-    if not date_str:
-        return None
-
-    try:
-        try:
-            # RFC 2822 形式の日付を解析
-            dt = parsedate_to_datetime(date_str)
-
-            # タイムゾーン情報の確認と修正
-            if dt.tzinfo is None:
-                current_app.logger.warning(f"Date without timezone info: {date_str}")
-                dt = dt.replace(tzinfo=timezone.utc)
-
-            # 未来の日付をチェック
-            now = datetime.now(timezone.utc)
-            if dt > now + timedelta(days=1):
-                current_app.logger.warning(f"Future date detected: {dt}, using current time")
-                return now
-
-            # 古すぎる日付をチェック
-            if dt < now - timedelta(days=365*5):  # 5年以上前
-                current_app.logger.warning(f"Very old date detected: {dt}, using current time")
-                return now
-
-            return dt
-
-        except (TypeError, ValueError) as e:
-            current_app.logger.warning(f"Standard date parsing failed: {str(e)}")
-
-            # 代替フォーマットでの解析を試行
-            for fmt in [
-                '%a, %d %b %Y %H:%M:%S %z',     # RFC 2822
-                '%d %b %Y %H:%M:%S %z',         # Modified RFC 2822
-                '%Y-%m-%d %H:%M:%S%z',          # ISO-like
-                '%Y-%m-%d %H:%M:%S.%f%z',       # ISO with microseconds
-                '%Y-%m-%d %H:%M:%S',            # Simple datetime
-                '%Y-%m-%d'                      # Simple date
-            ]:
-                try:
-                    dt = datetime.strptime(date_str, fmt)
-                    if dt.tzinfo is None:
-                        dt = dt.replace(tzinfo=timezone.utc)
-                    return dt
-                except ValueError:
-                    continue
-
-            raise ValueError(f"Could not parse date with any format: {date_str}")
-
-    except Exception as e:
-        current_app.logger.error(f"Error parsing email date: {str(e)}", exc_info=True)
-        return datetime.now(timezone.utc)
-
-def setup_email_scheduler(app):
-    """
-    Setup scheduler for periodic email checking with improved error handling and monitoring
-    """
-    scheduler = BackgroundScheduler()
-
-    def run_initial_check():
-        """Run initial email check with error handling"""
-        try:
-            with app.app_context():
-                app.logger.info("Running initial email check on startup")
-                check_emails_task(app)
-        except Exception as e:
-            app.logger.error(f"Initial email check failed: {str(e)}", exc_info=True)
-
-    def schedule_monitor():
-        """Monitor scheduler health and job execution"""
-        try:
-            jobs = scheduler.get_jobs()
-            running_jobs = [job for job in jobs if job.next_run_time is not None]
-
-            current_app.logger.info(
-                f"Scheduler status - Running jobs: {len(running_jobs)}, "
-                f"Total jobs: {len(jobs)}"
-            )
-
-            # スケジューラーの状態確認
-            if not scheduler.running:
-                current_app.logger.error("Scheduler is not running, attempting restart")
-                try:
-                    scheduler.start()
-                except Exception as e:
-                    current_app.logger.error(f"Failed to restart scheduler: {str(e)}")
-
-        except Exception as e:
-            current_app.logger.error(f"Error in schedule monitor: {str(e)}")
-
-    def email_check_wrapper():
-        """Wrapper for email check task with error handling"""
-        try:
-            with app.app_context():
-                check_emails_task(app)
-        except Exception as e:
-            app.logger.error(f"Scheduled email check failed: {str(e)}", exc_info=True)
-
-    try:
-        # スケジューラーの設定
-        scheduler.add_job(
-            email_check_wrapper,
-            'interval',
-            minutes=5,
-            id='email_check',
-            max_instances=1,
-            coalesce=True,
-            misfire_grace_time=300  # 5分のグレースタイム
-        )
-
-        # モニタリングジョブの追加
-        scheduler.add_job(
-            schedule_monitor,
-            'interval',
-            minutes=15,
-            id='scheduler_monitor'
-        )
-
-        # スケジューラーの起動
-        scheduler.start()
-        app.logger.info("Email scheduler started successfully")
-
-        # 初回チェックの実行
-        Thread(
-            target=run_initial_check,
-            name="InitialEmailCheck",
-            daemon=True
-        ).start()
-
-    except Exception as e:
-        app.logger.error(f"Failed to setup email scheduler: {str(e)}", exc_info=True)
-        raise
-
-def check_emails_task(app):
-    """
-    Task to check for new emails with improved error handling and monitoring
-    """
-    start_time = datetime.now()
-
-    with app.app_context():
-        try:
-            # メモリ使用状況のログ
-            process = psutil.Process()
-            initial_memory = process.memory_info().rss / 1024 / 1024  # MB
-
-            with session_scope() as session:
-                # 全てのユーザー設定を取得
-                settings_list = session.query(UserSettings).all()
-
-                if not settings_list:
-                    app.logger.info("No user settings found for email checking")  # メッセージを変更
-                    return
-                    
-#            with session_scope() as session:
-#                # アクティブなユーザーの取得
-#                active_users = session.query(User).filter_by(is_active=True).all()
-#
-#                if not active_users:
-#                    app.logger.info("No active users found for email checking")
-#                    return
-
-                processed_count = 0
-                error_count = 0
-
-               #for user in active_users:  # アクティブなUserオブジェクトをループ
-
-                for settings in settings_list:  # UserSettings を直接ループ
-                    try:
-                        process_emails_for_user(settings, session, app)
-                        processed_count += 1
-                    except Exception as e:
-                        error_count += 1
-                        app.logger.error(
-                            f"Error processing emails for user {settings.user_id}: {str(e)}",  # settings.user_id を使用
-                            exc_info=True
-                        )
-                        continue
-
-                # パフォーマンス統計の記録
-                end_time = datetime.now()
-                duration = (end_time - start_time).total_seconds()
-                final_memory = process.memory_info().rss / 1024 / 1024  # MB
-                memory_diff = final_memory - initial_memory
-
-                app.logger.info(
-                    f"Email check completed - "
-                    f"Processed users: {processed_count}, "
-                    f"Errors: {error_count}, "
-                    f"Duration: {duration:.2f}s, "
-                    f"Memory diff: {memory_diff:.2f}MB"
-                )
-
-        except Exception as e:
-            app.logger.error(f"Critical error in check_emails_task: {str(e)}", exc_info=True)
-
-            # エラー通知（実装に応じて）
-            try:
-                notify_admin_error("check_emails_task", str(e))
-            except Exception as notify_error:
-                app.logger.error(f"Failed to send error notification: {str(notify_error)}")
-
-def notify_admin_error(task_name, error_message):
-    """
-    Notify administrators about critical errors
-    Implement according to your notification system
-    """
-    try:
-        # Log to separate error log
-        error_logger = logging.getLogger('error_notifications')
-        error_logger.error(
-            f"Critical error in {task_name}: {error_message}"
-        )
-
-        # Add your notification logic here
-        # Example: email, Slack, etc.
-        pass
-
-    except Exception as e:
-        current_app.logger.error(f"Error in notify_admin_error: {str(e)}")

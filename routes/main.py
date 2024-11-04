@@ -130,42 +130,42 @@ def get_email_content(email_id):
 
         content = email.content
         current_app.logger.debug(f"Processing email {email_id} content type: {type(content)}")
-
-        # バイト列の場合の処理
+        
         if isinstance(content, bytes):
-            # ISO-2022-JPの特徴的なマーカーをチェック
-            if b'$B' in content or b'(B' in content:
+            current_app.logger.debug(f"Content length: {len(content)} bytes")
+            # First check for ISO-2022-JP markers
+            current_app.logger.debug("Checking for ISO-2022-JP markers")
+            if analyze_iso2022jp_text(content):
                 try:
-                    decoded_content = content.decode('iso-2022-jp', errors='replace')
+                    current_app.logger.debug("ISO-2022-JP markers found, attempting decode")
+                    decoded_content = content.decode('iso-2022-jp')
+                    current_app.logger.debug("Successfully decoded using ISO-2022-JP")
                     encoding_used = 'iso-2022-jp'
-                    current_app.logger.debug(f"Successfully decoded as ISO-2022-JP, length: {len(decoded_content)}")
                 except UnicodeDecodeError as e:
-                    current_app.logger.error(f"ISO-2022-JP decoding failed: {e}")
-                    # フォールバック処理
-                    decoded_content = content.decode('utf-8', errors='replace')
-                    encoding_used = 'utf-8-fallback'
-            else:
-                # その他のエンコーディングを試行
-                encodings = ['utf-8', 'shift_jis', 'euc-jp']
-                for encoding in encodings:
+                    current_app.logger.warning(f"ISO-2022-JP decoding failed: {str(e)}")
                     try:
-                        decoded_content = content.decode(encoding)
-                        encoding_used = encoding
-                        break
+                        current_app.logger.debug("Trying Shift-JIS as fallback")
+                        decoded_content = content.decode('shift_jis')
+                        encoding_used = 'shift_jis'
                     except UnicodeDecodeError:
-                        continue
-                else:
-                    # どのエンコーディングも失敗した場合
-                    decoded_content = content.decode('utf-8', errors='replace')
-                    encoding_used = 'utf-8-fallback'
+                        current_app.logger.debug("Falling back to general encoding conversion")
+                        decoded_content, encoding_used = convert_encoding(content)
+            else:
+                current_app.logger.debug("No ISO-2022-JP markers found, trying general encoding conversion")
+                decoded_content, encoding_used = convert_encoding(content)
         else:
             decoded_content = str(content) if content else ''
             encoding_used = 'text'
+            current_app.logger.debug("Content was already in text format")
 
-        # クリーニングと整形
+        # Clean and sanitize the content
+        current_app.logger.debug("Cleaning and sanitizing content")
         cleaned_content = clean_email_content(decoded_content)
+        current_app.logger.debug(f"Cleaned content length: {len(cleaned_content)}")
+        
         sanitized_content = html.escape(cleaned_content)
         formatted_content = sanitized_content.replace('\n', '<br>')
+        current_app.logger.debug(f"Final formatted content length: {len(formatted_content)}")
 
         return jsonify({
             'id': email.id,
@@ -178,9 +178,9 @@ def get_email_content(email_id):
         })
 
     except Exception as e:
-        current_app.logger.error(f"Error processing email content: {str(e)}", exc_info=True)
+        current_app.logger.error(f"Error fetching email content: {str(e)}")
         return jsonify({
-            'error': 'メール内容の処理中にエラーが発生しました',
+            'error': 'メール内容の取得中にエラーが発生しました',
             'details': str(e)
         }), 500
 
