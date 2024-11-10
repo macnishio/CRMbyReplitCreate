@@ -50,82 +50,115 @@ def logout():
 def register():
     if current_user.is_authenticated:
         return redirect(url_for('main.dashboard'))
+
+    try:
+        stripe_publishable_key = current_app.config.get('STRIPE_PUBLISHABLE_KEY')
+        if not stripe_publishable_key:
+            current_app.logger.error('Stripe publishable key not found in configuration')
+            flash('決済システムの設定エラーが発生しました。管理者に連絡してください。', 'error')
+            return redirect(url_for('auth.register'))
+
+        stripe_secret_key = current_app.config.get('STRIPE_SECRET_KEY')
+        if not stripe_secret_key:
+            current_app.logger.error('Stripe secret key not found in configuration')
+            flash('決済システムの設定エラーが発生しました。管理者に連絡してください。', 'error')
+            return redirect(url_for('auth.register'))
     
-    form = RegistrationForm()
-    if form.validate_on_submit():
-        if User.query.filter_by(email=form.email.data).first():
-            flash('このメールアドレスは既に登録されています。', 'error')
-            return redirect(url_for('auth.register'))
-        
-        if User.query.filter_by(username=form.username.data).first():
-            flash('このユーザー名は既に使用されています。', 'error')
-            return redirect(url_for('auth.register'))
-
-        try:
-            stripe.api_key = current_app.config['STRIPE_SECRET_KEY']
+        form = RegistrationForm()
+        if form.validate_on_submit():
+            if User.query.filter_by(email=form.email.data).first():
+                flash('このメールアドレスは既に登録されています。', 'error')
+                return redirect(url_for('auth.register'))
             
-            # Create Stripe customer
-            customer = stripe.Customer.create(
-                email=form.email.data,
-                payment_method=form.stripe_payment_method.data,
-                invoice_settings={
-                    'default_payment_method': form.stripe_payment_method.data
-                }
-            )
-
-            # Get selected plan
-            plan = SubscriptionPlan.query.get(form.plan_id.data)
-            if not plan:
-                flash('選択されたプランが見つかりません。', 'error')
+            if User.query.filter_by(username=form.username.data).first():
+                flash('このユーザー名は既に使用されています。', 'error')
                 return redirect(url_for('auth.register'))
 
-            # Create subscription
-            subscription = stripe.Subscription.create(
-                customer=customer.id,
-                items=[{'price': plan.stripe_price_id}],
-                expand=['latest_invoice.payment_intent']
-            )
+            try:
+                stripe.api_key = stripe_secret_key
+                
+                # Create Stripe customer
+                customer = stripe.Customer.create(
+                    email=form.email.data,
+                    payment_method=form.stripe_payment_method.data,
+                    invoice_settings={
+                        'default_payment_method': form.stripe_payment_method.data
+                    }
+                )
 
-            # Create user
-            user = User(
-                username=form.username.data,
-                email=form.email.data
-            )
-            user.set_password(form.password.data)
-            
-            db.session.add(user)
-            db.session.flush()  # Get user.id without committing
+                # Get selected plan
+                plan = SubscriptionPlan.query.get(form.plan_id.data)
+                if not plan:
+                    current_app.logger.error(f'Selected plan {form.plan_id.data} not found')
+                    flash('選択されたプランが見つかりません。', 'error')
+                    return redirect(url_for('auth.register'))
 
-            # Create local subscription record
-            user_subscription = Subscription(
-                user_id=user.id,
-                plan_id=plan.id,
-                stripe_subscription_id=subscription.id,
-                stripe_customer_id=customer.id,
-                status=subscription.status,
-                current_period_start=datetime.fromtimestamp(subscription.current_period_start),
-                current_period_end=datetime.fromtimestamp(subscription.current_period_end)
-            )
-            
-            db.session.add(user_subscription)
-            db.session.commit()
-            
-            flash('登録が完了しました。ログインしてください。', 'success')
-            return redirect(url_for('auth.login'))
-            
-        except stripe.error.StripeError as e:
-            db.session.rollback()
-            flash(f'支払い処理中にエラーが発生しました: {str(e)}', 'error')
-            current_app.logger.error(f"Stripe error during registration: {str(e)}")
-            return redirect(url_for('auth.register'))
-        except Exception as e:
-            db.session.rollback()
-            flash('登録処理中にエラーが発生しました。', 'error')
-            current_app.logger.error(f"Error during registration: {str(e)}")
-            return redirect(url_for('auth.register'))
-    
-    return render_template(
-        'register.html',
-        form=form,
-        stripe_publishable_key=current_app.config['STRIPE_PUBLISHABLE_KEY']
-    )
+                if not plan.stripe_price_id:
+                    current_app.logger.error(f'Stripe price ID not found for plan {plan.id}')
+                    flash('プランの設定エラーが発生しました。管理者に連絡してください。', 'error')
+                    return redirect(url_for('auth.register'))
+
+                # Create subscription
+                subscription = stripe.Subscription.create(
+                    customer=customer.id,
+                    items=[{'price': plan.stripe_price_id}],
+                    expand=['latest_invoice.payment_intent'],
+                    payment_behavior='default_incomplete',
+                    payment_settings={'save_default_payment_method': 'on_subscription'}
+                )
+
+                # Create user
+                user = User(
+                    username=form.username.data,
+                    email=form.email.data,
+                    role='user'
+                )
+                user.set_password(form.password.data)
+                
+                db.session.add(user)
+                db.session.flush()  # Get user.id without committing
+
+                # Create local subscription record
+                user_subscription = Subscription(
+                    user_id=user.id,
+                    plan_id=plan.id,
+                    stripe_subscription_id=subscription.id,
+                    stripe_customer_id=customer.id,
+                    status=subscription.status,
+                    current_period_start=datetime.fromtimestamp(subscription.current_period_start),
+                    current_period_end=datetime.fromtimestamp(subscription.current_period_end)
+                )
+                
+                db.session.add(user_subscription)
+                db.session.commit()
+                
+                flash('登録が完了しました。ログインしてください。', 'success')
+                return redirect(url_for('auth.login'))
+                
+            except stripe.error.CardError as e:
+                db.session.rollback()
+                error_msg = e.error.message
+                current_app.logger.error(f"Stripe card error: {error_msg}")
+                flash(f'カード処理中にエラーが発生しました: {error_msg}', 'error')
+                return redirect(url_for('auth.register'))
+            except stripe.error.StripeError as e:
+                db.session.rollback()
+                current_app.logger.error(f"Stripe error during registration: {str(e)}")
+                flash('支払い処理中にエラーが発生しました。もう一度お試しください。', 'error')
+                return redirect(url_for('auth.register'))
+            except Exception as e:
+                db.session.rollback()
+                current_app.logger.error(f"Error during registration: {str(e)}")
+                flash('登録処理中にエラーが発生しました。', 'error')
+                return redirect(url_for('auth.register'))
+        
+        return render_template(
+            'register.html',
+            form=form,
+            stripe_publishable_key=stripe_publishable_key
+        )
+
+    except Exception as e:
+        current_app.logger.error(f"Unexpected error in registration route: {str(e)}")
+        flash('システムエラーが発生しました。管理者に連絡してください。', 'error')
+        return redirect(url_for('auth.login'))

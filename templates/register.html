@@ -59,15 +59,22 @@
                 {% endfor %}
             {% endif %}
         </div>
-        <div class="form-group">
-            <div id="card-element" class="form-control">
-                <!-- A Stripe Element will be inserted here. -->
+
+        <div class="payment-section">
+            <h3>お支払い情報</h3>
+            <div class="form-group">
+                <label for="card-element">クレジットカード情報</label>
+                <div id="card-element" class="form-control">
+                    <!-- A Stripe Element will be inserted here. -->
+                </div>
+                <div id="card-errors" class="error-message" role="alert"></div>
             </div>
-            <div id="card-errors" class="error-message" role="alert"></div>
+            {{ form.stripe_payment_method }}
         </div>
-        {{ form.stripe_payment_method }}
+
         {{ form.submit(class="btn btn-primary", id="submit-button") }}
     </form>
+
     <div class="login-link">
         <p>アカウントをお持ちの方は<a href="{{ url_for('auth.login') }}">こちら</a>からログインしてください。</p>
     </div>
@@ -82,40 +89,60 @@ const card = elements.create('card', {
         base: {
             fontSize: '16px',
             color: '#32325d',
+            fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial',
+            '::placeholder': {
+                color: '#aab7c4'
+            }
         },
-    },
+        invalid: {
+            color: '#dc3545',
+            iconColor: '#dc3545'
+        }
+    }
 });
 
 card.mount('#card-element');
 
 const form = document.getElementById('registration-form');
 const submitButton = document.getElementById('submit-button');
+const cardErrors = document.getElementById('card-errors');
 
 card.addEventListener('change', ({error}) => {
-    const displayError = document.getElementById('card-errors');
     if (error) {
-        displayError.textContent = error.message;
+        cardErrors.textContent = error.message;
+        cardErrors.classList.add('visible');
     } else {
-        displayError.textContent = '';
+        cardErrors.textContent = '';
+        cardErrors.classList.remove('visible');
     }
 });
 
 form.addEventListener('submit', async (event) => {
     event.preventDefault();
     submitButton.disabled = true;
+    submitButton.textContent = '処理中...';
 
-    const {paymentMethod, error} = await stripe.createPaymentMethod({
-        type: 'card',
-        card: card,
-    });
+    try {
+        const {paymentMethod, error} = await stripe.createPaymentMethod({
+            type: 'card',
+            card: card,
+        });
 
-    if (error) {
-        const errorElement = document.getElementById('card-errors');
-        errorElement.textContent = error.message;
+        if (error) {
+            cardErrors.textContent = error.message;
+            cardErrors.classList.add('visible');
+            submitButton.disabled = false;
+            submitButton.textContent = '登録';
+        } else {
+            document.getElementById('stripe_payment_method').value = paymentMethod.id;
+            form.submit();
+        }
+    } catch (e) {
+        console.error('Error:', e);
+        cardErrors.textContent = '支払い処理中にエラーが発生しました。もう一度お試しください。';
+        cardErrors.classList.add('visible');
         submitButton.disabled = false;
-    } else {
-        document.getElementById('stripe_payment_method').value = paymentMethod.id;
-        form.submit();
+        submitButton.textContent = '登録';
     }
 });
 </script>
@@ -135,21 +162,48 @@ form.addEventListener('submit', async (event) => {
 }
 
 .form-group {
-    margin-bottom: 1rem;
+    margin-bottom: 1.5rem;
 }
 
 .form-group label {
     display: block;
     margin-bottom: 0.5rem;
     font-weight: bold;
+    color: #333;
 }
 
 .form-control {
     width: 100%;
-    padding: 0.5rem;
+    padding: 0.75rem;
     border: 1px solid #ddd;
     border-radius: 4px;
     font-size: 1rem;
+    transition: border-color 0.15s ease-in-out;
+}
+
+.form-control:focus {
+    border-color: #007bff;
+    outline: 0;
+    box-shadow: 0 0 0 0.2rem rgba(0,123,255,0.25);
+}
+
+.payment-section {
+    margin-top: 2rem;
+    padding-top: 1rem;
+    border-top: 1px solid #eee;
+}
+
+.payment-section h3 {
+    margin-bottom: 1rem;
+    color: #333;
+    font-size: 1.2rem;
+}
+
+#card-element {
+    padding: 0.75rem;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    background: white;
 }
 
 .btn-primary {
@@ -161,7 +215,8 @@ form.addEventListener('submit', async (event) => {
     border-radius: 4px;
     cursor: pointer;
     font-size: 1rem;
-    margin-top: 1rem;
+    margin-top: 1.5rem;
+    transition: background-color 0.15s ease-in-out;
 }
 
 .btn-primary:hover {
@@ -174,12 +229,12 @@ form.addEventListener('submit', async (event) => {
 }
 
 .login-link {
-    margin-top: 1rem;
+    margin-top: 1.5rem;
     text-align: center;
 }
 
 .alert {
-    padding: 0.75rem;
+    padding: 1rem;
     margin-bottom: 1rem;
     border-radius: 4px;
 }
@@ -200,13 +255,11 @@ form.addEventListener('submit', async (event) => {
     color: #dc3545;
     font-size: 0.875rem;
     margin-top: 0.25rem;
+    display: none;
 }
 
-#card-element {
-    padding: 10px;
-    border: 1px solid #ddd;
-    border-radius: 4px;
-    background: white;
+.error-message.visible {
+    display: block;
 }
 </style>
 {% endblock %}
