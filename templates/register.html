@@ -64,7 +64,7 @@
             <h3>お支払い情報</h3>
             <div class="form-group">
                 <label for="card-element">クレジットカード情報</label>
-                <div id="card-element" class="form-control" role="group" aria-label="クレジットカード情報">
+                <div id="card-element" class="form-control stripe-element" role="group" aria-label="クレジットカード情報">
                     <!-- Stripe Element will be inserted here -->
                 </div>
                 <div id="card-errors" class="error-message" role="alert" aria-live="polite"></div>
@@ -90,21 +90,13 @@ const card = elements.create('card', {
         base: {
             fontSize: '16px',
             color: '#32325d',
-            fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial',
-            '::placeholder': {
-                color: '#aab7c4'
-            }
-        },
-        invalid: {
-            color: '#dc3545',
-            iconColor: '#dc3545'
+            fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial'
         }
     },
-    // Add proper ARIA labels
-    aria: {
-        label: 'クレジットカード情報入力フォーム',
-        invalid: 'クレジットカード情報が正しくありません',
-        required: true
+    classes: {
+        base: 'stripe-element',
+        focus: 'stripe-element-focus',
+        invalid: 'stripe-element-invalid'
     }
 });
 
@@ -117,7 +109,7 @@ const submitButton = document.getElementById('submit-button');
 const errorElement = document.getElementById('card-errors');
 const cardElement = document.getElementById('card-element');
 
-// Set additional accessibility attributes
+// Set proper ARIA labels
 cardElement.setAttribute('role', 'group');
 cardElement.setAttribute('aria-label', 'クレジットカード情報');
 
@@ -126,7 +118,6 @@ card.addEventListener('change', ({error}) => {
     if (error) {
         errorElement.textContent = error.message;
         errorElement.classList.add('visible');
-        // Announce error to screen readers
         errorElement.setAttribute('aria-hidden', 'false');
     } else {
         errorElement.textContent = '';
@@ -151,14 +142,16 @@ form.addEventListener('submit', async (event) => {
             throw error;
         }
 
+        // Set the payment method ID
         document.getElementById('stripe-payment-method').value = paymentMethod.id;
-        form.dispatchEvent(new Event('submit', {cancelable: true}));
+        
+        // Submit the form using the native submit
+        form.querySelector('input[type="submit"]').click();
         
     } catch (error) {
         console.error('Error:', error);
         errorElement.textContent = error.message || '支払い処理中にエラーが発生しました。もう一度お試しください。';
         errorElement.classList.add('visible');
-        errorElement.setAttribute('aria-hidden', 'false');
         // Set focus to error message for screen readers
         errorElement.focus();
         submitButton.disabled = false;
@@ -224,6 +217,19 @@ form.addEventListener('submit', async (event) => {
     border: 1px solid #ddd;
     border-radius: 4px;
     background: white;
+}
+
+.stripe-element {
+    background-color: white;
+}
+
+.stripe-element-focus {
+    border-color: #007bff;
+    box-shadow: 0 0 0 0.2rem rgba(0,123,255,0.25);
+}
+
+.stripe-element-invalid {
+    border-color: #dc3545;
 }
 
 .btn-primary {
