@@ -139,7 +139,7 @@ function clearError() {
     errorElement.classList.remove('visible');
 }
 
-// Handle form submission with improved error handling and focus management
+// Handle form submission with improved accessibility and error handling
 form.addEventListener('submit', async (event) => {
     event.preventDefault();
     
@@ -160,8 +160,8 @@ form.addEventListener('submit', async (event) => {
         // Set the payment method ID
         document.getElementById('stripe-payment-method').value = paymentMethod.id;
         
-        // Submit the form
-        form.submit();
+        // Submit the form using the submit button click
+        form.querySelector('input[type="submit"]').click();
         
     } catch (error) {
         console.error('Error:', error);
@@ -311,8 +311,8 @@ form.addEventListener('submit', async (event) => {
     outline-offset: 2px;
 }
 
-/* High contrast focus styles for Windows High Contrast mode */
-@media screen and (-ms-high-contrast: active) {
+/* Modern forced-colors mode for high contrast */
+@media (forced-colors: active) {
     :focus {
         outline: 2px solid currentColor;
     }
