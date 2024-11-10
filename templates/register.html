@@ -64,7 +64,7 @@
             <h3 id="payment-heading">お支払い情報</h3>
             <div class="form-group">
                 <label for="card-element">クレジットカード情報</label>
-                <div id="card-element" class="form-control stripe-element" role="group" aria-labelledby="payment-heading"></div>
+                <div id="card-element" class="form-control stripe-element"></div>
                 <div id="card-errors" class="error-message" role="alert" aria-live="polite"></div>
             </div>
             {{ form.stripe_payment_method(id="stripe-payment-method") }}
@@ -90,21 +90,13 @@ const card = elements.create('card', {
         base: {
             fontSize: '16px',
             color: '#32325d',
-            fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial',
-            '::placeholder': {
-                color: '#aab7c4'
-            }
-        },
-        invalid: {
-            color: '#dc3545',
-            iconColor: '#dc3545'
+            fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif'
         }
     },
     classes: {
         base: 'stripe-element',
         focus: 'stripe-element-focus',
-        invalid: 'stripe-element-invalid',
-        complete: 'stripe-element-complete'
+        invalid: 'stripe-element-invalid'
     }
 });
 
@@ -114,7 +106,30 @@ card.mount('#card-element');
 // Handle form and elements
 const form = document.getElementById('registration-form');
 const submitButton = document.getElementById('submit-button');
-const errorElement = document.getElementById('card-errors');
+const cardElement = document.getElementById('card-element');
+
+// Set proper ARIA attributes for card element
+cardElement.setAttribute('role', 'group');
+cardElement.setAttribute('aria-label', 'クレジットカード情報');
+
+// Show error message with proper error handling
+function showError(message) {
+    const errorElement = document.getElementById('card-errors');
+    if (errorElement) {
+        errorElement.textContent = message || '';
+        errorElement.classList.add('visible');
+        errorElement.setAttribute('role', 'alert');
+    }
+}
+
+// Clear error message
+function clearError() {
+    const errorElement = document.getElementById('card-errors');
+    if (errorElement) {
+        errorElement.textContent = '';
+        errorElement.classList.remove('visible');
+    }
+}
 
 // Handle real-time validation errors
 card.addEventListener('change', ({error}) => {
@@ -125,25 +140,9 @@ card.addEventListener('change', ({error}) => {
     }
 });
 
-// Show error message with proper ARIA attributes
-function showError(message) {
-    errorElement.textContent = message;
-    errorElement.classList.add('visible');
-    errorElement.setAttribute('role', 'alert');
-    errorElement.focus();
-}
-
-// Clear error message
-function clearError() {
-    errorElement.textContent = '';
-    errorElement.classList.remove('visible');
-}
-
-// Handle form submission with improved accessibility and error handling
+// Handle form submission with improved error handling
 form.addEventListener('submit', async (event) => {
     event.preventDefault();
-    
-    // Disable submit button and update text
     submitButton.disabled = true;
     submitButton.textContent = '処理中...';
     
@@ -157,17 +156,18 @@ form.addEventListener('submit', async (event) => {
             throw error;
         }
 
-        // Set the payment method ID
+        // Set payment method ID
         document.getElementById('stripe-payment-method').value = paymentMethod.id;
         
-        // Submit the form using the submit button click
-        form.querySelector('input[type="submit"]').click();
+        // Submit form using native submit button
+        const submitBtn = form.querySelector('input[type="submit"]');
+        if (submitBtn) {
+            submitBtn.click();
+        }
         
     } catch (error) {
         console.error('Error:', error);
-        showError(error.message || '支払い処理中にエラーが発生しました。もう一度お試しください。');
-        
-        // Re-enable submit button
+        showError(error.message || '支払い処理中にエラーが発生しました。');
         submitButton.disabled = false;
         submitButton.textContent = '登録';
     }
@@ -231,7 +231,6 @@ form.addEventListener('submit', async (event) => {
     border: 1px solid #ddd;
     border-radius: 4px;
     background: white;
-    transition: border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out;
 }
 
 .stripe-element-focus {
@@ -242,10 +241,6 @@ form.addEventListener('submit', async (event) => {
 .stripe-element-invalid {
     border-color: #dc3545;
     box-shadow: 0 0 0 0.2rem rgba(220,53,69,0.25);
-}
-
-.stripe-element-complete {
-    border-color: #28a745;
 }
 
 .btn-primary {
@@ -297,7 +292,6 @@ form.addEventListener('submit', async (event) => {
     color: #dc3545;
     font-size: 0.875rem;
     margin-top: 0.25rem;
-    padding: 0.25rem 0;
     display: none;
 }
 
