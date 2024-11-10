@@ -1,0 +1,40 @@
+{% extends "base.html" %}
+{% block title %}500 - サーバーエラー{% endblock %}
+
+{% block content %}
+<div class="error-container">
+    <h1>500 - サーバーエラー</h1>
+    <p>申し訳ありませんが、サーバーで問題が発生しました。</p>
+    <p>しばらく時間をおいてから再度お試しください。</p>
+    <div class="error-actions">
+        <a href="{{ url_for('main.dashboard') }}" class="btn btn-primary">ダッシュボードに戻る</a>
+    </div>
+</div>
+
+<style>
+.error-container {
+    max-width: 600px;
+    margin: 4rem auto;
+    padding: 2rem;
+    text-align: center;
+    background: #fff;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.error-container h1 {
+    color: #dc3545;
+    margin-bottom: 1rem;
+}
+
+.error-actions {
+    margin-top: 2rem;
+}
+
+.btn-primary {
+    padding: 0.75rem 1.5rem;
+    font-size: 1rem;
+    text-decoration: none;
+}
+</style>
+{% endblock %}

@@ -7,66 +7,64 @@
     {% with messages = get_flashed_messages(with_categories=true) %}
         {% if messages %}
             {% for category, message in messages %}
-                <div class="alert alert-{{ category }}">{{ message }}</div>
+                <div class="alert alert-{{ category }}" role="alert">{{ message }}</div>
             {% endfor %}
         {% endif %}
     {% endwith %}
     
-    <form method="POST" action="{{ url_for('auth.register') }}" class="register-form" id="registration-form">
+    <form method="POST" action="{{ url_for('auth.register') }}" class="register-form" id="registration-form" novalidate>
         {{ form.hidden_tag() }}
         <div class="form-group">
             {{ form.username.label }}
-            {{ form.username(class="form-control") }}
+            {{ form.username(class="form-control", aria_required="true") }}
             {% if form.username.errors %}
                 {% for error in form.username.errors %}
-                    <div class="error-message">{{ error }}</div>
+                    <div class="error-message" role="alert">{{ error }}</div>
                 {% endfor %}
             {% endif %}
         </div>
         <div class="form-group">
             {{ form.email.label }}
-            {{ form.email(class="form-control") }}
+            {{ form.email(class="form-control", aria_required="true") }}
             {% if form.email.errors %}
                 {% for error in form.email.errors %}
-                    <div class="error-message">{{ error }}</div>
+                    <div class="error-message" role="alert">{{ error }}</div>
                 {% endfor %}
             {% endif %}
         </div>
         <div class="form-group">
             {{ form.password.label }}
-            {{ form.password(class="form-control") }}
+            {{ form.password(class="form-control", aria_required="true") }}
             {% if form.password.errors %}
                 {% for error in form.password.errors %}
-                    <div class="error-message">{{ error }}</div>
+                    <div class="error-message" role="alert">{{ error }}</div>
                 {% endfor %}
             {% endif %}
         </div>
         <div class="form-group">
             {{ form.confirm_password.label }}
-            {{ form.confirm_password(class="form-control") }}
+            {{ form.confirm_password(class="form-control", aria_required="true") }}
             {% if form.confirm_password.errors %}
                 {% for error in form.confirm_password.errors %}
-                    <div class="error-message">{{ error }}</div>
+                    <div class="error-message" role="alert">{{ error }}</div>
                 {% endfor %}
             {% endif %}
         </div>
         <div class="form-group">
             {{ form.plan_id.label }}
-            {{ form.plan_id(class="form-control") }}
+            {{ form.plan_id(class="form-control", aria_required="true") }}
             {% if form.plan_id.errors %}
                 {% for error in form.plan_id.errors %}
-                    <div class="error-message">{{ error }}</div>
+                    <div class="error-message" role="alert">{{ error }}</div>
                 {% endfor %}
             {% endif %}
         </div>
 
-        <div class="payment-section">
-            <h3>お支払い情報</h3>
+        <div class="payment-section" role="region" aria-label="お支払い情報">
+            <h3 id="payment-heading">お支払い情報</h3>
             <div class="form-group">
                 <label for="card-element">クレジットカード情報</label>
-                <div id="card-element" class="form-control stripe-element" role="group" aria-label="クレジットカード情報">
-                    <!-- Stripe Element will be inserted here -->
-                </div>
+                <div id="card-element" class="form-control stripe-element" role="group" aria-labelledby="payment-heading"></div>
                 <div id="card-errors" class="error-message" role="alert" aria-live="polite"></div>
             </div>
             {{ form.stripe_payment_method(id="stripe-payment-method") }}
@@ -85,18 +83,28 @@
 // Initialize Stripe with publishable key
 const stripe = Stripe('{{ stripe_publishable_key }}');
 const elements = stripe.elements();
+
+// Create card element with improved styles and accessibility
 const card = elements.create('card', {
     style: {
         base: {
             fontSize: '16px',
             color: '#32325d',
-            fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial'
+            fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial',
+            '::placeholder': {
+                color: '#aab7c4'
+            }
+        },
+        invalid: {
+            color: '#dc3545',
+            iconColor: '#dc3545'
         }
     },
     classes: {
         base: 'stripe-element',
         focus: 'stripe-element-focus',
-        invalid: 'stripe-element-invalid'
+        invalid: 'stripe-element-invalid',
+        complete: 'stripe-element-complete'
     }
 });
 
@@ -107,28 +115,35 @@ card.mount('#card-element');
 const form = document.getElementById('registration-form');
 const submitButton = document.getElementById('submit-button');
 const errorElement = document.getElementById('card-errors');
-const cardElement = document.getElementById('card-element');
-
-// Set proper ARIA labels
-cardElement.setAttribute('role', 'group');
-cardElement.setAttribute('aria-label', 'クレジットカード情報');
 
 // Handle real-time validation errors
 card.addEventListener('change', ({error}) => {
     if (error) {
-        errorElement.textContent = error.message;
-        errorElement.classList.add('visible');
-        errorElement.setAttribute('aria-hidden', 'false');
+        showError(error.message);
     } else {
-        errorElement.textContent = '';
-        errorElement.classList.remove('visible');
-        errorElement.setAttribute('aria-hidden', 'true');
+        clearError();
     }
 });
 
-// Handle form submission
+// Show error message with proper ARIA attributes
+function showError(message) {
+    errorElement.textContent = message;
+    errorElement.classList.add('visible');
+    errorElement.setAttribute('role', 'alert');
+    errorElement.focus();
+}
+
+// Clear error message
+function clearError() {
+    errorElement.textContent = '';
+    errorElement.classList.remove('visible');
+}
+
+// Handle form submission with improved error handling and focus management
 form.addEventListener('submit', async (event) => {
     event.preventDefault();
+    
+    // Disable submit button and update text
     submitButton.disabled = true;
     submitButton.textContent = '処理中...';
     
@@ -145,15 +160,14 @@ form.addEventListener('submit', async (event) => {
         // Set the payment method ID
         document.getElementById('stripe-payment-method').value = paymentMethod.id;
         
-        // Submit the form using the native submit
-        form.querySelector('input[type="submit"]').click();
+        // Submit the form
+        form.submit();
         
     } catch (error) {
         console.error('Error:', error);
-        errorElement.textContent = error.message || '支払い処理中にエラーが発生しました。もう一度お試しください。';
-        errorElement.classList.add('visible');
-        // Set focus to error message for screen readers
-        errorElement.focus();
+        showError(error.message || '支払い処理中にエラーが発生しました。もう一度お試しください。');
+        
+        // Re-enable submit button
         submitButton.disabled = false;
         submitButton.textContent = '登録';
     }
@@ -191,7 +205,7 @@ form.addEventListener('submit', async (event) => {
     border: 1px solid #ddd;
     border-radius: 4px;
     font-size: 1rem;
-    transition: border-color 0.15s ease-in-out;
+    transition: border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out;
 }
 
 .form-control:focus {
@@ -212,15 +226,12 @@ form.addEventListener('submit', async (event) => {
     font-size: 1.2rem;
 }
 
-#card-element {
+.stripe-element {
     padding: 0.75rem;
     border: 1px solid #ddd;
     border-radius: 4px;
     background: white;
-}
-
-.stripe-element {
-    background-color: white;
+    transition: border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out;
 }
 
 .stripe-element-focus {
@@ -230,6 +241,11 @@ form.addEventListener('submit', async (event) => {
 
 .stripe-element-invalid {
     border-color: #dc3545;
+    box-shadow: 0 0 0 0.2rem rgba(220,53,69,0.25);
+}
+
+.stripe-element-complete {
+    border-color: #28a745;
 }
 
 .btn-primary {
@@ -245,7 +261,7 @@ form.addEventListener('submit', async (event) => {
     transition: background-color 0.15s ease-in-out;
 }
 
-.btn-primary:hover {
+.btn-primary:hover:not(:disabled) {
     background: #0056b3;
 }
 
@@ -281,11 +297,25 @@ form.addEventListener('submit', async (event) => {
     color: #dc3545;
     font-size: 0.875rem;
     margin-top: 0.25rem;
+    padding: 0.25rem 0;
     display: none;
 }
 
 .error-message.visible {
     display: block;
+}
+
+/* Focus styles for better accessibility */
+:focus {
+    outline: 2px solid #007bff;
+    outline-offset: 2px;
+}
+
+/* High contrast focus styles for Windows High Contrast mode */
+@media screen and (-ms-high-contrast: active) {
+    :focus {
+        outline: 2px solid currentColor;
+    }
 }
 </style>
 {% endblock %}
