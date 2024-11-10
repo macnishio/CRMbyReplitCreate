@@ -69,7 +69,7 @@
                 </div>
                 <div id="card-errors" class="error-message" role="alert"></div>
             </div>
-            {{ form.stripe_payment_method }}
+            {{ form.stripe_payment_method(id="stripe-payment-method") }}
         </div>
 
         {{ form.submit(class="btn btn-primary", id="submit-button") }}
@@ -82,6 +82,7 @@
 
 <script src="https://js.stripe.com/v3/"></script>
 <script>
+// Initialize Stripe with publishable key
 const stripe = Stripe('{{ stripe_publishable_key }}');
 const elements = stripe.elements();
 const card = elements.create('card', {
@@ -134,7 +135,7 @@ form.addEventListener('submit', async (event) => {
             submitButton.disabled = false;
             submitButton.textContent = '登録';
         } else {
-            document.getElementById('stripe_payment_method').value = paymentMethod.id;
+            document.getElementById('stripe-payment-method').value = paymentMethod.id;
             form.submit();
         }
     } catch (e) {

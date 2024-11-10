@@ -52,37 +52,36 @@ def register():
     if current_user.is_authenticated:
         return redirect(url_for('main.dashboard'))
 
-    # Check Stripe keys before form creation
-    stripe_keys_missing = False
-    if not current_app.config.get('STRIPE_PUBLISHABLE_KEY'):
-        stripe_keys_missing = True
-        current_app.logger.error('Stripe publishable key not found')
-    if not current_app.config.get('STRIPE_SECRET_KEY'):
-        stripe_keys_missing = True
-        current_app.logger.error('Stripe secret key not found')
+    stripe_publishable_key = current_app.config.get('STRIPE_PUBLISHABLE_KEY')
+    if not stripe_publishable_key:
+        flash('決済システムの設定エラーが発生しました。管理者に連絡してください。', 'error')
+        return redirect(url_for('auth.login'))
 
     form = RegistrationForm()
     
-    if stripe_keys_missing:
-        flash('決済システムの設定エラーが発生しました。管理者に連絡してください。', 'error')
-        return render_template('register.html', form=form)
-
     if form.validate_on_submit():
         try:
             # Check for existing user
             if User.query.filter_by(email=form.email.data).first():
                 flash('このメールアドレスは既に登録されています。', 'error')
-                return render_template('register.html', form=form, 
-                    stripe_publishable_key=current_app.config.get('STRIPE_PUBLISHABLE_KEY', ''))
+                return render_template('register.html', 
+                    form=form,
+                    stripe_publishable_key=stripe_publishable_key)
             
             if User.query.filter_by(username=form.username.data).first():
                 flash('このユーザー名は既に使用されています。', 'error')
-                return render_template('register.html', form=form, 
-                    stripe_publishable_key=current_app.config.get('STRIPE_PUBLISHABLE_KEY', ''))
+                return render_template('register.html', 
+                    form=form,
+                    stripe_publishable_key=stripe_publishable_key)
 
+            # Set Stripe API key
             stripe.api_key = current_app.config.get('STRIPE_SECRET_KEY')
+            if not stripe.api_key:
+                current_app.logger.error('Stripe secret key not found')
+                flash('決済システムの設定エラーが発生しました。管理者に連絡してください。', 'error')
+                return redirect(url_for('auth.login'))
             
-            # Create Stripe customer with error handling
+            # Create Stripe customer
             try:
                 customer = stripe.Customer.create(
                     email=form.email.data,
@@ -94,24 +93,27 @@ def register():
             except stripe.error.StripeError as e:
                 current_app.logger.error(f"Stripe customer creation error: {str(e)}")
                 flash('顧客情報の作成中にエラーが発生しました。', 'error')
-                return render_template('register.html', form=form, 
-                    stripe_publishable_key=current_app.config.get('STRIPE_PUBLISHABLE_KEY', ''))
+                return render_template('register.html', 
+                    form=form,
+                    stripe_publishable_key=stripe_publishable_key)
 
             # Get selected plan
             plan = SubscriptionPlan.query.get(form.plan_id.data)
             if not plan:
                 current_app.logger.error(f'Selected plan {form.plan_id.data} not found')
                 flash('選択されたプランが見つかりません。', 'error')
-                return render_template('register.html', form=form, 
-                    stripe_publishable_key=current_app.config.get('STRIPE_PUBLISHABLE_KEY', ''))
+                return render_template('register.html', 
+                    form=form,
+                    stripe_publishable_key=stripe_publishable_key)
 
             if not plan.stripe_price_id:
                 current_app.logger.error(f'Stripe price ID not found for plan {plan.id}')
                 flash('プランの設定エラーが発生しました。管理者に連絡してください。', 'error')
-                return render_template('register.html', form=form, 
-                    stripe_publishable_key=current_app.config.get('STRIPE_PUBLISHABLE_KEY', ''))
+                return render_template('register.html', 
+                    form=form,
+                    stripe_publishable_key=stripe_publishable_key)
 
-            # Create subscription with error handling
+            # Create subscription
             try:
                 subscription = stripe.Subscription.create(
                     customer=customer.id,
@@ -123,8 +125,9 @@ def register():
             except stripe.error.StripeError as e:
                 current_app.logger.error(f"Stripe subscription creation error: {str(e)}")
                 flash('サブスクリプションの作成中にエラーが発生しました。', 'error')
-                return render_template('register.html', form=form, 
-                    stripe_publishable_key=current_app.config.get('STRIPE_PUBLISHABLE_KEY', ''))
+                return render_template('register.html', 
+                    form=form,
+                    stripe_publishable_key=stripe_publishable_key)
 
             # Create user
             user = User(
@@ -142,8 +145,9 @@ def register():
                 current_app.logger.error(f"Database error creating user: {str(e)}")
                 db.session.rollback()
                 flash('ユーザー情報の保存中にエラーが発生しました。', 'error')
-                return render_template('register.html', form=form, 
-                    stripe_publishable_key=current_app.config.get('STRIPE_PUBLISHABLE_KEY', ''))
+                return render_template('register.html', 
+                    form=form,
+                    stripe_publishable_key=stripe_publishable_key)
 
             # Create local subscription record
             user_subscription = Subscription(
@@ -164,33 +168,37 @@ def register():
                 current_app.logger.error(f"Database error saving subscription: {str(e)}")
                 db.session.rollback()
                 flash('サブスクリプション情報の保存中にエラーが発生しました。', 'error')
-                return render_template('register.html', form=form, 
-                    stripe_publishable_key=current_app.config.get('STRIPE_PUBLISHABLE_KEY', ''))
+                return render_template('register.html', 
+                    form=form,
+                    stripe_publishable_key=stripe_publishable_key)
             
             flash('登録が完了しました。ログインしてください。', 'success')
             return redirect(url_for('auth.login'))
             
         except stripe.error.CardError as e:
             db.session.rollback()
-            error_msg = e.error.message
+            error_msg = e.error.message if hasattr(e, 'error') and hasattr(e.error, 'message') else str(e)
             current_app.logger.error(f"Stripe card error: {error_msg}")
             flash(f'カード処理中にエラーが発生しました: {error_msg}', 'error')
-            return render_template('register.html', form=form, 
-                stripe_publishable_key=current_app.config.get('STRIPE_PUBLISHABLE_KEY', ''))
+            return render_template('register.html', 
+                form=form,
+                stripe_publishable_key=stripe_publishable_key)
         except stripe.error.StripeError as e:
             db.session.rollback()
             current_app.logger.error(f"Stripe error during registration: {str(e)}")
             flash('支払い処理中にエラーが発生しました。もう一度お試しください。', 'error')
-            return render_template('register.html', form=form, 
-                stripe_publishable_key=current_app.config.get('STRIPE_PUBLISHABLE_KEY', ''))
+            return render_template('register.html', 
+                form=form,
+                stripe_publishable_key=stripe_publishable_key)
         except Exception as e:
             db.session.rollback()
             current_app.logger.error(f"Error during registration: {str(e)}")
             flash('登録処理中にエラーが発生しました。', 'error')
-            return render_template('register.html', form=form, 
-                stripe_publishable_key=current_app.config.get('STRIPE_PUBLISHABLE_KEY', ''))
+            return render_template('register.html', 
+                form=form,
+                stripe_publishable_key=stripe_publishable_key)
     
-    return render_template('register.html', 
+    return render_template('register.html',
         form=form,
-        stripe_publishable_key=current_app.config.get('STRIPE_PUBLISHABLE_KEY', '')
+        stripe_publishable_key=stripe_publishable_key
     )
