@@ -1,7 +1,7 @@
 from flask_wtf import FlaskForm
-from wtforms import StringField, PasswordField, SubmitField, FloatField, DateField, SelectField, TextAreaField, DateTimeField, BooleanField, IntegerField
+from wtforms import StringField, PasswordField, SubmitField, FloatField, DateField, SelectField, TextAreaField, DateTimeField, BooleanField, IntegerField, HiddenField
 from wtforms.validators import DataRequired, Email, EqualTo, Length, Optional, NumberRange, ValidationError
-from models import Lead
+from models import Lead, SubscriptionPlan
 from datetime import date
 from wtforms.fields import DateTimeLocalField
 
@@ -28,7 +28,21 @@ class RegistrationForm(FlaskForm):
         DataRequired(message='パスワードを再入力してください'),
         EqualTo('password', message='パスワードが一致しません')
     ])
+    plan_id = SelectField('プラン', 
+        coerce=int,
+        validators=[DataRequired(message='プランを選択してください')],
+        render_kw={"class": "form-control"}
+    )
+    stripe_payment_method = HiddenField('支払い方法')
     submit = SubmitField('登録')
+
+    def __init__(self, *args, **kwargs):
+        super(RegistrationForm, self).__init__(*args, **kwargs)
+        # プランの選択肢を動的に設定
+        self.plan_id.choices = [
+            (plan.id, f"{plan.name} - ¥{plan.price:,.0f}/月") 
+            for plan in SubscriptionPlan.query.all()
+        ]
 
 class LeadForm(FlaskForm):
     name = StringField('Name', validators=[DataRequired()])

@@ -1830,6 +1830,21 @@ pymysql = ["pymysql"]
 sqlcipher = ["sqlcipher3_binary"]
 
 [[package]]
+name = "stripe"
+version = "11.2.0"
+description = "Python bindings for the Stripe API"
+optional = false
+python-versions = ">=3.6"
+files = [
+    {file = "stripe-11.2.0-py2.py3-none-any.whl", hash = "sha256:dec812eabc95488862be40e6c799acdaf2e1225d686490a793f949fab745fdd0"},
+    {file = "stripe-11.2.0.tar.gz", hash = "sha256:4c53d61d7b596070324bfa5d7215843145fe5466e48973d828aab41ad209b5ce"},
+]
+
+[package.dependencies]
+requests = {version = ">=2.20", markers = "python_version >= \"3.0\""}
+typing-extensions = {version = ">=4.5.0", markers = "python_version >= \"3.7\""}
+
+[[package]]
 name = "threadpoolctl"
 version = "3.5.0"
 description = "threadpoolctl"
@@ -2149,4 +2164,4 @@ email = ["email-validator"]
 [metadata]
 lock-version = "2.0"
 python-versions = "^3.11"
-content-hash = "5b40ad6d75434118e6c17478b0f24f59520dbc41388dc5abfd61a5d159b18b59"
+content-hash = "a2faae3f74501cb8929408479c3e4412d8361f5303e5872d0037b0e6c22d4f1d"

@@ -6,8 +6,39 @@ import base64
 from cryptography.fernet import Fernet
 from flask import current_app
 from sqlalchemy.orm import Mapped, mapped_column
-from sqlalchemy import Integer, String, DateTime, Float, ForeignKey, Text, Boolean
+from sqlalchemy import Integer, String, DateTime, Float, ForeignKey, Text, Boolean, Numeric
 from typing import List, Optional
+
+class SubscriptionPlan(db.Model):
+    __tablename__ = 'subscription_plans'
+    id: Mapped[int] = mapped_column(Integer, primary_key=True)
+    name: Mapped[str] = mapped_column(String(100), nullable=False)
+    stripe_price_id: Mapped[str] = mapped_column(String(100), nullable=False)
+    price: Mapped[float] = mapped_column(Numeric(10, 2), nullable=False)
+    description: Mapped[str] = mapped_column(Text, nullable=True)
+    features: Mapped[str] = mapped_column(Text, nullable=True)
+    created_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow)
+    updated_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+    
+    # リレーションシップ
+    subscriptions = db.relationship('Subscription', back_populates='plan')
+
+class Subscription(db.Model):
+    __tablename__ = 'subscriptions'
+    id: Mapped[int] = mapped_column(Integer, primary_key=True)
+    user_id: Mapped[int] = mapped_column(Integer, ForeignKey('users.id'), nullable=False)
+    plan_id: Mapped[int] = mapped_column(Integer, ForeignKey('subscription_plans.id'), nullable=False)
+    stripe_subscription_id: Mapped[str] = mapped_column(String(100), nullable=False)
+    stripe_customer_id: Mapped[str] = mapped_column(String(100), nullable=False)
+    status: Mapped[str] = mapped_column(String(20), nullable=False, default='active')
+    current_period_start: Mapped[datetime] = mapped_column(DateTime, nullable=False)
+    current_period_end: Mapped[datetime] = mapped_column(DateTime, nullable=False)
+    created_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow)
+    updated_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+    
+    # リレーションシップ
+    user = db.relationship('User', back_populates='subscription')
+    plan = db.relationship('SubscriptionPlan', back_populates='subscriptions')
 
 class User(UserMixin, db.Model):
     __tablename__ = 'users'
@@ -18,7 +49,9 @@ class User(UserMixin, db.Model):
     role: Mapped[str] = mapped_column(String(20), default='user')
     google_calendar_id: Mapped[Optional[str]] = mapped_column(String(255), nullable=True)
     google_service_account_file: Mapped[Optional[str]] = mapped_column(String(255), nullable=True)
+
     # リレーションシップ
+    subscription = db.relationship('Subscription', back_populates='user', uselist=False)
     opportunities = db.relationship('Opportunity', backref='owner', lazy='dynamic')
     leads = db.relationship('Lead', backref='owner', lazy='dynamic')
     accounts = db.relationship('Account', backref='owner', lazy='dynamic')
@@ -26,9 +59,6 @@ class User(UserMixin, db.Model):
     emails = db.relationship('Email', backref='user', lazy='dynamic')
     schedules = db.relationship('Schedule', backref='user', lazy='dynamic')
     tasks = db.relationship('Task', backref='user', lazy='dynamic')
-
-    def __init__(self, **kwargs):
-        super(User, self).__init__(**kwargs)
 
     def set_password(self, password):
         self.password_hash = generate_password_hash(password)
@@ -120,11 +150,9 @@ class Email(db.Model):
     received_date: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow)
     lead_id: Mapped[int] = mapped_column(Integer, ForeignKey('leads.id'), nullable=False)
     user_id: Mapped[int] = mapped_column(Integer, ForeignKey('users.id'), nullable=False)
-    # AI分析関連フィールドを追加
     ai_analysis: Mapped[Optional[str]] = mapped_column(Text, nullable=True)
     ai_analysis_date: Mapped[Optional[datetime]] = mapped_column(DateTime, nullable=True)
     ai_model_used: Mapped[Optional[str]] = mapped_column(String(50), nullable=True)
-    # リレーションシップを追加
     tasks = db.relationship('Task', back_populates='email', lazy='dynamic')
     schedules = db.relationship('Schedule', back_populates='email', lazy='dynamic')
 
@@ -153,7 +181,6 @@ class Opportunity(db.Model):
     # リレーションシップ
     lead = db.relationship('Lead', back_populates='opportunities')
     account = db.relationship('Account', back_populates='opportunities')
-    # owner = db.relationship('User', back_populates='opportunities')  # これは不要（User側のbackrefで定義済み）
 
 class Account(db.Model):
     __tablename__ = 'accounts'
@@ -163,8 +190,9 @@ class Account(db.Model):
     website: Mapped[str] = mapped_column(String(200))
     user_id: Mapped[int] = mapped_column(Integer, ForeignKey('users.id'), nullable=False)
 
-    # リレーションシップを追加
+    # リレーションシップ
     opportunities = db.relationship('Opportunity', back_populates='account')
+
 class Schedule(db.Model):
     __tablename__ = 'schedules'
     id: Mapped[int] = mapped_column(Integer, primary_key=True)
@@ -174,9 +202,9 @@ class Schedule(db.Model):
     end_time: Mapped[datetime] = mapped_column(DateTime, nullable=False)
     user_id: Mapped[int] = mapped_column(Integer, ForeignKey('users.id'), nullable=False)
     lead_id: Mapped[Optional[int]] = mapped_column(Integer, ForeignKey('leads.id'), nullable=True)
-    # 新しいフィールドを追加
     email_id: Mapped[Optional[int]] = mapped_column(Integer, ForeignKey('emails.id'), nullable=True)
     is_ai_generated: Mapped[bool] = mapped_column(Boolean, default=False)
+
     # リレーションシップ
     lead = db.relationship('Lead', back_populates='schedules')
     email = db.relationship('Email', back_populates='schedules')
@@ -191,9 +219,9 @@ class Task(db.Model):
     completed: Mapped[bool] = mapped_column(Boolean, default=False)
     user_id: Mapped[int] = mapped_column(Integer, ForeignKey('users.id'), nullable=False)
     lead_id: Mapped[Optional[int]] = mapped_column(Integer, ForeignKey('leads.id'), nullable=True)
-    # 新しいフィールドを追加
     email_id: Mapped[Optional[int]] = mapped_column(Integer, ForeignKey('emails.id'), nullable=True)
     is_ai_generated: Mapped[bool] = mapped_column(Boolean, default=False)
+
     # リレーションシップ
     lead = db.relationship('Lead', back_populates='tasks')
     email = db.relationship('Email', back_populates='tasks')
