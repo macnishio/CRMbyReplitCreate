@@ -64,10 +64,10 @@
             <h3>お支払い情報</h3>
             <div class="form-group">
                 <label for="card-element">クレジットカード情報</label>
-                <div id="card-element" class="form-control">
+                <div id="card-element" class="form-control" role="group" aria-label="クレジットカード情報">
                     <!-- Stripe Element will be inserted here -->
                 </div>
-                <div id="card-errors" class="error-message" role="alert"></div>
+                <div id="card-errors" class="error-message" role="alert" aria-live="polite"></div>
             </div>
             {{ form.stripe_payment_method(id="stripe-payment-method") }}
         </div>
@@ -99,50 +99,68 @@ const card = elements.create('card', {
             color: '#dc3545',
             iconColor: '#dc3545'
         }
+    },
+    // Add proper ARIA labels
+    aria: {
+        label: 'クレジットカード情報入力フォーム',
+        invalid: 'クレジットカード情報が正しくありません',
+        required: true
     }
 });
 
+// Mount the card element
 card.mount('#card-element');
 
+// Handle form and elements
 const form = document.getElementById('registration-form');
 const submitButton = document.getElementById('submit-button');
-const cardErrors = document.getElementById('card-errors');
+const errorElement = document.getElementById('card-errors');
+const cardElement = document.getElementById('card-element');
 
+// Set additional accessibility attributes
+cardElement.setAttribute('role', 'group');
+cardElement.setAttribute('aria-label', 'クレジットカード情報');
+
+// Handle real-time validation errors
 card.addEventListener('change', ({error}) => {
     if (error) {
-        cardErrors.textContent = error.message;
-        cardErrors.classList.add('visible');
+        errorElement.textContent = error.message;
+        errorElement.classList.add('visible');
+        // Announce error to screen readers
+        errorElement.setAttribute('aria-hidden', 'false');
     } else {
-        cardErrors.textContent = '';
-        cardErrors.classList.remove('visible');
+        errorElement.textContent = '';
+        errorElement.classList.remove('visible');
+        errorElement.setAttribute('aria-hidden', 'true');
     }
 });
 
+// Handle form submission
 form.addEventListener('submit', async (event) => {
     event.preventDefault();
     submitButton.disabled = true;
     submitButton.textContent = '処理中...';
-
+    
     try {
         const {paymentMethod, error} = await stripe.createPaymentMethod({
             type: 'card',
-            card: card,
+            card: card
         });
 
         if (error) {
             throw error;
         }
 
-        // Set the payment method ID
         document.getElementById('stripe-payment-method').value = paymentMethod.id;
-        
-        // Submit the form normally
-        form.querySelector('input[type="submit"]').click();
+        form.dispatchEvent(new Event('submit', {cancelable: true}));
         
     } catch (error) {
         console.error('Error:', error);
-        document.getElementById('card-errors').textContent = error.message || '支払い処理中にエラーが発生しました。もう一度お試しください。';
-        document.getElementById('card-errors').classList.add('visible');
+        errorElement.textContent = error.message || '支払い処理中にエラーが発生しました。もう一度お試しください。';
+        errorElement.classList.add('visible');
+        errorElement.setAttribute('aria-hidden', 'false');
+        // Set focus to error message for screen readers
+        errorElement.focus();
         submitButton.disabled = false;
         submitButton.textContent = '登録';
     }
