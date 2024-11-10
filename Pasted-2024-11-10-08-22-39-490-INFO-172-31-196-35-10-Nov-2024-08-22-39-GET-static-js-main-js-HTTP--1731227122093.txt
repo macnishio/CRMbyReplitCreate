@@ -1,0 +1,83 @@
+2024-11-10 08:22:39,490 INFO: 172.31.196.35 - - [10/Nov/2024 08:22:39] "GET /static/js/main.js HTTP/1.1" 304 - [in /home/runner/CRM/.pythonlibs/lib/python3.11/site-packages/werkzeug/_internal.py:224]
+
+2024-11-10 08:23:02,871 DEBUG: Looking for jobs to run [in /home/runner/CRM/.pythonlibs/lib/python3.11/site-packages/apscheduler/schedulers/base.py:954]
+
+2024-11-10 08:23:02,871 DEBUG: Next wakeup is due at 2024-11-10 08:28:02.870910+00:00 (in 299.999581 seconds) [in /home/runner/CRM/.pythonlibs/lib/python3.11/site-packages/apscheduler/schedulers/base.py:1034]
+
+2024-11-10 08:23:02,871 INFO: Running job "setup_email_scheduler.<locals>.email_check_wrapper (trigger: interval[0:05:00], next run at: 2024-11-10 08:28:02 UTC)" (scheduled at 2024-11-10 08:23:02.870910+00:00) [in /home/runner/CRM/.pythonlibs/lib/python3.11/site-packages/apscheduler/executors/base.py:123]
+
+2024-11-10 08:23:02,871 INFO: Running job "setup_email_scheduler.<locals>.schedule_monitor (trigger: interval[0:15:00], next run at: 2024-11-10 08:38:02 UTC)" (scheduled at 2024-11-10 08:23:02.871134+00:00) [in /home/runner/CRM/.pythonlibs/lib/python3.11/site-packages/apscheduler/executors/base.py:123]
+
+2024-11-10 08:23:02,872 ERROR: Job "setup_email_scheduler.<locals>.schedule_monitor (trigger: interval[0:15:00], next run at: 2024-11-10 08:38:02 UTC)" raised an exception [in /home/runner/CRM/.pythonlibs/lib/python3.11/site-packages/apscheduler/executors/base.py:131]
+
+Traceback (most recent call last):
+
+  File "/home/runner/CRM/.pythonlibs/lib/python3.11/site-packages/apscheduler/executors/base.py", line 125, in run_job
+
+    retval = job.func(*job.args, **job.kwargs)
+
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+  File "/home/runner/CRM/email_receiver.py", line 1625, in schedule_monitor
+
+    current_app.logger.error(f"Error in schedule monitor: {str(e)}")
+
+    ^^^^^^^^^^^^^^^^^^
+
+  File "/home/runner/CRM/.pythonlibs/lib/python3.11/site-packages/werkzeug/local.py", line 316, in get
+
+    obj = instance._get_current_object()
+
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+  File "/home/runner/CRM/.pythonlibs/lib/python3.11/site-packages/werkzeug/local.py", line 513, in getcurrent_object
+
+    raise RuntimeError(unbound_message) from None
+
+RuntimeError: Working outside of application context.
+
+This typically means that you attempted to use functionality that needed
+
+the current application. To solve this, set up an application context
+
+with app.app_context(). See the documentation for more information.
+
+2024-11-10 08:23:03,783 WARNING: Last fetch was more than 24 hours ago. Limiting to last 24 hours. [in /home/runner/CRM/email_receiver.py:800]
+
+2024-11-10 08:23:03,802 DEBUG: Connecting to imap.gmail.com [in /home/runner/CRM/email_receiver.py:544]
+
+2024-11-10 08:23:05,562 DEBUG: Connected successfully to imap.gmail.com [in /home/runner/CRM/email_receiver.py:561]
+
+2024-11-10 08:23:05,960 DEBUG: Successfully connected to email server for user 3 [in /home/runner/CRM/email_receiver.py:1221]
+
+2024-11-10 08:23:05,960 DEBUG: Searching emails with criteria: (SINCE "09-Nov-2024") [in /home/runner/CRM/email_receiver.py:1755]
+
+2024-11-10 08:23:06,713 DEBUG: Starting email content processing [in /home/runner/CRM/email_receiver.py:60]
+
+2024-11-10 08:23:06,713 DEBUG: Processing multipar
+
+CRM Application loaded
+
+register:1  Unchecked runtime.lastError: A listener indicated an asynchronous response by returning true, but the message channel closed before a response was received
+
+register:1  Unchecked runtime.lastError: A listener indicated an asynchronous response by returning true, but the message channel closed before a response was received
+
+register:1  Unchecked runtime.lastError: A listener indicated an asynchronous response by returning true, but the message channel closed before a response was received
+
+register:1  Unchecked runtime.lastError: A listener indicated an asynchronous response by returning true, but the message channel closed before a response was received
+
+register:1  Blocked aria-hidden on an element because its descendant retained focus. The focus must not be hidden from assistive technology users. Avoid using aria-hidden on a focused element or its ancestor. Consider using the inert attribute instead, which will also prevent focus. For more details, see the aria-hidden section of the WAI-ARIA specification at https://w3c.github.io/aria/#aria-hidden.
+
+Element with focus: input
+
+Ancestor with aria-hidden:  <input class=​"__PrivateStripeElement-input" aria-hidden=​"true" aria-label=​" " autocomplete=​"false" maxlength=​"1" style=​"border:​ none !important;​ display:​ block !important;​ position:​ absolute !important;​ height:​ 1px !important;​ top:​ -1px !important;​ left:​ 0px !important;​ padding:​ 0px !important;​ margin:​ 0px !important;​ width:​ 100% !important;​ opacity:​ 0 !important;​ background:​ transparent !important;​ pointer-events:​ none !important;​ font-size:​ 16px !important;​">​
+
+174Microsoft Edge is moving towards a new experience that allows users to choose to browse without third-party cookies.
+
+styles.css:1 
+
+        
+
+        
+
+        GET https://16ff0c7a-7366-40f0-8661-a3d2a1ef2ced-00-1a5ck73wo5gh6.sisko.replit.dev/static/css/styles.css net::ERR_ABORTED 502 (Bad Gateway)
