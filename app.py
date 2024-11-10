@@ -21,6 +21,13 @@ def create_app(config_name='default'):
         level=logging.DEBUG,
         format='%(asctime)s %(levelname)s: %(message)s [in %(pathname)s:%(lineno)d]'
     )
+    
+    # Add debug logging for Stripe configuration
+    app.logger.debug(f"Stripe configuration loaded: {bool(app.config.get('STRIPE_PUBLISHABLE_KEY'))}")
+    if not app.config.get('STRIPE_PUBLISHABLE_KEY'):
+        app.logger.error("Stripe publishable key is missing from configuration")
+    if not app.config.get('STRIPE_SECRET_KEY'):
+        app.logger.error("Stripe secret key is missing from configuration")
 
     # Upload folder configuration
     BASE_DIR = os.path.dirname(os.path.abspath(__file__))
