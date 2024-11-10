@@ -65,7 +65,7 @@
             <div class="form-group">
                 <label for="card-element">クレジットカード情報</label>
                 <div id="card-element" class="form-control">
-                    <!-- A Stripe Element will be inserted here. -->
+                    <!-- Stripe Element will be inserted here -->
                 </div>
                 <div id="card-errors" class="error-message" role="alert"></div>
             </div>
@@ -130,18 +130,19 @@ form.addEventListener('submit', async (event) => {
         });
 
         if (error) {
-            cardErrors.textContent = error.message;
-            cardErrors.classList.add('visible');
-            submitButton.disabled = false;
-            submitButton.textContent = '登録';
-        } else {
-            document.getElementById('stripe-payment-method').value = paymentMethod.id;
-            form.submit();
+            throw error;
         }
-    } catch (e) {
-        console.error('Error:', e);
-        cardErrors.textContent = '支払い処理中にエラーが発生しました。もう一度お試しください。';
-        cardErrors.classList.add('visible');
+
+        // Set the payment method ID
+        document.getElementById('stripe-payment-method').value = paymentMethod.id;
+        
+        // Submit the form normally
+        form.querySelector('input[type="submit"]').click();
+        
+    } catch (error) {
+        console.error('Error:', error);
+        document.getElementById('card-errors').textContent = error.message || '支払い処理中にエラーが発生しました。もう一度お試しください。';
+        document.getElementById('card-errors').classList.add('visible');
         submitButton.disabled = false;
         submitButton.textContent = '登録';
     }
