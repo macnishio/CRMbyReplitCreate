@@ -3,6 +3,54 @@
 
 {% block content %}
 <div class="task-manager">
+<!-- Filter Form -->
+<div class="filter-section">
+    <form method="GET" class="filter-form" id="filterForm">
+        <div class="filter-grid">
+            <div class="filter-group">
+                <label for="status">ステータス:</label>
+                <select name="status" id="status">
+                    <option value="">全て</option>
+                    <option value="New" {% if filters.status == 'New' %}selected{% endif %}>新規</option>
+                    <option value="In Progress" {% if filters.status == 'In Progress' %}selected{% endif %}>進行中</option>
+                    <option value="Completed" {% if filters.status == 'Completed' %}selected{% endif %}>完了</option>
+                </select>
+            </div>
+            <div class="filter-group">
+                <label for="due_date">期限:</label>
+                <select name="due_date" id="due_date">
+                    <option value="">全て</option>
+                    <option value="today" {% if filters.due_date == 'today' %}selected{% endif %}>今日</option>
+                    <option value="week" {% if filters.due_date == 'week' %}selected{% endif %}>今週</option>
+                    <option value="month" {% if filters.due_date == 'month' %}selected{% endif %}>今月</option>
+                    <option value="overdue" {% if filters.due_date == 'overdue' %}selected{% endif %}>期限切れ</option>
+                </select>
+            </div>
+            <div class="filter-group">
+                <label for="lead_search">リード検索:</label>
+                <input type="text" name="lead_search" id="lead_search" value="{{ filters.lead_search or '' }}" placeholder="リード名を入力">
+            </div>
+            <div class="filter-group">
+                <label>期間:</label>
+                <div class="date-range">
+                    <input type="date" name="date_from" value="{{ filters.date_from or '' }}">
+                    <span>～</span>
+                    <input type="date" name="date_to" value="{{ filters.date_to or '' }}">
+                </div>
+            </div>
+        </div>
+        <div class="filter-actions">
+            <button type="submit" class="btn btn-primary">フィルター適用</button>
+            <button type="button" class="btn btn-secondary" onclick="resetFilters()">リセット</button>
+            <button type="submit" class="btn btn-success" name="save_filters" value="1">
+                <i class="fas fa-save"></i> フィルター設定を保存
+            </button>
+            <button type="button" class="btn btn-info" onclick="runAnalysis()">
+                <i class="fas fa-brain"></i> AI分析を実行
+            </button>
+        </div>
+    </form>
+</div>
     <!-- 分析セクション -->
     <div class="analysis-section">
         <div class="analysis-header" onclick="toggleAnalysis()">
@@ -483,6 +531,60 @@ function toggleAnalysis() {
         content.style.display = 'none';
         icon.style.transform = 'rotate(0deg)';
     }
+}
+
+function resetFilters() {
+    // Reset all form fields
+    document.getElementById('filterForm').reset();
+    // Submit the form to clear all filters
+    document.getElementById('filterForm').submit();
+}
+
+function runAnalysis() {
+    // Show loading state
+    const analysisContent = document.querySelector('.analysis-content');
+    const aiCard = document.querySelector('.analysis-card:last-child');
+    const button = document.querySelector('.btn-info');
+    
+    // Display loading state
+    button.disabled = true;
+    button.innerHTML = '<i class="fas fa-spinner fa-spin"></i> 分析中...';
+    if (aiCard) {
+        aiCard.innerHTML = '<h3>AI分析結果</h3><p><i class="fas fa-spinner fa-spin"></i> AI分析を実行中...</p>';
+    }
+    
+    // Show analysis section if hidden
+    if (analysisContent.style.display === 'none') {
+        toggleAnalysis();
+    }
+
+    // Make API request
+    fetch('/tasks/analyze', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json'
+        }
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            if (aiCard) {
+                aiCard.innerHTML = `<h3>AI分析結果</h3>${data.analysis}`;
+            }
+        } else {
+            throw new Error(data.error || 'AI分析中にエラーが発生しました');
+        }
+    })
+    .catch(error => {
+        if (aiCard) {
+            aiCard.innerHTML = `<h3>AI分析結果</h3><p class="error-message">${error.message}</p>`;
+        }
+    })
+    .finally(() => {
+        // Reset button state
+        button.disabled = false;
+        button.innerHTML = '<i class="fas fa-brain"></i> AI分析を実行';
+    });
 }
 
 function toggleAllCheckboxes() {

@@ -1,7 +1,8 @@
-from flask import Blueprint, render_template, redirect, url_for, flash, request, jsonify
+from flask import Blueprint, render_template, redirect, url_for, flash, request, jsonify, current_app
 from flask_login import login_required, current_user
 from models import Task, Lead
 from extensions import db
+import json
 from datetime import datetime, timedelta
 from sqlalchemy import func
 from ai_analysis import analyze_tasks
@@ -12,14 +13,66 @@ tasks_bp = Blueprint('tasks', __name__)
 @tasks_bp.route('/')
 @login_required
 def list_tasks():
+    settings = current_user.settings
+    
+    # Check if we should save the current filters
+    if request.args.get('save_filters'):
+        try:
+            current_filters = {
+                'status': request.args.get('status'),
+                'due_date': request.args.get('due_date'),
+                'lead_search': request.args.get('lead_search'),
+                'date_from': request.args.get('date_from'),
+                'date_to': request.args.get('date_to')
+            }
+            
+            if settings:
+                if not hasattr(settings, 'filter_preferences'):
+                    settings.filter_preferences = '{}'
+                filters = json.loads(settings.filter_preferences)
+                filters['tasks'] = current_filters
+                settings.filter_preferences = json.dumps(filters)
+                db.session.commit()
+                flash('フィルター設定が保存されました。', 'success')
+            else:
+                flash('ユーザー設定が見つかりません。', 'error')
+                
+        except Exception as e:
+            db.session.rollback()
+            current_app.logger.error(f"Error saving filter preferences: {str(e)}")
+            flash('フィルター設定の保存中にエラーが発生しました。', 'error')
+            
+        return redirect(url_for('tasks.list_tasks'))
+
+    # Load saved filters if no parameters are provided
+    saved_filters = {}
+    if settings and settings.filter_preferences:
+        try:
+            filters = json.loads(settings.filter_preferences)
+            saved_filters = filters.get('tasks', {})
+        except json.JSONDecodeError:
+            current_app.logger.error("Error parsing saved filters")
+    
+    use_saved = not any(request.args.values())
+    
+    # Get filter parameters
+    status = request.args.get('status') or (saved_filters.get('status') if use_saved else None)
+    due_date = request.args.get('due_date') or (saved_filters.get('due_date') if use_saved else None)
+    lead_search = request.args.get('lead_search') or (saved_filters.get('lead_search') if use_saved else None)
+    date_from = request.args.get('date_from') or (saved_filters.get('date_from') if use_saved else None)
+    date_to = request.args.get('date_to') or (saved_filters.get('date_to') if use_saved else None)
+
+    # Base query
     query = Task.query.filter_by(user_id=current_user.id)
     
+    # Join Lead model if we need it for filtering
+    if lead_search:
+        query = query.join(Lead, Task.lead_id == Lead.id)
+
     # Apply filters
-    status = request.args.get('status')
     if status:
         query = query.filter(Task.status == status)
         
-    due_date = request.args.get('due_date')
     today = datetime.utcnow().replace(hour=0, minute=0, second=0, microsecond=0)
     if due_date == 'today':
         query = query.filter(
@@ -39,6 +92,14 @@ def list_tasks():
     elif due_date == 'overdue':
         query = query.filter(Task.due_date < today)
 
+    if lead_search:
+        query = query.filter(Lead.name.ilike(f'%{lead_search}%'))
+    
+    if date_from:
+        query = query.filter(Task.due_date >= datetime.strptime(date_from, '%Y-%m-%d'))
+    if date_to:
+        query = query.filter(Task.due_date <= datetime.strptime(date_to, '%Y-%m-%d'))
+
     # Order by due date and eager load lead relationship
     tasks = query.options(db.joinedload(Task.lead)).order_by(Task.due_date.asc()).all()
     
@@ -57,6 +118,13 @@ def list_tasks():
                          tasks=tasks,
                          task_status_counts=task_status_counts,
                          ai_analysis=ai_analysis,
+                         filters={
+                             'status': status,
+                             'due_date': due_date,
+                             'lead_search': lead_search,
+                             'date_from': date_from,
+                             'date_to': date_to
+                         },
                          utcnow=datetime.utcnow)
 
 @tasks_bp.route('/bulk_action', methods=['POST'])
@@ -183,3 +251,72 @@ def delete_task(id):
     db.session.commit()
     flash('タスクが削除されました。', 'success')
     return redirect(url_for('tasks.list_tasks'))
+
+@tasks_bp.route('/analyze', methods=['POST'])
+@login_required
+def analyze_tasks_endpoint():
+    try:
+        # Get current tasks for the user with filters applied
+        query = Task.query.filter_by(user_id=current_user.id)
+        
+        # Apply filters if they exist
+        status = request.args.get('status')
+        if status:
+            query = query.filter(Task.status == status)
+            
+        due_date_filter = request.args.get('due_date')
+        today = datetime.utcnow().replace(hour=0, minute=0, second=0, microsecond=0)
+        if due_date_filter == 'today':
+            query = query.filter(Task.due_date >= today, 
+                               Task.due_date < today + timedelta(days=1))
+        elif due_date_filter == 'week':
+            query = query.filter(Task.due_date >= today,
+                               Task.due_date < today + timedelta(days=7))
+        elif due_date_filter == 'month':
+            query = query.filter(Task.due_date >= today,
+                               Task.due_date < today + timedelta(days=30))
+        elif due_date_filter == 'overdue':
+            query = query.filter(Task.due_date < today)
+            
+        lead_search = request.args.get('lead_search')
+        if lead_search:
+            query = query.join(Lead, Task.lead_id == Lead.id).filter(Lead.name.ilike(f'%{lead_search}%'))
+            
+        date_from = request.args.get('date_from')
+        if date_from:
+            query = query.filter(Task.due_date >= datetime.strptime(date_from, '%Y-%m-%d'))
+            
+        date_to = request.args.get('date_to')
+        if date_to:
+            query = query.filter(Task.due_date <= datetime.strptime(date_to, '%Y-%m-%d'))
+        
+        # Get tasks
+        tasks = query.all()
+        
+        # Get task status counts for statistics
+        status_counts = db.session.query(
+            Task.status,
+            func.count(Task.id).label('count')
+        ).filter_by(user_id=current_user.id).group_by(Task.status).all()
+        
+        # Format status counts
+        task_status_counts = [
+            {'status': status, 'count': count}
+            for status, count in status_counts
+        ]
+        
+        # Get AI analysis
+        ai_analysis = analyze_tasks(tasks)
+        
+        return jsonify({
+            'success': True,
+            'status_counts': task_status_counts,
+            'ai_analysis': ai_analysis
+        })
+        
+    except Exception as e:
+        current_app.logger.error(f"Task analysis error: {str(e)}")
+        return jsonify({
+            'success': False,
+            'error': 'タスクの分析中にエラーが発生しました'
+        }), 500
