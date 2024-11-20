@@ -24,6 +24,10 @@ def list_opportunities():
     sort_by = request.args.get('sort_by', 'close_date')
     sort_order = request.args.get('sort_order', 'asc')
 
+    # Get page number from request
+    page = request.args.get('page', 1, type=int)
+    per_page = 10  # Number of items per page
+
     # Base query
     query = Opportunity.query.filter_by(user_id=current_user.id)
 
@@ -56,7 +60,8 @@ def list_opportunities():
         sort_column = sort_column.desc()
     query = query.order_by(sort_column)
 
-    opportunities = query.all()
+    # Paginate the results
+    opportunities = query.paginate(page=page, per_page=per_page, error_out=False)
 
     return render_template('opportunities/list_opportunities.html',
                          opportunities=opportunities,

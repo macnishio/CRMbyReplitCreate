@@ -232,7 +232,7 @@ document.getElementById('sort_order').addEventListener('change', function() {
 
     <!-- Opportunities Grid -->
     <div class="opportunity-grid">
-        {% for opportunity in opportunities %}
+        {% for opportunity in opportunities.items %}
         <div class="opportunity-card">
             <div class="opportunity-select">
                 <input type="checkbox" name="selected_opportunities[]" value="{{ opportunity.id }}" class="opportunity-checkbox">
@@ -261,6 +261,31 @@ document.getElementById('sort_order').addEventListener('change', function() {
         </div>
         {% endfor %}
     </div>
+
+    <!-- Pagination -->
+    {% if opportunities.pages > 1 %}
+    <div class="pagination-container">
+        <div class="pagination">
+            {% if opportunities.has_prev %}
+                <a href="{{ url_for('opportunities.list_opportunities', page=opportunities.prev_num, stage=filters.stage, min_amount=filters.min_amount, max_amount=filters.max_amount, lead_search=filters.lead_search, lead_status=filters.lead_status, date_from=filters.date_from, date_to=filters.date_to, sort_by=filters.sort_by, sort_order=filters.sort_order) }}" class="page-link">&laquo; 前へ</a>
+            {% endif %}
+
+            {% for page_num in range(max(1, opportunities.page - 2), min(opportunities.pages + 1, opportunities.page + 3)) %}
+                <a href="{{ url_for('opportunities.list_opportunities', page=page_num, stage=filters.stage, min_amount=filters.min_amount, max_amount=filters.max_amount, lead_search=filters.lead_search, lead_status=filters.lead_status, date_from=filters.date_from, date_to=filters.date_to, sort_by=filters.sort_by, sort_order=filters.sort_order) }}" 
+                   class="page-link {% if page_num == opportunities.page %}active{% endif %}">
+                    {{ page_num }}
+                </a>
+            {% endfor %}
+
+            {% if opportunities.has_next %}
+                <a href="{{ url_for('opportunities.list_opportunities', page=opportunities.next_num, stage=filters.stage, min_amount=filters.min_amount, max_amount=filters.max_amount, lead_search=filters.lead_search, lead_status=filters.lead_status, date_from=filters.date_from, date_to=filters.date_to, sort_by=filters.sort_by, sort_order=filters.sort_order) }}" class="page-link">次へ &raquo;</a>
+            {% endif %}
+        </div>
+        <div class="pagination-info">
+            ページ {{ opportunities.page }} / {{ opportunities.pages }} (全{{ opportunities.total }}件)
+        </div>
+    </div>
+    {% endif %}
 </form>
 
 <div class="add-opportunity">
