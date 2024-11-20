@@ -45,7 +45,12 @@
             <button type="submit" class="btn btn-success" name="save_filters" value="1">
                 <i class="fas fa-save"></i> フィルター設定を保存
             </button>
-            <button type="button" class="btn btn-info" onclick="runAnalysis()">
+            <div class="sort-controls">
+                <button type="button" class="btn btn-secondary" onclick="toggleDueDateSort()">
+                    期限でソート <i id="sortIcon" class="fas fa-sort"></i>
+                </button>
+            </div>
+            <button type="button" class="btn btn-info" onclick="runAnalysis()" id="analyzeBtn">
                 <i class="fas fa-brain"></i> AI分析を実行
             </button>
         </div>
@@ -166,6 +171,95 @@
                     <div class="lead-info">
                         <h4><i class="fas fa-user-tie"></i> リード情報</h4>
                         <div class="lead-details">
+<script>
+let currentSortOrder = 'asc';
+
+function toggleDueDateSort() {
+    const taskGrid = document.querySelector('.task-grid');
+    const tasks = Array.from(taskGrid.children);
+    const sortIcon = document.getElementById('sortIcon');
+
+    tasks.sort((a, b) => {
+        const dateA = new Date(a.querySelector('.due-date').innerText.trim());
+        const dateB = new Date(b.querySelector('.due-date').innerText.trim());
+        
+        return currentSortOrder === 'asc' ? dateA - dateB : dateB - dateA;
+    });
+
+    currentSortOrder = currentSortOrder === 'asc' ? 'desc' : 'asc';
+    sortIcon.className = `fas fa-sort-${currentSortOrder === 'asc' ? 'up' : 'down'}`;
+    
+    tasks.forEach(task => taskGrid.appendChild(task));
+}
+
+function runAnalysis() {
+    const analyzeBtn = document.getElementById('analyzeBtn');
+    const analysisContent = document.getElementById('analysisContent');
+    const loadingHtml = '<div class="loading-indicator"><i class="fas fa-spinner fa-spin"></i> AI分析を実行中...</div>';
+    
+    analyzeBtn.disabled = true;
+    analysisContent.innerHTML = loadingHtml;
+
+    // Get current filter parameters
+    const urlParams = new URLSearchParams(window.location.search);
+    
+    fetch('/tasks/analyze?' + urlParams.toString(), {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json'
+        }
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            // Update status counts
+            const statusCountsHtml = data.status_counts.map(status => 
+                `<li>${status.status}: ${status.count}件</li>`
+            ).join('');
+            
+            // Update AI analysis
+            const analysisGridHtml = `
+                <div class="analysis-grid">
+                    <div class="analysis-card">
+                        <h3>ステータス分布</h3>
+                        <ul>${statusCountsHtml}</ul>
+                    </div>
+                    <div class="analysis-card">
+                        <h3>AI分析結果</h3>
+                        ${data.ai_analysis}
+                    </div>
+                </div>`;
+            
+            analysisContent.innerHTML = analysisGridHtml;
+        } else {
+            analysisContent.innerHTML = `<p class="error-message">${data.error || 'AI分析中にエラーが発生しました。'}</p>`;
+        }
+    })
+    .catch(error => {
+        analysisContent.innerHTML = '<p class="error-message">AI分析中にエラーが発生しました。</p>';
+        console.error('Analysis error:', error);
+    })
+    .finally(() => {
+        analyzeBtn.disabled = false;
+    });
+}
+
+// Add loading indicator styles
+const style = document.createElement('style');
+style.textContent = `
+    .loading-indicator {
+        text-align: center;
+        padding: 20px;
+        font-size: 1.2em;
+        color: #666;
+    }
+    .loading-indicator i {
+        margin-right: 10px;
+        color: #007bff;
+    }
+`;
+document.head.appendChild(style);
+</script>
                             <div class="lead-header">
                                 <span class="lead-name">{{ task.lead.name }}</span>
                                 <span class="lead-score">スコア: {{ "%.1f"|format(task.lead.score) }}</span>
