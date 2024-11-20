@@ -25,9 +25,11 @@ def list_opportunities():
     sort_order = request.args.get('sort_order', 'asc')
 
     # Base query
-    query = Opportunity.query.filter_by(user_id=current_user.id).options(
-        db.joinedload(Opportunity.lead)
-    )
+    query = Opportunity.query.filter_by(user_id=current_user.id)
+
+    # Join Lead model if we need it for filtering
+    if lead_search or lead_status:
+        query = query.join(Lead, Opportunity.lead_id == Lead.id)
 
     # Apply filters
     if stage_filter:
@@ -36,16 +38,17 @@ def list_opportunities():
         query = query.filter(Opportunity.amount >= min_amount)
     if max_amount is not None:
         query = query.filter(Opportunity.amount <= max_amount)
-    if lead_search or lead_status:
-        query = query.join(Opportunity.lead)
-        if lead_search:
-            query = query.filter(Lead.name.ilike(f'%{lead_search}%'))
-        if lead_status:
-            query = query.filter(Lead.status == lead_status)
+    if lead_search:
+        query = query.filter(Lead.name.ilike(f'%{lead_search}%'))
+    if lead_status:
+        query = query.filter(Lead.status == lead_status)
     if date_from:
         query = query.filter(Opportunity.close_date >= datetime.strptime(date_from, '%Y-%m-%d'))
     if date_to:
         query = query.filter(Opportunity.close_date <= datetime.strptime(date_to, '%Y-%m-%d'))
+
+    # Add eager loading of lead data after all filters
+    query = query.options(db.joinedload(Opportunity.lead))
 
     # Apply sorting
     sort_column = getattr(Opportunity, sort_by) if hasattr(Opportunity, sort_by) else Opportunity.close_date
