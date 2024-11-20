@@ -13,9 +13,42 @@ bp = Blueprint('opportunities', __name__)
 @bp.route('')
 @login_required
 def list_opportunities():
-    opportunities = Opportunity.query.filter_by(user_id=current_user.id).options(
+    # Get filter parameters
+    stage_filter = request.args.get('stage')
+    min_amount = request.args.get('min_amount', type=float)
+    max_amount = request.args.get('max_amount', type=float)
+    lead_search = request.args.get('lead_search')
+    date_from = request.args.get('date_from')
+    date_to = request.args.get('date_to')
+    sort_by = request.args.get('sort_by', 'close_date')
+    sort_order = request.args.get('sort_order', 'asc')
+
+    # Base query
+    query = Opportunity.query.filter_by(user_id=current_user.id).options(
         db.joinedload(Opportunity.lead)
-    ).order_by(Opportunity.close_date.asc()).all()
+    )
+
+    # Apply filters
+    if stage_filter:
+        query = query.filter(Opportunity.stage == stage_filter)
+    if min_amount is not None:
+        query = query.filter(Opportunity.amount >= min_amount)
+    if max_amount is not None:
+        query = query.filter(Opportunity.amount <= max_amount)
+    if lead_search:
+        query = query.join(Opportunity.lead).filter(Lead.name.ilike(f'%{lead_search}%'))
+    if date_from:
+        query = query.filter(Opportunity.close_date >= datetime.strptime(date_from, '%Y-%m-%d'))
+    if date_to:
+        query = query.filter(Opportunity.close_date <= datetime.strptime(date_to, '%Y-%m-%d'))
+
+    # Apply sorting
+    sort_column = getattr(Opportunity, sort_by) if hasattr(Opportunity, sort_by) else Opportunity.close_date
+    if sort_order == 'desc':
+        sort_column = sort_column.desc()
+    query = query.order_by(sort_column)
+
+    opportunities = query.all()
 
     stage_stats = db.session.query(
         Opportunity.stage,
@@ -33,7 +66,17 @@ def list_opportunities():
     return render_template('opportunities/list_opportunities.html',
                          opportunities=opportunities,
                          opp_stage_stats=opp_stage_stats,
-                         ai_analysis=ai_analysis)
+                         ai_analysis=ai_analysis,
+                         filters={
+                             'stage': stage_filter,
+                             'min_amount': min_amount,
+                             'max_amount': max_amount,
+                             'lead_search': lead_search,
+                             'date_from': date_from,
+                             'date_to': date_to,
+                             'sort_by': sort_by,
+                             'sort_order': sort_order
+                         })
 
 @bp.route('/add', methods=['GET', 'POST'])
 @login_required
