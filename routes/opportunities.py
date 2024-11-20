@@ -58,23 +58,8 @@ def list_opportunities():
 
     opportunities = query.all()
 
-    stage_stats = db.session.query(
-        Opportunity.stage,
-        func.count(Opportunity.id).label('count'),
-        func.sum(Opportunity.amount).label('amount')
-    ).filter_by(user_id=current_user.id).group_by(Opportunity.stage).all()
-
-    opp_stage_stats = [
-        {'stage': stage, 'count': count, 'amount': amount}
-        for stage, count, amount in stage_stats
-    ]
-
-    ai_analysis = analyze_opportunities(opportunities)
-
     return render_template('opportunities/list_opportunities.html',
                          opportunities=opportunities,
-                         opp_stage_stats=opp_stage_stats,
-                         ai_analysis=ai_analysis,
                          filters={
                              'stage': stage_filter,
                              'min_amount': min_amount,
@@ -201,3 +186,30 @@ def bulk_action():
         current_app.logger.error(f"Bulk action error: {str(e)}")
 
     return redirect(url_for('opportunities.list_opportunities'))
+
+@bp.route('/analyze', methods=['POST'])
+@login_required
+def analyze_opportunities_data():
+    try:
+        opportunities = Opportunity.query.filter_by(user_id=current_user.id).all()
+        stage_stats = db.session.query(
+            Opportunity.stage,
+            func.count(Opportunity.id).label('count'),
+            func.sum(Opportunity.amount).label('amount')
+        ).filter_by(user_id=current_user.id).group_by(Opportunity.stage).all()
+
+        opp_stage_stats = [
+            {'stage': stage, 'count': count, 'amount': amount}
+            for stage, count, amount in stage_stats
+        ]
+
+        ai_analysis = analyze_opportunities(opportunities)
+
+        return {
+            'success': True,
+            'stage_stats': opp_stage_stats,
+            'ai_analysis': ai_analysis
+        }
+    except Exception as e:
+        current_app.logger.error(f"Analysis error: {str(e)}")
+        return {'success': False, 'error': str(e)}, 500
