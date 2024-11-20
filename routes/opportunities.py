@@ -281,28 +281,67 @@ def bulk_action():
 @login_required
 def analyze_opportunities_data():
     try:
+        # Validate user settings and API key
+        if not current_user.settings or not current_user.settings.claude_api_key:
+            current_app.logger.error(f"Missing Claude API key for user {current_user.id}")
+            return {
+                'success': False,
+                'error': 'API設定が見つかりません。設定画面でClaude APIキーを設定してください。'
+            }, 400
+
+        # Get opportunities data
         opportunities = Opportunity.query.filter_by(user_id=current_user.id).all()
-        stage_stats = db.session.query(
-            Opportunity.stage,
-            func.count(Opportunity.id).label('count'),
-            func.sum(Opportunity.amount).label('amount')
-        ).filter_by(user_id=current_user.id).group_by(Opportunity.stage).all()
+        if not opportunities:
+            return {
+                'success': True,
+                'stage_stats': [],
+                'ai_analysis': '分析対象の商談データがありません。'
+            }
 
-        opp_stage_stats = [
-            {'stage': stage, 'count': count, 'amount': amount}
-            for stage, count, amount in stage_stats
-        ]
+        # Get stage statistics
+        try:
+            stage_stats = db.session.query(
+                Opportunity.stage,
+                func.count(Opportunity.id).label('count'),
+                func.sum(Opportunity.amount).label('amount')
+            ).filter_by(user_id=current_user.id).group_by(Opportunity.stage).all()
 
-        ai_analysis = analyze_opportunities(opportunities)
+            opp_stage_stats = [
+                {'stage': stage, 'count': count, 'amount': float(amount) if amount else 0}
+                for stage, count, amount in stage_stats
+            ]
+        except Exception as db_error:
+            current_app.logger.error(f"Database error during analysis: {str(db_error)}")
+            return {
+                'success': False,
+                'error': 'データベースの集計中にエラーが発生しました。'
+            }, 500
+
+        # Perform AI analysis
+        try:
+            ai_analysis = analyze_opportunities(opportunities)
+            if not ai_analysis:
+                current_app.logger.warning(f"AI analysis returned empty result for user {current_user.id}")
+                ai_analysis = 'AI分析を実行できませんでした。再度お試しください。'
+        except Exception as ai_error:
+            current_app.logger.error(f"AI analysis error: {str(ai_error)}")
+            return {
+                'success': False,
+                'error': 'AI分析の実行中にエラーが発生しました。しばらく待ってから再度お試しください。'
+            }, 500
 
         return {
             'success': True,
             'stage_stats': opp_stage_stats,
             'ai_analysis': ai_analysis
         }
+
     except Exception as e:
-        current_app.logger.error(f"Analysis error: {str(e)}")
-        return {'success': False, 'error': str(e)}, 500
+        current_app.logger.error(f"Unexpected error in analyze_opportunities_data: {str(e)}")
+        return {
+            'success': False,
+            'error': '予期せぬエラーが発生しました。システム管理者に連絡してください。'
+        }, 500
 
 @bp.route('/export')
 @login_required

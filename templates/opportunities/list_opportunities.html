@@ -145,14 +145,15 @@
 
     <!-- AI Analysis Section -->
     <div class="ai-analysis-section">
-        <div class="analysis-header" onclick="toggleAnalysis()">
-            <h2>商談分析 <span class="toggle-icon">▼</span></h2>
-            <button type="button" class="btn btn-primary" onclick="runAnalysis()">
+        <div class="analysis-header">
+            <h2 onclick="toggleAnalysis()">商談分析 <span class="toggle-icon">▼</span></h2>
+            <button type="button" class="btn btn-primary btn-run-analysis" onclick="runAnalysis()">
                 <i class="fas fa-sync"></i> 分析を実行
             </button>
         </div>
         <div class="analysis-content" id="analysisContent">
-            <div id="analysisLoading" style="display: none;">
+            <div id="analysisError" class="analysis-error" style="display: none;"></div>
+            <div id="analysisLoading" class="analysis-loading" style="display: none;">
                 <i class="fas fa-spinner fa-spin"></i> 分析中...
             </div>
             <div class="analysis-grid">
@@ -255,19 +256,29 @@
     display: flex;
     justify-content: space-between;
     align-items: center;
-    cursor: pointer;
     padding-bottom: 10px;
     border-bottom: 1px solid #dee2e6;
 }
 
+.analysis-header h2 {
+    cursor: pointer;
+    margin: 0;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
 .analysis-content {
-    margin-top: 20px;
+    max-height: 0;
+    overflow: hidden;
+    transition: max-height 0.3s ease-out;
 }
 
 .analysis-grid {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
     gap: 20px;
+    margin-top: 20px;
 }
 
 .analysis-card {
@@ -282,69 +293,174 @@
     color: #333;
 }
 
-#analysisLoading {
+.analysis-loading {
     text-align: center;
     padding: 20px;
     font-size: 1.2em;
     color: #666;
 }
 
-.btn:hover {
+.analysis-error {
+    background-color: #fff3f3;
+    color: #dc3545;
+    padding: 12px;
+    border-radius: 4px;
+    margin-bottom: 15px;
+    border: 1px solid #ffcdd2;
+}
+
+.btn-run-analysis {
+    transition: all 0.3s ease;
+}
+
+.btn-run-analysis:disabled {
+    background-color: #6c757d;
+    border-color: #6c757d;
+    cursor: not-allowed;
+}
+
+.btn-run-analysis:hover:not(:disabled) {
     opacity: 0.9;
 }
+
+.toggle-icon {
+    transition: transform 0.3s ease;
+}
+</style>
 </style>
 
 <script>
 function toggleAnalysis() {
     const content = document.getElementById('analysisContent');
     const icon = document.querySelector('.toggle-icon');
-    if (content.style.display === 'none') {
-        content.style.display = 'block';
-        icon.textContent = '▼';
-    } else {
-        content.style.display = 'none';
+    if (content.style.maxHeight) {
+        content.style.maxHeight = null;
         icon.textContent = '▶';
+    } else {
+        content.style.maxHeight = content.scrollHeight + "px";
+        icon.textContent = '▼';
     }
 }
 
+function showError(message, isTemporary = true) {
+    const errorDiv = document.getElementById('analysisError');
+    errorDiv.textContent = message;
+    errorDiv.style.display = 'block';
+    
+    if (isTemporary) {
+        setTimeout(() => {
+            errorDiv.style.display = 'none';
+        }, 5000);
+    }
+}
+
+document.addEventListener('DOMContentLoaded', function() {
+    const analyzeButton = document.querySelector('.btn-run-analysis');
+    if (analyzeButton) {
+        analyzeButton.addEventListener('click', runAnalysis);
+    }
+});
+
 function runAnalysis() {
-    const loadingDiv = document.getElementById('analysisLoading');
-    const analysisGrid = document.querySelector('.analysis-grid');
+    // デバッグ用のログ追加
+    console.log('Analysis started');
     
-    loadingDiv.style.display = 'block';
-    analysisGrid.style.opacity = '0.5';
+    // 必要な要素の取得と存在確認
+    const elements = {
+        loadingDiv: document.getElementById('analysisLoading'),
+        analysisGrid: document.querySelector('.analysis-grid'),
+        errorDiv: document.getElementById('analysisError'),
+        runButton: document.querySelector('.btn-run-analysis'),
+        stageStats: document.querySelector('.analysis-card:first-child'),
+        aiAnalysis: document.querySelector('.analysis-card:last-child')
+    };
+
+    // 要素の存在確認とデバッグログ
+    for (const [key, element] of Object.entries(elements)) {
+        if (!element) {
+            console.error(`Missing element: ${key}`);
+        }
+    }
+
+    // 初期状態のリセット
+    if (elements.errorDiv) {
+        elements.errorDiv.style.display = 'none';
+    }
     
+    // ローディング状態の表示
+    const setLoadingState = (isLoading) => {
+        if (elements.loadingDiv) {
+            elements.loadingDiv.style.display = isLoading ? 'block' : 'none';
+        }
+        if (elements.analysisGrid) {
+            elements.analysisGrid.style.opacity = isLoading ? '0.5' : '1';
+        }
+        if (elements.runButton) {
+            elements.runButton.disabled = isLoading;
+            elements.runButton.innerHTML = isLoading ? 
+                '<i class="fas fa-spinner fa-spin"></i> 分析中...' : 
+                '<i class="fas fa-sync"></i> 分析を実行';
+        }
+    };
+
+    // エラー表示
+    const showError = (message) => {
+        if (elements.errorDiv) {
+            elements.errorDiv.style.display = 'block';
+            elements.errorDiv.textContent = message;
+        }
+        console.error('Analysis error:', message);
+    };
+
+    // 分析の実行
+    setLoadingState(true);
+
     fetch('/opportunities/analyze', {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json'
         }
     })
-    .then(response => response.json())
+    .then(response => {
+        if (!response.ok) {
+            throw new Error('サーバーエラーが発生しました');
+        }
+        return response.json();
+    })
     .then(data => {
+        console.log('Analysis data received:', data);
         if (data.success) {
-            // Update stage statistics
-            const stageStats = document.querySelector('.analysis-card:first-child');
-            let statsHtml = '<h3>ステージ分布</h3>';
-            data.stage_stats.forEach(stat => {
-                statsHtml += `<p>${stat.stage}: ${stat.count}件 (¥${new Intl.NumberFormat('ja-JP').format(stat.amount || 0)})</p>`;
-            });
-            stageStats.innerHTML = statsHtml;
-            
-            // Update AI analysis
-            const aiAnalysis = document.querySelector('.analysis-card:last-child');
-            aiAnalysis.innerHTML = `<h3>AI分析結果</h3>${data.ai_analysis || '<p>AI分析を実行できませんでした。</p>'}`;
+            // 統計情報の更新
+            if (elements.stageStats) {
+                let statsHtml = '<h3>ステージ分布</h3>';
+                if (!data.stage_stats || data.stage_stats.length === 0) {
+                    statsHtml += '<p>分析対象のデータがありません。</p>';
+                } else {
+                    data.stage_stats.forEach(stat => {
+                        const amount = new Intl.NumberFormat('ja-JP').format(stat.amount || 0);
+                        statsHtml += `<p>${stat.stage}: ${stat.count}件 (¥${amount})</p>`;
+                    });
+                }
+                elements.stageStats.innerHTML = statsHtml;
+            }
+
+            // AI分析結果の更新
+            if (elements.aiAnalysis) {
+                elements.aiAnalysis.innerHTML = `
+                    <h3>AI分析結果</h3>
+                    ${data.ai_analysis || '<p>AI分析を実行できませんでした。</p>'}
+                `;
+            }
         } else {
-            alert('分析中にエラーが発生しました: ' + (data.error || '不明なエラー'));
+            throw new Error(data.error || '分析中に不明なエラーが発生しました');
         }
     })
     .catch(error => {
         console.error('Analysis error:', error);
-        alert('分析の実行中にエラーが発生しました。');
+        showError('分析の実行中にエラーが発生しました。しばらく待ってから再度お試しください。');
     })
     .finally(() => {
-        loadingDiv.style.display = 'none';
-        analysisGrid.style.opacity = '1';
+        setLoadingState(false);
     });
 }
 </script>
