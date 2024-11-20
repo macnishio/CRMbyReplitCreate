@@ -26,6 +26,17 @@
                 </div>
             </div>
             <div class="filter-group">
+                <label for="lead_status">リードステータス:</label>
+                <select name="lead_status" id="lead_status">
+                    <option value="">全て</option>
+                    <option value="New" {% if filters.lead_status == 'New' %}selected{% endif %}>新規</option>
+                    <option value="Contacted" {% if filters.lead_status == 'Contacted' %}selected{% endif %}>連絡済み</option>
+                    <option value="Qualified" {% if filters.lead_status == 'Qualified' %}selected{% endif %}>適格</option>
+                    <option value="Unqualified" {% if filters.lead_status == 'Unqualified' %}selected{% endif %}>不適格</option>
+                    <option value="Converted" {% if filters.lead_status == 'Converted' %}selected{% endif %}>成約</option>
+                </select>
+            </div>
+            <div class="filter-group">
                 <label for="lead_search">リード検索:</label>
                 <input type="text" name="lead_search" id="lead_search" value="{{ filters.lead_search or '' }}" placeholder="リード名を入力">
             </div>

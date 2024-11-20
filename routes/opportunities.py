@@ -18,6 +18,7 @@ def list_opportunities():
     min_amount = request.args.get('min_amount', type=float)
     max_amount = request.args.get('max_amount', type=float)
     lead_search = request.args.get('lead_search')
+    lead_status = request.args.get('lead_status')
     date_from = request.args.get('date_from')
     date_to = request.args.get('date_to')
     sort_by = request.args.get('sort_by', 'close_date')
@@ -35,8 +36,12 @@ def list_opportunities():
         query = query.filter(Opportunity.amount >= min_amount)
     if max_amount is not None:
         query = query.filter(Opportunity.amount <= max_amount)
-    if lead_search:
-        query = query.join(Opportunity.lead).filter(Lead.name.ilike(f'%{lead_search}%'))
+    if lead_search or lead_status:
+        query = query.join(Opportunity.lead)
+        if lead_search:
+            query = query.filter(Lead.name.ilike(f'%{lead_search}%'))
+        if lead_status:
+            query = query.filter(Lead.status == lead_status)
     if date_from:
         query = query.filter(Opportunity.close_date >= datetime.strptime(date_from, '%Y-%m-%d'))
     if date_to:
@@ -75,7 +80,8 @@ def list_opportunities():
                              'date_from': date_from,
                              'date_to': date_to,
                              'sort_by': sort_by,
-                             'sort_order': sort_order
+                             'sort_order': sort_order,
+                              'lead_status': lead_status
                          })
 
 @bp.route('/add', methods=['GET', 'POST'])
