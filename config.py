@@ -48,12 +48,15 @@ class Config:
     # Content Security Policy
     CONTENT_SECURITY_POLICY = {
         'default-src': "'self'",
-        'script-src': "'self' 'unsafe-inline' https://js.stripe.com",
-        'style-src': "'self' 'unsafe-inline'",
-        'img-src': "'self' data:",
-        'font-src': "'self'",
-        'frame-src': "https://js.stripe.com",
-        'connect-src': "'self' https://api.stripe.com"
+        'script-src': "'self' 'unsafe-inline' 'unsafe-eval' https://js.stripe.com https://cdn.jsdelivr.net https://code.jquery.com https://cdnjs.cloudflare.com",
+        'style-src': "'self' 'unsafe-inline' https://cdn.jsdelivr.net https://fonts.googleapis.com https://cdnjs.cloudflare.com",
+        'font-src': "'self' https://fonts.gstatic.com https://cdnjs.cloudflare.com",
+        'img-src': "'self' data: https://*.stripe.com",
+        'frame-src': "https://js.stripe.com https://hooks.stripe.com",
+        'connect-src': "'self' https://api.stripe.com",
+        'form-action': "'self'",
+        'frame-ancestors': "'none'",
+        'object-src': "'none'"
     }
     
     # Redis configuration
@@ -66,7 +69,12 @@ class Config:
 
     @staticmethod
     def init_app(app):
-        pass
+        # Set Content Security Policy headers
+        @app.after_request
+        def add_security_headers(response):
+            csp = '; '.join(f"{key} {value}" for key, value in Config.CONTENT_SECURITY_POLICY.items())
+            response.headers['Content-Security-Policy'] = csp
+            return response
 
 class DevelopmentConfig(Config):
     DEBUG = True

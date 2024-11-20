@@ -7,9 +7,22 @@ from werkzeug.security import check_password_hash
 from urllib.parse import urlparse, urljoin
 from forms import RegistrationForm
 import stripe
+from stripe.error import (
+   StripeError,
+   CardError,
+   InvalidRequestError,
+   AuthenticationError,
+   APIConnectionError,
+   RateLimitError
+)
 from datetime import datetime, timedelta
+import logging
 
+# Blueprint設定
 bp = Blueprint('auth', __name__)
+
+# ログ設定
+logger = logging.getLogger(__name__)
 
 def is_safe_url(target):
     ref_url = urlparse(request.host_url)
@@ -54,11 +67,12 @@ def register():
 
     stripe_publishable_key = current_app.config.get('STRIPE_PUBLISHABLE_KEY')
     if not stripe_publishable_key:
+        current_app.logger.error('Stripe publishable key is missing')
         flash('決済システムの設定エラーが発生しました。管理者に連絡してください。', 'error')
         return redirect(url_for('auth.login'))
 
     form = RegistrationForm()
-    
+
     if form.validate_on_submit():
         try:
             # Check for existing user
@@ -67,7 +81,7 @@ def register():
                 return render_template('register.html', 
                     form=form,
                     stripe_publishable_key=stripe_publishable_key)
-            
+
             if User.query.filter_by(username=form.username.data).first():
                 flash('このユーザー名は既に使用されています。', 'error')
                 return render_template('register.html', 
@@ -78,37 +92,51 @@ def register():
             stripe.api_key = current_app.config.get('STRIPE_SECRET_KEY')
             if not stripe.api_key:
                 current_app.logger.error('Stripe secret key not found')
-                flash('決済システムの設定エラーが発生しました。管理者に連絡してください。', 'error')
+                flash('決済システムの設定エラーが発生しました。', 'error')
                 return redirect(url_for('auth.login'))
-            
-            # Create Stripe customer
+
+            # Validate and get payment method
+            payment_methods = request.form.getlist('stripe_payment_method')
+            valid_payment_method = next((pm for pm in reversed(payment_methods) if pm), None)
+
+            if not valid_payment_method:
+                current_app.logger.error("Payment method is missing")
+                flash('カード情報が正しく入力されていません。', 'error')
+                return render_template('register.html', 
+                    form=form,
+                    stripe_publishable_key=stripe_publishable_key)
+
             try:
+                # Create Stripe customer
                 customer = stripe.Customer.create(
                     email=form.email.data,
-                    payment_method=form.stripe_payment_method.data,
+                    payment_method=valid_payment_method,
                     invoice_settings={
-                        'default_payment_method': form.stripe_payment_method.data
+                        'default_payment_method': valid_payment_method
+                    },
+                    metadata={
+                        'username': form.username.data,
+                        'registration_date': datetime.utcnow().isoformat()
                     }
                 )
-            except stripe.error.StripeError as e:
+            except CardError as e:
+                current_app.logger.error(f"Stripe card error: {str(e)}")
+                flash(f'カード情報に問題があります: {e.user_message}', 'error')
+                return render_template('register.html', 
+                    form=form,
+                    stripe_publishable_key=stripe_publishable_key)
+            except StripeError as e:
                 current_app.logger.error(f"Stripe customer creation error: {str(e)}")
-                flash('顧客情報の作成中にエラーが発生しました。', 'error')
+                flash('決済システムでエラーが発生しました。', 'error')
                 return render_template('register.html', 
                     form=form,
                     stripe_publishable_key=stripe_publishable_key)
 
-            # Get selected plan
+            # Get and validate plan
             plan = SubscriptionPlan.query.get(form.plan_id.data)
-            if not plan:
-                current_app.logger.error(f'Selected plan {form.plan_id.data} not found')
-                flash('選択されたプランが見つかりません。', 'error')
-                return render_template('register.html', 
-                    form=form,
-                    stripe_publishable_key=stripe_publishable_key)
-
-            if not plan.stripe_price_id:
-                current_app.logger.error(f'Stripe price ID not found for plan {plan.id}')
-                flash('プランの設定エラーが発生しました。管理者に連絡してください。', 'error')
+            if not plan or not plan.stripe_price_id:
+                current_app.logger.error(f'Invalid plan or missing Stripe price ID: {form.plan_id.data}')
+                flash('選択されたプランが無効です。', 'error')
                 return render_template('register.html', 
                     form=form,
                     stripe_publishable_key=stripe_publishable_key)
@@ -122,82 +150,79 @@ def register():
                     payment_behavior='default_incomplete',
                     payment_settings={'save_default_payment_method': 'on_subscription'}
                 )
-            except stripe.error.StripeError as e:
-                current_app.logger.error(f"Stripe subscription creation error: {str(e)}")
-                flash('サブスクリプションの作成中にエラーが発生しました。', 'error')
+
+                if subscription.status == 'incomplete':
+                    # 支払いの確認が必要な場合
+                    payment_intent = subscription.latest_invoice.payment_intent
+
+                    try:
+                        # 支払いの確認を実行
+                        payment_intent = stripe.PaymentIntent.confirm(payment_intent.id)
+
+                        # 支払い状態を確認
+                        if payment_intent.status not in ['succeeded', 'requires_capture']:
+                            current_app.logger.error(f"Payment confirmation failed: {payment_intent.status}")
+                            flash('支払いの確認に失敗しました。もう一度お試しください。', 'error')
+                            return render_template('register.html', 
+                                form=form,
+                                stripe_publishable_key=stripe_publishable_key)
+
+                    except StripeError as e:
+                        current_app.logger.error(f"Payment confirmation error: {str(e)}")
+                        flash('支払いの確認中にエラーが発生しました。', 'error')
+                        return render_template('register.html', 
+                            form=form,
+                            stripe_publishable_key=stripe_publishable_key)
+
+            except StripeError as e:
+                current_app.logger.error(f"Subscription creation error: {str(e)}")
+                flash('サブスクリプション作成中にエラーが発生しました。', 'error')
                 return render_template('register.html', 
                     form=form,
                     stripe_publishable_key=stripe_publishable_key)
 
-            # Create user
-            user = User(
-                username=form.username.data,
-                email=form.email.data,
-                role='user'
-            )
-            user.set_password(form.password.data)
-            
-            db.session.add(user)
-            
+            # Create user and subscription records
             try:
-                db.session.flush()  # Get user.id without committing
+                user = User()
+                user.username = form.username.data
+                user.email = form.email.data
+                user.role = 'user'
+                user.set_password(form.password.data)
+
+                db.session.add(user)
+                db.session.flush()
+
+                user_subscription = Subscription(
+                    user_id=user.id,
+                    plan_id=plan.id,
+                    stripe_subscription_id=subscription.id,
+                    stripe_customer_id=customer.id,
+                    status=subscription.status,
+                    current_period_start=datetime.fromtimestamp(subscription.current_period_start),
+                    current_period_end=datetime.fromtimestamp(subscription.current_period_end)
+                )
+
+                db.session.add(user_subscription)
+                db.session.commit()
+
+                flash('登録が完了しました。ログインしてください。', 'success')
+                return redirect(url_for('auth.login'))
+
             except Exception as e:
-                current_app.logger.error(f"Database error creating user: {str(e)}")
                 db.session.rollback()
+                current_app.logger.error(f"Database error: {str(e)}")
                 flash('ユーザー情報の保存中にエラーが発生しました。', 'error')
                 return render_template('register.html', 
                     form=form,
                     stripe_publishable_key=stripe_publishable_key)
 
-            # Create local subscription record
-            user_subscription = Subscription(
-                user_id=user.id,
-                plan_id=plan.id,
-                stripe_subscription_id=subscription.id,
-                stripe_customer_id=customer.id,
-                status=subscription.status,
-                current_period_start=datetime.fromtimestamp(subscription.current_period_start),
-                current_period_end=datetime.fromtimestamp(subscription.current_period_end)
-            )
-            
-            db.session.add(user_subscription)
-
-            try:
-                db.session.commit()
-            except Exception as e:
-                current_app.logger.error(f"Database error saving subscription: {str(e)}")
-                db.session.rollback()
-                flash('サブスクリプション情報の保存中にエラーが発生しました。', 'error')
-                return render_template('register.html', 
-                    form=form,
-                    stripe_publishable_key=stripe_publishable_key)
-            
-            flash('登録が完了しました。ログインしてください。', 'success')
-            return redirect(url_for('auth.login'))
-            
-        except stripe.error.CardError as e:
-            db.session.rollback()
-            error_msg = e.error.message if hasattr(e, 'error') and hasattr(e.error, 'message') else str(e)
-            current_app.logger.error(f"Stripe card error: {error_msg}")
-            flash(f'カード処理中にエラーが発生しました: {error_msg}', 'error')
-            return render_template('register.html', 
-                form=form,
-                stripe_publishable_key=stripe_publishable_key)
-        except stripe.error.StripeError as e:
-            db.session.rollback()
-            current_app.logger.error(f"Stripe error during registration: {str(e)}")
-            flash('支払い処理中にエラーが発生しました。もう一度お試しください。', 'error')
-            return render_template('register.html', 
-                form=form,
-                stripe_publishable_key=stripe_publishable_key)
         except Exception as e:
-            db.session.rollback()
-            current_app.logger.error(f"Error during registration: {str(e)}")
+            current_app.logger.error(f"Registration error: {str(e)}")
             flash('登録処理中にエラーが発生しました。', 'error')
             return render_template('register.html', 
                 form=form,
                 stripe_publishable_key=stripe_publishable_key)
-    
+
     return render_template('register.html',
         form=form,
         stripe_publishable_key=stripe_publishable_key

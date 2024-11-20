@@ -11,68 +11,69 @@
             {% endfor %}
         {% endif %}
     {% endwith %}
-    
-    <form method="POST" action="{{ url_for('auth.register') }}" class="register-form" id="registration-form" novalidate>
+
+    <form method="POST" action="{{ url_for('auth.register') }}" class="register-form" id="registration-form">
         {{ form.hidden_tag() }}
         <div class="form-group">
             {{ form.username.label }}
-            {{ form.username(class="form-control", aria_required="true") }}
+            {{ form.username(class="form-control", placeholder="ユーザー名を入力してください") }}
             {% if form.username.errors %}
                 {% for error in form.username.errors %}
-                    <div class="error-message" role="alert">{{ error }}</div>
+                    <div class="error-message">{{ error }}</div>
                 {% endfor %}
             {% endif %}
         </div>
         <div class="form-group">
             {{ form.email.label }}
-            {{ form.email(class="form-control", aria_required="true") }}
+            {{ form.email(class="form-control", placeholder="メールアドレスを入力してください") }}
             {% if form.email.errors %}
                 {% for error in form.email.errors %}
-                    <div class="error-message" role="alert">{{ error }}</div>
+                    <div class="error-message">{{ error }}</div>
                 {% endfor %}
             {% endif %}
         </div>
         <div class="form-group">
             {{ form.password.label }}
-            {{ form.password(class="form-control", aria_required="true") }}
+            {{ form.password(class="form-control", placeholder="パスワードを入力してください") }}
             {% if form.password.errors %}
                 {% for error in form.password.errors %}
-                    <div class="error-message" role="alert">{{ error }}</div>
+                    <div class="error-message">{{ error }}</div>
                 {% endfor %}
             {% endif %}
         </div>
         <div class="form-group">
             {{ form.confirm_password.label }}
-            {{ form.confirm_password(class="form-control", aria_required="true") }}
+            {{ form.confirm_password(class="form-control", placeholder="パスワードを再入力してください") }}
             {% if form.confirm_password.errors %}
                 {% for error in form.confirm_password.errors %}
-                    <div class="error-message" role="alert">{{ error }}</div>
+                    <div class="error-message">{{ error }}</div>
                 {% endfor %}
             {% endif %}
         </div>
-        <div class="form-group">
-            {{ form.plan_id.label }}
-            {{ form.plan_id(class="form-control", aria_required="true") }}
-            {% if form.plan_id.errors %}
-                {% for error in form.plan_id.errors %}
-                    <div class="error-message" role="alert">{{ error }}</div>
-                {% endfor %}
-            {% endif %}
+        <div class="subscription-section">
+            <h3>サブスクリプションプラン</h3>
+            <div class="form-group">
+                {{ form.plan_id.label }}
+                {{ form.plan_id(class="form-control") }}
+                {% if form.plan_id.errors %}
+                    {% for error in form.plan_id.errors %}
+                        <div class="error-message">{{ error }}</div>
+                    {% endfor %}
+                {% endif %}
+            </div>
         </div>
 
-        <div class="payment-section" role="region" aria-label="お支払い情報">
-            <h3 id="payment-heading">お支払い情報</h3>
+        <div class="payment-section">
+            <h3>お支払い情報</h3>
             <div class="form-group">
                 <label for="card-element">クレジットカード情報</label>
-                <div id="card-element" class="form-control" role="group" aria-label="クレジットカード情報"></div>
-                <div id="card-errors" class="error-message" role="alert" aria-live="polite"></div>
+                <div id="card-element" class="form-control"></div>
+                <div id="card-errors" class="error-message" role="alert"></div>
             </div>
-            {{ form.stripe_payment_method(id="stripe-payment-method") }}
+            <input type="hidden" id="stripe_payment_method_field" name="stripe_payment_method" value="">
         </div>
-
-        {{ form.submit(class="btn btn-primary", id="submit-button") }}
+        <button type="submit" class="btn btn-primary" id="submit-button">登録</button>
     </form>
-
     <div class="login-link">
         <p>アカウントをお持ちの方は<a href="{{ url_for('auth.login') }}">こちら</a>からログインしてください。</p>
     </div>
@@ -80,234 +81,215 @@
 
 <script src="https://js.stripe.com/v3/"></script>
 <script>
-// Initialize Stripe with publishable key
-const stripe = Stripe('{{ stripe_publishable_key }}');
-const elements = stripe.elements();
+    // Stripeの初期化
+    const stripe = Stripe('{{ stripe_publishable_key }}');
+    const elements = stripe.elements();
+    let card;  // グローバルスコープで定義
 
-// Create card element with improved styles and accessibility
-const card = elements.create('card', {
-    style: {
-        base: {
-            fontSize: '16px',
-            color: '#32325d',
-            fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif'
-        }
-    }
-});
+    document.addEventListener('DOMContentLoaded', () => {
+        debugLog('Initializing form...');
 
-// Mount the card element
-card.mount('#card-element');
-
-// Handle form and elements
-const form = document.getElementById('registration-form');
-const submitButton = document.getElementById('submit-button');
-const cardElement = document.getElementById('card-element');
-
-// Add focus management
-card.on('focus', function() {
-    cardElement.classList.add('focused');
-});
-
-card.on('blur', function() {
-    cardElement.classList.remove('focused');
-});
-
-// Show error message with proper error handling
-function showError(message) {
-    const errorElement = document.getElementById('card-errors');
-    if (errorElement) {
-        errorElement.textContent = message || '';
-        errorElement.classList.add('visible');
-    }
-}
-
-// Clear error message
-function clearError() {
-    const errorElement = document.getElementById('card-errors');
-    if (errorElement) {
-        errorElement.textContent = '';
-        errorElement.classList.remove('visible');
-    }
-}
-
-// Handle real-time validation errors
-card.addEventListener('change', ({error}) => {
-    if (error) {
-        showError(error.message);
-    } else {
-        clearError();
-    }
-});
-
-// Handle form submission with improved error handling
-form.addEventListener('submit', async (event) => {
-    event.preventDefault();
-    submitButton.disabled = true;
-    submitButton.textContent = '処理中...';
-    
-    try {
-        const {paymentMethod, error} = await stripe.createPaymentMethod({
-            type: 'card',
-            card: card
+        card = elements.create('card', {
+            style: {
+                base: {
+                    fontSize: '16px',
+                    color: '#32325d',
+                    fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif',
+                    '::placeholder': {
+                        color: '#aab7c4'
+                    }
+                },
+                invalid: {
+                    color: '#dc3545',
+                    iconColor: '#dc3545'
+                }
+            }
         });
 
-        if (error) {
-            throw error;
-        }
+        card.mount('#card-element');
+        debugLog('Card element mounted');
 
-        // Set payment method ID
-        document.getElementById('stripe-payment-method').value = paymentMethod.id;
-        
-        // Submit form using native submit button
-        const submitBtn = form.querySelector('input[type="submit"]');
-        if (submitBtn) {
-            submitBtn.click();
+        // カード要素の状態変更監視
+        card.on('change', (event) => {
+            const displayError = document.getElementById('card-errors');
+            if (event.error) {
+                displayError.textContent = event.error.message;
+                debugLog('Card error:', event.error.message);
+            } else {
+                displayError.textContent = '';
+            }
+        });
+
+        // フォームのイベントリスナー設定
+        const form = document.getElementById('registration-form');
+        if (form) {
+            form.addEventListener('submit', handleFormSubmission);
+            debugLog('Form submit handler attached');
+        } else {
+            debugLog('ERROR: Registration form not found');
         }
-        
-    } catch (error) {
-        console.error('Error:', error);
-        showError(error.message || '支払い処理中にエラーが発生しました。');
-        submitButton.disabled = false;
-        submitButton.textContent = '登録';
+    });
+
+    async function handleFormSubmission(event) {
+        event.preventDefault();
+        debugLog('Form submission started');
+
+        const form = event.target;
+        const submitButton = document.getElementById('submit-button');
+        const paymentMethodField = document.getElementById('stripe_payment_method_field');
+        const emailField = document.getElementById('email');
+
+        try {
+            submitButton.disabled = true;
+            submitButton.textContent = '処理中...';
+
+            // メールアドレスの確認
+            const email = emailField.value.trim();
+            if (!email) {
+                throw new Error('メールアドレスを入力してください');
+            }
+
+            debugLog('Creating payment method...');
+            const {paymentMethod, error} = await stripe.createPaymentMethod({
+                type: 'card',
+                card: card,
+                billing_details: {
+                    email: email
+                }
+            });
+
+            if (error) {
+                debugLog('Payment method error:', error);
+                throw new Error(error.message || 'カード情報の処理中にエラーが発生しました');
+            }
+
+            if (!paymentMethod || !paymentMethod.id) {
+                throw new Error('カード情報の処理に失敗しました');
+            }
+
+            debugLog('Payment method created:', paymentMethod.id);
+
+            // hidden fieldの値を設定する前にフィールドの存在を確認
+            if (!paymentMethodField) {
+                throw new Error('支払い方法フィールドが見つかりません');
+            }
+
+            // 値を設定
+            paymentMethodField.value = paymentMethod.id;
+            debugLog('Set payment method field value:', paymentMethodField.value);
+
+            // フォームデータを確認
+            debugLog('Form data before submission:', {
+                email: emailField.value,
+                payment_method: paymentMethodField.value,
+                username: document.getElementById('username').value,
+                plan_id: document.getElementById('plan_id').value
+            });
+
+            // フォームをサブミット
+            form.submit();
+
+        } catch (error) {
+            debugLog('Error in form submission:', error);
+            showError(error.message);
+            submitButton.disabled = false;
+            submitButton.textContent = '登録';
+        }
     }
-});
+
+    // エラー表示用関数
+    function showError(message) {
+        const errorElement = document.getElementById('card-errors');
+        if (errorElement) {
+            errorElement.textContent = message;
+            debugLog('Displaying error:', message);
+        } else {
+            debugLog('ERROR: Card errors element not found');
+            console.error('Error:', message);
+        }
+    }
+
+    // デバッグログ用関数
+    function debugLog(...args) {
+        console.log('[Debug]', ...args);
+    }
 </script>
 
 <style>
+/* レイアウト */
 .register-container {
-    max-width: 500px;
-    margin: 2rem auto;
-    padding: 2rem;
-    background: #fff;
-    border-radius: 8px;
-    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 100vh;
+  background: #f5f5f5;
 }
 
 .register-form {
-    margin-top: 1rem;
+  background: #fff;
+  padding: 3rem;
+  border-radius: 10px;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+  width: 100%;
+  max-width: 500px;
 }
 
+/* フォームデザイン */
 .form-group {
-    margin-bottom: 1.5rem;
+  margin-bottom: 1rem;
 }
 
-.form-group label {
-    display: block;
-    margin-bottom: 0.5rem;
-    font-weight: bold;
-    color: #333;
+label {
+  display: block;
+  margin-bottom: 0.5rem;
+  font-weight: bold;
 }
 
-.form-control {
-    width: 100%;
-    padding: 0.75rem;
-    border: 1px solid #ddd;
-    border-radius: 4px;
-    font-size: 1rem;
+input[type="text"],
+input[type="email"],
+input[type="password"] {
+  width: 100%;
+  padding: 1rem;
+  border: 1px solid #ddd;
+  border-radius: 5px;
+  font-size: 1rem;
 }
 
-.form-control:focus {
-    border-color: #007bff;
-    outline: 0;
-    box-shadow: 0 0 0 0.2rem rgba(0,123,255,0.25);
-}
-
-.payment-section {
-    margin-top: 2rem;
-    padding-top: 1rem;
-    border-top: 1px solid #eee;
-}
-
-.payment-section h3 {
-    margin-bottom: 1rem;
-    color: #333;
-    font-size: 1.2rem;
-}
-
-.stripe-element {
-    padding: 0.75rem;
-    border: 1px solid #ddd;
-    border-radius: 4px;
-    background: white;
-}
-
-.stripe-element.focused {
-    border-color: #007bff;
-    box-shadow: 0 0 0 0.2rem rgba(0,123,255,0.25);
-}
-
-.stripe-element-invalid {
-    border-color: #dc3545;
-    box-shadow: 0 0 0 0.2rem rgba(220,53,69,0.25);
-}
-
-.btn-primary {
-    width: 100%;
-    padding: 0.75rem;
-    background: #007bff;
-    color: white;
-    border: none;
-    border-radius: 4px;
-    cursor: pointer;
-    font-size: 1rem;
-    margin-top: 1.5rem;
-    transition: background-color 0.15s ease-in-out;
-}
-
-.btn-primary:hover:not(:disabled) {
-    background: #0056b3;
-}
-
-.btn-primary:disabled {
-    background: #ccc;
-    cursor: not-allowed;
-}
-
-.login-link {
-    margin-top: 1.5rem;
-    text-align: center;
-}
-
-.alert {
-    padding: 1rem;
-    margin-bottom: 1rem;
-    border-radius: 4px;
-}
-
-.alert-error {
-    background-color: #f8d7da;
-    color: #721c24;
-    border: 1px solid #f5c6cb;
-}
-
-.alert-success {
-    background-color: #d4edda;
-    color: #155724;
-    border: 1px solid #c3e6cb;
+input[type="text"]:focus,
+input[type="email"]:focus,
+input[type="password"]:focus {
+  outline: none;
+  border-color: #007bff;
+  box-shadow: 0 0 5px rgba(0, 123, 255, 0.2);
 }
 
 .error-message {
-    color: #dc3545;
-    font-size: 0.875rem;
-    margin-top: 0.25rem;
-    display: none;
+  color: #dc3545;
+  font-size: 0.8rem;
+  margin-top: 0.25rem;
 }
 
-.error-message.visible {
-    display: block;
+/* ボタン */
+.btn-primary {
+  background-color: #007bff;
+  color: #fff;
+  padding: 1rem 2rem;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
 }
 
-/* Focus styles for better accessibility */
-:focus {
-    outline: 2px solid #007bff;
-    outline-offset: 2px;
+.btn-primary:hover {
+  background-color: #0062cc;
 }
 
-/* Modern forced-colors mode for high contrast */
-@media (forced-colors: active) {
-    :focus {
-        outline: 2px solid currentColor;
-    }
+/* レスポンシブデザイン */
+@media (max-width: 500px) {
+  .register-form {
+    padding: 2rem;
+  }
 }
 </style>
 {% endblock %}
