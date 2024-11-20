@@ -1,4 +1,5 @@
 from flask import Blueprint, render_template, redirect, url_for, flash, request, current_app
+from flask_login import current_user
 from flask_login import login_required, current_user
 from models import Opportunity, Lead
 from extensions import db
@@ -13,16 +14,41 @@ bp = Blueprint('opportunities', __name__)
 @bp.route('')
 @login_required
 def list_opportunities():
+    settings = current_user.settings
+
+    # Check if we should save the current filters
+    if request.args.get('save_filters'):
+        current_filters = {
+            'stage': request.args.get('stage'),
+            'min_amount': request.args.get('min_amount'),
+            'max_amount': request.args.get('max_amount'),
+            'lead_search': request.args.get('lead_search'),
+            'lead_status': request.args.get('lead_status'),
+            'date_from': request.args.get('date_from'),
+            'date_to': request.args.get('date_to'),
+            'sort_by': request.args.get('sort_by', 'close_date'),
+            'sort_order': request.args.get('sort_order', 'asc')
+        }
+        if settings:
+            settings.opportunity_filters = current_filters
+            db.session.commit()
+            flash('フィルター設定が保存されました。', 'success')
+        return redirect(url_for('opportunities.list_opportunities'))
+
+    # Load saved filters if no parameters are provided
+    saved_filters = settings.opportunity_filters if settings else {}
+    use_saved = not any(request.args.values())
+
     # Get filter parameters
-    stage_filter = request.args.get('stage')
-    min_amount = request.args.get('min_amount', type=float)
-    max_amount = request.args.get('max_amount', type=float)
-    lead_search = request.args.get('lead_search')
-    lead_status = request.args.get('lead_status')
-    date_from = request.args.get('date_from')
-    date_to = request.args.get('date_to')
-    sort_by = request.args.get('sort_by', 'close_date')
-    sort_order = request.args.get('sort_order', 'asc')
+    stage_filter = request.args.get('stage') or (saved_filters.get('stage') if use_saved else None)
+    min_amount = request.args.get('min_amount', type=float) or (float(saved_filters.get('min_amount')) if use_saved and saved_filters.get('min_amount') else None)
+    max_amount = request.args.get('max_amount', type=float) or (float(saved_filters.get('max_amount')) if use_saved and saved_filters.get('max_amount') else None)
+    lead_search = request.args.get('lead_search') or (saved_filters.get('lead_search') if use_saved else None)
+    lead_status = request.args.get('lead_status') or (saved_filters.get('lead_status') if use_saved else None)
+    date_from = request.args.get('date_from') or (saved_filters.get('date_from') if use_saved else None)
+    date_to = request.args.get('date_to') or (saved_filters.get('date_to') if use_saved else None)
+    sort_by = request.args.get('sort_by') or (saved_filters.get('sort_by') if use_saved else 'close_date')
+    sort_order = request.args.get('sort_order') or (saved_filters.get('sort_order') if use_saved else 'asc')
 
     # Get page number from request
     page = request.args.get('page', 1, type=int)

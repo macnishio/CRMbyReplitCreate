@@ -1,6 +1,7 @@
 from flask_login import UserMixin
 from werkzeug.security import generate_password_hash, check_password_hash
 from extensions import db
+import json
 from datetime import datetime
 import base64
 from cryptography.fernet import Fernet
@@ -79,6 +80,27 @@ class UserSettings(db.Model):
     _clearbit_api_key: Mapped[Optional[str]] = mapped_column('clearbit_api_key', String(255), nullable=True)
     created_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow)
     updated_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+    filter_preferences: Mapped[Optional[str]] = mapped_column('filter_preferences', Text, nullable=True)
+
+    @property
+    def opportunity_filters(self):
+        if not self.filter_preferences:
+            return {}
+        try:
+            all_filters = json.loads(self.filter_preferences)
+            return all_filters.get('opportunities', {})
+        except json.JSONDecodeError:
+            return {}
+
+    @opportunity_filters.setter
+    def opportunity_filters(self, value):
+        try:
+            current_filters = json.loads(self.filter_preferences) if self.filter_preferences else {}
+        except json.JSONDecodeError:
+            current_filters = {}
+        
+        current_filters['opportunities'] = value
+        self.filter_preferences = json.dumps(current_filters)
 
     def _get_encryption_key(self):
         key = current_app.config['SECRET_KEY']
