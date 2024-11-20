@@ -1,0 +1,318 @@
+024-11-20 14:41:01,345 ERROR: Session rolled back due to error: (psycopg2.errors.UndefinedColumn) column user_settings.filter_preferences does not exist
+LINE 1: ..._settings.updated_at AS user_settings_updated_at, user_setti...
+                                                             ^
+
+[SQL: SELECT user_settings.id AS user_settings_id, user_settings.user_id AS user_settings_user_id, user_settings.mail_server AS user_settings_mail_server, user_settings.mail_port AS user_settings_mail_port, user_settings.mail_use_tls AS user_settings_mail_use_tls, user_settings.mail_username AS user_settings_mail_username, user_settings.mail_password AS user_settings_mail_password, user_settings.claude_api_key AS user_settings_claude_api_key, user_settings.clearbit_api_key AS user_settings_clearbit_api_key, user_settings.created_at AS user_settings_created_at, user_settings.updated_at AS user_settings_updated_at, user_settings.filter_preferences AS user_settings_filter_preferences 
+FROM user_settings]
+(Background on this error at: https://sqlalche.me/e/20/f405) [in /home/runner/CRM/email_receiver.py:673]
+Traceback (most recent call last):
+  File "/home/runner/CRM/.pythonlibs/lib/python3.11/site-packages/sqlalchemy/engine/base.py", line 1967, in _exec_single_context
+    self.dialect.do_execute(
+  File "/home/runner/CRM/.pythonlibs/lib/python3.11/site-packages/sqlalchemy/engine/default.py", line 941, in do_execute
+    cursor.execute(statement, parameters)
+psycopg2.errors.UndefinedColumn: column user_settings.filter_preferences does not exist
+LINE 1: ..._settings.updated_at AS user_settings_updated_at, user_setti...
+                                                             ^
+
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "/home/runner/CRM/email_receiver.py", line 661, in session_scope
+    yield session
+  File "/home/runner/CRM/email_receiver.py", line 1684, in check_emails_task
+    settings_list = session.query(UserSettings).all()
+                    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/runner/CRM/.pythonlibs/lib/python3.11/site-packages/sqlalchemy/orm/query.py", line 2673, in all
+    return self._iter().all()  # type: ignore
+           ^^^^^^^^^^^^
+  File "/home/runner/CRM/.pythonlibs/lib/python3.11/site-packages/sqlalchemy/orm/query.py", line 2827, in _iter
+    result: Union[ScalarResult[_T], Result[_T]] = self.session.execute(
+                                                  ^^^^^^^^^^^^^^^^^^^^^
+  File "/home/runner/CRM/.pythonlibs/lib/python3.11/site-packages/sqlalchemy/orm/session.py", line 2362, in execute
+    return self._execute_internal(
+           ^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/runner/CRM/.pythonlibs/lib/python3.11/site-packages/sqlalchemy/orm/session.py", line 2247, in _execute_internal
+    result: Result[Any] = compile_state_cls.orm_execute_statement(
+                          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/runner/CRM/.pythonlibs/lib/python3.11/site-packages/sqlalchemy/orm/context.py", line 305, in orm_execute_statement
+    result = conn.execute(
+             ^^^^^^^^^^^^^
+  File "/home/runner/CRM/.pythonlibs/lib/python3.11/site-packages/sqlalchemy/engine/base.py", line 1418, in execute
+    return meth(
+           ^^^^^
+  File "/home/runner/CRM/.pythonlibs/lib/python3.11/site-packages/sqlalchemy/sql/elements.py", line 515, in _execute_on_connection
+    return connection._execute_clauseelement(
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/runner/CRM/.pythonlibs/lib/python3.11/site-packages/sqlalchemy/engine/base.py", line 1640, in _execute_clauseelement
+    ret = self._execute_context(
+          ^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/runner/CRM/.pythonlibs/lib/python3.11/site-packages/sqlalchemy/engine/base.py", line 1846, in _execute_context
+    return self._exec_single_context(
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/runner/CRM/.pythonlibs/lib/python3.11/site-packages/sqlalchemy/engine/base.py", line 1986, in _exec_single_context
+    self._handle_dbapi_exception(
+  File "/home/runner/CRM/.pythonlibs/lib/python3.11/site-packages/sqlalchemy/engine/base.py", line 2355, in _handle_dbapi_exception
+    raise sqlalchemy_exception.with_traceback(exc_info[2]) from e
+  File "/home/runner/CRM/.pythonlibs/lib/python3.11/site-packages/sqlalchemy/engine/base.py", line 1967, in _exec_single_context
+    self.dialect.do_execute(
+  File "/home/runner/CRM/.pythonlibs/lib/python3.11/site-packages/sqlalchemy/engine/default.py", line 941, in do_execute
+    cursor.execute(statement, parameters)
+sqlalchemy.exc.ProgrammingError: (psycopg2.errors.UndefinedColumn) column user_settings.filter_preferences does not exist
+LINE 1: ..._settings.updated_at AS user_settings_updated_at, user_setti...
+                                                             ^
+
+[SQL: SELECT user_settings.id AS user_settings_id, user_settings.user_id AS user_settings_user_id, user_settings.mail_server AS user_settings_mail_server, user_settings.mail_port AS user_settings_mail_port, user_settings.mail_use_tls AS user_settings_mail_use_tls, user_settings.mail_username AS user_settings_mail_username, user_settings.mail_password AS user_settings_mail_password, user_settings.claude_api_key AS user_settings_claude_api_key, user_settings.clearbit_api_key AS user_settings_clearbit_api_key, user_settings.created_at AS user_settings_created_at, user_settings.updated_at AS user_settings_updated_at, user_settings.filter_preferences AS user_settings_filter_preferences 
+FROM user_settings]
+(Background on this error at: https://sqlalche.me/e/20/f405)
+2024-11-20 14:41:01,350 DEBUG: Session closed. Total duration: 0.99s [in /home/runner/CRM/email_receiver.py:683]
+2024-11-20 14:41:01,350 ERROR: Critical error in check_emails_task: (psycopg2.errors.UndefinedColumn) column user_settings.filter_preferences does not exist
+LINE 1: ..._settings.updated_at AS user_settings_updated_at, user_setti...
+                                                             ^
+
+[SQL: SELECT user_settings.id AS user_settings_id, user_settings.user_id AS user_settings_user_id, user_settings.mail_server AS user_settings_mail_server, user_settings.mail_port AS user_settings_mail_port, user_settings.mail_use_tls AS user_settings_mail_use_tls, user_settings.mail_username AS user_settings_mail_username, user_settings.mail_password AS user_settings_mail_password, user_settings.claude_api_key AS user_settings_claude_api_key, user_settings.clearbit_api_key AS user_settings_clearbit_api_key, user_settings.created_at AS user_settings_created_at, user_settings.updated_at AS user_settings_updated_at, user_settings.filter_preferences AS user_settings_filter_preferences 
+FROM user_settings]
+(Background on this error at: https://sqlalche.me/e/20/f405) [in /home/runner/CRM/email_receiver.py:1721]
+Traceback (most recent call last):
+  File "/home/runner/CRM/.pythonlibs/lib/python3.11/site-packages/sqlalchemy/engine/base.py", line 1967, in _exec_single_context
+    self.dialect.do_execute(
+  File "/home/runner/CRM/.pythonlibs/lib/python3.11/site-packages/sqlalchemy/engine/default.py", line 941, in do_execute
+    cursor.execute(statement, parameters)
+psycopg2.errors.UndefinedColumn: column user_settings.filter_preferences does not exist
+LINE 1: ..._settings.updated_at AS user_settings_updated_at, user_setti...
+                                                             ^
+
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "/home/runner/CRM/email_receiver.py", line 1684, in check_emails_task
+    settings_list = session.query(UserSettings).all()
+                    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/runner/CRM/.pythonlibs/lib/python3.11/site-packages/sqlalchemy/orm/query.py", line 2673, in all
+    return self._iter().all()  # type: ignore
+           ^^^^^^^^^^^^
+  File "/home/runner/CRM/.pythonlibs/lib/python3.11/site-packages/sqlalchemy/orm/query.py", line 2827, in _iter
+    result: Union[ScalarResult[_T], Result[_T]] = self.session.execute(
+                                                  ^^^^^^^^^^^^^^^^^^^^^
+  File "/home/runner/CRM/.pythonlibs/lib/python3.11/site-packages/sqlalchemy/orm/session.py", line 2362, in execute
+    return self._execute_internal(
+           ^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/runner/CRM/.pythonlibs/lib/python3.11/site-packages/sqlalchemy/orm/session.py", line 2247, in _execute_internal
+    result: Result[Any] = compile_state_cls.orm_execute_statement(
+                          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/runner/CRM/.pythonlibs/lib/python3.11/site-packages/sqlalchemy/orm/context.py", line 305, in orm_execute_statement
+    result = conn.execute(
+             ^^^^^^^^^^^^^
+  File "/home/runner/CRM/.pythonlibs/lib/python3.11/site-packages/sqlalchemy/engine/base.py", line 1418, in execute
+    return meth(
+           ^^^^^
+  File "/home/runner/CRM/.pythonlibs/lib/python3.11/site-packages/sqlalchemy/sql/elements.py", line 515, in _execute_on_connection
+    return connection._execute_clauseelement(
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/runner/CRM/.pythonlibs/lib/python3.11/site-packages/sqlalchemy/engine/base.py", line 1640, in _execute_clauseelement
+    ret = self._execute_context(
+          ^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/runner/CRM/.pythonlibs/lib/python3.11/site-packages/sqlalchemy/engine/base.py", line 1846, in _execute_context
+    return self._exec_single_context(
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/runner/CRM/.pythonlibs/lib/python3.11/site-packages/sqlalchemy/engine/base.py", line 1986, in _exec_single_context
+    self._handle_dbapi_exception(
+  File "/home/runner/CRM/.pythonlibs/lib/python3.11/site-packages/sqlalchemy/engine/base.py", line 2355, in _handle_dbapi_exception
+    raise sqlalchemy_exception.with_traceback(exc_info[2]) from e
+  File "/home/runner/CRM/.pythonlibs/lib/python3.11/site-packages/sqlalchemy/engine/base.py", line 1967, in _exec_single_context
+    self.dialect.do_execute(
+  File "/home/runner/CRM/.pythonlibs/lib/python3.11/site-packages/sqlalchemy/engine/default.py", line 941, in do_execute
+    cursor.execute(statement, parameters)
+sqlalchemy.exc.ProgrammingError: (psycopg2.errors.UndefinedColumn) column user_settings.filter_preferences does not exist
+LINE 1: ..._settings.updated_at AS user_settings_updated_at, user_setti...
+                                                             ^
+
+[SQL: SELECT user_settings.id AS user_settings_id, user_settings.user_id AS user_settings_user_id, user_settings.mail_server AS user_settings_mail_server, user_settings.mail_port AS user_settings_mail_port, user_settings.mail_use_tls AS user_settings_mail_use_tls, user_settings.mail_username AS user_settings_mail_username, user_settings.mail_password AS user_settings_mail_password, user_settings.claude_api_key AS user_settings_claude_api_key, user_settings.clearbit_api_key AS user_settings_clearbit_api_key, user_settings.created_at AS user_settings_created_at, user_settings.updated_at AS user_settings_updated_at, user_settings.filter_preferences AS user_settings_filter_preferences 
+FROM user_settings]
+(Background on this error at: https://sqlalche.me/e/20/f405)
+2024-11-20 14:41:01,351 ERROR: Critical error in check_emails_task: (psycopg2.errors.UndefinedColumn) column user_settings.filter_preferences does not exist
+LINE 1: ..._settings.updated_at AS user_settings_updated_at, user_setti...
+                                                             ^
+
+[SQL: SELECT user_settings.id AS user_settings_id, user_settings.user_id AS user_settings_user_id, user_settings.mail_server AS user_settings_mail_server, user_settings.mail_port AS user_settings_mail_port, user_settings.mail_use_tls AS user_settings_mail_use_tls, user_settings.mail_username AS user_settings_mail_username, user_settings.mail_password AS user_settings_mail_password, user_settings.claude_api_key AS user_settings_claude_api_key, user_settings.clearbit_api_key AS user_settings_clearbit_api_key, user_settings.created_at AS user_settings_created_at, user_settings.updated_at AS user_settings_updated_at, user_settings.filter_preferences AS user_settings_filter_preferences 
+FROM user_settings]
+(Background on this error at: https://sqlalche.me/e/20/f405) [in /home/runner/CRM/email_receiver.py:1737]
+2024-11-20 14:41:05,125 INFO: Database connection successful [in /home/runner/CRM/db_utils.py:75]
+2024-11-20 14:41:07,484 INFO: Database tables already exist [in /home/runner/CRM/db_utils.py:87]
+2024-11-20 14:41:08,469 DEBUG: No explicit setting existed. Use localtime [in /home/runner/CRM/.pythonlibs/lib/python3.11/site-packages/tzlocal/unix.py:183]
+2024-11-20 14:41:08,469 INFO: Adding job tentatively -- it will be properly scheduled when the scheduler starts [in /home/runner/CRM/.pythonlibs/lib/python3.11/site-packages/apscheduler/schedulers/base.py:454]
+2024-11-20 14:41:08,469 INFO: Adding job tentatively -- it will be properly scheduled when the scheduler starts [in /home/runner/CRM/.pythonlibs/lib/python3.11/site-packages/apscheduler/schedulers/base.py:454]
+2024-11-20 14:41:08,470 INFO: Added job "setup_email_scheduler.<locals>.email_check_wrapper" to job store "default" [in /home/runner/CRM/.pythonlibs/lib/python3.11/site-packages/apscheduler/schedulers/base.py:895]
+2024-11-20 14:41:08,470 INFO: Added job "setup_email_scheduler.<locals>.schedule_monitor" to job store "default" [in /home/runner/CRM/.pythonlibs/lib/python3.11/site-packages/apscheduler/schedulers/base.py:895]
+2024-11-20 14:41:08,470 INFO: Scheduler started [in /home/runner/CRM/.pythonlibs/lib/python3.11/site-packages/apscheduler/schedulers/base.py:181]
+2024-11-20 14:41:08,470 DEBUG: Looking for jobs to run [in /home/runner/CRM/.pythonlibs/lib/python3.11/site-packages/apscheduler/schedulers/base.py:954]
+2024-11-20 14:41:08,470 DEBUG: Next wakeup is due at 2024-11-20 14:46:08.469720+00:00 (in 299.998829 seconds) [in /home/runner/CRM/.pythonlibs/lib/python3.11/site-packages/apscheduler/schedulers/base.py:1034]
+2024-11-20 14:41:08,470 INFO: Email scheduler started successfully [in /home/runner/CRM/email_receiver.py:1657]
+2024-11-20 14:41:08,471 INFO: Running initial email check on startup [in /home/runner/CRM/email_receiver.py:1600]
+2024-11-20 14:41:08,514 WARNING:  * Debugger is active! [in /home/runner/CRM/.pythonlibs/lib/python3.11/site-packages/werkzeug/_internal.py:224]
+2024-11-20 14:41:08,515 INFO:  * Debugger PIN: 793-516-395 [in /home/runner/CRM/.pythonlibs/lib/python3.11/site-packages/werkzeug/_internal.py:224]
+2024-11-20 14:41:08,644 INFO: 172.31.196.26 - - [20/Nov/2024 14:41:08] "GET / HTTP/1.1" 302 - [in /home/runner/CRM/.pythonlibs/lib/python3.11/site-packages/werkzeug/_internal.py:224]
+2024-11-20 14:41:08,683 INFO: 172.31.196.26 - - [20/Nov/2024 14:41:08] "GET /auth/login?next=%2F HTTP/1.1" 200 - [in /home/runner/CRM/.pythonlibs/lib/python3.11/site-packages/werkzeug/_internal.py:224]
+2024-11-20 14:41:08,703 INFO: 172.31.196.26 - - [20/Nov/2024 14:41:08] "GET /static/css/styles.css HTTP/1.1" 200 - [in /home/runner/CRM/.pythonlibs/lib/python3.11/site-packages/werkzeug/_internal.py:224]
+2024-11-20 14:41:08,764 INFO: 172.31.196.26 - - [20/Nov/2024 14:41:08] "GET /static/js/main.js HTTP/1.1" 200 - [in /home/runner/CRM/.pythonlibs/lib/python3.11/site-packages/werkzeug/_internal.py:224]
+2024-11-20 14:41:09,438 ERROR: Session rolled back due to error: (psycopg2.errors.UndefinedColumn) column user_settings.filter_preferences does not exist
+LINE 1: ..._settings.updated_at AS user_settings_updated_at, user_setti...
+                                                             ^
+
+[SQL: SELECT user_settings.id AS user_settings_id, user_settings.user_id AS user_settings_user_id, user_settings.mail_server AS user_settings_mail_server, user_settings.mail_port AS user_settings_mail_port, user_settings.mail_use_tls AS user_settings_mail_use_tls, user_settings.mail_username AS user_settings_mail_username, user_settings.mail_password AS user_settings_mail_password, user_settings.claude_api_key AS user_settings_claude_api_key, user_settings.clearbit_api_key AS user_settings_clearbit_api_key, user_settings.created_at AS user_settings_created_at, user_settings.updated_at AS user_settings_updated_at, user_settings.filter_preferences AS user_settings_filter_preferences 
+FROM user_settings]
+(Background on this error at: https://sqlalche.me/e/20/f405) [in /home/runner/CRM/email_receiver.py:673]
+Traceback (most recent call last):
+  File "/home/runner/CRM/.pythonlibs/lib/python3.11/site-packages/sqlalchemy/engine/base.py", line 1967, in _exec_single_context
+    self.dialect.do_execute(
+  File "/home/runner/CRM/.pythonlibs/lib/python3.11/site-packages/sqlalchemy/engine/default.py", line 941, in do_execute
+    cursor.execute(statement, parameters)
+psycopg2.errors.UndefinedColumn: column user_settings.filter_preferences does not exist
+LINE 1: ..._settings.updated_at AS user_settings_updated_at, user_setti...
+                                                             ^
+
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "/home/runner/CRM/email_receiver.py", line 661, in session_scope
+    yield session
+  File "/home/runner/CRM/email_receiver.py", line 1684, in check_emails_task
+    settings_list = session.query(UserSettings).all()
+                    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/runner/CRM/.pythonlibs/lib/python3.11/site-packages/sqlalchemy/orm/query.py", line 2673, in all
+    return self._iter().all()  # type: ignore
+           ^^^^^^^^^^^^
+  File "/home/runner/CRM/.pythonlibs/lib/python3.11/site-packages/sqlalchemy/orm/query.py", line 2827, in _iter
+    result: Union[ScalarResult[_T], Result[_T]] = self.session.execute(
+                                                  ^^^^^^^^^^^^^^^^^^^^^
+  File "/home/runner/CRM/.pythonlibs/lib/python3.11/site-packages/sqlalchemy/orm/session.py", line 2362, in execute
+    return self._execute_internal(
+           ^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/runner/CRM/.pythonlibs/lib/python3.11/site-packages/sqlalchemy/orm/session.py", line 2247, in _execute_internal
+    result: Result[Any] = compile_state_cls.orm_execute_statement(
+                          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/runner/CRM/.pythonlibs/lib/python3.11/site-packages/sqlalchemy/orm/context.py", line 305, in orm_execute_statement
+    result = conn.execute(
+             ^^^^^^^^^^^^^
+  File "/home/runner/CRM/.pythonlibs/lib/python3.11/site-packages/sqlalchemy/engine/base.py", line 1418, in execute
+    return meth(
+           ^^^^^
+  File "/home/runner/CRM/.pythonlibs/lib/python3.11/site-packages/sqlalchemy/sql/elements.py", line 515, in _execute_on_connection
+    return connection._execute_clauseelement(
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/runner/CRM/.pythonlibs/lib/python3.11/site-packages/sqlalchemy/engine/base.py", line 1640, in _execute_clauseelement
+    ret = self._execute_context(
+          ^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/runner/CRM/.pythonlibs/lib/python3.11/site-packages/sqlalchemy/engine/base.py", line 1846, in _execute_context
+    return self._exec_single_context(
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/runner/CRM/.pythonlibs/lib/python3.11/site-packages/sqlalchemy/engine/base.py", line 1986, in _exec_single_context
+    self._handle_dbapi_exception(
+  File "/home/runner/CRM/.pythonlibs/lib/python3.11/site-packages/sqlalchemy/engine/base.py", line 2355, in _handle_dbapi_exception
+    raise sqlalchemy_exception.with_traceback(exc_info[2]) from e
+  File "/home/runner/CRM/.pythonlibs/lib/python3.11/site-packages/sqlalchemy/engine/base.py", line 1967, in _exec_single_context
+    self.dialect.do_execute(
+  File "/home/runner/CRM/.pythonlibs/lib/python3.11/site-packages/sqlalchemy/engine/default.py", line 941, in do_execute
+    cursor.execute(statement, parameters)
+sqlalchemy.exc.ProgrammingError: (psycopg2.errors.UndefinedColumn) column user_settings.filter_preferences does not exist
+LINE 1: ..._settings.updated_at AS user_settings_updated_at, user_setti...
+                                                             ^
+
+[SQL: SELECT user_settings.id AS user_settings_id, user_settings.user_id AS user_settings_user_id, user_settings.mail_server AS user_settings_mail_server, user_settings.mail_port AS user_settings_mail_port, user_settings.mail_use_tls AS user_settings_mail_use_tls, user_settings.mail_username AS user_settings_mail_username, user_settings.mail_password AS user_settings_mail_password, user_settings.claude_api_key AS user_settings_claude_api_key, user_settings.clearbit_api_key AS user_settings_clearbit_api_key, user_settings.created_at AS user_settings_created_at, user_settings.updated_at AS user_settings_updated_at, user_settings.filter_preferences AS user_settings_filter_preferences 
+FROM user_settings]
+(Background on this error at: https://sqlalche.me/e/20/f405)
+2024-11-20 14:41:09,443 DEBUG: Session closed. Total duration: 0.97s [in /home/runner/CRM/email_receiver.py:683]
+2024-11-20 14:41:09,443 ERROR: Critical error in check_emails_task: (psycopg2.errors.UndefinedColumn) column user_settings.filter_preferences does not exist
+LINE 1: ..._settings.updated_at AS user_settings_updated_at, user_setti...
+                                                             ^
+
+[SQL: SELECT user_settings.id AS user_settings_id, user_settings.user_id AS user_settings_user_id, user_settings.mail_server AS user_settings_mail_server, user_settings.mail_port AS user_settings_mail_port, user_settings.mail_use_tls AS user_settings_mail_use_tls, user_settings.mail_username AS user_settings_mail_username, user_settings.mail_password AS user_settings_mail_password, user_settings.claude_api_key AS user_settings_claude_api_key, user_settings.clearbit_api_key AS user_settings_clearbit_api_key, user_settings.created_at AS user_settings_created_at, user_settings.updated_at AS user_settings_updated_at, user_settings.filter_preferences AS user_settings_filter_preferences 
+FROM user_settings]
+(Background on this error at: https://sqlalche.me/e/20/f405) [in /home/runner/CRM/email_receiver.py:1721]
+Traceback (most recent call last):
+  File "/home/runner/CRM/.pythonlibs/lib/python3.11/site-packages/sqlalchemy/engine/base.py", line 1967, in _exec_single_context
+    self.dialect.do_execute(
+  File "/home/runner/CRM/.pythonlibs/lib/python3.11/site-packages/sqlalchemy/engine/default.py", line 941, in do_execute
+    cursor.execute(statement, parameters)
+psycopg2.errors.UndefinedColumn: column user_settings.filter_preferences does not exist
+LINE 1: ..._settings.updated_at AS user_settings_updated_at, user_setti...
+                                                             ^
+
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "/home/runner/CRM/email_receiver.py", line 1684, in check_emails_task
+    settings_list = session.query(UserSettings).all()
+                    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/runner/CRM/.pythonlibs/lib/python3.11/site-packages/sqlalchemy/orm/query.py", line 2673, in all
+    return self._iter().all()  # type: ignore
+           ^^^^^^^^^^^^
+  File "/home/runner/CRM/.pythonlibs/lib/python3.11/site-packages/sqlalchemy/orm/query.py", line 2827, in _iter
+    result: Union[ScalarResult[_T], Result[_T]] = self.session.execute(
+                                                  ^^^^^^^^^^^^^^^^^^^^^
+  File "/home/runner/CRM/.pythonlibs/lib/python3.11/site-packages/sqlalchemy/orm/session.py", line 2362, in execute
+    return self._execute_internal(
+           ^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/runner/CRM/.pythonlibs/lib/python3.11/site-packages/sqlalchemy/orm/session.py", line 2247, in _execute_internal
+    result: Result[Any] = compile_state_cls.orm_execute_statement(
+                          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/runner/CRM/.pythonlibs/lib/python3.11/site-packages/sqlalchemy/orm/context.py", line 305, in orm_execute_statement
+    result = conn.execute(
+             ^^^^^^^^^^^^^
+  File "/home/runner/CRM/.pythonlibs/lib/python3.11/site-packages/sqlalchemy/engine/base.py", line 1418, in execute
+    return meth(
+           ^^^^^
+  File "/home/runner/CRM/.pythonlibs/lib/python3.11/site-packages/sqlalchemy/sql/elements.py", line 515, in _execute_on_connection
+    return connection._execute_clauseelement(
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/runner/CRM/.pythonlibs/lib/python3.11/site-packages/sqlalchemy/engine/base.py", line 1640, in _execute_clauseelement
+    ret = self._execute_context(
+          ^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/runner/CRM/.pythonlibs/lib/python3.11/site-packages/sqlalchemy/engine/base.py", line 1846, in _execute_context
+    return self._exec_single_context(
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/runner/CRM/.pythonlibs/lib/python3.11/site-packages/sqlalchemy/engine/base.py", line 1986, in _exec_single_context
+    self._handle_dbapi_exception(
+  File "/home/runner/CRM/.pythonlibs/lib/python3.11/site-packages/sqlalchemy/engine/base.py", line 2355, in _handle_dbapi_exception
+    raise sqlalchemy_exception.with_traceback(exc_info[2]) from e
+  File "/home/runner/CRM/.pythonlibs/lib/python3.11/site-packages/sqlalchemy/engine/base.py", line 1967, in _exec_single_context
+    self.dialect.do_execute(
+  File "/home/runner/CRM/.pythonlibs/lib/python3.11/site-packages/sqlalchemy/engine/default.py", line 941, in do_execute
+    cursor.execute(statement, parameters)
+sqlalchemy.exc.ProgrammingError: (psycopg2.errors.UndefinedColumn) column user_settings.filter_preferences does not exist
+LINE 1: ..._settings.updated_at AS user_settings_updated_at, user_setti...
+                                                             ^
+
+[SQL: SELECT user_settings.id AS user_settings_id, user_settings.user_id AS user_settings_user_id, user_settings.mail_server AS user_settings_mail_server, user_settings.mail_port AS user_settings_mail_port, user_settings.mail_use_tls AS user_settings_mail_use_tls, user_settings.mail_username AS user_settings_mail_username, user_settings.mail_password AS user_settings_mail_password, user_settings.claude_api_key AS user_settings_claude_api_key, user_settings.clearbit_api_key AS user_settings_clearbit_api_key, user_settings.created_at AS user_settings_created_at, user_settings.updated_at AS user_settings_updated_at, user_settings.filter_preferences AS user_settings_filter_preferences 
+FROM user_settings]
+(Background on this error at: https://sqlalche.me/e/20/f405)
+2024-11-20 14:41:09,444 ERROR: Critical error in check_emails_task: (psycopg2.errors.UndefinedColumn) column user_settings.filter_preferences does not exist
+LINE 1: ..._settings.updated_at AS user_settings_updated_at, user_setti...
+                                                             ^
+
+[SQL: SELECT user_settings.id AS user_settings_id, user_settings.user_id AS user_settings_user_id, user_settings.mail_server AS user_settings_mail_server, user_settings.mail_port AS user_settings_mail_port, user_settings.mail_use_tls AS user_settings_mail_use_tls, user_settings.mail_username AS user_settings_mail_username, user_settings.mail_password AS user_settings_mail_password, user_settings.claude_api_key AS user_settings_claude_api_key, user_settings.clearbit_api_key AS user_settings_clearbit_api_key, user_settings.created_at AS user_settings_created_at, user_settings.updated_at AS user_settings_updated_at, user_settings.filter_preferences AS user_settings_filter_preferences 
+FROM user_settings]
+(Background on this error at: https://sqlalche.me/e/20/f405) [in /home/runner/CRM/email_receiver.py:1737]
+2024-11-20 14:41:13,539 INFO: 172.31.196.26 - - [20/Nov/2024 14:41:13] "GET / HTTP/1.1" 200 - [in /home/runner/CRM/.pythonlibs/lib/python3.11/site-packages/werkzeug/_internal.py:224]
+2024-11-20 14:41:20,593 INFO: 172.31.196.26 - - [20/Nov/2024 14:41:20] "GET / HTTP/1.1" 200 - [in /home/runner/CRM/.pythonlibs/lib/python3.11/site-packages/werkzeug/_internal.py:224]
+2024-11-20 14:41:34,539 INFO: 172.31.196.26 - - [20/Nov/2024 14:41:34] "GET / HTTP/1.1" 200 - [in /home/runner/CRM/.pythonlibs/lib/python3.11/site-packages/werkzeug/_internal.py:224]
+2024-11-20 14:41:34,752 INFO: 172.31.196.26 - - [20/Nov/2024 14:41:34] "GET /static/css/styles.css HTTP/1.1" 304 - [in /home/runner/CRM/.pythonlibs/lib/python3.11/site-packages/werkzeug/_internal.py:224]
+2024-11-20 14:41:34,934 INFO: 172.31.196.26 - - [20/Nov/2024 14:41:34] "GET /static/js/main.js HTTP/1.1" 304 - [in /home/runner/CRM/.pythonlibs/lib/python3.11/site-packages/werkzeug/_internal.py:224]
+2024-11-20 14:41:53,774 ERROR: Database error: (psycopg2.errors.UndefinedColumn) column user_settings.filter_preferences does not exist
+LINE 1: ..._settings.updated_at AS user_settings_updated_at, user_setti...
+                                                             ^
+
+[SQL: SELECT user_settings.id AS user_settings_id, user_settings.user_id AS user_settings_user_id, user_settings.mail_server AS user_settings_mail_server, user_settings.mail_port AS user_settings_mail_port, user_settings.mail_use_tls AS user_settings_mail_use_tls, user_settings.mail_username AS user_settings_mail_username, user_settings.mail_password AS user_settings_mail_password, user_settings.claude_api_key AS user_settings_claude_api_key, user_settings.clearbit_api_key AS user_settings_clearbit_api_key, user_settings.created_at AS user_settings_created_at, user_settings.updated_at AS user_settings_updated_at, user_settings.filter_preferences AS user_settings_filter_preferences 
+FROM user_settings 
+WHERE %(param_1)s = user_settings.user_id]
+[parameters: {'param_1': 2}]
+(Background on this error at: https://sqlalche.me/e/20/f405) [in /home/runner/CRM/app.py:94]
+2024-11-20 14:41:54,682 INFO: 172.31.196.26 - - [20/Nov/2024 14:41:54] "GET /opportunities HTTP/1.1" 500 - [in /home/runner/CRM/.pythonlibs/lib/python3.11/site-packages/werkzeug/_internal.py:224]
+2024-11-20 14:41:54,902 INFO: 172.31.196.26 - - [20/Nov/2024 14:41:54] "GET /static/css/styles.css HTTP/1.1" 304 - [in /home/runner/CRM/.pythonlibs/lib/python3.11/site-packages/werkzeug/_internal.py:224]
+2024-11-20 14:41:54,923 INFO: 172.31.196.26 - - [20/Nov/2024 14:41:54] "GET /static/js/main.js HTTP/1.1" 304 - [in /home/runner/CRM/.pythonlibs/lib/python3.11/site-packages/werkzeug/_internal.py:224]
+2024-11-20 14:42:08,324 INFO: 172.31.196.26 - - [20/Nov/2024 14:42:08] "GET /reports/ HTTP/1.1" 200 - [in /home/runner/CRM/.pythonlibs/lib/python3.11/site-packages/werkzeug/_internal.py:224]
+2024-11-20 14:42:08,555 INFO: 172.31.196.26 - - [20/Nov/2024 14:42:08] "GET /static/css/styles.css HTTP/1.1" 304 - [in /home/runner/CRM/.pythonlibs/lib/python3.11/site-packages/werkzeug/_internal.py:224]
+2024-11-20 14:42:08,807 INFO: 172.31.196.26 - - [20/Nov/2024 14:42:08] "GET /static/js/main
