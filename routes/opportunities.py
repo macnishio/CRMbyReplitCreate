@@ -281,7 +281,12 @@ def analyze_opportunities_data():
 @bp.route('/export')
 @login_required
 def export_opportunities():
+    """
+    Export opportunities list as CSV with proper Japanese encoding support
+    and error handling.
+    """
     try:
+        current_app.logger.info("Starting opportunities export")
         # Get filter parameters
         stage_filter = request.args.get('stage')
         min_amount = request.args.get('min_amount', type=float)
@@ -324,21 +329,50 @@ def export_opportunities():
         si = StringIO()
         writer = csv.writer(si)
         
-        # Write headers
-        writer.writerow(['商談名', 'ステージ', '金額', '完了予定日', 'リード名', 'リードメール', 'リードスコア', 'リードステータス'])
+        # Japanese headers with their corresponding translations
+        headers = [
+            '商談名', 'ステージ', '金額（円）', '完了予定日', 
+            'リード名', 'リードメール', 'リードスコア', 'リードステータス',
+            '作成日', '最終更新日'
+        ]
+        writer.writerow(headers)
         
-        # Write data
+        # Write data with proper Japanese stage translations
+        stage_translations = {
+            'Initial Contact': '初期接触',
+            'Qualification': '資格確認',
+            'Proposal': '提案',
+            'Negotiation': '交渉',
+            'Closed Won': '成約',
+            'Closed Lost': '失注'
+        }
+
+        status_translations = {
+            'New': '新規',
+            'Contacted': '連絡済み',
+            'Qualified': '適格',
+            'Unqualified': '不適格',
+            'Converted': '成約'
+        }
+        
         for opp in opportunities:
-            writer.writerow([
-                opp.name,
-                opp.stage,
-                opp.amount,
-                opp.close_date.strftime('%Y-%m-%d') if opp.close_date else '',
-                opp.lead.name if opp.lead else '',
-                opp.lead.email if opp.lead else '',
-                opp.lead.score if opp.lead else '',
-                opp.lead.status if opp.lead else ''
-            ])
+            try:
+                row = [
+                    opp.name,
+                    stage_translations.get(opp.stage, opp.stage),
+                    f"¥{opp.amount:,.0f}" if opp.amount else '',
+                    opp.close_date.strftime('%Y-%m-%d') if opp.close_date else '',
+                    opp.lead.name if opp.lead else '',
+                    opp.lead.email if opp.lead else '',
+                    f"{opp.lead.score:.1f}" if opp.lead and opp.lead.score else '',
+                    status_translations.get(opp.lead.status, opp.lead.status) if opp.lead else '',
+                    opp.created_at.strftime('%Y-%m-%d %H:%M') if hasattr(opp, 'created_at') else '',
+                    opp.updated_at.strftime('%Y-%m-%d %H:%M') if hasattr(opp, 'updated_at') else ''
+                ]
+                writer.writerow(row)
+            except Exception as row_error:
+                current_app.logger.error(f"Error writing row for opportunity {opp.id}: {str(row_error)}")
+                continue
 
         # Prepare response
         output = si.getvalue()
@@ -358,5 +392,9 @@ def export_opportunities():
         )
 
     except Exception as e:
-        current_app.logger.error(f"Export error: {str(e)}")
+        current_app.logger.error(f"Export error: {str(e)}", exc_info=True)
+        return {
+            'error': 'エクスポート中にエラーが発生しました。',
+            'details': str(e)
+        }, 500
         return {'success': False, 'error': str(e)}, 500

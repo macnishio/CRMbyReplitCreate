@@ -77,10 +77,43 @@
         
         <script>
         function exportOpportunities() {
+            const exportButton = document.querySelector('button[onclick="exportOpportunities()"]');
+            const originalText = exportButton.innerHTML;
+            
+            // Disable button and show loading state
+            exportButton.disabled = true;
+            exportButton.innerHTML = '<i class="fas fa-spinner fa-spin"></i> エクスポート中...';
+            
             // Get current filter parameters
             const urlParams = new URLSearchParams(window.location.search);
-            const exportUrl = '/opportunities/export?' + urlParams.toString();
-            window.location.href = exportUrl;
+            
+            // Use fetch instead of direct navigation
+            fetch('/opportunities/export?' + urlParams.toString())
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error('エクスポートに失敗しました');
+                    }
+                    return response.blob();
+                })
+                .then(blob => {
+                    // Create download link
+                    const url = window.URL.createObjectURL(blob);
+                    const a = document.createElement('a');
+                    a.href = url;
+                    a.download = `商談リスト_${new Date().toISOString().split('T')[0]}.csv`;
+                    document.body.appendChild(a);
+                    a.click();
+                    window.URL.revokeObjectURL(url);
+                })
+                .catch(error => {
+                    console.error('Export error:', error);
+                    alert('エクスポート中にエラーが発生しました: ' + error.message);
+                })
+                .finally(() => {
+                    // Reset button state
+                    exportButton.disabled = false;
+                    exportButton.innerHTML = originalText;
+                });
         }
         </script>
     </form>
