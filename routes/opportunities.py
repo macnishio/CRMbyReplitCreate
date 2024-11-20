@@ -20,16 +20,31 @@ def list_opportunities():
     # Check if we should save the current filters
     if request.args.get('save_filters'):
         try:
+            # Get all filter parameters with proper type conversion
+            min_amount = request.args.get('min_amount')
+            max_amount = request.args.get('max_amount')
+            
+            # Convert amount strings to float if they exist
+            try:
+                min_amount = float(min_amount) if min_amount else None
+            except ValueError:
+                min_amount = None
+                
+            try:
+                max_amount = float(max_amount) if max_amount else None
+            except ValueError:
+                max_amount = None
+                
             current_filters = {
                 'stage': request.args.get('stage'),
-                'min_amount': request.args.get('min_amount'),
-                'max_amount': request.args.get('max_amount'),
+                'min_amount': min_amount,
+                'max_amount': max_amount,
                 'lead_search': request.args.get('lead_search'),
                 'lead_status': request.args.get('lead_status'),
                 'date_from': request.args.get('date_from'),
                 'date_to': request.args.get('date_to'),
-                'sort_by': sort_by,
-                'sort_order': sort_order
+                'sort_by': request.args.get('sort_by', 'close_date'),
+                'sort_order': request.args.get('sort_order', 'asc')
             }
             
             if settings:
@@ -37,7 +52,14 @@ def list_opportunities():
                 db.session.commit()
                 flash('フィルター設定が保存されました。', 'success')
             else:
-                flash('ユーザー設定が見つかりません。', 'error')
+                # Create new settings if they don't exist
+                settings = UserSettings(
+                    user_id=current_user.id,
+                    filter_preferences=json.dumps({'opportunities': current_filters})
+                )
+                db.session.add(settings)
+                db.session.commit()
+                flash('フィルター設定が作成されました。', 'success')
                 
         except Exception as e:
             current_app.logger.error(f"Error saving filter preferences: {str(e)}")
@@ -75,12 +97,16 @@ def list_opportunities():
     
     # Ensure we have valid sorting parameters
     valid_sort_columns = ['close_date', 'amount', 'name', 'stage']
-    sort_by = request.args.get('sort_by') or (saved_filters.get('sort_by') if use_saved else 'close_date')
-    if sort_by not in valid_sort_columns:
+    sort_by = request.args.get('sort_by')
+    if not sort_by and use_saved:
+        sort_by = saved_filters.get('sort_by')
+    if not sort_by or sort_by not in valid_sort_columns:
         sort_by = 'close_date'
         
-    sort_order = request.args.get('sort_order') or (saved_filters.get('sort_order') if use_saved else 'asc')
-    if sort_order not in ['asc', 'desc']:
+    sort_order = request.args.get('sort_order')
+    if not sort_order and use_saved:
+        sort_order = saved_filters.get('sort_order')
+    if not sort_order or sort_order not in ['asc', 'desc']:
         sort_order = 'asc'
 
     # Get page number from request

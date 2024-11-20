@@ -99,6 +99,10 @@ args = "Fix Email Encoding"
 task = "workflow.run"
 args = "Add Filter Preferences Migration"
 
+[[workflows.workflow.tasks]]
+task = "workflow.run"
+args = "Add Filter Migration"
+
 [[workflows.workflow]]
 name = "Run Flask App"
 author = "agent"
@@ -394,6 +398,20 @@ args = "python fix_email_encoding.py"
 
 [[workflows.workflow]]
 name = "Add Filter Preferences Migration"
+author = "agent"
+
+[workflows.workflow.metadata]
+agentRequireRestartOnSave = false
+
+[[workflows.workflow.tasks]]
+task = "packager.installForAll"
+
+[[workflows.workflow.tasks]]
+task = "shell.exec"
+args = "flask db migrate -m 'Add filter preferences to UserSettings' && flask db upgrade"
+
+[[workflows.workflow]]
+name = "Add Filter Migration"
 author = "agent"
 
 [workflows.workflow.metadata]
