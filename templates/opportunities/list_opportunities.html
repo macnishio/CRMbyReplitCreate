@@ -70,7 +70,19 @@
             <button type="submit" class="btn btn-success" name="save_filters" value="1">
                 <i class="fas fa-save"></i> フィルター設定を保存
             </button>
+            <button type="button" class="btn btn-info" onclick="exportOpportunities()">
+                <i class="fas fa-file-export"></i> エクスポート
+            </button>
         </div>
+        
+        <script>
+        function exportOpportunities() {
+            // Get current filter parameters
+            const urlParams = new URLSearchParams(window.location.search);
+            const exportUrl = '/opportunities/export?' + urlParams.toString();
+            window.location.href = exportUrl;
+        }
+        </script>
     </form>
 </div>
 <h1>商談一覧</h1>

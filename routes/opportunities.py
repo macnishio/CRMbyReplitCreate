@@ -1,9 +1,10 @@
-from flask import Blueprint, render_template, redirect, url_for, flash, request, current_app
-from flask_login import current_user
+from flask import Blueprint, render_template, redirect, url_for, flash, request, current_app, send_file
 from flask_login import login_required, current_user
 from models import Opportunity, Lead
 from extensions import db
-from datetime import datetime, timedelta
+import csv
+from io import StringIO, BytesIO
+from datetime import datetime
 from sqlalchemy import func
 from ai_analysis import analyze_opportunities
 from forms import OpportunityForm
@@ -275,4 +276,87 @@ def analyze_opportunities_data():
         }
     except Exception as e:
         current_app.logger.error(f"Analysis error: {str(e)}")
+        return {'success': False, 'error': str(e)}, 500
+
+@bp.route('/export')
+@login_required
+def export_opportunities():
+    try:
+        # Get filter parameters
+        stage_filter = request.args.get('stage')
+        min_amount = request.args.get('min_amount', type=float)
+        max_amount = request.args.get('max_amount', type=float)
+        lead_search = request.args.get('lead_search')
+        lead_status = request.args.get('lead_status')
+        date_from = request.args.get('date_from')
+        date_to = request.args.get('date_to')
+
+        # Base query
+        query = Opportunity.query.filter_by(user_id=current_user.id)
+
+        # Join Lead model if we need it for filtering
+        if lead_search or lead_status:
+            query = query.join(Lead, Opportunity.lead_id == Lead.id)
+
+        # Apply filters
+        if stage_filter:
+            query = query.filter(Opportunity.stage == stage_filter)
+        if min_amount is not None:
+            query = query.filter(Opportunity.amount >= min_amount)
+        if max_amount is not None:
+            query = query.filter(Opportunity.amount <= max_amount)
+        if lead_search:
+            query = query.filter(Lead.name.ilike(f'%{lead_search}%'))
+        if lead_status:
+            query = query.filter(Lead.status == lead_status)
+        if date_from:
+            query = query.filter(Opportunity.close_date >= datetime.strptime(date_from, '%Y-%m-%d'))
+        if date_to:
+            query = query.filter(Opportunity.close_date <= datetime.strptime(date_to, '%Y-%m-%d'))
+
+        # Add eager loading of lead data
+        query = query.options(db.joinedload(Opportunity.lead))
+
+        # Get opportunities
+        opportunities = query.all()
+
+        # Create CSV file
+        si = StringIO()
+        writer = csv.writer(si)
+        
+        # Write headers
+        writer.writerow(['商談名', 'ステージ', '金額', '完了予定日', 'リード名', 'リードメール', 'リードスコア', 'リードステータス'])
+        
+        # Write data
+        for opp in opportunities:
+            writer.writerow([
+                opp.name,
+                opp.stage,
+                opp.amount,
+                opp.close_date.strftime('%Y-%m-%d') if opp.close_date else '',
+                opp.lead.name if opp.lead else '',
+                opp.lead.email if opp.lead else '',
+                opp.lead.score if opp.lead else '',
+                opp.lead.status if opp.lead else ''
+            ])
+
+        # Prepare response
+        output = si.getvalue()
+        si.close()
+        
+        # Create response with Japanese filename
+        filename = f'商談リスト_{datetime.now().strftime("%Y%m%d_%H%M%S")}.csv'
+        
+        # Convert string to bytes for file sending
+        output_bytes = output.encode('utf-8-sig')  # Use UTF-8 with BOM for Excel compatibility
+        
+        return send_file(
+            BytesIO(output_bytes),
+            mimetype='text/csv',
+            as_attachment=True,
+            download_name=filename
+        )
+
+    except Exception as e:
+        current_app.logger.error(f"Export error: {str(e)}")
         return {'success': False, 'error': str(e)}, 500
