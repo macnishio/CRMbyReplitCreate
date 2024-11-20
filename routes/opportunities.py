@@ -18,37 +18,69 @@ def list_opportunities():
 
     # Check if we should save the current filters
     if request.args.get('save_filters'):
-        current_filters = {
-            'stage': request.args.get('stage'),
-            'min_amount': request.args.get('min_amount'),
-            'max_amount': request.args.get('max_amount'),
-            'lead_search': request.args.get('lead_search'),
-            'lead_status': request.args.get('lead_status'),
-            'date_from': request.args.get('date_from'),
-            'date_to': request.args.get('date_to'),
-            'sort_by': request.args.get('sort_by', 'close_date'),
-            'sort_order': request.args.get('sort_order', 'asc')
-        }
-        if settings:
-            settings.opportunity_filters = current_filters
-            db.session.commit()
-            flash('フィルター設定が保存されました。', 'success')
+        try:
+            current_filters = {
+                'stage': request.args.get('stage'),
+                'min_amount': request.args.get('min_amount'),
+                'max_amount': request.args.get('max_amount'),
+                'lead_search': request.args.get('lead_search'),
+                'lead_status': request.args.get('lead_status'),
+                'date_from': request.args.get('date_from'),
+                'date_to': request.args.get('date_to'),
+                'sort_by': sort_by,
+                'sort_order': sort_order
+            }
+            
+            if settings:
+                settings.opportunity_filters = current_filters
+                db.session.commit()
+                flash('フィルター設定が保存されました。', 'success')
+            else:
+                flash('ユーザー設定が見つかりません。', 'error')
+                
+        except Exception as e:
+            current_app.logger.error(f"Error saving filter preferences: {str(e)}")
+            db.session.rollback()
+            flash('フィルター設定の保存中にエラーが発生しました。', 'error')
+            
         return redirect(url_for('opportunities.list_opportunities'))
 
     # Load saved filters if no parameters are provided
     saved_filters = settings.opportunity_filters if settings else {}
     use_saved = not any(request.args.values())
 
-    # Get filter parameters
+    # Get filter parameters with proper error handling
     stage_filter = request.args.get('stage') or (saved_filters.get('stage') if use_saved else None)
-    min_amount = request.args.get('min_amount', type=float) or (float(saved_filters.get('min_amount')) if use_saved and saved_filters.get('min_amount') else None)
-    max_amount = request.args.get('max_amount', type=float) or (float(saved_filters.get('max_amount')) if use_saved and saved_filters.get('max_amount') else None)
+    
+    # Handle numeric filters with safe conversion
+    try:
+        min_amount = request.args.get('min_amount', type=float) or (
+            float(saved_filters.get('min_amount')) if use_saved and saved_filters.get('min_amount') else None
+        )
+    except (ValueError, TypeError):
+        min_amount = None
+        
+    try:
+        max_amount = request.args.get('max_amount', type=float) or (
+            float(saved_filters.get('max_amount')) if use_saved and saved_filters.get('max_amount') else None
+        )
+    except (ValueError, TypeError):
+        max_amount = None
+        
     lead_search = request.args.get('lead_search') or (saved_filters.get('lead_search') if use_saved else None)
     lead_status = request.args.get('lead_status') or (saved_filters.get('lead_status') if use_saved else None)
     date_from = request.args.get('date_from') or (saved_filters.get('date_from') if use_saved else None)
     date_to = request.args.get('date_to') or (saved_filters.get('date_to') if use_saved else None)
+    
+    # Ensure we have valid sorting parameters
+    valid_sort_columns = ['close_date', 'amount', 'name', 'stage']
     sort_by = request.args.get('sort_by') or (saved_filters.get('sort_by') if use_saved else 'close_date')
+    if sort_by not in valid_sort_columns:
+        sort_by = 'close_date'
+        
     sort_order = request.args.get('sort_order') or (saved_filters.get('sort_order') if use_saved else 'asc')
+    if sort_order not in ['asc', 'desc']:
+        sort_order = 'asc'
 
     # Get page number from request
     page = request.args.get('page', 1, type=int)
@@ -80,8 +112,8 @@ def list_opportunities():
     # Add eager loading of lead data after all filters
     query = query.options(db.joinedload(Opportunity.lead))
 
-    # Apply sorting
-    sort_column = getattr(Opportunity, sort_by) if hasattr(Opportunity, sort_by) else Opportunity.close_date
+    # Apply sorting with safe column access
+    sort_column = getattr(Opportunity, sort_by, Opportunity.close_date)
     if sort_order == 'desc':
         sort_column = sort_column.desc()
     query = query.order_by(sort_column)
