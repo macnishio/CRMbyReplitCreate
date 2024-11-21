@@ -769,6 +769,14 @@ function updatePaginationControls(data) {
     }
 
     paginationLinks.innerHTML = html;
+    
+    // Add keyboard navigation hint if it doesn't exist
+    if (!document.querySelector('.keyboard-navigation-hint')) {
+        const hint = document.createElement('div');
+        hint.className = 'keyboard-navigation-hint';
+        hint.textContent = 'Use ← and → arrow keys to navigate between pages';
+        paginationLinks.parentNode.appendChild(hint);
+    }
 
     // Update pagination info
     const paginationInfo = document.querySelector('.pagination-info');
@@ -821,6 +829,7 @@ document.addEventListener('DOMContentLoaded', function() {
             this.setupEventListeners();
             this.setupEmailModal();
             this.setupBulkActions();
+            this.setupKeyboardNavigation();
         },
 
         setupEventListeners: function() {
@@ -854,6 +863,37 @@ document.addEventListener('DOMContentLoaded', function() {
             // 一括選択
             const selectAllCheckbox = document.getElementById('select-all');
             if (selectAllCheckbox) {
+        setupKeyboardNavigation: function() {
+            document.addEventListener('keydown', (e) => {
+                // Only handle keyboard navigation when not in an input field
+                if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') {
+                    return;
+                }
+
+                switch(e.key) {
+                    case 'ArrowLeft':
+                        const prevButton = document.querySelector('.pagination-links button:not([disabled]):first-child');
+                        if (prevButton && prevButton.textContent.includes('Previous')) {
+                            e.preventDefault();
+                            prevButton.click();
+                        }
+                        break;
+                    case 'ArrowRight':
+                        const nextButton = document.querySelector('.pagination-links button:not([disabled]):last-child');
+                        if (nextButton && nextButton.textContent.includes('Next')) {
+                            e.preventDefault();
+                            nextButton.click();
+                        }
+                        break;
+                }
+            });
+
+            // Add keyboard focus styles to pagination buttons
+            const paginationButtons = document.querySelectorAll('.pagination-links button');
+            paginationButtons.forEach(button => {
+                button.setAttribute('tabindex', '0');
+            });
+        },
                 selectAllCheckbox.onclick = null;
                 selectAllCheckbox.addEventListener('change', this.toggleAllCheckboxes);
             }
@@ -1031,6 +1071,19 @@ document.addEventListener('DOMContentLoaded', function() {
                         `送信者: ${data.sender_name || data.sender}`;
                     document.getElementById('modalDate').textContent = 
                         `受信日時: ${new Date(data.received_date).toLocaleString('ja-JP')}`;
+            .btn-pagination:focus {
+                outline: 2px solid #007bff;
+                outline-offset: 2px;
+            }
+            .btn-pagination:focus:not(:focus-visible) {
+                outline: none;
+            }
+            .keyboard-navigation-hint {
+                text-align: center;
+                font-size: 0.9em;
+                color: #666;
+                margin: 10px 0;
+            }
                     document.getElementById('modalContent').innerHTML = 
                         data.content.replace(/\n/g, '<br>') || '(本文なし)';
 
