@@ -222,6 +222,7 @@ class Schedule(db.Model):
     description: Mapped[str] = mapped_column(Text)
     start_time: Mapped[datetime] = mapped_column(DateTime, nullable=False)
     end_time: Mapped[datetime] = mapped_column(DateTime, nullable=False)
+    status: Mapped[str] = mapped_column(String(20), nullable=False, default='Scheduled')
     user_id: Mapped[int] = mapped_column(Integer, ForeignKey('users.id'), nullable=False)
     lead_id: Mapped[Optional[int]] = mapped_column(Integer, ForeignKey('leads.id'), nullable=True)
     email_id: Mapped[Optional[int]] = mapped_column(Integer, ForeignKey('emails.id'), nullable=True)
