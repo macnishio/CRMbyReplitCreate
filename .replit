@@ -103,6 +103,10 @@ args = "Add Filter Preferences Migration"
 task = "workflow.run"
 args = "Add Filter Migration"
 
+[[workflows.workflow.tasks]]
+task = "workflow.run"
+args = "Add Schedule Fields Migration"
+
 [[workflows.workflow]]
 name = "Run Flask App"
 author = "agent"
@@ -423,6 +427,20 @@ task = "packager.installForAll"
 [[workflows.workflow.tasks]]
 task = "shell.exec"
 args = "flask db migrate -m 'Add filter preferences to UserSettings' && flask db upgrade"
+
+[[workflows.workflow]]
+name = "Add Schedule Fields Migration"
+author = "agent"
+
+[workflows.workflow.metadata]
+agentRequireRestartOnSave = false
+
+[[workflows.workflow.tasks]]
+task = "packager.installForAll"
+
+[[workflows.workflow.tasks]]
+task = "shell.exec"
+args = "flask db migrate -m 'Add location and attendees fields to Schedule model' && flask db upgrade"
 
 [deployment]
 run = ["sh", "-c", "python3 app.py"]
