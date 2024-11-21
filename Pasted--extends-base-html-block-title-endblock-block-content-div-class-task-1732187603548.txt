@@ -1,0 +1,75 @@
+{% extends "base.html" %}
+{% block title %}タスク一覧{% endblock %}
+
+{% block content %}
+<div class="task-manager">
+    <!-- フィルターセクション -->
+    <div class="filter-section">
+        <form method="GET" class="filter-form" id="filterForm">
+            <div class="filter-grid">
+                <!-- ステータスフィルター -->
+                <div class="filter-group">
+                    <label for="status">ステータス:</label>
+                    <select name="status" id="status">
+                        <option value="">全て</option>
+                        <option value="New" {% if filters.status == 'New' %}selected{% endif %}>新規</option>
+                        <option value="In Progress" {% if filters.status == 'In Progress' %}selected{% endif %}>進行中</option>
+                        <option value="Completed" {% if filters.status == 'Completed' %}selected{% endif %}>完了</option>
+                    </select>
+                </div>
+
+                <!-- 期限フィルター -->
+                <div class="filter-group">
+                    <label for="due_date">期限:</label>
+                    <select name="due_date" id="due_date">
+                        <option value="">全て</option>
+                        <option value="today" {% if filters.due_date == 'today' %}selected{% endif %}>今日</option>
+                        <option value="week" {% if filters.due_date == 'week' %}selected{% endif %}>今週</option>
+                        <option value="month" {% if filters.due_date == 'month' %}selected{% endif %}>今月</option>
+                        <option value="overdue" {% if filters.due_date == 'overdue' %}selected{% endif %}>期限切れ</option>
+                    </select>
+                </div>
+
+                <!-- リード検索 -->
+                <div class="filter-group">
+                    <label for="lead_search">リード検索:</label>
+                    <input type="text" 
+                           name="lead_search" 
+                           id="lead_search" 
+                           value="{{ filters.lead_search or '' }}" 
+                           placeholder="リード名を入力">
+                </div>
+
+                <!-- 期間指定 -->
+                <div class="filter-group">
+                    <label>期間:</label>
+                    <div class="date-range">
+                        <input type="date" name="date_from" value="{{ filters.date_from or '' }}">
+                        <span>～</span>
+                        <input type="date" name="date_to" value="{{ filters.date_to or '' }}">
+                    </div>
+                </div>
+            </div>
+
+            <!-- フィルターアクション -->
+            <div class="filter-actions">
+                <button type="submit" class="btn btn-primary">
+                    <i class="fas fa-filter"></i> フィルター適用
+                </button>
+                <button type="button" class="btn btn-secondary" id="resetFiltersBtn">
+                    <i class="fas fa-undo"></i> リセット
+                </button>
+                <button type="submit" class="btn btn-success" name="save_filters" value="1">
+                    <i class="fas fa-save"></i> フィルター設定を保存
+                </button>
+                <div class="sort-controls">
+                    <button type="button" class="btn btn-secondary" id="sortButton">
+                        期限でソート <i id="sortIcon" class="fas fa-sort"></i>
+                    </button>
+                </div>
+                <button type="button" class="btn btn-info" id="analyzeBtn">
+                    <i class="fas fa-brain"></i> AI分析を実行
+                </button>
+            </div>
+        </form>
+    </div>

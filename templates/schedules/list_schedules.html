@@ -443,7 +443,16 @@
         </div>
         {% endfor %}
     </div>
-
+    <select name="action" id="bulk-action" required>
+        <option value="">一括操作を選択...</option>
+        <option value="delete">削除</option>
+        <option value="reschedule">日時変更</option>
+    </select>
+    <div id="reschedule-inputs" style="display: none;">
+        <input type="date" name="new_date" id="new-date">
+        <input type="time" name="new_time" id="new-time">
+    </div>
+    <button type="submit" class="btn btn-primary" id="bulk-apply-btn">適用</button>
     <!-- Pagination Controls -->
     <div class="pagination-controls">
         {% if pagination.pages > 1 %}
