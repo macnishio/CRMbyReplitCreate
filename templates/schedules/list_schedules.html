@@ -166,7 +166,7 @@
             <option value="reschedule">日時変更</option>
         </select>
         <div id="reschedule-inputs" style="display: none;">
-            <input type="date" name="new_date" id="new-date">toggleAnalysis()
+            <input type="date" name="new_date" id="new-date">
             <input type="time" name="new_time" id="new-time">
         </div>
         <button type="submit" class="btn btn-primary" id="bulk-apply-btn">適用</button>
@@ -210,7 +210,7 @@
                             <span class="status-label">{{ status.status }}</span>
                             <span class="status-count">{{ status.count }}件</span>
                             <div class="progress-bar">
-                                <div class="progress" style="width: {{ (status.count / (schedules|length or 1) * 100)|round }}%"></div>
+                                <div class="progress" style="width: {{ (status.count / (schedules|length if schedules|length > 0 else 1) * 100)|round }}%"></div>
                             </div>
                         </div>
                         {% endfor %}
@@ -239,7 +239,7 @@
                                 <span class="time-label">{{ '%02d:00'|format(hour) }}~{{ '%02d:00'|format(hour + 3) }}</span>
                                 <span class="time-count">{{ count }}件</span>
                                 <div class="progress-bar">
-                                    <div class="progress" style="width: {{ (count / schedules|length * 100)|round }}%"></div>
+                                    <div class="progress" style="width: {{ (count / (schedules|length if schedules|length > 0 else 1) * 100)|round }}%"></div>
                                 </div>
                             </div>
                         {% endfor %}
@@ -350,7 +350,11 @@
             </ul>
         </nav>
         <div class="pagination-info">
-            全{{ total_count }}件中 {{ (pagination.page - 1) * pagination.per_page + 1 }}～{{ [pagination.page * pagination.per_page, total_count]|min }}件を表示
+            {% if total_count > 0 %}
+    全{{ total_count }}件中 {{ (pagination.page - 1) * pagination.per_page + 1 }}～{{ ((pagination.page * pagination.per_page) if (pagination.page * pagination.per_page) <= total_count else total_count) }}件を表示
+{% else %}
+    表示するスケジュールがありません
+{% endif %}
         </div>
         {% endif %}
     </div>
@@ -365,6 +369,146 @@
     <div class="modal-content">
         <span class="close-modal">×</span>
         <div class="email-header">
+{% block scripts %}
+{{ super() }}
+<script>
+function toggleAnalysis() {
+    const content = document.getElementById('analysisContent');
+    const icon = document.querySelector('.toggle-icon');
+    if (content) {
+        content.classList.toggle('active');
+        if (content.classList.contains('active')) {
+            icon.style.transform = 'rotate(180deg)';
+        } else {
+            icon.style.transform = 'rotate(0deg)';
+        }
+    }
+}
+
+// Initialize tooltips
+$(function () {
+    $('[data-toggle="tooltip"]').tooltip();
+});
+
+// Handle bulk actions
+document.getElementById('bulk-action').addEventListener('change', function() {
+    const rescheduleInputs = document.getElementById('reschedule-inputs');
+    rescheduleInputs.style.display = this.value === 'reschedule' ? 'inline-block' : 'none';
+});
+
+// Handle checkboxes
+function toggleAllCheckboxes() {
+    const mainCheckbox = document.getElementById('select-all');
+    const checkboxes = document.getElementsByClassName('schedule-checkbox');
+    Array.from(checkboxes).forEach(checkbox => {
+        checkbox.checked = mainCheckbox.checked;
+    });
+    updateGoogleTransferButton();
+}
+
+function updateGoogleTransferButton() {
+    const checkboxes = document.getElementsByClassName('schedule-checkbox');
+    const checkedCount = Array.from(checkboxes).filter(cb => cb.checked).length;
+    document.getElementById('transfer-to-google').disabled = checkedCount === 0;
+}
+
+// Add change event listener to all schedule checkboxes
+document.querySelectorAll('.schedule-checkbox').forEach(checkbox => {
+    checkbox.addEventListener('change', updateGoogleTransferButton);
+});
+
+// Handle Google Calendar transfer
+document.getElementById('transfer-to-google').addEventListener('click', function() {
+    const selectedSchedules = Array.from(document.getElementsByClassName('schedule-checkbox'))
+        .filter(cb => cb.checked)
+        .map(cb => cb.value);
+    
+    if (selectedSchedules.length === 0) {
+        alert('転送するスケジュールを選択してください。');
+        return;
+    }
+
+    fetch('{{ url_for("schedules.transfer_to_google") }}', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({schedules: selectedSchedules})
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            alert(data.message);
+            if (data.errors && data.errors.length > 0) {
+                console.warn('Errors occurred:', data.errors);
+            }
+        } else {
+            alert(data.message || 'エラーが発生しました。');
+        }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        alert('転送中にエラーが発生しました。');
+    });
+});
+
+// Handle schedule deletion
+function deleteSchedule(id) {
+    if (confirm('このスケジュールを削除してもよろしいですか？')) {
+        fetch(`/schedules/delete/${id}`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            }
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                location.reload();
+            } else {
+                alert(data.message || 'エラーが発生しました。');
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            alert('削除中にエラーが発生しました。');
+        });
+    }
+}
+
+// Confirm bulk actions
+function confirmBulkAction() {
+    const action = document.getElementById('bulk-action').value;
+    const selectedSchedules = document.querySelectorAll('input[name="selected_schedules[]"]:checked');
+    
+    if (selectedSchedules.length === 0) {
+        alert('スケジュールを選択してください。');
+        return false;
+    }
+
+    if (action === '') {
+        alert('操作を選択してください。');
+        return false;
+    }
+
+    if (action === 'delete') {
+        return confirm(`選択された${selectedSchedules.length}件のスケジュールを削除してもよろしいですか？`);
+    }
+
+    if (action === 'reschedule') {
+        const newDate = document.getElementById('new-date').value;
+        const newTime = document.getElementById('new-time').value;
+        if (!newDate || !newTime) {
+            alert('新しい日時を選択してください。');
+            return false;
+        }
+        return confirm(`選択された${selectedSchedules.length}件のスケジュールの日時を変更してもよろしいですか？`);
+    }
+
+    return true;
+}
+</script>
+{% endblock %}
             <h2 id="modalSubject"></h2>
             <div class="email-metadata">
                 <p id="modalSender"></p>
