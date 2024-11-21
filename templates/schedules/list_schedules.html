@@ -369,6 +369,37 @@
 
 <div class="add-schedule">
 <script>
+<script>
+// Reset button functionality
+document.getElementById('resetFiltersBtn').addEventListener('click', function() {
+    // Clear all filter inputs
+    document.getElementById('status').value = '';
+    document.getElementById('date_range').value = '';
+    document.getElementById('lead_search').value = '';
+    document.getElementById('date_from').value = '';
+    document.getElementById('date_to').value = '';
+    document.getElementById('page_size').value = '10';
+    document.getElementById('sort').value = 'asc';
+    // Submit the form
+    document.getElementById('filterForm').submit();
+});
+
+// Sort button functionality
+document.getElementById('sortButton').addEventListener('click', function() {
+    const sortInput = document.getElementById('sort');
+    const currentSort = sortInput.value;
+    const newSort = currentSort === 'asc' ? 'desc' : 'asc';
+    sortInput.value = newSort;
+    
+    // Update icon
+    const icon = document.getElementById('sortIcon');
+    icon.className = `fas fa-sort-${newSort === 'asc' ? 'up' : 'down'}`;
+    
+    // Submit the form
+    document.getElementById('filterForm').submit();
+});
+
+</script>
 async function analyzeSchedules() {
     const loadingDiv = document.getElementById('analysisLoading');
     const resultDiv = document.getElementById('analysisResult');
