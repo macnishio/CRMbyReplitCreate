@@ -223,6 +223,37 @@
             </div>
             {% endfor %}
         </div>
+    <!-- ページネーションコントロール -->
+    <div class="pagination-controls">
+        <div class="pagination-info">
+            全{{ pagination.total }}件中 {{ (pagination.page - 1) * pagination.per_page + 1 }}～{{ min(pagination.page * pagination.per_page, pagination.total) }}件を表示
+        </div>
+        <div class="pagination-links">
+            {% if pagination.has_prev %}
+                <a href="{{ url_for('tasks.list_tasks', page=pagination.prev_num, **request.args) }}" class="btn btn-pagination">
+                    <i class="fas fa-chevron-left"></i> 前へ
+                </a>
+            {% endif %}
+            
+            {% for page in pagination.iter_pages(left_edge=2, left_current=2, right_current=2, right_edge=2) %}
+                {% if page %}
+                    {% if page != pagination.page %}
+                        <a href="{{ url_for('tasks.list_tasks', page=page, **request.args) }}" class="btn btn-pagination">{{ page }}</a>
+                    {% else %}
+                        <span class="btn btn-pagination active">{{ page }}</span>
+                    {% endif %}
+                {% else %}
+                    <span class="pagination-ellipsis">...</span>
+                {% endif %}
+            {% endfor %}
+
+            {% if pagination.has_next %}
+                <a href="{{ url_for('tasks.list_tasks', page=pagination.next_num, **request.args) }}" class="btn btn-pagination">
+                    次へ <i class="fas fa-chevron-right"></i>
+                </a>
+            {% endif %}
+        </div>
+    </div>
     </form>
 
     <!-- 新規タスク追加ボタン -->
@@ -443,6 +474,55 @@
 }
 
 .btn-complete { background: #28a745; }
+    /* Pagination styles */
+    .pagination-controls {
+        margin-top: 20px;
+        margin-bottom: 20px;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 15px;
+        background: white;
+        padding: 20px;
+        border-radius: 8px;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    }
+
+    .pagination-info {
+        color: #666;
+        font-size: 0.9em;
+    }
+
+    .pagination-links {
+        display: flex;
+        gap: 8px;
+        align-items: center;
+        flex-wrap: wrap;
+        justify-content: center;
+    }
+
+    .btn-pagination {
+        padding: 8px 12px;
+        background: #f8f9fa;
+        color: #007bff;
+        border: 1px solid #dee2e6;
+    }
+
+    .btn-pagination:hover {
+        background: #e9ecef;
+        color: #0056b3;
+    }
+
+    .btn-pagination.active {
+        background: #007bff;
+        color: white;
+        border-color: #007bff;
+    }
+
+    .pagination-ellipsis {
+        color: #6c757d;
+        padding: 0 5px;
+    }
 .btn-edit { background: #17a2b8; }
 .btn-delete { background: #dc3545; }
 
