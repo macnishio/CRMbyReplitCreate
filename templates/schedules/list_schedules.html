@@ -48,6 +48,7 @@
 .pagination-info {
     text-align: center;
     color: #6c757d;
+    <input type="hidden" id="sort" name="sort" value="{{ filters.sort }}">
     margin-top: 1rem;
 }
 
@@ -674,19 +675,19 @@ document.addEventListener('DOMContentLoaded', function() {
     });
 
     // ソートボタンの処理
-    let currentSort = 'asc';
     document.getElementById('sortButton').addEventListener('click', function() {
-        const icon = document.getElementById('sortIcon');
-        currentSort = currentSort === 'asc' ? 'desc' : 'asc';
-        icon.className = `fas fa-sort-${currentSort === 'asc' ? 'up' : 'down'}`;
+        const icon = this.querySelector('i');
+        const currentSort = document.getElementById('sort').value;
+        const newSort = currentSort === 'asc' ? 'desc' : 'asc';
         
-        const form = document.getElementById('filterForm');
-        const sortInput = document.createElement('input');
-        sortInput.type = 'hidden';
-        sortInput.name = 'sort';
-        sortInput.value = currentSort;
-        form.appendChild(sortInput);
-        form.submit();
+        // Update the hidden sort input
+        document.getElementById('sort').value = newSort;
+        
+        // Update the icon
+        icon.className = `fas fa-sort-${newSort === 'asc' ? 'up' : 'down'}`;
+        
+        // Submit the form
+        document.getElementById('filterForm').submit();
     });
 
     // AI分析ボタンの処理
