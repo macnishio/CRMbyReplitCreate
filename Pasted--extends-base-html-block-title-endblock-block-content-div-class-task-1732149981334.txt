@@ -645,6 +645,151 @@
 
     .analysis-grid {
         grid-template-columns: 1fr;
+// AJAX pagination functions
+function loadTasks(page, perPage) {
+    // Show loading indicator
+    const taskGrid = document.querySelector('.task-grid');
+    taskGrid.innerHTML = '<div class="loading-indicator"><i class="fas fa-spinner fa-spin"></i> Loading tasks...</div>';
+
+    // Get current URL and params
+    const url = new URL(window.location.href);
+    const params = new URLSearchParams(url.search);
+    
+    // Update pagination parameters
+    params.set('page', page);
+    if (perPage) params.set('per_page', perPage);
+    
+    // Make AJAX request
+    fetch(`${url.pathname}?${params.toString()}`, {
+        headers: {
+            'X-Requested-With': 'XMLHttpRequest'
+        }
+    })
+    .then(response => response.json())
+    .then(data => {
+        // Update task grid
+        taskGrid.innerHTML = '';
+        data.tasks.forEach(task => {
+            const taskElement = createTaskElement(task);
+            taskGrid.appendChild(taskElement);
+        });
+
+        // Update pagination controls
+        updatePaginationControls(data);
+        
+        // Update status counts if available
+        if (data.task_status_counts) {
+            updateStatusCounts(data.task_status_counts);
+        }
+
+        // Update URL without reload
+        url.searchParams.set('page', page);
+        window.history.pushState({}, '', url);
+    })
+    .catch(error => {
+        console.error('Error loading tasks:', error);
+        taskGrid.innerHTML = '<div class="error-message">Error loading tasks. Please try again.</div>';
+    });
+}
+
+function createTaskElement(task) {
+    const taskDiv = document.createElement('div');
+    taskDiv.className = 'task-card';
+    
+    const dueDate = new Date(task.due_date);
+    const isOverdue = dueDate < new Date() && !task.completed;
+    
+    taskDiv.innerHTML = `
+        <div class="task-header">
+            <input type="checkbox" class="task-checkbox" value="${task.id}">
+            <h3>${task.title}</h3>
+        </div>
+        <div class="task-content">
+            <p>${task.description}</p>
+            <div class="task-metadata">
+                <span class="due-date ${isOverdue ? 'overdue' : ''}">${task.due_date}</span>
+                <span class="status">${task.status}</span>
+                ${task.lead ? `<span class="lead">Lead: ${task.lead.name}</span>` : ''}
+            </div>
+        </div>
+        <div class="task-actions">
+            <button class="btn btn-complete" data-task-id="${task.id}">
+                <i class="fas fa-check"></i>
+            </button>
+            <button class="btn btn-edit" onclick="window.location.href='/tasks/edit/${task.id}'">
+                <i class="fas fa-edit"></i>
+            </button>
+            <button class="btn btn-delete" data-task-id="${task.id}">
+                <i class="fas fa-trash"></i>
+            </button>
+        </div>
+    `;
+
+    // Reattach event listeners
+    const completeBtn = taskDiv.querySelector('.btn-complete');
+    const deleteBtn = taskDiv.querySelector('.btn-delete');
+    
+    completeBtn.addEventListener('click', () => TaskManager.toggleTaskCompletion(task.id));
+    deleteBtn.addEventListener('click', () => TaskManager.deleteTask(task.id));
+
+    return taskDiv;
+}
+
+function updatePaginationControls(data) {
+    const paginationLinks = document.querySelector('.pagination-links');
+    if (!paginationLinks) return;
+
+    let html = '';
+    
+    // Previous button
+    if (data.has_prev) {
+        html += `<button class="btn-pagination" onclick="loadTasks(${data.current_page - 1})">&laquo; Previous</button>`;
+    }
+
+    // Page numbers
+    for (let i = 1; i <= data.pages; i++) {
+        if (
+            i === 1 || 
+            i === data.pages || 
+            (i >= data.current_page - 2 && i <= data.current_page + 2)
+        ) {
+            html += `<button class="btn-pagination ${i === data.current_page ? 'active' : ''}" 
+                onclick="loadTasks(${i})">${i}</button>`;
+        } else if (
+            i === data.current_page - 3 || 
+            i === data.current_page + 3
+        ) {
+            html += '<span class="pagination-ellipsis">...</span>';
+        }
+    }
+
+    // Next button
+    if (data.has_next) {
+        html += `<button class="btn-pagination" onclick="loadTasks(${data.current_page + 1})">Next &raquo;</button>`;
+    }
+
+    paginationLinks.innerHTML = html;
+
+    // Update pagination info
+    const paginationInfo = document.querySelector('.pagination-info');
+    if (paginationInfo) {
+        paginationInfo.textContent = `Showing ${data.current_page} of ${data.pages} pages (${data.total} items)`;
+    }
+}
+
+function updateStatusCounts(statusCounts) {
+    const statusList = document.querySelector('.analysis-card:nth-child(2) ul');
+    if (statusList) {
+        statusList.innerHTML = statusCounts.map(status => 
+            `<li>${status.status}: ${status.count}件</li>`
+        ).join('');
+    }
+}
+
+// Override the changePageSize function
+function changePageSize(size) {
+    loadTasks(1, size);
+}
     }
 
     .analysis-header {

@@ -123,6 +123,32 @@ def list_tasks():
 
     task_status_counts = [{'status': status, 'count': count} for status, count in status_counts]
 
+    # For AJAX requests, return JSON response
+    if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+        tasks_data = []
+        for task in paginated_tasks.items:
+            task_data = {
+                'id': task.id,
+                'title': task.title,
+                'description': task.description,
+                'due_date': task.due_date.strftime('%Y-%m-%d'),
+                'status': task.status,
+                'completed': task.completed,
+                'lead': {'name': task.lead.name} if task.lead else None,
+            }
+            tasks_data.append(task_data)
+
+        return jsonify({
+            'tasks': tasks_data,
+            'total': paginated_tasks.total,
+            'pages': paginated_tasks.pages,
+            'current_page': paginated_tasks.page,
+            'has_next': paginated_tasks.has_next,
+            'has_prev': paginated_tasks.has_prev,
+            'task_status_counts': task_status_counts
+        })
+
+    # For regular requests, return HTML template
     return render_template('tasks/list_tasks.html',
                          tasks=paginated_tasks.items,
                          task_status_counts=task_status_counts,
