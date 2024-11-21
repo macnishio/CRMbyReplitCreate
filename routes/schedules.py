@@ -96,16 +96,12 @@ def list_schedules():
         for status in ['Scheduled', 'In Progress', 'Completed', 'Cancelled']
     ]
 
-    # Get AI analysis
-    ai_analysis = analyze_schedules(paginated_schedules.items)
-
     return render_template('schedules/list_schedules.html',
                          schedules=paginated_schedules.items,
                          pagination=paginated_schedules,
                          filters=filters,
                          total_count=total_count,
                          schedule_status_counts=schedule_status_counts,
-                         ai_analysis=ai_analysis,
                          now=datetime.utcnow,
                          timedelta=timedelta)
 
@@ -325,5 +321,53 @@ def transfer_to_google():
         return jsonify({
             'success': False,
             'message': '転送中にエラーが発生しました。',
+            'error': str(e)
+        }), 500
+
+@bp.route('/analyze', methods=['POST'])
+@login_required
+def analyze():
+    try:
+        # Get filtered schedules
+        query = Schedule.query.filter_by(user_id=current_user.id)
+
+        # Apply any active filters from the request
+        if request.json:
+            filters = request.json
+            if filters.get('status'):
+                query = query.filter(Schedule.status == filters['status'])
+            
+            if filters.get('date_range'):
+                today = datetime.utcnow().replace(hour=0, minute=0, second=0, microsecond=0)
+                if filters['date_range'] == 'today':
+                    query = query.filter(
+                        Schedule.start_time >= today,
+                        Schedule.start_time < today + timedelta(days=1)
+                    )
+                elif filters['date_range'] == 'tomorrow':
+                    query = query.filter(
+                        Schedule.start_time >= today + timedelta(days=1),
+                        Schedule.start_time < today + timedelta(days=2)
+                    )
+                elif filters['date_range'] == 'week':
+                    query = query.filter(
+                        Schedule.start_time >= today,
+                        Schedule.start_time < today + timedelta(days=7)
+                    )
+                elif filters['date_range'] == 'month':
+                    query = query.filter(
+                        Schedule.start_time >= today,
+                        Schedule.start_time < today + timedelta(days=30)
+                    )
+
+        schedules = query.all()
+        analysis = analyze_schedules(schedules)
+        return jsonify({'success': True, 'analysis': analysis})
+
+    except Exception as e:
+        current_app.logger.error(f"Schedule analysis error: {str(e)}")
+        return jsonify({
+            'success': False,
+            'message': 'スケジュールの分析中にエラーが発生しました。',
             'error': str(e)
         }), 500

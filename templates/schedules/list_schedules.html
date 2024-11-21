@@ -210,7 +210,12 @@
                             <span class="status-label">{{ status.status }}</span>
                             <span class="status-count">{{ status.count }}件</span>
                             <div class="progress-bar">
-                                <div class="progress" style="width: {{ (status.count / (schedules|length if schedules|length > 0 else 1) * 100)|round }}%"></div>
+                                {% set total = schedules|length %}
+                                {% if total > 0 %}
+                                    <div class="progress" style="width: {{ (status.count / total * 100)|round }}%"></div>
+                                {% else %}
+                                    <div class="progress" style="width: 0%"></div>
+                                {% endif %}
                             </div>
                         </div>
                         {% endfor %}
@@ -221,11 +226,12 @@
                 <div class="analysis-card">
                     <h3><i class="fas fa-robot"></i> AI分析結果</h3>
                     <div id="aiAnalysisContent">
-                        {% if ai_analysis %}
-                            {{ ai_analysis|safe }}
-                        {% else %}
-                            <p>分析データがありません。「AI分析を実行」ボタンをクリックして分析を開始してください。</p>
-                        {% endif %}
+                        <div id="analysisResult">
+                            <p>「AI分析を実行」ボタンをクリックして分析を開始してください。</p>
+                        </div>
+                        <div id="analysisLoading" style="display: none;">
+                            <p><i class="fas fa-spinner fa-spin"></i> 分析中...</p>
+                        </div>
                     </div>
                 </div>
 
@@ -361,6 +367,58 @@
 </form>
 
 <div class="add-schedule">
+<script>
+async function analyzeSchedules() {
+    const loadingDiv = document.getElementById('analysisLoading');
+    const resultDiv = document.getElementById('analysisResult');
+    
+    try {
+        loadingDiv.style.display = 'block';
+        resultDiv.innerHTML = '';
+        
+        // Get current filter values
+        const filters = {
+            status: document.getElementById('status').value,
+            date_range: document.getElementById('date_range').value,
+            date_from: document.getElementById('date_from').value,
+            date_to: document.getElementById('date_to').value,
+        };
+        
+        const response = await fetch('/schedules/analyze', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(filters)
+        });
+        
+        const data = await response.json();
+        
+        if (data.success) {
+            resultDiv.innerHTML = data.analysis;
+        } else {
+            resultDiv.innerHTML = `<p class="error-message">${data.message}</p>`;
+        }
+    } catch (error) {
+        resultDiv.innerHTML = '<p class="error-message">分析中にエラーが発生しました。</p>';
+        console.error('Analysis error:', error);
+    } finally {
+        loadingDiv.style.display = 'none';
+    }
+}
+
+// Add event listener to the analyze button
+document.getElementById('analyzeBtn').addEventListener('click', analyzeSchedules);
+
+// Initialize tooltips and other components
+document.addEventListener('DOMContentLoaded', function() {
+    // Initialize tooltips
+    const tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
+    tooltipTriggerList.map(function (tooltipTriggerEl) {
+        return new bootstrap.Tooltip(tooltipTriggerEl);
+    });
+});
+</script>
     <a href="{{ url_for('schedules.add_schedule') }}" class="btn btn-add">新規スケジュールを追加</a>
 </div>
 
