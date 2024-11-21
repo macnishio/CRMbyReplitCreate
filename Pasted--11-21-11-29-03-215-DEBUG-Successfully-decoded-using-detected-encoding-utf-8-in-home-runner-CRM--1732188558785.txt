@@ -1,0 +1,22 @@
+-11-21 11:29:03,215 DEBUG: Successfully decoded using detected encoding: utf_8 [in /home/runner/CRM/email_receiver.py:83]
+2024-11-21 11:29:03,215 DEBUG: Added content part: 663 chars [in /home/runner/CRM/email_receiver.py:124]
+2024-11-21 11:29:03,215 DEBUG: Final content length: 663 [in /home/runner/CRM/email_receiver.py:149]
+2024-11-21 11:29:03,694 INFO: Found existing email with message_id: <673d18cb819bb_5a3065cf702015123d9@worker1462.optin.kks.ynwh.yahoo.co.jp.mail>, lead_id: 1201 [in /home/runner/CRM/email_receiver.py:818]
+2024-11-21 11:29:03,694 INFO: Duplicate email detected from shopping-snl-master@mail.yahoo.co.jp [in /home/runner/CRM/email_receiver.py:1047]
+2024-11-21 11:29:04,147 DEBUG: Session committed successfully. Duration: 1.37s [in /home/runner/CRM/email_receiver.py:667]
+2024-11-21 11:29:04,147 DEBUG: Session closed. Total duration: 1.37s [in /home/runner/CRM/email_receiver.py:683]
+2024-11-21 11:29:04,175 INFO: Found existing email with message_id: <20241119231857.734-2a97b64785e2bb1cb2817aabb076c087e027b9d27bb047fc4b60aa229c00a2dd@mnybk.com>, lead_id: 953 [in /home/runner/CRM/email_receiver.py:818]
+2024-11-21 11:29:04,175 INFO: Duplicate email detected from accounting.feedback@moneyforward.com [in /home/runner/CRM/email_receiver.py:1047]
+2024-11-21 11:29:04,595 ERROR: Database error: (psycopg2.errors.UndefinedColumn) column schedules.location does not exist
+LINE 2: ...les.is_ai_generated AS schedules_is_ai_generated, schedules....
+                                                             ^
+
+[SQL: SELECT count(*) AS count_1 
+FROM (SELECT schedules.id AS schedules_id, schedules.title AS schedules_title, schedules.description AS schedules_description, schedules.start_time AS schedules_start_time, schedules.end_time AS schedules_end_time, schedules.status AS schedules_status, schedules.user_id AS schedules_user_id, schedules.lead_id AS schedules_lead_id, schedules.email_id AS schedules_email_id, schedules.is_ai_generated AS schedules_is_ai_generated, schedules.location AS schedules_location, schedules.attendees AS schedules_attendees 
+FROM schedules 
+WHERE schedules.user_id = %(user_id_1)s ORDER BY schedules.start_time ASC) AS anon_1]
+[parameters: {'user_id_1': 2}]
+(Background on this error at: https://sqlalche.me/e/20/f405) [in /home/runner/CRM/app.py:94]
+2024-11-21 11:29:04,598 DEBUG: Starting email content processing [in /home/runner/CRM/email_receiver.py:60]
+2024-11-21 11:29:04,600 DEBUG: Detected utf_8 with confidence 0.99 [in /home/runner/CRM/email_receiver.py:202]
+2024-11-21 11:29:04,600 DEBUG: Successfully d
