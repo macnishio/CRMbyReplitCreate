@@ -123,6 +123,10 @@ args = "Fix Migration"
 task = "workflow.run"
 args = "Add Fields"
 
+[[workflows.workflow.tasks]]
+task = "workflow.run"
+args = "Add Columns"
+
 [[workflows.workflow]]
 name = "Run Flask App"
 author = "agent"
@@ -343,8 +347,11 @@ author = "agent"
 agentRequireRestartOnSave = false
 
 [[workflows.workflow.tasks]]
+task = "packager.installForAll"
+
+[[workflows.workflow.tasks]]
 task = "shell.exec"
-args = "flask db init && flask db migrate -m 'Fix email schema' && flask db upgrade"
+args = "flask db merge heads"
 
 #[[workflows.workflow]]
 #name = "Fix Database Schema"
@@ -513,6 +520,20 @@ task = "packager.installForAll"
 [[workflows.workflow.tasks]]
 task = "shell.exec"
 args = "flask db migrate -m 'Add location and attendees fields to Schedule model' && flask db upgrade"
+
+[[workflows.workflow]]
+name = "Add Columns"
+author = "agent"
+
+[workflows.workflow.metadata]
+agentRequireRestartOnSave = false
+
+[[workflows.workflow.tasks]]
+task = "packager.installForAll"
+
+[[workflows.workflow.tasks]]
+task = "shell.exec"
+args = "flask db migrate -m 'Add location and attendees columns to Schedule' && flask db upgrade"
 
 [deployment]
 run = ["sh", "-c", "python3 app.py"]
