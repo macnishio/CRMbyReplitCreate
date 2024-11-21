@@ -8,7 +8,6 @@ from ai_analysis import analyze_schedules
 from google.oauth2 import service_account
 from googleapiclient.discovery import build
 import os
-import json
 from forms import ScheduleForm
 
 bp = Blueprint('schedules', __name__)
@@ -17,25 +16,10 @@ bp = Blueprint('schedules', __name__)
 @bp.route('')
 @login_required
 def list_schedules():
-    # Load user's saved filter preferences
-    user_settings = current_user.settings
-    saved_filters = {}
-    if user_settings and user_settings.filter_preferences:
-        try:
-            all_filters = json.loads(user_settings.filter_preferences)
-            saved_filters = all_filters.get('schedules', {})
-        except json.JSONDecodeError:
-            current_app.logger.error("Failed to parse saved filter preferences")
-
-    # Get filter parameters from request, fallback to saved filters
-    date_filter = request.args.get('date_filter', saved_filters.get('date_filter', ''))
-    lead_filter = request.args.get('lead_filter', saved_filters.get('lead_filter', ''))
-    ai_generated_filter = request.args.get('ai_generated_filter', saved_filters.get('ai_generated_filter', ''))
-
-    # Build base query
     query = Schedule.query.filter_by(user_id=current_user.id)
 
-    # Apply date filter
+    # Apply filters if provided
+    date_filter = request.args.get('date_filter')
     if date_filter:
         today = datetime.utcnow().replace(hour=0, minute=0, second=0, microsecond=0)
         if date_filter == 'today':
@@ -54,18 +38,6 @@ def list_schedules():
                 Schedule.start_time < today + timedelta(days=30)
             )
 
-    # Apply lead filter
-    if lead_filter:
-        query = query.filter(Schedule.lead_id == lead_filter)
-
-    # Apply AI generated filter
-    if ai_generated_filter:
-        is_ai_generated = ai_generated_filter.lower() == 'true'
-        query = query.filter(Schedule.is_ai_generated == is_ai_generated)
-
-    # Get all leads for the filter dropdown
-    leads = Lead.query.filter_by(user_id=current_user.id).order_by(Lead.name).all()
-
     # Order by start time and eager load lead relationship
     schedules = query.options(db.joinedload(Schedule.lead)).order_by(Schedule.start_time.asc()).all()
 
@@ -74,7 +46,6 @@ def list_schedules():
 
     return render_template('schedules/list_schedules.html',
                          schedules=schedules,
-                         leads=leads,
                          ai_analysis=ai_analysis,
                          now=datetime.utcnow,
                          timedelta=timedelta)

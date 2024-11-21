@@ -3,48 +3,6 @@
 {% block content %}
 <h1>スケジュール一覧</h1>
 
-<div class="filter-section">
-    <form id="filterForm" method="GET" action="{{ url_for('schedules.list_schedules') }}">
-        <div class="filter-controls">
-            <div class="filter-group">
-                <label for="date_filter">期間:</label>
-                <select name="date_filter" id="date_filter">
-                    <option value="">すべて</option>
-                    <option value="today" {% if request.args.get('date_filter') == 'today' %}selected{% endif %}>今日</option>
-                    <option value="week" {% if request.args.get('date_filter') == 'week' %}selected{% endif %}>今週</option>
-                    <option value="month" {% if request.args.get('date_filter') == 'month' %}selected{% endif %}>今月</option>
-                </select>
-            </div>
-            
-            <div class="filter-group">
-                <label for="lead_filter">リード:</label>
-                <select name="lead_filter" id="lead_filter">
-                    <option value="">すべて</option>
-                    {% for lead in leads %}
-                    <option value="{{ lead.id }}" {% if request.args.get('lead_filter')|int == lead.id %}selected{% endif %}>
-                        {{ lead.name }}
-                    </option>
-                    {% endfor %}
-                </select>
-            </div>
-
-            <div class="filter-group">
-                <label for="ai_generated_filter">AI生成:</label>
-                <select name="ai_generated_filter" id="ai_generated_filter">
-                    <option value="">すべて</option>
-                    <option value="true" {% if request.args.get('ai_generated_filter') == 'true' %}selected{% endif %}>AI生成のみ</option>
-                    <option value="false" {% if request.args.get('ai_generated_filter') == 'false' %}selected{% endif %}>手動作成のみ</option>
-                </select>
-            </div>
-
-            <div class="filter-actions">
-                <button type="submit" class="btn btn-primary">フィルター適用</button>
-                <button type="button" onclick="clearFilters()" class="btn btn-secondary">クリア</button>
-                <button type="button" onclick="saveFilters()" class="btn btn-success">フィルターを保存</button>
-            </div>
-        </div>
-    </form>
-</div>
 <!-- Bulk Operations Form -->
 <form method="POST" action="{{ url_for('schedules.bulk_action') }}" id="bulkForm" onsubmit="return confirmBulkAction()">
     <div class="bulk-actions">
@@ -95,51 +53,7 @@
     </div>
 
     <!-- Schedule Grid -->
-    <div class="filter-section">
-    <form id="filterForm" class="filter-controls">
-        <div class="filter-group">
-            <label for="date_filter">日付フィルター</label>
-            <select name="date_filter" id="date_filter">
-                <option value="">全期間</option>
-                <option value="today" {% if request.args.get('date_filter') == 'today' %}selected{% endif %}>今日</option>
-                <option value="week" {% if request.args.get('date_filter') == 'week' %}selected{% endif %}>今週</option>
-                <option value="month" {% if request.args.get('date_filter') == 'month' %}selected{% endif %}>今月</option>
-            </select>
-        </div>
-
-        <div class="filter-group">
-            <label for="lead_filter">リード</label>
-            <select name="lead_filter" id="lead_filter">
-                <option value="">すべて</option>
-                {% for lead in leads %}
-                    <option value="{{ lead.id }}" {% if request.args.get('lead_filter')|string == lead.id|string %}selected{% endif %}>
-                        {{ lead.name }}
-                    </option>
-                {% endfor %}
-            </select>
-        </div>
-
-        <div class="filter-group">
-            <label for="ai_generated_filter">AI生成</label>
-            <select name="ai_generated_filter" id="ai_generated_filter">
-                <option value="">すべて</option>
-                <option value="true" {% if request.args.get('ai_generated_filter') == 'true' %}selected{% endif %}>はい</option>
-                <option value="false" {% if request.args.get('ai_generated_filter') == 'false' %}selected{% endif %}>いいえ</option>
-            </select>
-        </div>
-
-        <div class="filter-actions">
-            <button type="button" onclick="clearFilters()" class="btn btn-secondary">クリア</button>
-            <button type="button" onclick="saveFilters()" class="btn btn-primary">フィルターを保存</button>
-        </div>
-    </form>
-</div>
-
-<div class="filtered-count">
-    表示件数: <span id="filteredCount">{{ schedules|length }}</span> 件
-</div>
-
-<div class="schedule-grid">
+    <div class="schedule-grid">
         {% for schedule in schedules %}
         <div class="schedule-card {% if schedule.is_ai_generated %}ai-generated{% endif %}">
             <div class="schedule-select">
@@ -348,200 +262,55 @@ function deleteSchedule(scheduleId) {
 
 document.getElementById('bulk-action').addEventListener('change', function() {
     const rescheduleInputs = document.getElementById('reschedule-inputs');
-<script>
-document.addEventListener('DOMContentLoaded', function() {
-    // Add event listeners to all filter controls
-    const filterControls = document.querySelectorAll('#filterForm select');
-    filterControls.forEach(control => {
-        control.addEventListener('change', function() {
-            document.getElementById('filterForm').submit();
-        });
-    });
+    rescheduleInputs.style.display = this.value === 'reschedule' ? 'block' : 'none';
 });
 
-function clearFilters() {
-    const form = document.getElementById('filterForm');
-    const selects = form.getElementsByTagName('select');
-    for (let select of selects) {
-        select.value = '';
-    }
-    form.submit();
+document.addEventListener('DOMContentLoaded', function() {
+    const checkboxes = document.querySelectorAll('.schedule-checkbox');
+    checkboxes.forEach(checkbox => {
+        checkbox.addEventListener('change', updateButtonStates);
+    });
+    updateButtonStates();
+});
+
+function updateButtonStates() {
+    const selectedCount = document.querySelectorAll('input[name="selected_schedules[]"]:checked').length;
+    document.getElementById('transfer-to-google').disabled = selectedCount === 0;
+    document.getElementById('bulk-apply-btn').disabled = selectedCount === 0;
 }
 
-function saveFilters() {
-    const form = document.getElementById('filterForm');
-    const filterData = {
-        date_filter: form.date_filter.value,
-        lead_filter: form.lead_filter.value,
-        ai_generated_filter: form.ai_generated_filter.value
-    };
+document.getElementById('transfer-to-google').addEventListener('click', function() {
+    const selectedSchedules = Array.from(document.querySelectorAll('input[name="selected_schedules[]"]:checked'))
+        .map(checkbox => checkbox.value);
 
-    fetch('/api/user/settings/filters', {
+    if (selectedSchedules.length === 0) {
+        alert('転送するイベントを選択してください。');
+        return;
+    }
+
+    if (!confirm('選択したイベントをGoogleカレンダーに転送してもよろしいですか？')) {
+        return;
+    }
+
+    fetch("{{ url_for('schedules.transfer_to_google') }}", {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json',
         },
-        body: JSON.stringify({
-            filter_type: 'schedules',
-            filters: filterData
-        })
+        body: JSON.stringify({ schedules: selectedSchedules }),
     })
     .then(response => response.json())
     .then(data => {
+        alert(data.message);
         if (data.success) {
-            alert('フィルター設定を保存しました。');
-        } else {
-            alert('フィルター設定の保存に失敗しました。');
+            location.reload();
         }
     })
     .catch(error => {
         console.error('Error:', error);
-        alert('フィルター設定の保存中にエラーが発生しました。');
+        alert('イベントの転送中にエラーが発生しました。');
     });
-}
-</script>
-
-<style>
-.filter-section {
-    margin: 20px 0;
-    padding: 15px;
-    background-color: #f8f9fa;
-    border-radius: 5px;
-}
-
-.filter-controls {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 15px;
-    align-items: flex-end;
-}
-
-.filter-group {
-    display: flex;
-    flex-direction: column;
-    gap: 5px;
-}
-
-.filter-group label {
-    font-weight: 500;
-    color: #495057;
-}
-
-.filter-group select {
-    padding: 8px;
-    border: 1px solid #ced4da;
-    border-radius: 4px;
-    min-width: 150px;
-}
-
-.filter-actions {
-    display: flex;
-    gap: 10px;
-    margin-left: auto;
-}
-
-.filtered-count {
-    margin: 15px 0;
-    padding: 10px;
-    background-color: #e9ecef;
-    border-radius: 4px;
-    font-weight: 500;
-}
-
-.filter-section {
-    margin: 20px 0;
-    padding: 15px;
-    background-color: #f8f9fa;
-    border-radius: 5px;
-}
-
-.filter-controls {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 15px;
-    align-items: flex-end;
-}
-
-.filter-group {
-    display: flex;
-    flex-direction: column;
-    gap: 5px;
-}
-
-.filter-group label {
-    font-weight: 500;
-    color: #495057;
-}
-
-.filter-group select {
-    padding: 8px;
-    border: 1px solid #ced4da;
-    border-radius: 4px;
-    min-width: 150px;
-}
-
-.filter-actions {
-    display: flex;
-    gap: 10px;
-    margin-left: auto;
-}
-
-.btn-secondary {
-    background-color: #6c757d;
-    color: white;
-}
-
-.filter-badge {
-    display: inline-block;
-    padding: 4px 8px;
-    background-color: #e9ecef;
-    border-radius: 4px;
-    margin-right: 8px;
-    font-size: 0.9em;
-}
-</style>
-
-<script>
-function clearFilters() {
-    const form = document.getElementById('filterForm');
-    const selects = form.getElementsByTagName('select');
-    for (let select of selects) {
-        select.value = '';
-    }
-    form.submit();
-}
-
-function saveFilters() {
-    const form = document.getElementById('filterForm');
-    const filterData = {
-        date_filter: form.date_filter.value,
-        lead_filter: form.lead_filter.value,
-        ai_generated_filter: form.ai_generated_filter.value
-    };
-
-    fetch('/api/user/settings/filters', {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-            filter_type: 'schedules',
-            filters: filterData
-        })
-    })
-    .then(response => response.json())
-    .then(data => {
-        if (data.success) {
-            alert('フィルター設定を保存しました。');
-        } else {
-            alert('フィルター設定の保存に失敗しました。');
-        }
-    })
-    .catch(error => {
-        console.error('Error:', error);
-        alert('フィルター設定の保存中にエラーが発生しました。');
-    });
-}
+});
 
 function showEmailModal(emailId) {
     fetch(`/api/emails/${emailId}`)
