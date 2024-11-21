@@ -104,8 +104,8 @@ def list_tasks():
     page = request.args.get('page', 1, type=int)
     per_page = 10  # Number of items per page
 
-    # Order by due date and eager load lead relationship
-    query = query.options(db.joinedload(Task.lead)).order_by(Task.due_date.asc())
+    # Order by due date descending and eager load lead relationship
+    query = query.options(db.joinedload(Task.lead)).order_by(Task.due_date.desc())  # ここを変更
 
     # Paginate the results
     paginated_tasks = query.paginate(page=page, per_page=per_page, error_out=False)
@@ -120,8 +120,8 @@ def list_tasks():
 
     return render_template('tasks/list_tasks.html',
                          tasks=paginated_tasks.items,
-                         task_status_counts=task_status_counts,
                          pagination=paginated_tasks,
+                         task_status_counts=task_status_counts,
                          ai_analysis=None,
                          filters={
                              'status': status,

@@ -222,49 +222,7 @@
                 </div>
             </div>
             {% endfor %}
-        </div
-            {% if pagination.pages > 1 %}
-            <div class="pagination-container">
-                <div class="pagination">
-                    {% if pagination.has_prev %}
-                        <a href="{{ url_for('tasks.list_tasks', page=pagination.prev_num, 
-                            status=filters.status, 
-                            due_date=filters.due_date, 
-                            lead_search=filters.lead_search, 
-                            date_from=filters.date_from, 
-                            date_to=filters.date_to) }}" 
-                           class="page-link">&laquo; 前へ</a>
-                    {% endif %}
-
-                    {% for page_num in range(pagination.page - 2, pagination.page + 3) if page_num > 0 and page_num <= pagination.pages %}
-                        <a href="{{ url_for('tasks.list_tasks', page=page_num,
-                            status=filters.status,
-                            due_date=filters.due_date,
-                            lead_search=filters.lead_search,
-                            date_from=filters.date_from,
-                            date_to=filters.date_to) }}" 
-                           class="page-link {% if page_num == pagination.page %}active{% endif %}">
-                            {{ page_num }}
-                        </a>
-                    {% endfor %}
-
-                    {% if pagination.has_next %}
-                        <a href="{{ url_for('tasks.list_tasks', page=pagination.next_num,
-                            status=filters.status,
-                            due_date=filters.due_date,
-                            lead_search=filters.lead_search,
-                            date_from=filters.date_from,
-                            date_to=filters.date_to) }}" 
-                           class="page-link">次へ &raquo;</a>
-                    {% endif %}
-                </div>
-                <div class="pagination-info">
-                    ページ {{ pagination.page }} / {{ pagination.pages }} (全{{ pagination.total }}件)
-                </div>
-            </div>
-            {% endif %}
-
-            
+        </div>
     </form>
 
     <!-- 新規タスク追加ボタン -->
@@ -602,69 +560,6 @@
         margin: 10% auto;
     }
 }
-
-    <!-- ページネーション用のスタイルを追加 -->
-    .pagination-container {
-        margin: 20px 0;
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-        gap: 10px;
-    }
-
-    .pagination {
-        display: flex;
-        gap: 5px;
-        align-items: center;
-        justify-content: center;
-        margin-top: 20px;
-    }
-
-    .page-link {
-        display: inline-flex;
-        align-items: center;
-        justify-content: center;
-        padding: 8px 12px;
-        background-color: #fff;
-        border: 1px solid #dee2e6;
-        border-radius: 4px;
-        text-decoration: none;
-        color: #007bff;
-        min-width: 40px;
-        height: 40px;
-        transition: all 0.2s ease;
-    }
-
-    .page-link:hover {
-        background-color: #e9ecef;
-        color: #0056b3;
-        text-decoration: none;
-    }
-
-    .page-link.active {
-        background-color: #007bff;
-        color: #fff;
-        border-color: #007bff;
-    }
-
-    .pagination-info {
-        color: #6c757d;
-        font-size: 0.9em;
-        text-align: center;
-    }
-
-    @media (max-width: 768px) {
-        .pagination {
-            flex-wrap: wrap;
-        }
-
-        .page-link {
-            padding: 6px 10px;
-            min-width: 35px;
-            height: 35px;
-        }
-    }
-
 </style>
 
 
@@ -674,35 +569,13 @@
 document.addEventListener('DOMContentLoaded', function() {
     // グローバル変数
     const TaskManager = {
-        sortOrder: 'desc',
+        sortOrder: 'asc',
         currentEmailId: null,
 
         init: function() {
             this.setupEventListeners();
             this.setupEmailModal();
             this.setupBulkActions();
-            this.initialSort();  // この行を追加
-        },
-
-        // 3. 初期ソート用のメソッドを追加
-        initialSort: function() {
-            const taskGrid = document.querySelector('.task-grid');
-            const sortIcon = document.getElementById('sortIcon');
-
-            if (!taskGrid || !sortIcon) return;
-
-            const tasks = Array.from(taskGrid.children);
-            tasks.sort((a, b) => {
-                const dateA = new Date(a.querySelector('.due-date').innerText.trim());
-                const dateB = new Date(b.querySelector('.due-date').innerText.trim());
-                return dateB - dateA;  // 降順（新しい順）でソート
-            });
-
-            // アイコンを更新
-            sortIcon.className = 'fas fa-sort-down';
-
-            // タスクを並び替え
-            tasks.forEach(task => taskGrid.appendChild(task));
         },
 
         setupEventListeners: function() {

@@ -291,7 +291,7 @@ task = "packager.installForAll"
 [[workflows.workflow.tasks]]
 task = "shell.exec"
 args = "python3 app.py"
-waitForPort = 5000
+waitForPort = 80
 
 [[workflows.workflow]]
 name = "Init Database"
