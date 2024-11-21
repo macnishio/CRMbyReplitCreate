@@ -447,54 +447,7 @@ function saveFilters() {
     border-radius: 4px;
     font-weight: 500;
 }
-</style>
-    rescheduleInputs.style.display = this.value === 'reschedule' ? 'block' : 'none';
-});
 
-document.addEventListener('DOMContentLoaded', function() {
-    const checkboxes = document.querySelectorAll('.schedule-checkbox');
-    checkboxes.forEach(checkbox => {
-        checkbox.addEventListener('change', updateButtonStates);
-    });
-    updateButtonStates();
-});
-
-function updateButtonStates() {
-    const selectedCount = document.querySelectorAll('input[name="selected_schedules[]"]:checked').length;
-    document.getElementById('transfer-to-google').disabled = selectedCount === 0;
-    document.getElementById('bulk-apply-btn').disabled = selectedCount === 0;
-}
-
-document.getElementById('transfer-to-google').addEventListener('click', function() {
-    const selectedSchedules = Array.from(document.querySelectorAll('input[name="selected_schedules[]"]:checked'))
-        .map(checkbox => checkbox.value);
-
-    if (selectedSchedules.length === 0) {
-        alert('転送するイベントを選択してください。');
-        return;
-    }
-
-    if (!confirm('選択したイベントをGoogleカレンダーに転送してもよろしいですか？')) {
-        return;
-    }
-
-    fetch("{{ url_for('schedules.transfer_to_google') }}", {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ schedules: selectedSchedules }),
-    })
-    .then(response => response.json())
-    .then(data => {
-        alert(data.message);
-        if (data.success) {
-            location.reload();
-        }
-    })
-    .catch(error => {
-        console.error('Error:', error);
-<style>
 .filter-section {
     margin: 20px 0;
     padding: 15px;
@@ -589,10 +542,6 @@ function saveFilters() {
         alert('フィルター設定の保存中にエラーが発生しました。');
     });
 }
-</script>
-        alert('イベントの転送中にエラーが発生しました。');
-    });
-});
 
 function showEmailModal(emailId) {
     fetch(`/api/emails/${emailId}`)
