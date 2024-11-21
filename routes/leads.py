@@ -1,7 +1,8 @@
 from flask import Blueprint, render_template, redirect, url_for, flash, request, current_app
 from flask_login import login_required, current_user
-from models import Lead, Email
+from models import Lead, Email, UserSettings
 from extensions import db
+import json
 from datetime import datetime
 from sqlalchemy import func
 from ai_analysis import analyze_leads
@@ -58,27 +59,137 @@ def list_leads():
     else:
         saved_filters = {}
 
-    # Apply search filters
-    search_name = request.args.get('search_name', '').strip()
-    search_email = request.args.get('search_email', '').strip()
-    search_operator = request.args.get('search_operator', 'AND')
-    
-    if search_name or search_email:
-        name_filter = Lead.name.ilike(f'%{search_name}%') if search_name else None
-        email_filter = Lead.email.ilike(f'%{search_email}%') if search_email else None
+    # Advanced filter combinations
+    filter_groups = json.loads(request.args.get('filter_groups', '[]'))
+    if filter_groups:
+        # Process each filter group
+        group_conditions = []
+        for group in filter_groups:
+            group_operator = group.get('operator', 'AND')
+            conditions = []
+            
+            for condition in group.get('conditions', []):
+                field = condition.get('field')
+                operator = condition.get('operator')
+                value = condition.get('value')
+                
+                if not all([field, operator, value]):
+                    continue
+
+                # Handle Japanese text properly
+                if isinstance(value, str):
+                    value = value.strip()
+                    
+                if field == 'name':
+                    if operator == 'contains':
+                        conditions.append(Lead.name.ilike(f'%{value}%'))
+                    elif operator == 'equals':
+                        conditions.append(Lead.name == value)
+                    elif operator == 'starts_with':
+                        conditions.append(Lead.name.ilike(f'{value}%'))
+                    elif operator == 'ends_with':
+                        conditions.append(Lead.name.ilike(f'%{value}'))
+                elif field == 'email':
+                    if operator == 'contains':
+                        conditions.append(Lead.email.ilike(f'%{value}%'))
+                    elif operator == 'equals':
+                        conditions.append(Lead.email == value)
+                    elif operator == 'starts_with':
+                        conditions.append(Lead.email.ilike(f'{value}%'))
+                    elif operator == 'ends_with':
+                        conditions.append(Lead.email.ilike(f'%{value}'))
+                elif field == 'score':
+                    try:
+                        score_value = float(value)
+                        if operator == 'greater_than':
+                            conditions.append(Lead.score > score_value)
+                        elif operator == 'less_than':
+                            conditions.append(Lead.score < score_value)
+                        elif operator == 'equals':
+                            conditions.append(Lead.score == score_value)
+                        elif operator == 'greater_equal':
+                            conditions.append(Lead.score >= score_value)
+                        elif operator == 'less_equal':
+                            conditions.append(Lead.score <= score_value)
+                    except ValueError:
+                        continue
+                elif field == 'status':
+                    if operator == 'equals':
+                        conditions.append(Lead.status == value)
+                    elif operator == 'not_equals':
+                        conditions.append(Lead.status != value)
+                        
+            if conditions:
+                if group_operator == 'OR':
+                    group_conditions.append(db.or_(*conditions))
+                else:  # AND
+                    group_conditions.append(db.and_(*conditions))
         
-        if search_operator == 'OR':
-            if name_filter and email_filter:
-                query = query.filter(db.or_(name_filter, email_filter))
-            elif name_filter:
-                query = query.filter(name_filter)
-            elif email_filter:
-                query = query.filter(email_filter)
-        else:  # AND
-            if name_filter:
-                query = query.filter(name_filter)
-            if email_filter:
-                query = query.filter(email_filter)
+        if group_conditions:
+            query = query.filter(db.and_(*group_conditions))
+    else:  # Fall back to basic search
+        search_name = request.args.get('search_name', '').strip()
+        search_email = request.args.get('search_email', '').strip()
+        search_operator = request.args.get('search_operator', 'AND')
+        
+        if search_name or search_email:
+            name_filter = Lead.name.ilike(f'%{search_name}%') if search_name else None
+            email_filter = Lead.email.ilike(f'%{search_email}%') if search_email else None
+            
+            if search_operator == 'OR':
+                if name_filter and email_filter:
+                    query = query.filter(db.or_(name_filter, email_filter))
+                elif name_filter:
+                    query = query.filter(name_filter)
+                elif email_filter:
+                    query = query.filter(email_filter)
+            else:  # AND
+                if name_filter:
+                    query = query.filter(name_filter)
+                if email_filter:
+                    query = query.filter(email_filter)
+        for group in filter_groups:
+            group_operator = group.get('operator', 'AND')
+            conditions = []
+            
+            for condition in group.get('conditions', []):
+                field = condition.get('field')
+                operator = condition.get('operator')
+                value = condition.get('value')
+                
+                if not all([field, operator, value]):
+                    continue
+                    
+                if field == 'name':
+                    if operator == 'contains':
+                        conditions.append(Lead.name.ilike(f'%{value}%'))
+                    elif operator == 'equals':
+                        conditions.append(Lead.name == value)
+                elif field == 'email':
+                    if operator == 'contains':
+                        conditions.append(Lead.email.ilike(f'%{value}%'))
+                    elif operator == 'equals':
+                        conditions.append(Lead.email == value)
+                elif field == 'score':
+                    try:
+                        score_value = float(value)
+                        if operator == 'greater_than':
+                            conditions.append(Lead.score > score_value)
+                        elif operator == 'less_than':
+                            conditions.append(Lead.score < score_value)
+                        elif operator == 'equals':
+                            conditions.append(Lead.score == score_value)
+                    except ValueError:
+                        continue
+                        
+            if conditions:
+                if group_operator == 'OR':
+                    group_conditions.append(db.or_(*conditions))
+                else:
+                    group_conditions.append(db.and_(*conditions))
+        
+        if group_conditions:
+            query = query.filter(db.and_(*group_conditions))
     
     # Apply status filters
     statuses = request.args.getlist('status')
@@ -147,8 +258,8 @@ def list_leads():
             'statuses': statuses,
             'min_score': min_score,
             'max_score': max_score,
-            'date_from': date_from.strftime('%Y-%m-%d') if date_from else None,
-            'date_to': date_to.strftime('%Y-%m-%d') if date_to else None,
+            'date_from': date_from.strftime('%Y-%m-%d') if isinstance(date_from, datetime) else date_from,
+            'date_to': date_to.strftime('%Y-%m-%d') if isinstance(date_to, datetime) else date_to,
             'date_field': date_field,
             'sort_by': sort_by,
             'sort_order': sort_order
