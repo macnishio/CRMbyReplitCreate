@@ -1,0 +1,43 @@
+24-11-21 05:13:52,373 DEBUG: Final content length: 3289 [in /home/runner/CRM/email_receiver.py:149]
+2024-11-21 05:13:52,510 DEBUG: Connected successfully to imap.gmail.com [in /home/runner/CRM/email_receiver.py:561]
+2024-11-21 05:13:53,113 INFO: 172.31.196.82 - - [21/Nov/2024 05:13:53] "GET /schedules HTTP/1.1" 500 - [in /home/runner/CRM/.pythonlibs/lib/python3.11/site-packages/werkzeug/_internal.py:224]
+Traceback (most recent call last):
+  File "/home/runner/CRM/routes/schedules.py", line 24, in list_schedules
+    all_filters = json.loads(user_settings.filter_preferences)
+                  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+NameError: name 'json' is not defined
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/home/runner/CRM/.pythonlibs/lib/python3.11/site-packages/flask/app.py", line 2552, in __call__
+    return self.wsgi_app(environ, start_response)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/runner/CRM/.pythonlibs/lib/python3.11/site-packages/flask/app.py", line 2532, in wsgi_app
+    response = self.handle_exception(e)
+               ^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/runner/CRM/.pythonlibs/lib/python3.11/site-packages/flask/app.py", line 2529, in wsgi_app
+    response = self.full_dispatch_request()
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/runner/CRM/.pythonlibs/lib/python3.11/site-packages/flask/app.py", line 1825, in full_dispatch_request
+    rv = self.handle_user_exception(e)
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/runner/CRM/.pythonlibs/lib/python3.11/site-packages/flask/app.py", line 1823, in full_dispatch_request
+    rv = self.dispatch_request()
+         ^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/runner/CRM/.pythonlibs/lib/python3.11/site-packages/flask/app.py", line 1799, in dispatch_request
+    return self.ensure_sync(self.view_functions[rule.endpoint])(**view_args)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/runner/CRM/.pythonlibs/lib/python3.11/site-packages/flask_login/utils.py", line 290, in decorated_view
+    return current_app.ensure_sync(func)(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/runner/CRM/routes/schedules.py", line 26, in list_schedules
+    except json.JSONDecodeError:
+           ^^^^^^^^^^^^^^^^^^^^^
+NameError: name 'json' is not defined
+2024-11-21 05:13:53,292 INFO: Found existing email with message_id: <bab73769-32d7-4f73-ab55-8ad0175f6134@fc9430.cuenote.jp>, lead_id: 954 [in /home/runner/CRM/email_receiver.py:818]
+2024-11-21 05:13:53,292 INFO: Duplicate email detected from info@freebieac.net [in /home/runner/CRM/email_receiver.py:1047]
+2024-11-21 05:13:53,439 INFO: 172.31.196.82 - - [21/Nov/2024 05:13:53] "GET /schedules?__debugger__=yes&cmd=resource&f=style.css HTTP/1.1" 200 - [in /home/runner/CRM/.pythonlibs/lib/python3.11/site-packages/werkzeug/_internal.py:224]
+2024-11-21 05:13:53,751 DEBUG: Session committed successfully. Duration: 1.40s [in /home/runner/CRM/email_receiver.py:667]
+2024-11-21 05:13:53,752 DEBUG: Session closed. Total duration: 1.40s [in /home/runner/CRM/email_receiver.py:683]
+2024-11-21 05:13:53,835 INFO: 172.31.196.82 - - [21/Nov/2024 0

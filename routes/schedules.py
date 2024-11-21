@@ -8,6 +8,7 @@ from ai_analysis import analyze_schedules
 from google.oauth2 import service_account
 from googleapiclient.discovery import build
 import os
+import json
 from forms import ScheduleForm
 
 bp = Blueprint('schedules', __name__)
