@@ -59,11 +59,13 @@ def list_leads():
     else:
         saved_filters = {}
 
+    # Initialize group_conditions before any conditional blocks
+    group_conditions = []
+
     # Advanced filter combinations
     filter_groups = json.loads(request.args.get('filter_groups', '[]'))
     if filter_groups:
         # Process each filter group
-        group_conditions = []
         for group in filter_groups:
             group_operator = group.get('operator', 'AND')
             conditions = []
@@ -148,48 +150,6 @@ def list_leads():
                     query = query.filter(name_filter)
                 if email_filter:
                     query = query.filter(email_filter)
-        for group in filter_groups:
-            group_operator = group.get('operator', 'AND')
-            conditions = []
-            
-            for condition in group.get('conditions', []):
-                field = condition.get('field')
-                operator = condition.get('operator')
-                value = condition.get('value')
-                
-                if not all([field, operator, value]):
-                    continue
-                    
-                if field == 'name':
-                    if operator == 'contains':
-                        conditions.append(Lead.name.ilike(f'%{value}%'))
-                    elif operator == 'equals':
-                        conditions.append(Lead.name == value)
-                elif field == 'email':
-                    if operator == 'contains':
-                        conditions.append(Lead.email.ilike(f'%{value}%'))
-                    elif operator == 'equals':
-                        conditions.append(Lead.email == value)
-                elif field == 'score':
-                    try:
-                        score_value = float(value)
-                        if operator == 'greater_than':
-                            conditions.append(Lead.score > score_value)
-                        elif operator == 'less_than':
-                            conditions.append(Lead.score < score_value)
-                        elif operator == 'equals':
-                            conditions.append(Lead.score == score_value)
-                    except ValueError:
-                        continue
-                        
-            if conditions:
-                if group_operator == 'OR':
-                    group_conditions.append(db.or_(*conditions))
-                else:
-                    group_conditions.append(db.and_(*conditions))
-        
-        if group_conditions:
-            query = query.filter(db.and_(*group_conditions))
     
     # Apply status filters
     statuses = request.args.getlist('status')
