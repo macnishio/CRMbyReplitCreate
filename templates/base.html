@@ -295,6 +295,92 @@
             }
         }
     </style>
+        /* Search box styles */
+        .search-container {
+            flex: 1;
+            max-width: 500px;
+            margin: 0 20px;
+            position: relative;
+        }
+
+        .search-box {
+            position: relative;
+            width: 100%;
+        }
+
+        .search-box input {
+            width: 100%;
+            padding: 8px 35px 8px 15px;
+            border: 1px solid #ddd;
+            border-radius: 20px;
+            font-size: 14px;
+            transition: all 0.3s ease;
+        }
+
+        .search-box input:focus {
+            outline: none;
+            border-color: #4a90e2;
+            box-shadow: 0 0 5px rgba(74, 144, 226, 0.3);
+        }
+
+        .search-icon {
+            position: absolute;
+            right: 12px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #666;
+        }
+
+        .search-results {
+            display: none;
+            position: absolute;
+            top: 100%;
+            left: 0;
+            right: 0;
+            background: white;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            margin-top: 5px;
+            max-height: 300px;
+            overflow-y: auto;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            z-index: 1000;
+        }
+
+        .search-results.active {
+            display: block;
+        }
+
+        .search-result-item {
+            padding: 10px 15px;
+            border-bottom: 1px solid #eee;
+            cursor: pointer;
+        }
+
+        .search-result-item:last-child {
+            border-bottom: none;
+        }
+
+        .search-result-item:hover {
+            background-color: #f5f5f5;
+        }
+
+        .search-result-name {
+            font-weight: bold;
+            color: #333;
+        }
+
+        .search-result-email {
+            font-size: 12px;
+            color: #666;
+        }
+
+        @media (max-width: 768px) {
+            .search-container {
+                max-width: 100%;
+                margin: 10px 0;
+            }
+        }
 </head>
 <body>
     <button class="mobile-toggle" id="mobileToggle">
@@ -318,6 +404,87 @@
                     <i class="fas fa-tachometer-alt"></i>
                     <span class="nav-text">ダッシュボード</span>
                 </a></li>
+    <script>
+    // Global search functionality
+    document.addEventListener('DOMContentLoaded', function() {
+        const searchInput = document.getElementById('globalSearch');
+        const searchResults = document.getElementById('searchResults');
+        let searchTimeout;
+
+        searchInput.addEventListener('input', function() {
+            clearTimeout(searchTimeout);
+            const query = this.value.trim();
+
+            if (query.length < 2) {
+                searchResults.classList.remove('active');
+                return;
+            }
+
+            searchTimeout = setTimeout(() => {
+                fetch(`/api/search?q=${encodeURIComponent(query)}`)
+                    .then(response => response.json())
+                    .then(data => {
+                        searchResults.innerHTML = '';
+                        if (data.results.length > 0) {
+                            data.results.forEach(result => {
+                                const div = document.createElement('div');
+                                div.className = 'search-result-item';
+                                div.innerHTML = `
+                                    <div class="search-result-name">${result.name || 'No name'}</div>
+                                    <div class="search-result-email">${result.email}</div>
+                                `;
+                                div.addEventListener('click', () => {
+                                    window.location.href = `/leads/${result.id}`;
+                                });
+                                searchResults.appendChild(div);
+                            });
+                            searchResults.classList.add('active');
+                        } else {
+                            searchResults.innerHTML = '<div class="search-result-item">該当する結果がありません</div>';
+                            searchResults.classList.add('active');
+                        }
+                    })
+                    .catch(error => {
+                        console.error('Search error:', error);
+                    });
+            }, 300);
+        });
+
+        // Close search results when clicking outside
+        document.addEventListener('click', function(e) {
+            if (!searchInput.contains(e.target) && !searchResults.contains(e.target)) {
+                searchResults.classList.remove('active');
+            }
+        });
+
+        // Handle keyboard navigation
+        searchInput.addEventListener('keydown', function(e) {
+            const items = searchResults.querySelectorAll('.search-result-item');
+            const current = searchResults.querySelector('.search-result-item.highlighted');
+            
+            if (items.length === 0) return;
+
+            if (e.key === 'ArrowDown' || e.key === 'ArrowUp') {
+                e.preventDefault();
+                if (!current) {
+                    items[e.key === 'ArrowDown' ? 0 : items.length - 1].classList.add('highlighted');
+                } else {
+                    const currentIndex = Array.from(items).indexOf(current);
+                    current.classList.remove('highlighted');
+                    const nextIndex = e.key === 'ArrowDown' 
+                        ? (currentIndex + 1) % items.length 
+                        : (currentIndex - 1 + items.length) % items.length;
+                    items[nextIndex].classList.add('highlighted');
+                }
+            } else if (e.key === 'Enter') {
+                if (current) {
+                    e.preventDefault();
+                    current.click();
+                }
+            }
+        });
+    });
+    </script>
                 <li><a href="{{ url_for('leads.list_leads') }}" data-title="リード">
                     <i class="fas fa-user-friends"></i>
                     <span class="nav-text">リード</span>
@@ -356,6 +523,13 @@
         <div class="main-content">
             <header class="header">
                 <div class="logo">CRM System</div>
+                <div class="search-container">
+                    <div class="search-box">
+                        <input type="text" id="globalSearch" placeholder="名前またはメールで検索..." autocomplete="off">
+                        <i class="fas fa-search search-icon"></i>
+                        <div id="searchResults" class="search-results"></div>
+                    </div>
+                </div>
                 <div class="user-profile">
                     {% if current_user.is_authenticated %}
                         <span>ようこそ、{{ current_user.username }}さん</span>
