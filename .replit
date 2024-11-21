@@ -235,7 +235,7 @@ task = "packager.installForAll"
 
 [[workflows.workflow.tasks]]
 task = "shell.exec"
-args = "flask db migrate -m 'Add filter presets table' && flask db upgrade"
+args = "flask db migrate -m 'Add filter preferences to UserSettings' && flask db upgrade"
 
 #[[workflows.workflow]]
 #name = "Clean Migration"

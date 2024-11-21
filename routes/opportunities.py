@@ -1,14 +1,13 @@
-from flask import Blueprint, render_template, redirect, url_for, flash, request, jsonify, current_app, send_file
-from datetime import datetime, timedelta
-from io import StringIO, BytesIO
-import csv
-import json
+from flask import Blueprint, render_template, redirect, url_for, flash, request, current_app, send_file
 from flask_login import login_required, current_user
-from models import Opportunity, Lead, FilterPreset, UserSettings, db
-from sqlalchemy.orm import joinedload
+from models import Opportunity, Lead
+from extensions import db
+import csv
+from io import StringIO, BytesIO
+from datetime import datetime
+from sqlalchemy import func
 from ai_analysis import analyze_opportunities
 from forms import OpportunityForm
-from sqlalchemy import func
 
 bp = Blueprint('opportunities', __name__)
 
@@ -160,142 +159,8 @@ def list_opportunities():
                              'date_to': date_to,
                              'sort_by': sort_by,
                              'sort_order': sort_order,
-                             'lead_status': lead_status
+                              'lead_status': lead_status
                          })
-
-@bp.route('/filter-presets/common', methods=['GET'])
-@login_required
-def get_common_presets():
-    """Get predefined common filter presets"""
-    today = datetime.now().replace(hour=0, minute=0, second=0, microsecond=0)
-    
-    # Calculate end of current month
-    next_month = today.replace(day=28) + timedelta(days=4)  # Add 4 days to ensure we go into next month
-    end_of_month = (next_month - timedelta(days=next_month.day)).replace(hour=23, minute=59, second=59)
-    
-    common_presets = [
-        {
-            'id': 'this_month_closing',
-            'name': '今月末の商談',
-            'filters': {
-                'date_from': today.strftime('%Y-%m-%d'),
-                'date_to': end_of_month.strftime('%Y-%m-%d'),
-                'stage': 'Negotiation'
-            }
-        },
-        {
-            'id': 'high_value_opportunities',
-            'name': '高額案件 (500万円以上)',
-            'filters': {
-                'min_amount': 5000000,
-                'stage': 'Negotiation'
-            }
-        },
-        {
-            'id': 'early_stage',
-            'name': '初期段階の商談',
-            'filters': {
-                'stage': 'Initial Contact'
-            }
-        },
-        {
-            'id': 'closing_soon',
-            'name': '30日以内に完了予定',
-            'filters': {
-                'date_from': today.strftime('%Y-%m-%d'),
-                'date_to': (today + timedelta(days=30)).strftime('%Y-%m-%d'),
-                'stage': 'Negotiation'
-            }
-        },
-        {
-            'id': 'stalled_opportunities',
-            'name': '停滞中の商談',
-            'filters': {
-                'stage': 'Qualification',
-                'date_from': (today - timedelta(days=30)).strftime('%Y-%m-%d'),
-                'date_to': today.strftime('%Y-%m-%d')
-            }
-        }
-    ]
-    return jsonify({'success': True, 'presets': common_presets})
-
-@bp.route('/filter-presets', methods=['POST'])
-@login_required
-def save_filter_preset():
-    """Save a custom filter preset"""
-    try:
-        data = request.get_json()
-        name = data.get('name')
-        filters = data.get('filters')
-        is_default = data.get('is_default', False)
-
-        if not name or not filters:
-            return jsonify({'success': False, 'error': '名前とフィルター設定は必須です。'}), 400
-
-        if is_default:
-            # Remove default status from other presets
-            FilterPreset.query.filter_by(user_id=current_user.id, is_default=True).update({'is_default': False})
-
-        preset = FilterPreset(
-            name=name,
-            user_id=current_user.id,
-            filters=json.dumps(filters),
-            is_default=is_default
-        )
-        db.session.add(preset)
-        db.session.commit()
-
-        return jsonify({
-            'success': True,
-            'message': 'フィルタープリセットが保存されました。',
-            'preset': {
-                'id': preset.id,
-                'name': preset.name,
-                'filters': json.loads(preset.filters),
-                'is_default': preset.is_default
-            }
-        })
-
-    except Exception as e:
-        current_app.logger.error(f"Error saving filter preset: {str(e)}")
-        db.session.rollback()
-        return jsonify({'success': False, 'error': 'プリセットの保存中にエラーが発生しました。'}), 500
-
-@bp.route('/filter-presets', methods=['GET'])
-@login_required
-def get_filter_presets():
-    """Get all saved filter presets for the current user"""
-    try:
-        presets = FilterPreset.query.filter_by(user_id=current_user.id).all()
-        return jsonify({
-            'success': True,
-            'presets': [{
-                'id': p.id,
-                'name': p.name,
-                'filters': json.loads(p.filters),
-                'is_default': p.is_default
-            } for p in presets]
-        })
-    except Exception as e:
-        current_app.logger.error(f"Error getting filter presets: {str(e)}")
-        return jsonify({'success': False, 'error': 'プリセットの取得中にエラーが発生しました。'}), 500
-
-@bp.route('/filter-presets/<int:id>', methods=['DELETE'])
-@login_required
-def delete_filter_preset(id):
-    """Delete a filter preset"""
-    try:
-        preset = FilterPreset.query.get_or_404(id)
-        if preset.user_id != current_user.id:
-            return jsonify({'success': False, 'error': '権限がありません。'}), 403
-        
-        db.session.delete(preset)
-        db.session.commit()
-        return jsonify({'success': True, 'message': 'プリセットが削除されました。'})
-    except Exception as e:
-        current_app.logger.error(f"Error deleting filter preset: {str(e)}")
-        db.session.rollback()
-        return jsonify({'success': False, 'error': 'プリセットの削除中にエラーが発生しました。'}), 500
 
 @bp.route('/add', methods=['GET', 'POST'])
 @login_required
@@ -526,137 +391,6 @@ def export_opportunities():
         opportunities = query.all()
 
         # Create CSV file
-        output = StringIO()
-        writer = csv.writer(output)
-        writer.writerow(['商談名', 'ステージ', '金額', '完了予定日', 'リード名'])
-
-        for opp in opportunities:
-            writer.writerow([
-                opp.name,
-                opp.stage,
-                f'¥{opp.amount:,.0f}' if opp.amount else '',
-                opp.close_date.strftime('%Y-%m-%d') if opp.close_date else '',
-                opp.lead.name if opp.lead else ''
-            ])
-
-        # Create response
-        output.seek(0)
-        return send_file(
-            BytesIO(output.getvalue().encode('utf-8-sig')),
-            mimetype='text/csv',
-            as_attachment=True,
-            download_name=f'opportunities_{datetime.now().strftime("%Y%m%d")}.csv'
-        )
-
-    except Exception as e:
-        current_app.logger.error(f"Error exporting opportunities: {str(e)}")
-        flash('エクスポート中にエラーが発生しました。', 'error')
-        return redirect(url_for('opportunities.list_opportunities'))
-
-@bp.route('/filter-presets/common', methods=['GET'])
-@login_required
-def get_common_presets():
-    """Get predefined common filter presets"""
-    today = datetime.now().replace(hour=0, minute=0, second=0, microsecond=0)
-    
-    # Calculate end of current month
-    next_month = today.replace(day=28) + timedelta(days=4)  # Add 4 days to ensure we go into next month
-    end_of_month = (next_month - timedelta(days=next_month.day)).replace(hour=23, minute=59, second=59)
-    
-    common_presets = [
-        {
-            'id': 'this_month_closing',
-            'name': '今月末の商談',
-            'filters': {
-                'date_from': today.strftime('%Y-%m-%d'),
-                'date_to': end_of_month.strftime('%Y-%m-%d'),
-                'stage': 'Negotiation'
-            }
-        },
-        {
-            'id': 'high_value_opportunities',
-            'name': '高額案件 (500万円以上)',
-            'filters': {
-                'min_amount': 5000000,
-                'stage': 'Negotiation'
-            }
-        },
-        {
-            'id': 'early_stage',
-            'name': '初期段階の商談',
-            'filters': {
-                'stage': 'Initial Contact'
-            }
-        },
-        {
-            'id': 'closing_soon',
-            'name': '30日以内に完了予定',
-            'filters': {
-                'date_from': today.strftime('%Y-%m-%d'),
-                'date_to': (today + timedelta(days=30)).strftime('%Y-%m-%d'),
-                'stage': 'Negotiation'
-            }
-        },
-        {
-            'id': 'stalled_opportunities',
-            'name': '停滞中の商談',
-            'filters': {
-                'stage': 'Qualification',
-                'date_from': (today - timedelta(days=30)).strftime('%Y-%m-%d'),
-                'date_to': today.strftime('%Y-%m-%d')
-            }
-        }
-    ]
-    return jsonify({'success': True, 'presets': common_presets})
-
-@bp.route('/export-all', methods=['GET'])
-@login_required
-def export_all_opportunities():
-    """
-    Export opportunities list as CSV with proper Japanese encoding support
-    and error handling, including all fields and Japanese translations.
-    """
-    try:
-        current_app.logger.info("Starting opportunities export")
-        # Get filter parameters
-        stage_filter = request.args.get('stage')
-        min_amount = request.args.get('min_amount', type=float)
-        max_amount = request.args.get('max_amount', type=float)
-        lead_search = request.args.get('lead_search')
-        lead_status = request.args.get('lead_status')
-        date_from = request.args.get('date_from')
-        date_to = request.args.get('date_to')
-
-        # Base query
-        query = Opportunity.query.filter_by(user_id=current_user.id)
-
-        # Join Lead model if we need it for filtering
-        if lead_search or lead_status:
-            query = query.join(Lead, Opportunity.lead_id == Lead.id)
-
-        # Apply filters
-        if stage_filter:
-            query = query.filter(Opportunity.stage == stage_filter)
-        if min_amount is not None:
-            query = query.filter(Opportunity.amount >= min_amount)
-        if max_amount is not None:
-            query = query.filter(Opportunity.amount <= max_amount)
-        if lead_search:
-            query = query.filter(Lead.name.ilike(f'%{lead_search}%'))
-        if lead_status:
-            query = query.filter(Lead.status == lead_status)
-        if date_from:
-            query = query.filter(Opportunity.close_date >= datetime.strptime(date_from, '%Y-%m-%d'))
-        if date_to:
-            query = query.filter(Opportunity.close_date <= datetime.strptime(date_to, '%Y-%m-%d'))
-
-        # Add eager loading of lead data
-        query = query.options(db.joinedload(Opportunity.lead))
-
-        # Get opportunities
-        opportunities = query.all()
-
-        # Create CSV file
         si = StringIO()
         writer = csv.writer(si)
         
@@ -728,3 +462,4 @@ def export_all_opportunities():
             'error': 'エクスポート中にエラーが発生しました。',
             'details': str(e)
         }, 500
+        return {'success': False, 'error': str(e)}, 500

@@ -256,24 +256,3 @@ class EmailFetchTracker(db.Model):
     user_id: Mapped[int] = mapped_column(Integer, ForeignKey('users.id'), nullable=False)
     created_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow)
     updated_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
-
-class FilterPreset(db.Model):
-    __tablename__ = 'filter_presets'
-    id: Mapped[int] = mapped_column(Integer, primary_key=True)
-    name: Mapped[str] = mapped_column(String(100), nullable=False)
-    user_id: Mapped[int] = mapped_column(Integer, ForeignKey('users.id'), nullable=False)
-    filters: Mapped[str] = mapped_column(Text, nullable=False)  # JSON string of filter settings
-    is_default: Mapped[bool] = mapped_column(Boolean, default=False)
-    created_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow)
-    updated_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
-
-    # Relationship with User model
-    user = db.relationship('User', backref=db.backref('filter_presets', lazy='dynamic'))
-
-    @property
-    def filter_data(self):
-        return json.loads(self.filters)
-
-    @filter_data.setter
-    def filter_data(self, value):
-        self.filters = json.dumps(value)
