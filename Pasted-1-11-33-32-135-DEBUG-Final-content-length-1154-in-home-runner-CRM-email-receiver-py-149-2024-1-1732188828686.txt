@@ -1,0 +1,25 @@
+1 11:33:32,135 DEBUG: Final content length: 1154 [in /home/runner/CRM/email_receiver.py:149]
+2024-11-21 11:33:32,976 INFO: Found existing email with message_id: <McewTAPPSkS6ShWmteGX_A@geopod-ismtpd-31>, lead_id: 816 [in /home/runner/CRM/email_receiver.py:818]
+2024-11-21 11:33:32,976 INFO: Duplicate email detected from info@zkai.co.jp [in /home/runner/CRM/email_receiver.py:1047]
+2024-11-21 11:33:33,080 INFO: Found existing email with message_id: <sc1v5.08aW/Qmp5/o=.office@pal-system.co.jp>, lead_id: 560 [in /home/runner/CRM/email_receiver.py:818]
+2024-11-21 11:33:33,080 INFO: Duplicate email detected from office@pal-system.co.jp [in /home/runner/CRM/email_receiver.py:1047]
+2024-11-21 11:33:33,283 ERROR: Database error: (psycopg2.errors.UndefinedColumn) column schedules.location does not exist
+LINE 2: ...les.is_ai_generated AS schedules_is_ai_generated, schedules....
+                                                             ^
+
+[SQL: SELECT count(*) AS count_1 
+FROM (SELECT schedules.id AS schedules_id, schedules.title AS schedules_title, schedules.description AS schedules_description, schedules.start_time AS schedules_start_time, schedules.end_time AS schedules_end_time, schedules.status AS schedules_status, schedules.user_id AS schedules_user_id, schedules.lead_id AS schedules_lead_id, schedules.email_id AS schedules_email_id, schedules.is_ai_generated AS schedules_is_ai_generated, schedules.location AS schedules_location, schedules.attendees AS schedules_attendees 
+FROM schedules 
+WHERE schedules.user_id = %(user_id_1)s ORDER BY schedules.start_time ASC) AS anon_1]
+[parameters: {'user_id_1': 2}]
+(Background on this error at: https://sqlalche.me/e/20/f405) [in /home/runner/CRM/app.py:94]
+2024-11-21 11:33:33,430 DEBUG: Session committed successfully. Duration: 1.37s [in /home/runner/CRM/email_receiver.py:667]
+2024-11-21 11:33:33,430 DEBUG: Session closed. Total duration: 1.37s [in /home/runner/CRM/email_receiver.py:683]
+2024-11-21 11:33:33,552 DEBUG: Session committed successfully. Duration: 1.42s [in /home/runner/CRM/email_receiver.py:667]
+2024-11-21 11:33:33,552 DEBUG: Session closed. Total duration: 1.42s [in /home/runner/CRM/email_receiver.py:683]
+2024-11-21 11:33:33,735 DEBUG: Starting email content processing [in /home/runner/CRM/email_receiver.py:60]
+2024-11-21 11:33:33,736 DEBUG: ISO-2022-JP marker detected: b'\x1b$B' [in /home/runner/CRM/email_receiver.py:192]
+2024-11-21 11:33:33,736 DEBUG: Successfully decoded using detected encoding: iso-2022-jp [in /home/runner/CRM/email_receiver.py:83]
+2024-11-21 11:33:33,736 DEBUG: Added single part content: 11077 chars [in /home/runner/CRM/email_receiver.py:138]
+2024-11-21 11:33:33,736 DEBUG: Final content length: 11077 [in /home/runner/CRM/email_receiver.py:149]
+2024-11-21 11:33
