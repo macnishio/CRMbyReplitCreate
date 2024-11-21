@@ -78,7 +78,8 @@
     <div class="filter-summary">
         <div class="summary-content">
             <i class="fas fa-tasks"></i>
-            <span class="total-count">フィルター結果: {{ pagination.total }}件</span>
+            <span class="total-count">フィルター結果: 現在のページ {{ tasks|length }}/{{ pagination.total }}件</span>
+            <span class="page-info">ページ {{ pagination.page }}/{{ pagination.pages }}</span>
         </div>
     </div>
 
@@ -416,23 +417,41 @@
     margin: 20px 0;
     border-radius: 8px;
     box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    transition: all 0.3s ease;
+}
+
+.filter-summary:hover {
+    box-shadow: 0 4px 8px rgba(0,0,0,0.15);
 }
 
 .summary-content {
     display: flex;
     align-items: center;
-    gap: 10px;
+    gap: 15px;
     color: #333;
+    flex-wrap: wrap;
 }
 
 .summary-content i {
     color: #007bff;
-    font-size: 1.2em;
+    font-size: 1.4em;
 }
 
 .total-count {
-    font-size: 1.1em;
+    font-size: 1.2em;
     font-weight: 500;
+    color: #2c3e50;
+    display: flex;
+    align-items: center;
+    gap: 5px;
+}
+
+.page-info {
+    font-size: 1em;
+    color: #666;
+    margin-left: auto;
+    padding-left: 15px;
+    border-left: 2px solid #eee;
 }
 .status-in-progress { background-color: #fff3e0; color: #f57c00; }
 .status-completed { background-color: #e8f5e9; color: #388e3c; }
