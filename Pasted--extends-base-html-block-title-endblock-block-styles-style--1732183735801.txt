@@ -1,0 +1,146 @@
+{% extends "base.html" %}
+{% block title %}スケジュール一覧{% endblock %}
+
+{% block styles %}
+<style>
+/* Pagination styles */
+.pagination-controls {
+    margin-top: 2rem;
+    margin-bottom: 2rem;
+}
+
+.pagination {
+    display: flex;
+    justify-content: center;
+    list-style: none;
+    padding: 0;
+    margin: 1rem 0;
+}
+
+.page-item {
+    margin: 0 0.25rem;
+}
+
+.page-link {
+    display: block;
+    padding: 0.5rem 1rem;
+    color: #0d6efd;
+    background-color: #fff;
+    border: 1px solid #dee2e6;
+    border-radius: 0.25rem;
+    text-decoration: none;
+    transition: all 0.2s ease-in-out;
+}
+
+.page-item.active .page-link {
+    background-color: #0d6efd;
+    color: #fff;
+    border-color: #0d6efd;
+}
+
+.page-item.disabled .page-link {
+    color: #6c757d;
+    pointer-events: none;
+    background-color: #fff;
+    border-color: #dee2e6;
+}
+
+.pagination-info {
+    text-align: center;
+    color: #6c757d;
+    <input type="hidden" id="sort" name="sort" value="{{ filters.sort }}">
+    margin-top: 1rem;
+}
+
+/* Schedule analysis styles */
+.analysis-content {
+    max-height: 0;
+    overflow: hidden;
+    transition: max-height 0.3s ease-out;
+}
+
+.analysis-content.active {
+    max-height: 1000px;
+}
+
+.toggle-icon {
+    display: inline-block;
+    transition: transform 0.3s ease;
+}
+</style>
+{% endblock %}
+
+{% block content %}
+<h1>スケジュール一覧</h1>
+
+<!-- フィルターセクション -->
+<div class="filter-section">
+    <form method="GET" class="filter-form" id="filterForm">
+        <div class="filter-grid">
+            <!-- 状態フィルター -->
+            <div class="filter-group">
+                <label for="status">状態:</label>
+                <select name="status" id="status">
+                    <option value="">全て</option>
+                    <option value="Scheduled" {% if filters.status == 'Scheduled' %}selected{% endif %}>予定済み</option>
+                    <option value="In Progress" {% if filters.status == 'In Progress' %}selected{% endif %}>進行中</option>
+                    <option value="Completed" {% if filters.status == 'Completed' %}selected{% endif %}>完了</option>
+                    <option value="Cancelled" {% if filters.status == 'Cancelled' %}selected{% endif %}>キャンセル</option>
+                </select>
+            </div>
+
+            <!-- 期間フィルター -->
+            <div class="filter-group">
+                <label for="date_range">期間:</label>
+                <select name="date_range" id="date_range">
+                    <option value="">全て</option>
+                    <option value="today" {% if filters.date_range == 'today' %}selected{% endif %}>今日</option>
+                    <option value="tomorrow" {% if filters.date_range == 'tomorrow' %}selected{% endif %}>明日</option>
+                    <option value="week" {% if filters.date_range == 'week' %}selected{% endif %}>今週</option>
+                    <option value="month" {% if filters.date_range == 'month' %}selected{% endif %}>今月</option>
+                </select>
+            </div>
+
+            <!-- リード検索 -->
+            <div class="filter-group">
+                <label for="lead_search">リード検索:</label>
+                <input type="text" 
+                       name="lead_search" 
+                       id="lead_search" 
+                       value="{{ filters.lead_search or '' }}" 
+                       placeholder="リード名を入力">
+            </div>
+
+            <!-- カスタム期間指定 -->
+            <div class="filter-group">
+                <label>カスタム期間:</label>
+                <div class="date-range">
+                    <input type="date" name="date_from" value="{{ filters.date_from or '' }}" id="date_from">
+                    <span>～</span>
+                    <input type="date" name="date_to" value="{{ filters.date_to or '' }}" id="date_to">
+                </div>
+            </div>
+
+            <!-- ページサイズ選択 -->
+            <div class="filter-group">
+                <label for="page_size">表示件数:</label>
+                <select name="page_size" id="page_size">
+                    <option value="10" {% if filters.page_size == 10 %}selected{% endif %}>10件</option>
+                    <option value="25" {% if filters.page_size == 25 %}selected{% endif %}>25件</option>
+                    <option value="50" {% if filters.page_size == 50 %}selected{% endif %}>50件</option>
+                </select>
+            </div>
+        </div>
+
+        <!-- フィルターアクション -->
+        <div class="filter-actions">
+            <button type="submit" class="btn btn-primary">
+                <i class="fas fa-filter"></i> フィルター適用
+            </button>
+            <button type="button" class="btn btn-secondary" id="resetFiltersBtn">
+                <i class="fas fa-undo"></i> リセット
+            </button>
+            <button type="submit" class="btn btn-success" name="save_filters" value="1">
+                <i class="fas fa-save"></i> フィルター設定を保存
+            </button>
+            <div class="sort-contr...
