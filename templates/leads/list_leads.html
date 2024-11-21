@@ -6,6 +6,21 @@
 <!-- Filter Section -->
 <div class="filter-section">
     <form method="GET" action="{{ url_for('leads.list_leads') }}" class="filter-form">
+        <!-- Search Fields -->
+        <div class="search-group">
+            <div class="search-field">
+                <label for="search_name">名前で検索:</label>
+                <input type="text" name="search_name" id="search_name" 
+                       value="{{ request.args.get('search_name', '') }}"
+                       placeholder="名前を入力...">
+            </div>
+            <div class="search-field">
+                <label for="search_email">メールで検索:</label>
+                <input type="text" name="search_email" id="search_email" 
+                       value="{{ request.args.get('search_email', '') }}"
+                       placeholder="メールアドレスを入力...">
+            </div>
+        </div>
         <div class="filter-group">
             <label for="status">ステータス:</label>
             <select name="status" id="status">
@@ -145,6 +160,30 @@ document.querySelectorAll('.lead-checkbox').forEach(checkbox => {
     padding: 15px;
     background-color: #f8f9fa;
     border-radius: 5px;
+}
+
+.search-group {
+    display: flex;
+    gap: 15px;
+    margin-bottom: 15px;
+    flex-wrap: wrap;
+}
+
+.search-field {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.search-field input[type="text"] {
+    padding: 6px 12px;
+    border: 1px solid #ced4da;
+    border-radius: 4px;
+    min-width: 200px;
+}
+
+.search-field label {
+    white-space: nowrap;
 }
 
 .filter-form {

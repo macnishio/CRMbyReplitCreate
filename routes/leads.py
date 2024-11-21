@@ -48,7 +48,16 @@ def update_empty_names():
 def list_leads():
     query = Lead.query.filter_by(user_id=current_user.id)
     
-    # Apply filters
+    # Apply search filters
+    search_name = request.args.get('search_name', '').strip()
+    search_email = request.args.get('search_email', '').strip()
+    
+    if search_name:
+        query = query.filter(Lead.name.ilike(f'%{search_name}%'))
+    if search_email:
+        query = query.filter(Lead.email.ilike(f'%{search_email}%'))
+    
+    # Apply other filters
     status = request.args.get('status')
     if status:
         query = query.filter(Lead.status == status)
