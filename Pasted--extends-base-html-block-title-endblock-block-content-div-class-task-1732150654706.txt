@@ -225,6 +225,40 @@
         </div>
     </form>
 
+    <!-- ページサイズセレクターとページネーション -->
+    <div class="pagination-controls">
+        <div class="page-size-selector">
+            <label for="per-page">表示件数:</label>
+            <select id="per-page" onchange="changePageSize(this.value)">
+                <option value="10" {% if request.args.get('per_page', '10')|int == 10 %}selected{% endif %}>10件</option>
+                <option value="25" {% if request.args.get('per_page')|int == 25 %}selected{% endif %}>25件</option>
+                <option value="50" {% if request.args.get('per_page')|int == 50 %}selected{% endif %}>50件</option>
+            </select>
+        </div>
+        {% if pagination.pages > 1 %}
+        <div class="pagination-links">
+            {% if pagination.has_prev %}
+                <a href="{{ url_for('tasks.list_tasks', page=pagination.prev_num, per_page=request.args.get('per_page', 10), **filters) }}" class="btn-pagination">&laquo; 前へ</a>
+            {% endif %}
+            
+            {% for page_num in pagination.iter_pages() %}
+                {% if page_num %}
+                    <a href="{{ url_for('tasks.list_tasks', page=page_num, per_page=request.args.get('per_page', 10), **filters) }}" 
+                       class="btn-pagination {{ 'active' if page_num == pagination.page else '' }}">
+                        {{ page_num }}
+                    </a>
+                {% else %}
+                    <span class="pagination-ellipsis">...</span>
+                {% endif %}
+            {% endfor %}
+            
+            {% if pagination.has_next %}
+                <a href="{{ url_for('tasks.list_tasks', page=pagination.next_num, per_page=request.args.get('per_page', 10), **filters) }}" class="btn-pagination">次へ &raquo;</a>
+            {% endif %}
+        </div>
+        {% endif %}
+    </div>
+
     <!-- 新規タスク追加ボタン -->
     <div class="add-task">
         <a href="{{ url_for('tasks.add_task') }}" class="btn btn-add">
@@ -611,6 +645,14 @@ document.addEventListener('DOMContentLoaded', function() {
             if (selectAllCheckbox) {
                 selectAllCheckbox.onclick = null;
                 selectAllCheckbox.addEventListener('change', this.toggleAllCheckboxes);
+<script>
+function changePageSize(size) {
+    const urlParams = new URLSearchParams(window.location.search);
+    urlParams.set('per_page', size);
+    urlParams.set('page', '1'); // Reset to first page when changing page size
+    window.location.href = window.location.pathname + '?' + urlParams.toString();
+}
+</script>
             }
 
             // タスク完了トグルと削除ボタン
