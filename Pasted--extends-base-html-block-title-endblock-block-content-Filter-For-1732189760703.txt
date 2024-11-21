@@ -1,0 +1,76 @@
+{% extends "base.html" %}
+{% block title %}商談一覧{% endblock %}
+{% block content %}
+<!-- Filter Form -->
+<div class="filter-section">
+    <form method="GET" class="filter-form" id="filterForm">
+        <div class="filter-grid">
+            <div class="filter-group">
+                <label for="stage">ステージ:</label>
+                <select name="stage" id="stage">
+                    <option value="">全て</option>
+                    <option value="Initial Contact" {% if filters.stage == 'Initial Contact' %}selected{% endif %}>初期接触</option>
+                    <option value="Qualification" {% if filters.stage == 'Qualification' %}selected{% endif %}>資格確認</option>
+                    <option value="Proposal" {% if filters.stage == 'Proposal' %}selected{% endif %}>提案</option>
+                    <option value="Negotiation" {% if filters.stage == 'Negotiation' %}selected{% endif %}>交渉</option>
+                    <option value="Closed Won" {% if filters.stage == 'Closed Won' %}selected{% endif %}>成約</option>
+                    <option value="Closed Lost" {% if filters.stage == 'Closed Lost' %}selected{% endif %}>失注</option>
+                </select>
+            </div>
+            <div class="filter-group">
+                <label>金額範囲:</label>
+                <div class="amount-range">
+                    <input type="number" name="min_amount" placeholder="最小" value="{{ filters.min_amount or '' }}">
+                    <span>～</span>
+                    <input type="number" name="max_amount" placeholder="最大" value="{{ filters.max_amount or '' }}">
+                </div>
+            </div>
+            <div class="filter-group">
+                <label for="lead_status">リードステータス:</label>
+                <select name="lead_status" id="lead_status">
+                    <option value="">全て</option>
+                    <option value="New" {% if filters.lead_status == 'New' %}selected{% endif %}>新規</option>
+                    <option value="Contacted" {% if filters.lead_status == 'Contacted' %}selected{% endif %}>連絡済み</option>
+                    <option value="Qualified" {% if filters.lead_status == 'Qualified' %}selected{% endif %}>適格</option>
+                    <option value="Unqualified" {% if filters.lead_status == 'Unqualified' %}selected{% endif %}>不適格</option>
+                    <option value="Converted" {% if filters.lead_status == 'Converted' %}selected{% endif %}>成約</option>
+                </select>
+            </div>
+            <div class="filter-group">
+                <label for="lead_search">リード検索:</label>
+                <input type="text" name="lead_search" id="lead_search" value="{{ filters.lead_search or '' }}" placeholder="リード名を入力">
+            </div>
+            <div class="filter-group">
+                <label>期間:</label>
+                <div class="date-range">
+                    <input type="date" name="date_from" value="{{ filters.date_from or '' }}">
+                    <span>～</span>
+                    <input type="date" name="date_to" value="{{ filters.date_to or '' }}">
+                </div>
+            </div>
+            <div class="filter-group">
+                <label>並び替え:</label>
+                <div class="sort-controls">
+                    <select name="sort_by" id="sort_by">
+                        <option value="close_date" {% if filters.sort_by == 'close_date' %}selected{% endif %}>完了予定日</option>
+                        <option value="amount" {% if filters.sort_by == 'amount' %}selected{% endif %}>金額</option>
+                        <option value="name" {% if filters.sort_by == 'name' %}selected{% endif %}>商談名</option>
+                        <option value="stage" {% if filters.sort_by == 'stage' %}selected{% endif %}>ステージ</option>
+                    </select>
+                    <select name="sort_order" id="sort_order">
+                        <option value="asc" {% if filters.sort_order == 'asc' %}selected{% endif %}>昇順</option>
+                        <option value="desc" {% if filters.sort_order == 'desc' %}selected{% endif %}>降順</option>
+                    </select>
+                </div>
+            </div>
+        </div>
+        <div class="filter-actions">
+            <button type="submit" class="btn btn-primary">フィルター適用</button>
+            <button type="button" class="btn btn-secondary" onclick="resetFilters()">リセット</button>
+            <button type="submit" class="btn btn-success" name="save_filters" value="1">
+                <i class="fas fa-save"></i> フィルター設定を保存
+            </button>
+            <button type="button" class="btn btn-info" onclick="exportOpportunities()">
+                <i class="fas fa-file-export"></i> エクスポート
+            </button>
+        </div>
