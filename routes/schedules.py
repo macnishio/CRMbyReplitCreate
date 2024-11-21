@@ -16,36 +16,95 @@ bp = Blueprint('schedules', __name__)
 @bp.route('')
 @login_required
 def list_schedules():
+    # Initialize filters dictionary
+    filters = {
+        'status': request.args.get('status', ''),
+        'date_range': request.args.get('date_range', ''),
+        'lead_search': request.args.get('lead_search', ''),
+        'date_from': request.args.get('date_from', ''),
+        'date_to': request.args.get('date_to', ''),
+        'page_size': int(request.args.get('page_size', 10)),
+        'sort': request.args.get('sort', 'asc')
+    }
+    
+    page = request.args.get('page', 1, type=int)
+    
+    # Base query
     query = Schedule.query.filter_by(user_id=current_user.id)
 
-    # Apply filters if provided
-    date_filter = request.args.get('date_filter')
-    if date_filter:
-        today = datetime.utcnow().replace(hour=0, minute=0, second=0, microsecond=0)
-        if date_filter == 'today':
+    # Apply status filter
+    if filters['status']:
+        query = query.filter(Schedule.status == filters['status'])
+
+    # Apply date range filter
+    today = datetime.utcnow().replace(hour=0, minute=0, second=0, microsecond=0)
+    if filters['date_range']:
+        if filters['date_range'] == 'today':
             query = query.filter(
                 Schedule.start_time >= today,
                 Schedule.start_time < today + timedelta(days=1)
             )
-        elif date_filter == 'week':
+        elif filters['date_range'] == 'tomorrow':
+            query = query.filter(
+                Schedule.start_time >= today + timedelta(days=1),
+                Schedule.start_time < today + timedelta(days=2)
+            )
+        elif filters['date_range'] == 'week':
             query = query.filter(
                 Schedule.start_time >= today,
                 Schedule.start_time < today + timedelta(days=7)
             )
-        elif date_filter == 'month':
+        elif filters['date_range'] == 'month':
             query = query.filter(
                 Schedule.start_time >= today,
                 Schedule.start_time < today + timedelta(days=30)
             )
+    elif filters['date_from'] or filters['date_to']:
+        if filters['date_from']:
+            date_from = datetime.strptime(filters['date_from'], '%Y-%m-%d')
+            query = query.filter(Schedule.start_time >= date_from)
+        if filters['date_to']:
+            date_to = datetime.strptime(filters['date_to'], '%Y-%m-%d')
+            query = query.filter(Schedule.start_time < date_to + timedelta(days=1))
 
-    # Order by start time and eager load lead relationship
-    schedules = query.options(db.joinedload(Schedule.lead)).order_by(Schedule.start_time.asc()).all()
+    # Apply lead search
+    if filters['lead_search']:
+        query = query.join(Schedule.lead).filter(
+            Lead.name.ilike(f'%{filters["lead_search"]}%')
+        )
+
+    # Apply sorting
+    if filters['sort'] == 'desc':
+        query = query.order_by(Schedule.start_time.desc())
+    else:
+        query = query.order_by(Schedule.start_time.asc())
+
+    # Get total count before pagination
+    total_count = query.count()
+
+    # Apply pagination
+    paginated_schedules = query.options(db.joinedload(Schedule.lead)).paginate(
+        page=page,
+        per_page=filters['page_size'],
+        error_out=False
+    )
+
+    # Calculate schedule status counts
+    schedule_status_counts = [
+        {'status': status, 'count': Schedule.query.filter_by(
+            user_id=current_user.id, status=status).count()}
+        for status in ['Scheduled', 'In Progress', 'Completed', 'Cancelled']
+    ]
 
     # Get AI analysis
-    ai_analysis = analyze_schedules(schedules)
+    ai_analysis = analyze_schedules(paginated_schedules.items)
 
     return render_template('schedules/list_schedules.html',
-                         schedules=schedules,
+                         schedules=paginated_schedules.items,
+                         pagination=paginated_schedules,
+                         filters=filters,
+                         total_count=total_count,
+                         schedule_status_counts=schedule_status_counts,
                          ai_analysis=ai_analysis,
                          now=datetime.utcnow,
                          timedelta=timedelta)
