@@ -3,6 +3,87 @@
 {% block content %}
 <h1>スケジュール一覧</h1>
 
+<!-- フィルターセクション -->
+<div class="filter-section">
+    <form method="GET" class="filter-form" id="filterForm">
+        <div class="filter-grid">
+            <!-- 状態フィルター -->
+            <div class="filter-group">
+                <label for="status">状態:</label>
+                <select name="status" id="status">
+                    <option value="">全て</option>
+                    <option value="Scheduled" {% if filters.status == 'Scheduled' %}selected{% endif %}>予定済み</option>
+                    <option value="In Progress" {% if filters.status == 'In Progress' %}selected{% endif %}>進行中</option>
+                    <option value="Completed" {% if filters.status == 'Completed' %}selected{% endif %}>完了</option>
+                    <option value="Cancelled" {% if filters.status == 'Cancelled' %}selected{% endif %}>キャンセル</option>
+                </select>
+            </div>
+
+            <!-- 期間フィルター -->
+            <div class="filter-group">
+                <label for="date_range">期間:</label>
+                <select name="date_range" id="date_range">
+                    <option value="">全て</option>
+                    <option value="today" {% if filters.date_range == 'today' %}selected{% endif %}>今日</option>
+                    <option value="tomorrow" {% if filters.date_range == 'tomorrow' %}selected{% endif %}>明日</option>
+                    <option value="week" {% if filters.date_range == 'week' %}selected{% endif %}>今週</option>
+                    <option value="month" {% if filters.date_range == 'month' %}selected{% endif %}>今月</option>
+                </select>
+            </div>
+
+            <!-- リード検索 -->
+            <div class="filter-group">
+                <label for="lead_search">リード検索:</label>
+                <input type="text" 
+                       name="lead_search" 
+                       id="lead_search" 
+                       value="{{ filters.lead_search or '' }}" 
+                       placeholder="リード名を入力">
+            </div>
+
+            <!-- カスタム期間指定 -->
+            <div class="filter-group">
+                <label>カスタム期間:</label>
+                <div class="date-range">
+                    <input type="date" name="date_from" value="{{ filters.date_from or '' }}" id="date_from">
+                    <span>～</span>
+                    <input type="date" name="date_to" value="{{ filters.date_to or '' }}" id="date_to">
+                </div>
+            </div>
+
+            <!-- ページサイズ選択 -->
+            <div class="filter-group">
+                <label for="page_size">表示件数:</label>
+                <select name="page_size" id="page_size">
+                    <option value="10" {% if filters.page_size == 10 %}selected{% endif %}>10件</option>
+                    <option value="25" {% if filters.page_size == 25 %}selected{% endif %}>25件</option>
+                    <option value="50" {% if filters.page_size == 50 %}selected{% endif %}>50件</option>
+                </select>
+            </div>
+        </div>
+
+        <!-- フィルターアクション -->
+        <div class="filter-actions">
+            <button type="submit" class="btn btn-primary">
+                <i class="fas fa-filter"></i> フィルター適用
+            </button>
+            <button type="button" class="btn btn-secondary" id="resetFiltersBtn">
+                <i class="fas fa-undo"></i> リセット
+            </button>
+            <button type="submit" class="btn btn-success" name="save_filters" value="1">
+                <i class="fas fa-save"></i> フィルター設定を保存
+            </button>
+            <div class="sort-controls">
+                <button type="button" class="btn btn-secondary" id="sortButton">
+                    開始日時でソート <i id="sortIcon" class="fas fa-sort"></i>
+                </button>
+            </div>
+            <button type="button" class="btn btn-info" id="analyzeBtn">
+                <i class="fas fa-brain"></i> AI分析を実行
+            </button>
+        </div>
+    </form>
+</div>
 <!-- Bulk Operations Form -->
 <form method="POST" action="{{ url_for('schedules.bulk_action') }}" id="bulkForm" onsubmit="return confirmBulkAction()">
     <div class="bulk-actions">
@@ -34,19 +115,66 @@
             <div class="analysis-grid">
                 <!-- Schedule Overview -->
                 <div class="analysis-card">
-                    <h3>概要</h3>
-                    <p>今日のイベント: {{ schedules|selectattr('start_time', 'le', now())|selectattr('end_time', 'ge', now())|list|length }}件</p>
-                    <p>今週のイベント: {{ schedules|selectattr('start_time', 'le', now() + timedelta(days=7))|selectattr('start_time', 'ge', now())|list|length }}件</p>
+                    <h3><i class="fas fa-chart-pie"></i> 概要</h3>
+                    <div class="stats-grid">
+                        <div class="stat-item">
+                            <span class="stat-label">現在進行中</span>
+                            <span class="stat-value">{{ schedules|selectattr('start_time', 'le', now())|selectattr('end_time', 'ge', now())|list|length }}件</span>
+                        </div>
+                        <div class="stat-item">
+                            <span class="stat-label">今日の予定</span>
+                            <span class="stat-value">{{ schedules|selectattr('start_time', 'ge', now().replace(hour=0, minute=0))|selectattr('start_time', 'le', now().replace(hour=23, minute=59))|list|length }}件</span>
+                        </div>
+                        <div class="stat-item">
+                            <span class="stat-label">今週の予定</span>
+                            <span class="stat-value">{{ schedules|selectattr('start_time', 'le', now() + timedelta(days=7))|selectattr('start_time', 'ge', now())|list|length }}件</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Status Distribution -->
+                <div class="analysis-card">
+                    <h3><i class="fas fa-chart-bar"></i> 状態分布</h3>
+                    <div class="status-distribution">
+                        {% for status in schedule_status_counts %}
+                        <div class="status-item">
+                            <span class="status-label">{{ status.status }}</span>
+                            <span class="status-count">{{ status.count }}件</span>
+                            <div class="progress-bar">
+                                <div class="progress" style="width: {{ (status.count / schedules|length * 100)|round }}%"></div>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
                 </div>
 
                 <!-- AI Insights -->
                 <div class="analysis-card">
-                    <h3>AI分析結果</h3>
-                    {% if ai_analysis %}
-                        {{ ai_analysis|safe }}
-                    {% else %}
-                        <p>AI分析を実行できませんでした。</p>
-                    {% endif %}
+                    <h3><i class="fas fa-robot"></i> AI分析結果</h3>
+                    <div id="aiAnalysisContent">
+                        {% if ai_analysis %}
+                            {{ ai_analysis|safe }}
+                        {% else %}
+                            <p>分析データがありません。「AI分析を実行」ボタンをクリックして分析を開始してください。</p>
+                        {% endif %}
+                    </div>
+                </div>
+
+                <!-- Time Distribution -->
+                <div class="analysis-card">
+                    <h3><i class="fas fa-clock"></i> 時間帯分布</h3>
+                    <div class="time-distribution">
+                        {% for hour in range(0, 24, 3) %}
+                            {% set count = schedules|selectattr('start_time.hour', 'ge', hour)|selectattr('start_time.hour', 'lt', hour + 3)|list|length %}
+                            <div class="time-slot">
+                                <span class="time-label">{{ '%02d:00'|format(hour) }}~{{ '%02d:00'|format(hour + 3) }}</span>
+                                <span class="time-count">{{ count }}件</span>
+                                <div class="progress-bar">
+                                    <div class="progress" style="width: {{ (count / schedules|length * 100)|round }}%"></div>
+                                </div>
+                            </div>
+                        {% endfor %}
+                    </div>
                 </div>
             </div>
         </div>
@@ -221,6 +349,84 @@ function confirmBulkAction() {
         return false;
     }
 
+// フィルター関連の機能
+document.addEventListener('DOMContentLoaded', function() {
+    // リセットボタンの処理
+    document.getElementById('resetFiltersBtn').addEventListener('click', function() {
+        document.getElementById('filterForm').reset();
+        document.getElementById('filterForm').submit();
+    });
+
+    // ソートボタンの処理
+    let currentSort = 'asc';
+    document.getElementById('sortButton').addEventListener('click', function() {
+        const icon = document.getElementById('sortIcon');
+        currentSort = currentSort === 'asc' ? 'desc' : 'asc';
+        icon.className = `fas fa-sort-${currentSort === 'asc' ? 'up' : 'down'}`;
+        
+        const form = document.getElementById('filterForm');
+        const sortInput = document.createElement('input');
+        sortInput.type = 'hidden';
+        sortInput.name = 'sort';
+        sortInput.value = currentSort;
+        form.appendChild(sortInput);
+        form.submit();
+    });
+
+    // AI分析ボタンの処理
+    document.getElementById('analyzeBtn').addEventListener('click', function() {
+        this.disabled = true;
+        this.innerHTML = '<i class="fas fa-spinner fa-spin"></i> 分析中...';
+        
+        fetch('/schedules/analyze', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(getFilterValues())
+        })
+        .then(response => response.json())
+        .then(data => {
+            document.getElementById('aiAnalysisContent').innerHTML = data.analysis;
+            this.disabled = false;
+            this.innerHTML = '<i class="fas fa-brain"></i> AI分析を実行';
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            this.disabled = false;
+            this.innerHTML = '<i class="fas fa-brain"></i> AI分析を実行';
+            alert('分析中にエラーが発生しました。');
+        });
+    });
+
+    // カスタム期間の制御
+    const dateRange = document.getElementById('date_range');
+    const customDateInputs = document.querySelectorAll('.date-range input');
+    
+    dateRange.addEventListener('change', function() {
+        const isCustom = !this.value;
+        customDateInputs.forEach(input => {
+            input.disabled = !isCustom;
+        });
+    });
+
+    // ページサイズ変更時の処理
+    document.getElementById('page_size').addEventListener('change', function() {
+        document.getElementById('filterForm').submit();
+    });
+});
+
+// フィルター値を取得する関数
+function getFilterValues() {
+    return {
+        status: document.getElementById('status').value,
+        date_range: document.getElementById('date_range').value,
+        lead_search: document.getElementById('lead_search').value,
+        date_from: document.getElementById('date_from').value,
+        date_to: document.getElementById('date_to').value,
+        page_size: document.getElementById('page_size').value
+    };
+}
     if (action === 'delete') {
         return confirm(`選択された${selectedSchedules}件のスケジュールを削除してもよろしいですか？`);
     }
@@ -304,6 +510,168 @@ document.getElementById('transfer-to-google').addEventListener('click', function
         alert(data.message);
         if (data.success) {
             location.reload();
+/* Filter section styles */
+.filter-section {
+    background-color: #f8f9fa;
+    padding: 20px;
+    border-radius: 8px;
+    margin-bottom: 20px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.filter-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 15px;
+    margin-bottom: 20px;
+}
+
+.filter-group {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+}
+
+.filter-group label {
+    font-weight: 500;
+    color: #495057;
+}
+
+.filter-group select,
+.filter-group input {
+    padding: 8px;
+    border: 1px solid #ced4da;
+    border-radius: 4px;
+    font-size: 14px;
+}
+
+.date-range {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.filter-actions {
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+    align-items: center;
+}
+
+/* Analysis section styles */
+.analysis-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 20px;
+    padding: 20px;
+}
+
+.analysis-card {
+    background: white;
+    padding: 20px;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.analysis-card h3 {
+    margin-bottom: 15px;
+    color: #2c3e50;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.stats-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+    gap: 15px;
+}
+
+.stat-item {
+    text-align: center;
+    padding: 10px;
+    background-color: #f8f9fa;
+    border-radius: 6px;
+}
+
+.stat-label {
+    display: block;
+    font-size: 14px;
+    color: #6c757d;
+    margin-bottom: 5px;
+}
+
+.stat-value {
+    font-size: 24px;
+    font-weight: bold;
+    color: #2c3e50;
+}
+
+.status-distribution,
+.time-distribution {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.status-item,
+.time-slot {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.progress-bar {
+    flex-grow: 1;
+    height: 8px;
+    background-color: #e9ecef;
+    border-radius: 4px;
+    overflow: hidden;
+}
+
+.progress {
+    height: 100%;
+    background-color: #007bff;
+    transition: width 0.3s ease;
+}
+
+/* Pagination styles */
+.pagination-container {
+    margin-top: 20px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 10px;
+}
+
+.pagination {
+    display: flex;
+    gap: 5px;
+}
+
+.page-link {
+    padding: 8px 12px;
+    border: 1px solid #dee2e6;
+    border-radius: 4px;
+    color: #007bff;
+    text-decoration: none;
+    transition: all 0.2s;
+}
+
+.page-link:hover {
+    background-color: #e9ecef;
+}
+
+.page-link.active {
+    background-color: #007bff;
+    color: white;
+    border-color: #007bff;
+}
+
+.pagination-info {
+    color: #6c757d;
+    font-size: 14px;
+}
         }
     })
     .catch(error => {
