@@ -48,28 +48,124 @@ def update_empty_names():
 def list_leads():
     query = Lead.query.filter_by(user_id=current_user.id)
     
+    # Get filter preferences from UserSettings
+    user_settings = current_user.settings
+    if user_settings and user_settings.filter_preferences:
+        try:
+            saved_filters = json.loads(user_settings.filter_preferences).get('leads', {})
+        except json.JSONDecodeError:
+            saved_filters = {}
+    else:
+        saved_filters = {}
+
     # Apply search filters
     search_name = request.args.get('search_name', '').strip()
     search_email = request.args.get('search_email', '').strip()
+    search_operator = request.args.get('search_operator', 'AND')
     
-    if search_name:
-        query = query.filter(Lead.name.ilike(f'%{search_name}%'))
-    if search_email:
-        query = query.filter(Lead.email.ilike(f'%{search_email}%'))
+    if search_name or search_email:
+        name_filter = Lead.name.ilike(f'%{search_name}%') if search_name else None
+        email_filter = Lead.email.ilike(f'%{search_email}%') if search_email else None
+        
+        if search_operator == 'OR':
+            if name_filter and email_filter:
+                query = query.filter(db.or_(name_filter, email_filter))
+            elif name_filter:
+                query = query.filter(name_filter)
+            elif email_filter:
+                query = query.filter(email_filter)
+        else:  # AND
+            if name_filter:
+                query = query.filter(name_filter)
+            if email_filter:
+                query = query.filter(email_filter)
     
-    # Apply other filters
-    status = request.args.get('status')
-    if status:
-        query = query.filter(Lead.status == status)
+    # Apply status filters
+    statuses = request.args.getlist('status')
+    if statuses:
+        query = query.filter(Lead.status.in_(statuses))
     
+    # Apply score range filter
     min_score = request.args.get('min_score')
+    max_score = request.args.get('max_score')
     if min_score and min_score.isdigit():
         query = query.filter(Lead.score >= float(min_score))
+    if max_score and max_score.isdigit():
+        query = query.filter(Lead.score <= float(max_score))
     
-    # Order by last contact date
-    leads = query.order_by(Lead.last_contact.desc().nullslast(), Lead.created_at.desc()).all()
+    # Apply date filters
+    date_from = request.args.get('date_from')
+    date_to = request.args.get('date_to')
+    date_field = request.args.get('date_field', 'created_at')
     
-    return render_template('leads/list_leads.html', leads=leads)
+    if date_from:
+        try:
+            date_from = datetime.strptime(date_from, '%Y-%m-%d')
+            if date_field == 'last_contact':
+                query = query.filter(Lead.last_contact >= date_from)
+            else:
+                query = query.filter(Lead.created_at >= date_from)
+        except ValueError:
+            flash('Invalid date format for Date From', 'error')
+    
+    if date_to:
+        try:
+            date_to = datetime.strptime(date_to, '%Y-%m-%d')
+            if date_field == 'last_contact':
+                query = query.filter(Lead.last_contact <= date_to)
+            else:
+                query = query.filter(Lead.created_at <= date_to)
+        except ValueError:
+            flash('Invalid date format for Date To', 'error')
+    
+    # Apply sorting
+    sort_by = request.args.get('sort_by', 'last_contact')
+    sort_order = request.args.get('sort_order', 'desc')
+    
+    if sort_by == 'name':
+        sort_field = Lead.name
+    elif sort_by == 'email':
+        sort_field = Lead.email
+    elif sort_by == 'score':
+        sort_field = Lead.score
+    elif sort_by == 'created_at':
+        sort_field = Lead.created_at
+    else:
+        sort_field = Lead.last_contact
+    
+    if sort_order == 'asc':
+        query = query.order_by(sort_field.asc().nullslast())
+    else:
+        query = query.order_by(sort_field.desc().nullslast())
+    
+    # Save current filters if requested
+    if request.args.get('save_filters'):
+        current_filters = {
+            'search_name': search_name,
+            'search_email': search_email,
+            'search_operator': search_operator,
+            'statuses': statuses,
+            'min_score': min_score,
+            'max_score': max_score,
+            'date_from': date_from.strftime('%Y-%m-%d') if date_from else None,
+            'date_to': date_to.strftime('%Y-%m-%d') if date_to else None,
+            'date_field': date_field,
+            'sort_by': sort_by,
+            'sort_order': sort_order
+        }
+        
+        if not user_settings:
+            user_settings = UserSettings(user_id=current_user.id)
+            db.session.add(user_settings)
+        
+        saved_filters = json.loads(user_settings.filter_preferences) if user_settings.filter_preferences else {}
+        saved_filters['leads'] = current_filters
+        user_settings.filter_preferences = json.dumps(saved_filters)
+        db.session.commit()
+        flash('Filter preferences saved successfully', 'success')
+    
+    leads = query.all()
+    return render_template('leads/list_leads.html', leads=leads, saved_filters=saved_filters)
 
 @bp.route('/bulk_action', methods=['POST'])
 @login_required

@@ -5,47 +5,279 @@
 
 <!-- Filter Section -->
 <div class="filter-section">
-    <form method="GET" action="{{ url_for('leads.list_leads') }}" class="filter-form">
+    <form method="GET" action="{{ url_for('leads.list_leads') }}" class="filter-form" id="leadFilterForm">
         <!-- Search Fields -->
         <div class="search-group">
             <div class="search-field">
                 <label for="search_name">名前で検索:</label>
                 <input type="text" name="search_name" id="search_name" 
-       value="{{ request.args.get('search_name', '') }}"
-       placeholder="顧客名を入力してください..."
-       class="search-input">
+                       value="{{ request.args.get('search_name', '') }}"
+                       placeholder="顧客名を入力してください..."
+                       class="search-input">
+            </div>
+            <div class="search-operator">
+                <label for="search_operator">検索条件:</label>
+                <select name="search_operator" id="search_operator">
+                    <option value="AND" {% if request.args.get('search_operator') == 'AND' %}selected{% endif %}>AND</option>
+                    <option value="OR" {% if request.args.get('search_operator') == 'OR' %}selected{% endif %}>OR</option>
+                </select>
             </div>
             <div class="search-field">
                 <label for="search_email">メールで検索:</label>
                 <input type="text" name="search_email" id="search_email" 
-       value="{{ request.args.get('search_email', '') }}"
-       placeholder="メールアドレスを入力してください..."
-       class="search-input">
+                       value="{{ request.args.get('search_email', '') }}"
+                       placeholder="メールアドレスを入力してください..."
+                       class="search-input">
             </div>
         </div>
+
+        <!-- Status Multi-select -->
         <div class="filter-group">
-            <label for="status">ステータス:</label>
-            <select name="status" id="status">
-                <option value="">すべて</option>
-                <option value="New" {% if request.args.get('status') == 'New' %}selected{% endif %}>新規</option>
-                <option value="Contacted" {% if request.args.get('status') == 'Contacted' %}selected{% endif %}>連絡済み</option>
-                <option value="Qualified" {% if request.args.get('status') == 'Qualified' %}selected{% endif %}>適格</option>
-                <option value="Lost" {% if request.args.get('status') == 'Lost' %}selected{% endif %}>失注</option>
-                <option value="Spam" {% if request.args.get('status') == 'Spam' %}selected{% endif %}>迷惑メール</option>
-            </select>
+            <label>ステータス:</label>
+            <div class="status-checkboxes">
+                <label>
+                    <input type="checkbox" name="status" value="New" 
+                           {% if 'New' in request.args.getlist('status') %}checked{% endif %}> 新規
+                </label>
+                <label>
+                    <input type="checkbox" name="status" value="Contacted"
+                           {% if 'Contacted' in request.args.getlist('status') %}checked{% endif %}> 連絡済み
+                </label>
+                <label>
+                    <input type="checkbox" name="status" value="Qualified"
+                           {% if 'Qualified' in request.args.getlist('status') %}checked{% endif %}> 適格
+                </label>
+                <label>
+                    <input type="checkbox" name="status" value="Lost"
+                           {% if 'Lost' in request.args.getlist('status') %}checked{% endif %}> 失注
+                </label>
+                <label>
+                    <input type="checkbox" name="status" value="Spam"
+                           {% if 'Spam' in request.args.getlist('status') %}checked{% endif %}> 迷惑メール
+                </label>
+            </div>
         </div>
+
+        <!-- Score Range -->
         <div class="filter-group">
-            <label for="score">最小スコア:</label>
-            <input type="number" name="min_score" id="score" min="0" max="100" step="1" 
-                   value="{{ request.args.get('min_score', '') }}">
+            <label>スコア範囲:</label>
+            <div class="score-range">
+                <input type="number" name="min_score" id="min_score" min="0" max="100" step="1" 
+                       placeholder="最小" value="{{ request.args.get('min_score', '') }}">
+                <span>～</span>
+                <input type="number" name="max_score" id="max_score" min="0" max="100" step="1" 
+                       placeholder="最大" value="{{ request.args.get('max_score', '') }}">
+            </div>
         </div>
-        <button type="submit" class="btn btn-primary">フィルター適用</button>
-        <a href="{{ url_for('leads.list_leads') }}" class="btn btn-secondary">リセット</a>
+
+        <!-- Date Range -->
+        <div class="filter-group">
+            <label>日付範囲:</label>
+            <div class="date-range">
+                <select name="date_field" id="date_field">
+                    <option value="created_at" {% if request.args.get('date_field') == 'created_at' %}selected{% endif %}>作成日</option>
+                    <option value="last_contact" {% if request.args.get('date_field') == 'last_contact' %}selected{% endif %}>最終接触日</option>
+                </select>
+                <input type="date" name="date_from" id="date_from" 
+                       value="{{ request.args.get('date_from', '') }}">
+                <span>～</span>
+                <input type="date" name="date_to" id="date_to" 
+                       value="{{ request.args.get('date_to', '') }}">
+            </div>
+        </div>
+
+        <!-- Sort Options -->
+        <div class="filter-group">
+            <label>並び替え:</label>
+            <div class="sort-options">
+                <select name="sort_by" id="sort_by">
+                    <option value="last_contact" {% if request.args.get('sort_by') == 'last_contact' %}selected{% endif %}>最終接触日</option>
+                    <option value="name" {% if request.args.get('sort_by') == 'name' %}selected{% endif %}>名前</option>
+                    <option value="email" {% if request.args.get('sort_by') == 'email' %}selected{% endif %}>メール</option>
+                    <option value="score" {% if request.args.get('sort_by') == 'score' %}selected{% endif %}>スコア</option>
+                    <option value="created_at" {% if request.args.get('sort_by') == 'created_at' %}selected{% endif %}>作成日</option>
+                </select>
+                <select name="sort_order" id="sort_order">
+                    <option value="desc" {% if request.args.get('sort_order', 'desc') == 'desc' %}selected{% endif %}>降順</option>
+                    <option value="asc" {% if request.args.get('sort_order') == 'asc' %}selected{% endif %}>昇順</option>
+                </select>
+            </div>
+        </div>
+        <div class="filter-actions">
+            <button type="submit" class="btn btn-primary">フィルター適用</button>
+            <a href="{{ url_for('leads.list_leads') }}" class="btn btn-secondary">リセット</a>
+            <button type="submit" name="save_filters" value="1" class="btn btn-success">フィルターを保存</button>
+            {% if saved_filters %}
+            <button type="button" class="btn btn-info" onclick="loadSavedFilters()">保存したフィルターを読み込む</button>
+            {% endif %}
+        </div>
     </form>
     <div class="action-buttons">
         <a href="{{ url_for('leads.update_empty_names') }}" class="btn btn-info">空の名前を更新</a>
     </div>
 </div>
+
+<script>
+function loadSavedFilters() {
+    const savedFilters = {{ saved_filters|tojson|safe }};
+    const form = document.getElementById('leadFilterForm');
+    
+    if (savedFilters && savedFilters.leads) {
+        const filters = savedFilters.leads;
+        
+        // Set text inputs
+        form.querySelector('#search_name').value = filters.search_name || '';
+        form.querySelector('#search_email').value = filters.search_email || '';
+        form.querySelector('#search_operator').value = filters.search_operator || 'AND';
+        
+        // Set status checkboxes
+        const statusCheckboxes = form.querySelectorAll('input[name="status"]');
+        statusCheckboxes.forEach(checkbox => {
+            checkbox.checked = filters.statuses && filters.statuses.includes(checkbox.value);
+        });
+        
+        // Set score range
+        form.querySelector('#min_score').value = filters.min_score || '';
+        form.querySelector('#max_score').value = filters.max_score || '';
+        
+        // Set date range
+        form.querySelector('#date_field').value = filters.date_field || 'created_at';
+        form.querySelector('#date_from').value = filters.date_from || '';
+        form.querySelector('#date_to').value = filters.date_to || '';
+        
+        // Set sort options
+        form.querySelector('#sort_by').value = filters.sort_by || 'last_contact';
+        form.querySelector('#sort_order').value = filters.sort_order || 'desc';
+        
+        // Submit the form to apply filters
+        form.submit();
+    }
+}
+</script>
+
+<style>
+.filter-section {
+    background: var(--secondary-color);
+    padding: 1.5rem;
+    border-radius: 8px;
+    box-shadow: var(--shadow);
+    margin-bottom: 2rem;
+}
+
+.filter-form {
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+}
+
+.search-group {
+    display: flex;
+    gap: 1rem;
+    align-items: center;
+    flex-wrap: wrap;
+}
+
+.search-operator {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.search-operator select {
+    padding: 0.5rem;
+    border: 1px solid var(--border-color);
+    border-radius: 4px;
+}
+
+.status-checkboxes {
+    display: flex;
+    gap: 1rem;
+    flex-wrap: wrap;
+}
+
+.status-checkboxes label {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.score-range {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.score-range input {
+    width: 80px;
+    padding: 0.5rem;
+    border: 1px solid var(--border-color);
+    border-radius: 4px;
+}
+
+.date-range {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    flex-wrap: wrap;
+}
+
+.date-range select,
+.date-range input {
+    padding: 0.5rem;
+    border: 1px solid var(--border-color);
+    border-radius: 4px;
+}
+
+.sort-options {
+    display: flex;
+    gap: 0.5rem;
+}
+
+.sort-options select {
+    padding: 0.5rem;
+    border: 1px solid var(--border-color);
+    border-radius: 4px;
+}
+
+.filter-actions {
+    display: flex;
+    gap: 1rem;
+    margin-top: 1rem;
+    flex-wrap: wrap;
+}
+
+.btn-success {
+    background-color: var(--success-color);
+    color: white;
+}
+
+.btn-success:hover {
+    background-color: #218838;
+}
+
+@media (max-width: 768px) {
+    .search-group,
+    .status-checkboxes,
+    .score-range,
+    .date-range,
+    .sort-options,
+    .filter-actions {
+        flex-direction: column;
+        width: 100%;
+    }
+    
+    .search-operator {
+        width: 100%;
+        justify-content: space-between;
+    }
+    
+    .date-range select,
+    .date-range input,
+    .sort-options select {
+        width: 100%;
+    }
+}
+</style>
 
 <!-- Bulk Operations Form -->
 <form method="POST" action="{{ url_for('leads.bulk_action') }}" id="bulkForm">
