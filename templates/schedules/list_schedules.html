@@ -141,7 +141,7 @@
                             <span class="status-label">{{ status.status }}</span>
                             <span class="status-count">{{ status.count }}件</span>
                             <div class="progress-bar">
-                                <div class="progress" style="width: {{ (status.count / schedules|length * 100)|round }}%"></div>
+                                <div class="progress" style="width: {{ (status.count / (schedules|length or 1) * 100)|round }}%"></div>
                             </div>
                         </div>
                         {% endfor %}
