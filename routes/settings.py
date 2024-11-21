@@ -61,3 +61,43 @@ def update_settings():
         flash('設定の更新中にエラーが発生しました。', 'error')
 
     return redirect(url_for('settings.settings'))
+
+import json
+
+@bp.route('/api/user/settings/filters', methods=['POST'])
+@login_required
+def save_filter_preferences():
+    try:
+        data = request.get_json()
+        if not data or 'filter_type' not in data or 'filters' not in data:
+            return jsonify({
+                'success': False,
+                'message': '無効なリクエストデータです。'
+            }), 400
+
+        user_settings = UserSettings.query.filter_by(user_id=current_user.id).first()
+        if not user_settings:
+            user_settings = UserSettings(user_id=current_user.id)
+            db.session.add(user_settings)
+
+        try:
+            current_filters = json.loads(user_settings.filter_preferences) if user_settings.filter_preferences else {}
+        except json.JSONDecodeError:
+            current_filters = {}
+
+        current_filters[data['filter_type']] = data['filters']
+        user_settings.filter_preferences = json.dumps(current_filters)
+
+        db.session.commit()
+        return jsonify({
+            'success': True,
+            'message': 'フィルター設定が保存されました。'
+        })
+
+    except Exception as e:
+        db.session.rollback()
+        current_app.logger.error(f"Error saving filter preferences: {str(e)}")
+        return jsonify({
+            'success': False,
+            'message': 'フィルター設定の保存中にエラーが発生しました。'
+        }), 500
