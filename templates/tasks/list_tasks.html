@@ -74,6 +74,14 @@
         </form>
     </div>
 
+    <!-- フィルター結果サマリー -->
+    <div class="filter-summary">
+        <div class="summary-content">
+            <i class="fas fa-tasks"></i>
+            <span class="total-count">フィルター結果: {{ pagination.total }}件</span>
+        </div>
+    </div>
+
     <!-- 分析セクション -->
     <div class="analysis-section">
         <div class="analysis-header" id="analysisToggle">
@@ -400,6 +408,32 @@
 }
 
 .status-new { background-color: #e3f2fd; color: #1976d2; }
+
+/* フィルター結果サマリーのスタイル */
+.filter-summary {
+    background: #fff;
+    padding: 15px 20px;
+    margin: 20px 0;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.summary-content {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    color: #333;
+}
+
+.summary-content i {
+    color: #007bff;
+    font-size: 1.2em;
+}
+
+.total-count {
+    font-size: 1.1em;
+    font-weight: 500;
+}
 .status-in-progress { background-color: #fff3e0; color: #f57c00; }
 .status-completed { background-color: #e8f5e9; color: #388e3c; }
 
