@@ -6,7 +6,9 @@
 }
 
 body {
-    font-family: Arial, sans-serif;
+    margin: 0;
+    padding: 0;
+    font-family: 'Hiragino Kaku Gothic Pro', 'メイリオ', Arial, sans-serif;
     background-color: #f4f4f4;
 }
 
@@ -18,29 +20,53 @@ body {
 
 /* Sidebar styles */
 .sidebar {
-    width: 250px;
     background-color: #333;
     color: white;
-    padding-top: 20px;
+    width: 250px;
+    transition: all 0.3s ease;
+    position: relative;
+    z-index: 1000;
 }
 
-.sidebar ul {
-    list-style-type: none;
+.sidebar.collapsed {
+    width: 60px;
 }
 
-.sidebar li {
-    padding: 10px 20px;
+/* Top menu styles */
+.top-menu {
+    padding: 15px 10px;
+    border-bottom: 1px solid #444;
+    display: flex;
+    align-items: center;
 }
 
-.sidebar a {
+.menu-items {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    width: 100%;
+}
+
+.sidebar-brand {
+    font-size: 1.2em;
+    font-weight: bold;
     color: white;
     text-decoration: none;
-    display: block;
-    transition: background-color 0.3s;
+    white-space: nowrap;
+    overflow: hidden;
 }
 
-.sidebar a:hover {
-    background-color: #444;
+.toggle-button {
+    background: none;
+    border: none;
+    color: white;
+    cursor: pointer;
+    padding: 5px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 30px;
+    margin-left: 0;
 }
 
 /* Main content area */
@@ -60,36 +86,6 @@ body {
     align-items: center;
 }
 
-.logo {
-    font-size: 24px;
-    font-weight: bold;
-}
-
-.user-profile {
-    display: flex;
-    align-items: center;
-}
-
-.user-profile span {
-    margin-right: 10px;
-}
-
-.avatar {
-    font-size: 24px;
-    color: white;
-}
-
-/* Footer styles */
-.footer {
-    background-color: #34495e;
-    color: white;
-    text-align: center;
-    padding: 10px;
-    position: fixed;
-    bottom: 0;
-    width: 100%;
-}
-
 /* Button Styles */
 .btn {
     padding: 8px 15px;
@@ -99,213 +95,123 @@ body {
     cursor: pointer;
     border: none;
     transition: all 0.3s ease;
-    display: inline-block;
-    text-align: center;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
 }
 
-/* Primary Button */
 .btn-primary {
-    background-color: #007bff;
-    color: #ffffff;
-    border: 1px solid #0056b3;
+    background: #3182ce;
+    color: white;
+    border: none;
 }
 
 .btn-primary:hover {
-    background-color: #0056b3;
-    border-color: #004085;
+    background: #2c5282;
 }
 
-/* Edit Button */
-.btn-edit {
-    background-color: #3498db;
-    color: #ffffff;
-    border: 1px solid #2980b9;
+.btn-secondary {
+    background: #edf2f7;
+    color: #4a5568;
+    border: 1px solid #e2e8f0;
 }
 
-.btn-edit:hover {
-    background-color: #2980b9;
-    border-color: #2472a4;
+.btn-secondary:hover {
+    background: #e2e8f0;
 }
 
-/* Delete Button */
-.btn-delete {
-    background-color: #e74c3c;
-    color: #ffffff;
-    border: 1px solid #c0392b;
+.btn-logout, .btn-login, .btn-register {
+    padding: 8px 16px;
+    border-radius: 4px;
+    text-decoration: none;
+    transition: all 0.3s ease;
 }
 
-.btn-delete:hover {
-    background-color: #c0392b;
-    border-color: #a93226;
-}
-
-/* Add Button */
-.btn-add {
-    background-color: #2ecc71;
-    color: #ffffff;
-    border: 1px solid #27ae60;
-    margin-top: 20px;
-    margin-left: 20px;
-}
-
-.btn-add:hover {
-    background-color: #27ae60;
-    border-color: #219a52;
-}
-
-/* Success Button (Google Calendar Transfer) */
-.btn-success {
-    background-color: #28a745;
-    color: #ffffff;
-    border: 1px solid #218838;
-    margin: 10px 0;
-    font-size: 14px;
-    padding: 10px 20px;
-}
-
-.btn-success:hover {
-    background-color: #218838;
-    border-color: #1e7e34;
-}
-
-.btn-success:disabled {
-    background-color: #6c757d;
-    border-color: #6c757d;
-    cursor: not-allowed;
-    opacity: 0.65;
-}
-
-/* Card Grid Styles */
-.opportunity-grid,
-.lead-grid,
-.schedule-grid,
-.task-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
-    gap: 20px;
-    padding: 20px;
-}
-
-/* Card Styles */
-.opportunity-card,
-.lead-card,
-.schedule-card,
-.task-card {
-    background-color: #fff;
-    border-radius: 8px;
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-    padding: 20px;
-    transition: transform 0.3s ease;
-}
-
-.opportunity-card:hover,
-.lead-card:hover,
-.schedule-card:hover,
-.task-card:hover {
-    transform: translateY(-5px);
-}
-
-.opportunity-card h2,
-.lead-card h2,
-.schedule-card h2,
-.task-card h2 {
-    font-size: 18px;
-    margin-bottom: 10px;
-}
-
-.opportunity-card p,
-.lead-card p,
-.schedule-card p,
-.task-card p {
-    margin-bottom: 5px;
-}
-
-.card-actions {
-    display: flex;
-    justify-content: space-between;
-    margin-top: 15px;
-}
-
-/* Specific card styles */
-.lead-card {
-    border-left: 5px solid #3498db;
-}
-
-.schedule-card {
-    border-left: 5px solid #f39c12;
-}
-
-.task-card {
-    border-left: 5px solid #2ecc71;
-}
-
-.task-card .completed {
-    color: #27ae60;
-    font-weight: bold;
-}
-
-.task-card .not-completed {
-    color: #e74c3c;
-    font-weight: bold;
-}
-
-/* Schedule view toggle styles */
-.view-toggle {
-    display: flex;
-    justify-content: center;
-    margin-bottom: 20px;
-}
-
-.view-toggle button {
-    padding: 10px 20px;
-    margin: 0 5px;
-    border: none;
-    background-color: #f0f0f0;
-    cursor: pointer;
-    border-radius: 5px;
-    transition: background-color 0.3s;
-}
-
-.view-toggle button.active {
-    background-color: #3498db;
+.btn-logout {
+    background-color: #dc3545;
     color: white;
 }
 
-/* Calendar view styles */
-.calendar-view {
-    background-color: white;
-    padding: 20px;
-    border-radius: 8px;
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+.btn-login {
+    background-color: #007bff;
+    color: white;
 }
 
-/* Responsive styles */
+.btn-register {
+    background-color: #28a745;
+    color: white;
+}
+
+/* Mobile styles */
 @media (max-width: 768px) {
+    .mobile-toggle {
+        display: block;
+        position: fixed;
+        top: 10px;
+        left: 0;  /* ここを0に変更 */
+        z-index: 1001;
+        background: none;
+        border: none;
+        color: #333;
+        font-size: 1.5em;
+        cursor: pointer;
+        padding: 10px;
+        background-color: white;
+        border-radius: 4px;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    }
+
+    .sidebar {
+        position: fixed;
+        left: -250px;
+        height: 100vh;
+        width: 250px;
+    }
+
+    .sidebar.active {
+        left: 0;
+    }
+
+    .sidebar.collapsed {
+        left: -60px;
+        width: 60px;
+    }
+
+    .sidebar.collapsed.active {
+        left: 0;
+    }
+
     .dashboard-container {
         flex-direction: column;
     }
 
-    .sidebar {
-        width: 100%;
-        order: 2;
+    .header {
+        padding-left: 60px;
     }
 
     .main-content {
         margin-left: 0;
-        order: 1;
+        width: 100%;
     }
 
+    /* サイドバーが閉じている時のモバイルトグルボタン */
+    .sidebar.collapsed ~ .mobile-toggle {
+        left: 0;  /* ここも0に変更 */
+    }
+}
+
+/* Dark mode */
+@media (prefers-color-scheme: dark) {
+    body {
+        background-color: #1a1a1a;
+        color: #ffffff;
+    }
+    
+    .sidebar {
+        background-color: #2d2d2d;
+    }
+    
     .header {
-        flex-direction: column;
-        align-items: flex-start;
-    }
-
-    .user-profile {
-        margin-top: 10px;
-    }
-
-    .btn {
-        padding: 12px 20px;
-        font-size: 16px;
+        background-color: #2d2d2d;
     }
 }
