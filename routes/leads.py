@@ -138,18 +138,17 @@ def list_leads():
             name_filter = Lead.name.ilike(f'%{search_name}%') if search_name else None
             email_filter = Lead.email.ilike(f'%{search_email}%') if search_email else None
             
-            if search_operator == 'OR':
-                if name_filter and email_filter:
-                    query = query.filter(db.or_(name_filter, email_filter))
-                elif name_filter:
-                    query = query.filter(name_filter)
-                elif email_filter:
-                    query = query.filter(email_filter)
-            else:  # AND
-                if name_filter:
-                    query = query.filter(name_filter)
-                if email_filter:
-                    query = query.filter(email_filter)
+            conditions = []
+            if search_name:
+                conditions.append(Lead.name.ilike(f'%{search_name}%'))
+            if search_email:
+                conditions.append(Lead.email.ilike(f'%{search_email}%'))
+
+            if conditions:
+                if search_operator == 'OR':
+                    query = query.filter(db.or_(*conditions))
+                else:  # AND
+                    query = query.filter(db.and_(*conditions))
     
     # Apply status filters
     statuses = request.args.getlist('status')
