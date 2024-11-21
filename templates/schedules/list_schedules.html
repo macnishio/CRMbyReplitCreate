@@ -420,16 +420,13 @@ function toggleAnalysis() {
     const content = document.getElementById('analysisContent');
     const icon = document.querySelector('.toggle-icon');
     
-    if (!content || !icon) return;
-
-    if (content.classList.contains('active')) {
-        content.style.maxHeight = '0px';
-        content.classList.remove('active');
-        icon.style.transform = 'rotate(0deg)';
-    } else {
-        content.style.maxHeight = content.scrollHeight + 'px';
-        content.classList.add('active');
-        icon.style.transform = 'rotate(180deg)';
+    if (content) {
+        content.classList.toggle('active');
+        if (content.classList.contains('active')) {
+            icon.style.transform = 'rotate(180deg)';
+        } else {
+            icon.style.transform = 'rotate(0deg)';
+        }
     }
 }
 
