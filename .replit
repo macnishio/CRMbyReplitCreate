@@ -103,42 +103,6 @@ args = "Add Filter Preferences Migration"
 task = "workflow.run"
 args = "Add Filter Migration"
 
-[[workflows.workflow.tasks]]
-task = "workflow.run"
-args = "Add Schedule Fields Migration"
-
-[[workflows.workflow.tasks]]
-task = "workflow.run"
-args = "Migration Fix"
-
-[[workflows.workflow.tasks]]
-task = "workflow.run"
-args = "Add Fields Migration"
-
-[[workflows.workflow.tasks]]
-task = "workflow.run"
-args = "Fix Migration"
-
-[[workflows.workflow.tasks]]
-task = "workflow.run"
-args = "Add Fields"
-
-[[workflows.workflow.tasks]]
-task = "workflow.run"
-args = "Add Columns"
-
-[[workflows.workflow.tasks]]
-task = "workflow.run"
-args = "Merge Migration"
-
-[[workflows.workflow.tasks]]
-task = "workflow.run"
-args = "Stamp Head"
-
-[[workflows.workflow.tasks]]
-task = "workflow.run"
-args = "Add Schedule Columns"
-
 [[workflows.workflow]]
 name = "Run Flask App"
 author = "agent"
@@ -267,7 +231,7 @@ task = "packager.installForAll"
 
 [[workflows.workflow.tasks]]
 task = "shell.exec"
-args = "flask db migrate -m 'Add location and attendees fields to Schedule model' && flask db upgrade"
+args = "flask db migrate -m 'Add filter preferences to UserSettings' && flask db upgrade"
 
 #[[workflows.workflow]]
 #name = "Clean Migration"
@@ -359,11 +323,8 @@ author = "agent"
 agentRequireRestartOnSave = false
 
 [[workflows.workflow.tasks]]
-task = "packager.installForAll"
-
-[[workflows.workflow.tasks]]
 task = "shell.exec"
-args = "flask db merge heads"
+args = "flask db init && flask db migrate -m 'Fix email schema' && flask db upgrade"
 
 #[[workflows.workflow]]
 #name = "Fix Database Schema"
@@ -462,132 +423,6 @@ task = "packager.installForAll"
 [[workflows.workflow.tasks]]
 task = "shell.exec"
 args = "flask db migrate -m 'Add filter preferences to UserSettings' && flask db upgrade"
-
-[[workflows.workflow]]
-name = "Add Schedule Fields Migration"
-author = "agent"
-
-[workflows.workflow.metadata]
-agentRequireRestartOnSave = false
-
-[[workflows.workflow.tasks]]
-task = "packager.installForAll"
-
-[[workflows.workflow.tasks]]
-task = "shell.exec"
-args = "flask db migrate -m 'Add location and attendees fields to Schedule model' && flask db upgrade"
-
-[[workflows.workflow]]
-name = "Migration Fix"
-author = "agent"
-
-[workflows.workflow.metadata]
-agentRequireRestartOnSave = false
-
-[[workflows.workflow.tasks]]
-task = "packager.installForAll"
-
-[[workflows.workflow.tasks]]
-task = "shell.exec"
-args = "flask db stamp head && flask db upgrade"
-
-[[workflows.workflow]]
-name = "Add Fields Migration"
-author = "agent"
-
-[workflows.workflow.metadata]
-agentRequireRestartOnSave = false
-
-[[workflows.workflow.tasks]]
-task = "packager.installForAll"
-
-[[workflows.workflow.tasks]]
-task = "shell.exec"
-args = "flask db migrate -m 'Add location and attendees fields to Schedule model' && flask db upgrade"
-
-[[workflows.workflow]]
-name = "Fix Migration"
-author = "agent"
-
-[workflows.workflow.metadata]
-agentRequireRestartOnSave = false
-
-[[workflows.workflow.tasks]]
-task = "packager.installForAll"
-
-[[workflows.workflow.tasks]]
-task = "shell.exec"
-args = "flask db stamp head"
-
-[[workflows.workflow]]
-name = "Add Fields"
-author = "agent"
-
-[workflows.workflow.metadata]
-agentRequireRestartOnSave = false
-
-[[workflows.workflow.tasks]]
-task = "packager.installForAll"
-
-[[workflows.workflow.tasks]]
-task = "shell.exec"
-args = "flask db migrate -m 'Add location and attendees fields to Schedule model' && flask db upgrade"
-
-[[workflows.workflow]]
-name = "Add Columns"
-author = "agent"
-
-[workflows.workflow.metadata]
-agentRequireRestartOnSave = false
-
-[[workflows.workflow.tasks]]
-task = "packager.installForAll"
-
-[[workflows.workflow.tasks]]
-task = "shell.exec"
-args = "flask db migrate -m 'Add location and attendees columns to Schedule' && flask db upgrade"
-
-[[workflows.workflow]]
-name = "Merge Migration"
-author = "agent"
-
-[workflows.workflow.metadata]
-agentRequireRestartOnSave = false
-
-[[workflows.workflow.tasks]]
-task = "packager.installForAll"
-
-[[workflows.workflow.tasks]]
-task = "shell.exec"
-args = "flask db merge heads"
-
-[[workflows.workflow]]
-name = "Stamp Head"
-author = "agent"
-
-[workflows.workflow.metadata]
-agentRequireRestartOnSave = false
-
-[[workflows.workflow.tasks]]
-task = "packager.installForAll"
-
-[[workflows.workflow.tasks]]
-task = "shell.exec"
-args = "flask db stamp head"
-
-[[workflows.workflow]]
-name = "Add Schedule Columns"
-author = "agent"
-
-[workflows.workflow.metadata]
-agentRequireRestartOnSave = false
-
-[[workflows.workflow.tasks]]
-task = "packager.installForAll"
-
-[[workflows.workflow.tasks]]
-task = "shell.exec"
-args = "flask db migrate -m 'Add location and attendees columns to Schedule' && flask db upgrade"
 
 [deployment]
 run = ["sh", "-c", "python3 app.py"]

@@ -23,8 +23,6 @@ def list_schedules():
         'lead_search': request.args.get('lead_search', ''),
         'date_from': request.args.get('date_from', ''),
         'date_to': request.args.get('date_to', ''),
-        'location': request.args.get('location', ''),
-        'attendees': request.args.get('attendees', ''),
         'page_size': int(request.args.get('page_size', 10)),
         'sort': request.args.get('sort', 'asc')
     }
@@ -74,14 +72,6 @@ def list_schedules():
         query = query.join(Schedule.lead).filter(
             Lead.name.ilike(f'%{filters["lead_search"]}%')
         )
-    
-    # Apply location filter
-    if filters['location']:
-        query = query.filter(Schedule.location.ilike(f'%{filters["location"]}%'))
-    
-    # Apply attendees filter
-    if filters['attendees']:
-        query = query.filter(Schedule.attendees.ilike(f'%{filters["attendees"]}%'))
 
     # Apply sorting
     if filters['sort'] == 'desc':

@@ -227,8 +227,6 @@ class Schedule(db.Model):
     lead_id: Mapped[Optional[int]] = mapped_column(Integer, ForeignKey('leads.id'), nullable=True)
     email_id: Mapped[Optional[int]] = mapped_column(Integer, ForeignKey('emails.id'), nullable=True)
     is_ai_generated: Mapped[bool] = mapped_column(Boolean, default=False)
-    location: Mapped[Optional[str]] = mapped_column(String(200), nullable=True)
-    attendees: Mapped[Optional[str]] = mapped_column(Text, nullable=True)
 
     # リレーションシップ
     lead = db.relationship('Lead', back_populates='schedules')
