@@ -1,12 +1,94 @@
 {% extends "base.html" %}
 {% block title %}商談一覧{% endblock %}
+
+{% block styles %}
+<style>
+/* Global Variables */
+:root {
+    --primary-color: #4a90e2;
+    --secondary-color: #f8fafc;
+    --border-color: #e2e8f0;
+    --text-color: #2d3748;
+    --hover-color: #3182ce;
+    --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.05);
+    --shadow-md: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+/* Filter Section */
+.filter-section {
+    background-color: #fff;
+    border-radius: 12px;
+    box-shadow: var(--shadow-md);
+    position: relative;
+    z-index: 20;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    border: 1px solid var(--border-color);
+    margin-bottom: 20px;
+}
+
+.filter-header {
+    display: flex;
+    align-items: center;
+    padding: 1rem 1.25rem;
+    cursor: pointer;
+    background-color: var(--secondary-color);
+    border-radius: 12px 12px 0 0;
+    border-bottom: 1px solid var(--border-color);
+    transition: background-color 0.3s ease-in-out;
+}
+
+.filter-header:hover {
+    background-color: #edf2f7;
+}
+
+.filter-icon {
+    margin-right: 0.8rem;
+    font-size: 1.2rem;
+    transition: transform 0.3s ease;
+}
+
+.filter-content {
+    padding: 1rem;
+    overflow: hidden;
+    transition: max-height 0.3s ease-in-out, opacity 0.3s ease-in-out;
+    max-height: 2000px;
+    opacity: 1;
+}
+
+.filter-content.collapsed {
+    max-height: 0;
+    padding-top: 0;
+    padding-bottom: 0;
+    opacity: 0;
+}
+
+/* Data Table Container */
+.data-table-container {
+    background-color: #fff;
+    border-radius: 12px;
+    box-shadow: var(--shadow-md);
+    position: relative;
+    z-index: 10;
+    padding: 1.5rem;
+    border: 1px solid var(--border-color);
+}
+</style>
+{% endblock %}
+
 {% block content %}
-<!-- Filter Form -->
-<div class="filter-section">
-    <form method="GET" class="filter-form" id="filterForm">
-        <div class="filter-header">
-            <h2><i class="fas fa-filter"></i> フィルター設定</h2>
-            <div class="filter-summary" id="filterSummary"></div>
+<div class="page-container">
+    <div class="content-wrapper">
+        <!-- Filter Section -->
+        <div class="filter-section">
+            <!-- Filter Toggle Header -->
+            <div class="filter-header" onclick="toggleFilters()">
+                <span class="filter-icon" id="filter-toggle-icon">▼</span>
+                <h3>フィルターオプション</h3>
+            </div>
+            
+            <!-- Collapsible Filter Content -->
+            <div class="filter-content" id="filter-content">
+                <form method="GET" class="filter-form" id="filterForm">
 <div class="active-filters">
     {% if filters.stage or filters.min_amount or filters.max_amount or filters.lead_search or filters.lead_status or filters.date_from or filters.date_to %}
         <div class="filter-tags">
@@ -366,9 +448,134 @@ function clearAllFilters() {
         </div>
         
         <script>
-        function exportOpportunities() {
-            const exportButton = document.querySelector('button[onclick="exportOpportunities()"]');
-            const originalText = exportButton.innerHTML;
+        // フィルターの開閉機能とフィルター状態の保存
+function toggleFilters() {
+    const content = document.getElementById('filter-content');
+    const icon = document.getElementById('filter-toggle-icon');
+    const filterForm = document.getElementById('filterForm');
+    
+    // Get current state
+    const isCollapsed = content.classList.contains('collapsed');
+    
+    // Toggle icon class for rotation
+    icon.classList.toggle('collapsed');
+    icon.style.transform = isCollapsed ? 'rotate(0deg)' : 'rotate(-90deg)';
+    
+    if (isCollapsed) {
+        // Expanding
+        content.style.maxHeight = content.scrollHeight + 'px';
+        content.classList.remove('collapsed');
+        
+        setTimeout(() => {
+            if (!content.classList.contains('collapsed')) {
+                content.style.maxHeight = 'none';
+            }
+        }, 300);
+    } else {
+        // Collapsing
+        content.style.maxHeight = content.scrollHeight + 'px';
+        content.offsetHeight;
+        content.classList.add('collapsed');
+        content.style.maxHeight = '0';
+    }
+    
+    // Save section state and form values
+    saveFilterState();
+}
+
+// フィルター状態の保存
+function saveFilterState() {
+    const content = document.getElementById('filter-content');
+    const filterForm = document.getElementById('filterForm');
+    const formData = new FormData(filterForm);
+    
+    // チェックボックスの状態を保存
+    const checkboxStates = {};
+    filterForm.querySelectorAll('input[type="checkbox"]').forEach(checkbox => {
+        checkboxStates[checkbox.name + '_' + checkbox.value] = checkbox.checked;
+    });
+
+    const filterState = {
+        isCollapsed: content.classList.contains('collapsed'),
+        formValues: Object.fromEntries(formData.entries()),
+        checkboxStates: checkboxStates,
+        lastUpdated: new Date().toISOString()
+    };
+    
+    localStorage.setItem('opportunity-filter-section-state', JSON.stringify(filterState));
+}
+
+// フィルターフォームの値が変更されたときも状態を保存
+document.getElementById('filterForm').addEventListener('change', saveFilterState);
+
+// ページ読み込み時の初期化と保存された状態の復元
+document.addEventListener('DOMContentLoaded', function() {
+    const content = document.getElementById('filter-content');
+    const icon = document.getElementById('filter-toggle-icon');
+    const filterForm = document.getElementById('filterForm');
+    
+    // アニメーションを一時的に無効化
+    content.style.transition = 'none';
+    
+    try {
+        const savedState = JSON.parse(localStorage.getItem('opportunity-filter-section-state'));
+        
+        if (savedState && savedState.lastUpdated) {
+            const lastUpdated = new Date(savedState.lastUpdated);
+            const now = new Date();
+            const hoursDiff = (now - lastUpdated) / (1000 * 60 * 60);
+            
+            // 24時間以内の状態のみを復元
+            if (hoursDiff <= 24) {
+                // セクションの開閉状態を復元
+                if (!savedState.isCollapsed) {
+                    content.classList.remove('collapsed');
+                    icon.style.transform = 'rotate(0deg)';
+                    content.style.maxHeight = 'none';
+                } else {
+                    content.classList.add('collapsed');
+                    icon.style.transform = 'rotate(-90deg)';
+                    content.style.maxHeight = '0';
+                }
+                
+                // フォームの値を復元
+                if (savedState.formValues) {
+                    Object.entries(savedState.formValues).forEach(([key, value]) => {
+                        const input = filterForm.elements[key];
+                        if (input && input.type !== 'checkbox') {
+                            input.value = value;
+                        }
+                    });
+                }
+                
+                // チェックボックスの状態を復元
+                if (savedState.checkboxStates) {
+                    Object.entries(savedState.checkboxStates).forEach(([key, checked]) => {
+                        const [name, value] = key.split('_');
+                        const checkbox = filterForm.querySelector(`input[type="checkbox"][name="${name}"][value="${value}"]`);
+                        if (checkbox) {
+                            checkbox.checked = checked;
+                        }
+                    });
+                }
+            } else {
+                // 24時間以上経過している場合は状態をクリア
+                localStorage.removeItem('opportunity-filter-section-state');
+            }
+        }
+    } catch (error) {
+        console.error('Error restoring filter state:', error);
+        localStorage.removeItem('opportunity-filter-section-state');
+    }
+    
+    // アニメーションを再有効化
+    setTimeout(() => {
+        content.style.transition = 'max-height 0.3s ease-in-out, opacity 0.3s ease-in-out';
+    }, 0);
+});
+
+function exportOpportunities() {
+    const exportButton = document.querySelector('button[onclick="exportOpportunities()"]');
             
             // Disable button and show loading state
             exportButton.disabled = true;
