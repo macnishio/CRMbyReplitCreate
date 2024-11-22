@@ -3,225 +3,320 @@
 
 {% block styles %}
 <style>
-/* Global Variables */
-:root {
-    --primary-color: #4a90e2;
-    --secondary-color: #f8fafc;
-    --border-color: #e2e8f0;
-    --text-color: #2d3748;
-    --hover-color: #3182ce;
-    --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.05);
-    --shadow-md: 0 4px 6px rgba(0, 0, 0, 0.1);
-    --font-family: -apple-system, "Segoe UI", "Hiragino Kaku Gothic ProN", "Hiragino Sans", Meiryo, sans-serif;
-}
+    /* Global Variables */
+    :root {
+        --primary-color: #4a90e2;
+        --secondary-color: #f8fafc;
+        --border-color: #e2e8f0;
+        --text-color: #2d3748;
+        --hover-color: #3182ce;
+        --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.05);
+        --shadow-md: 0 4px 6px rgba(0, 0, 0, 0.1);
+        --font-family: -apple-system, "Segoe UI", "Hiragino Kaku Gothic ProN", "Hiragino Sans", Meiryo, sans-serif;
+        --success-color: #28a745;
+        --danger-color: #dc3545;
+        --shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    }
 
-/* Page Layout */
-.page-container {
-    padding: 1.5rem;
-    font-family: var(--font-family);
-    color: var(--text-color);
-}
+    body {
+        font-family: var(--font-family);
+        color: var(--text-color);
+        line-height: 1.6;
+    }
 
-.content-wrapper {
-    display: flex;
-    flex-direction: column;
-    gap: 1.5rem;
-    position: relative;
-}
-
-/* Filter Section */
-.filter-section {
-    background-color: #fff;
-    border-radius: 12px;
-    box-shadow: var(--shadow-md);
-    position: relative;
-    z-index: 20;
-    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-    border: 1px solid var(--border-color);
-    margin-bottom: 0;
-}
-
-/* Data Table Container */
-.data-table-container {
-    background-color: #fff;
-    border-radius: 12px;
-    box-shadow: var(--shadow-md);
-    position: relative;
-    z-index: 10;
-    padding: 1.5rem;
-    border: 1px solid var(--border-color);
-}
-
-/* Data Table Container */
-.data-table-container {
-    background-color: #fff;
-    border-radius: 8px;
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-    position: relative;
-    z-index: 10;
-    margin-top: 1rem;
-}
-
-.filter-header {
-    display: flex;
-    align-items: center;
-    padding: 1rem 1.25rem;
-    cursor: pointer;
-    background-color: var(--secondary-color);
-    border-radius: 12px 12px 0 0;
-    border-bottom: 1px solid var(--border-color);
-    transition: background-color 0.3s ease-in-out;
-}
-
-.filter-header:hover {
-    background-color: #edf2f7;
-}
-
-.filter-header:focus-within {
-    outline: 2px solid var(--primary-color);
-    outline-offset: -2px;
-}
-
-.filter-header h3, .filter-group-header h4 {
-    font-size: 0.9rem;
-    font-weight: 600;
-    color: var(--text-color);
-    margin: 0;
-}
-
-.filter-icon {
-    margin-right: 0.8rem;
-    font-size: 1.2rem;
-    transition: transform 0.3s ease;
-}
-
-.filter-content {
-    padding: 1rem;
-    overflow: hidden;
-    transition: max-height 0.3s ease-in-out, opacity 0.3s ease-in-out;
-    max-height: 2000px;
-    opacity: 1;
-}
-
-.filter-content.collapsed {
-    max-height: 0;
-    padding-top: 0;
-    padding-bottom: 0;
-    opacity: 0;
-}
-
-/* Data Table Container */
-.data-table-container {
-    background-color: #fff;
-    border-radius: 8px;
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-    position: relative;
-    z-index: 5;
-}
-
-.filter-header {
-    display: flex;
-    align-items: center;
-    padding: 1rem;
-    cursor: pointer;
-    background-color: #f8fafc;
-    border-radius: 8px 8px 0 0;
-    border-bottom: 1px solid #e2e8f0;
-    transition: background-color 0.2s ease;
-}
-
-.filter-header:hover {
-    background-color: #edf2f7;
-}
-
-.filter-icon {
-    margin-right: 0.8rem;
-    font-size: 1.2rem;
-    transition: transform 0.3s ease;
-}
-
-.filter-header h3, .filter-group-header h4 {
-    margin: 0;
-    font-size: 0.9rem;
-    font-weight: 600;
-    color: #2d3748;
-}
-
-.filter-content {
-    overflow: hidden;
-    transition: max-height 0.3s cubic-bezier(0.4, 0, 0.2, 1), 
-                opacity 0.3s cubic-bezier(0.4, 0, 0.2, 1),
-                padding 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-    max-height: 2000px;
-    opacity: 1;
-    padding: 1.25rem;
-    background-color: #fff;
-    will-change: max-height, opacity, padding;
-}
-
-.filter-content.collapsed {
-    max-height: 0;
-    opacity: 0;
-    padding-top: 0;
-    padding-bottom: 0;
-    pointer-events: none;
-}
-
-.filter-group-section {
-    margin-bottom: 1.5rem;
-    background-color: #fff;
-    border-radius: 8px;
-    box-shadow: var(--shadow-sm);
-}
-
-.filter-group-header {
-    display: flex;
-    align-items: center;
-    padding: 0.75rem 1rem;
-    background-color: var(--secondary-color);
-    border-radius: 8px;
-    cursor: pointer;
-    transition: all 0.3s ease-in-out;
-}
-
-.filter-group-header:hover {
-    background-color: #edf2f7;
-    transform: translateY(-1px);
-}
-
-.filter-group-header:active {
-    transform: translateY(0);
-}
-
-.filter-icon {
-    display: inline-block;
-    transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-    will-change: transform;
-}
-
-.filter-icon.collapsed {
-    transform: rotate(-90deg);
-}
-
-/* Data Table Container */
-.data-table-container {
-    background-color: #fff;
-    border-radius: 8px;
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-    position: relative;
-    z-index: 5;
-}
-
-/* Responsive adjustments */
-@media (max-width: 768px) {
+    /* Page Layout */
     .page-container {
-        padding: 0.5rem;
+        padding: 1.5rem;
     }
-    
+
+    .content-wrapper {
+        display: flex;
+        flex-direction: column;
+        gap: 1.5rem;
+        position: relative;
+    }
+
+    /* Filter Section */
+    .filter-section {
+        background: #fff;
+        border: 1px solid var(--border-color);
+        border-radius: 12px;
+        box-shadow: var(--shadow-md);
+        margin-bottom: 1.5rem;
+        position: relative;
+        z-index: 20;
+        transition: all 0.3s cubic-bezier(.4,0,.2,1);
+    }
+
     .filter-header {
-        padding: 0.8rem;
+        align-items: center;
+        background-color: var(--secondary-color);
+        border-bottom: 1px solid var(--border-color);
+        border-radius: 12px 12px 0 0;
+        cursor: pointer;
+        display: flex;
+        padding: 1rem 1.25rem;
+        transition: background-color .3s ease-in-out;
     }
-}
+
+    .filter-header:hover {
+        background-color: #edf2f7;
+    }
+
+    .filter-header:focus-within {
+        outline: 2px solid var(--primary-color);
+        outline-offset: -2px;
+    }
+
+    .filter-header h3, .filter-group-header h4 {
+        color: var(--text-color);
+        font-size: .9rem;
+        font-weight: 600;
+        margin: 0;
+    }
+
+    .filter-icon {
+        font-size: 1.2rem;
+        margin-right: .8rem;
+        transition: transform .3s ease;
+    }
+
+    .filter-content {
+        background-color: #fff;
+        overflow: hidden;
+        padding: 1.25rem;
+        max-height: 2000px;  /* For transition */
+        transition: all .3s cubic-bezier(.4,0,.2,1);
+        opacity: 1;
+    }
+
+    .filter-content.collapsed {
+        max-height: 0;
+        opacity: 0;
+        padding: 0;
+        pointer-events: none;
+    }
+
+    .filter-group-section {
+        background-color: #fff;
+        border-radius: 8px;
+        box-shadow: var(--shadow-sm);
+        margin-bottom: 1.5rem;
+    }
+
+    .filter-group-header {
+        align-items: center;
+        background-color: var(--secondary-color);
+        border-radius: 8px;
+        cursor: pointer;
+        display: flex;
+        padding: .75rem 1rem;
+        transition: all .3s ease-in-out;
+    }
+
+    .filter-group-header:hover {
+        background-color: #edf2f7;
+        transform: translateY(-1px);
+    }
+
+    .filter-group-header:active {
+        transform: translateY(0);
+    }
+
+    .filter-icon.collapsed {
+        transform: rotate(-90deg);
+    }
+
+    .data-table-container {
+        background-color: #fff;
+        border: 1px solid var(--border-color);
+        border-radius: 8px;
+        box-shadow: var(--shadow);
+        margin-top: 1rem;
+        padding: 1.5rem;
+        position: relative;
+        z-index: 10;
+    }
+
+    /* Lead Grid */
+    .lead-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: 1rem;
+        margin-top: 1rem;
+    }
+
+    .lead-card {
+        background: white;
+        border: 1px solid var(--border-color);
+        border-radius: 8px;
+        padding: 0.75rem;
+        box-shadow: var(--shadow-sm);
+        transition: transform 0.2s ease, box-shadow 0.2s ease;
+        overflow: hidden;
+    }
+
+    .lead-card:hover {
+        transform: translateY(-3px);
+        box-shadow: var(--shadow-md);
+    }
+
+    .lead-card h2 {
+        font-size: 1rem;
+        margin-bottom: 0.5rem;
+        color: var(--text-color);
+        font-weight: 600;
+    }
+
+    .lead-card p {
+        margin: 0.3rem 0;
+        line-height: 1.4;
+        color: #4a5568;
+    }
+
+    .lead-card p strong {
+        color: var(--text-color);
+    }
+
+    .card-actions {
+        display: flex;
+        gap: 0.75rem;
+        margin-top: 0.75rem;
+        justify-content: flex-end;
+        align-items: center;
+    }
+
+    /* Buttons */
+    .btn {
+        padding: 0.5rem 1rem;
+        border-radius: 6px;
+        font-weight: 500;
+        cursor: pointer;
+        transition: all 0.2s ease;
+        border: none;
+        text-decoration: none;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 0.5rem;
+    }
+
+    .btn-primary {
+        background-color: var(--primary-color);
+        color: white;
+    }
+
+    .btn-primary:hover {
+        background-color: var(--hover-color);
+    }
+
+    .btn-danger {
+        background-color: var(--danger-color);
+        color: white;
+    }
+
+    .btn-danger:hover {
+        background-color: darken(var(--danger-color), 10%);
+    }
+
+    .btn-edit {
+        background-color: var(--primary-color);
+        color: white;
+    }
+
+    .btn-delete {
+        background-color: var(--danger-color);
+        color: white;
+    }
+
+    /* Bulk Actions */
+    .bulk-actions {
+        margin: 1.5rem 0;
+        padding: 1rem;
+        background-color: var(--secondary-color);
+        border-radius: 8px;
+        display: flex;
+        gap: 1rem;
+        align-items: center;
+        flex-wrap: wrap;
+    }
+
+    .select-all-container {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    .lead-select {
+        position: absolute;
+        top: 1rem;
+        right: 1rem;
+    }
+
+    #new-score {
+        width: 100px;
+    }
+
+    /* Animations */
+    @keyframes fadeInUp {
+        from { opacity: 0; transform: translateY(10px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
+
+    .lead-card {
+        animation: fadeInUp 0.3s ease-out;
+    }
+
+    /* Responsive Adjustments */
+    @media (max-width: 768px) {
+        .lead-grid {
+            grid-template-columns: 1fr;
+        }
+        .lead-card {
+            padding: 0.75rem;
+        }
+    }
+
+    .pagination {
+        display: flex;
+        justify-content: center;
+        margin-top: 2rem;
+    }
+
+    .pagination-list {
+        list-style: none;
+        padding: 0;
+        display: flex;
+        gap: 0.5rem;
+    }
+
+    .page-item {
+        margin: 0;
+    }
+
+    .page-link {
+        display: block;
+        padding: 0.5rem 0.75rem;
+        border: 1px solid var(--border-color);
+        border-radius: 4px;
+        text-decoration: none;
+        color: var(--text-color);
+        transition: background-color 0.2s ease;
+    }
+
+    .page-link:hover {
+        background-color: var(--secondary-color);
+    }
+
+    .page-item.active .page-link {
+        background-color: var(--primary-color);
+        color: white;
+    }
+
+    .page-item.disabled .page-link {
+        color: #ccc;
+        pointer-events: none;
+    }
 </style>
 {% endblock %}
 
@@ -235,56 +330,87 @@
                 <span class="filter-icon" id="filter-toggle-icon">▼</span>
                 <h3>フィルターオプション</h3>
             </div>
-            
+
             <!-- Collapsible Filter Content -->
             <div class="filter-content collapsed" id="filter-content">
                 <form method="GET" action="{{ url_for('leads.list_leads') }}" class="filter-form" id="leadFilterForm">
-        
-        <!-- Search Fields -->
-        <div class="filter-group-section">
-            <div class="filter-group-header" onclick="toggleFilterGroup('search')">
-                <span class="filter-group-icon" id="search-icon">▼</span>
-                <h4>検索フィルター</h4>
-            </div>
-            <div class="filter-group-content" id="search-content">
-                <div class="search-group">
-            <div class="search-field">
-                <label for="search_name">名前で検索:</label>
-                <input type="text" name="search_name" id="search_name" 
-                       value="{{ request.args.get('search_name', '') }}"
-                       placeholder="顧客名を入力してください..."
-                       class="search-input">
-            </div>
-            <div class="search-operator">
-                <label for="search_operator">検索条件:</label>
-                <select name="search_operator" id="search_operator">
-                    <option value="AND" {% if request.args.get('search_operator') == 'AND' %}selected{% endif %}>AND</option>
-                    <option value="OR" {% if request.args.get('search_operator') == 'OR' %}selected{% endif %}>OR</option>
-                </select>
-            </div>
-            <div class="search-field">
-                <label for="search_email">メールで検索:</label>
-                <input type="text" name="search_email" id="search_email" 
-                       value="{{ request.args.get('search_email', '') }}"
-                       placeholder="メールアドレスを入力してください..."
-                       class="search-input">
-            </div>
-            </div>
-        </div>
-        <!-- Advanced Filter Groups -->
-        <div class="filter-group-section">
-            <div class="filter-group-header" onclick="toggleFilterGroup('advanced')">
-                <span class="filter-group-icon" id="advanced-icon">▼</span>
-                <h4>高度なフィルター</h4>
-            </div>
-            <div class="filter-group-content" id="advanced-content">
-                <div class="advanced-filters" id="advancedFilters">
-            <h3>高度なフィルター</h3>
-            <div id="filterGroups">
-                <!-- Filter groups will be dynamically added here -->
-            </div>
-            <button type="button" class="btn btn-secondary" onclick="addFilterGroup()">フィルターグループを追加</button>
-        </div>
+                    <!-- Search Fields -->
+                    <div class="filter-group-section">
+                        <div class="filter-group-header">
+                            <h4>検索フィルター</h4>
+                        </div>
+                        <div class="filter-group-content">
+                            <div class="search-group">
+                                <div class="search-field">
+                                    <label for="search_name">名前で検索:</label>
+                                    <input type="text" name="search_name" id="search_name" 
+                                           value="{{ request.args.get('search_name', '') }}"
+                                           placeholder="顧客名を入力してください..."
+                                           class="search-input">
+                                </div>
+                                <div class="search-operator">
+                                    <label for="search_operator">検索条件:</label>
+                                    <select name="search_operator" id="search_operator">
+                                        <option value="AND" {% if request.args.get('search_operator') == 'AND' %}selected{% endif %}>AND</option>
+                                        <option value="OR" {% if request.args.get('search_operator') == 'OR' %}selected{% endif %}>OR</option>
+                                    </select>
+                                </div>
+                                <div class="search-field">
+                                    <label for="search_email">メールで検索:</label>
+                                    <input type="text" name="search_email" id="search_email" 
+                                           value="{{ request.args.get('search_email', '') }}"
+                                           placeholder="メールアドレスを入力してください..."
+                                           class="search-input">
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Status Filter -->
+                    <div class="filter-group-section">
+                        <div class="filter-group-header">
+                            <h4>ステータスフィルター</h4>
+                        </div>
+                        <div class="filter-group-content">
+                            <div class="status-group">
+                                <label for="lead_status">ステータス:</label>
+                                <select name="lead_status" id="lead_status" class="form-select">
+                                    <option value="">全て</option>
+                                    <option value="New" {% if request.args.get('lead_status') == 'New' %}selected{% endif %}>新規</option>
+                                    <option value="Contacted" {% if request.args.get('lead_status') == 'Contacted' %}selected{% endif %}>連絡済み</option>
+                                    <option value="Qualified" {% if request.args.get('lead_status') == 'Qualified' %}selected{% endif %}>適格</option>
+                                    <option value="Unqualified" {% if request.args.get('lead_status') == 'Unqualified' %}selected{% endif %}>不適格</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Sort Options -->
+                    <div class="filter-group-section">
+                        <div class="filter-group-header">
+                            <h4>並べ替えオプション</h4>
+                        </div>
+                        <div class="filter-group-content">
+                            <div class="sort-group">
+                                <div class="sort-field">
+                                    <label for="sort_by">並べ替えフィールド:</label>
+                                    <select name="sort_by" id="sort_by" class="form-select">
+                                        <option value="created_at" {% if request.args.get('sort_by') == 'created_at' %}selected{% endif %}>作成日</option>
+                                        <option value="name" {% if request.args.get('sort_by') == 'name' %}selected{% endif %}>名前</option>
+                                        <option value="email" {% if request.args.get('sort_by') == 'email' %}selected{% endif %}>メール</option>
+                                        <option value="status" {% if request.args.get('sort_by') == 'status' %}selected{% endif %}>ステータス</option>
+                                    </select>
+                                </div>
+                                <div class="sort-field">
+                                    <label for="sort_order">並び順:</label>
+                                    <select name="sort_order" id="sort_order" class="form-select">
+                                        <option value="asc" {% if request.args.get('sort_order') == 'asc' %}selected{% endif %}>昇順</option>
+                                        <option value="desc" {% if request.args.get('sort_order') == 'desc' %}selected{% endif %}>降順</option>
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
 
         <script>
             // フィルターの開閉機能とフィルター状態の保存
@@ -323,7 +449,7 @@
             }
 
             // フィルター状態の保存
-            function saveFilterState() {
+            async function saveFilterState() {
                 const content = document.getElementById('filter-content');
                 const filterForm = document.getElementById('leadFilterForm');
                 const formData = new FormData(filterForm);
@@ -338,11 +464,31 @@
                     isCollapsed: content.classList.contains('collapsed'),
                     formValues: Object.fromEntries(formData.entries()),
                     checkboxStates: checkboxStates,
-                    filterGroups: filterGroups,
                     lastUpdated: new Date().toISOString()
                 };
                 
+                // ローカルストレージに保存
                 localStorage.setItem('filter-section-state', JSON.stringify(filterState));
+
+                // サーバーに保存
+                try {
+                    const response = await fetch('/api/save_filter_state', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify({
+                            section: 'leads',
+                            state: filterState
+                        })
+                    });
+
+                    if (!response.ok) {
+                        console.error('フィルター状態の保存に失敗しました');
+                    }
+                } catch (error) {
+                    console.error('フィルター状態の保存中にエラーが発生しました:', error);
+                }
             }
 
             // フィルターフォームの値が変更されたときも状態を保存
@@ -1389,28 +1535,58 @@ function loadSavedFilters() {
         <button type="submit" class="btn btn-primary" onclick="return confirmBulkAction()">適用</button>
     </div>
 
-<!-- Lead Grid -->
-<div class="lead-grid">
-    {% for lead in leads %}
-    <div class="lead-card">
-        <div class="lead-select">
-            <input type="checkbox" name="selected_leads[]" value="{{ lead.id }}" class="lead-checkbox">
-        </div>
-        <h2>{{ lead.name or '名前なし' }}</h2>
-        <p><strong>メール:</strong> {{ lead.email }}</p>
-        <p><strong>電話:</strong> {{ lead.phone }}</p>
-        <p><strong>ステータス:</strong> {{ lead.status }}</p>
-        <p><strong>スコア:</strong> {{ "%.1f"|format(lead.score) }}</p>
-        <p><strong>最終接触:</strong> {{ lead.last_contact.strftime('%Y-%m-%d %H:%M') if lead.last_contact }}</p>
-        <div class="card-actions">
-            <a href="{{ url_for('leads.edit_lead', id=lead.id) }}" class="btn btn-edit">編集</a>
-            <form method="POST" action="{{ url_for('leads.delete_lead', id=lead.id) }}" style="display: inline;">
-                <button type="submit" class="btn btn-delete" onclick="return confirm('このリードを削除してもよろしいですか？');">削除</button>
-            </form>
+    <!-- Lead Grid -->
+    <div class="lead-grid">
+        {% for lead in leads %}
+        <div class="lead-card">
+            <div class="lead-select">
+                <input type="checkbox" name="selected_leads[]" value="{{ lead.id }}" class="lead-checkbox">
+            </div>
+            <h2>{{ lead.name or '名前なし' }}</h2>
+            <p><strong>メール:</strong> {{ lead.email }}</p>
+            <p><strong>電話:</strong> {{ lead.phone }}</p>
+            <p><strong>ステータス:</strong> {{ lead.status }}</p>
+            <p><strong>スコア:</strong> {{ "%.1f"|format(lead.score) }}</p>
+            <p><strong>最終接触:</strong> {{ lead.last_contact.strftime('%Y-%m-%d %H:%M') if lead.last_contact }}</p>
+            <div class="card-actions">
+                <a href="{{ url_for('leads.edit_lead', id=lead.id) }}" class="btn btn-edit">編集</a>
+                <form method="POST" action="{{ url_for('leads.delete_lead', id=lead.id) }}" style="display: inline;">
+                    <button type="submit" class="btn btn-delete" onclick="return confirm('このリードを削除してもよろしいですか？');">削除</button>
+                </form>
         </div>
     </div>
     {% endfor %}
 </div>
+    <div class="pagination">
+        <ul class="pagination-list">
+            {% if pagination.has_prev %}
+            <li class="page-item">
+                <a href="{{ url_for('leads.list_leads', page=pagination.prev_num, **request.args) }}" class="page-link">前へ</a>
+            </li>
+            {% endif %}
+            {% for page_num in pagination.iter_pages(left_edge=1, right_edge=1, left_current=2, right_current=2) %}
+            {% if page_num %}
+                {% if page_num == pagination.page %}
+                <li class="page-item active">
+                    <span class="page-link">{{ page_num }}</span>
+                </li>
+                {% else %}
+                <li class="page-item">
+                    <a href="{{ url_for('leads.list_leads', page=page_num, **request.args) }}" class="page-link">{{ page_num }}</a>
+                </li>
+                {% endif %}
+            {% else %}
+            <li class="page-item disabled"><span class="page-link">...</span></li>
+            {% endif %}
+            {% endfor %}
+            {% if pagination.has_next %}
+            <li class="page-item">
+                <a href="{{ url_for('leads.list_leads', page=pagination.next_num, **request.args) }}" class="page-link">次へ</a>
+            </li>
+            {% endif %}
+        </ul>
+    </div>
+
 </form>
 
 <div class="add-lead">
@@ -1473,241 +1649,4 @@ document.querySelectorAll('.lead-checkbox').forEach(checkbox => {
 });
 </script>
 
-<style>
-:root {
-    --primary-color: #4a90e2;
-    --secondary-color: #f8f9fa;
-    --border-color: #e1e4e8;
-    --text-color: #2c3e50;
-    --success-color: #28a745;
-    --danger-color: #dc3545;
-    --shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-}
-
-body {
-    font-family: "Noto Sans JP", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-    color: var(--text-color);
-    line-height: 1.6;
-}
-
-.filter-section {
-    margin-bottom: 2rem;
-    padding: 1.5rem;
-    background-color: var(--secondary-color);
-    border-radius: 8px;
-    box-shadow: var(--shadow);
-}
-
-.search-group {
-    display: flex;
-    gap: 1.5rem;
-    margin-bottom: 1.5rem;
-    flex-wrap: wrap;
-}
-
-.search-field {
-    display: flex;
-    align-items: center;
-    gap: 1rem;
-    position: relative;
-    flex: 1;
-    min-width: 280px;
-}
-
-.search-field::before {
-    content: "🔍";
-    position: absolute;
-    left: 12px;
-    top: 50%;
-    transform: translateY(-50%);
-    color: #666;
-    pointer-events: none;
-}
-
-.search-field input[type="text"] {
-    padding: 0.8rem 1rem 0.8rem 2.5rem;
-    border: 2px solid var(--border-color);
-    border-radius: 8px;
-    width: 100%;
-    font-size: 1rem;
-    transition: all 0.3s ease;
-}
-
-.search-field input[type="text"]:focus {
-    border-color: var(--primary-color);
-    box-shadow: 0 0 0 3px rgba(74, 144, 226, 0.1);
-    outline: none;
-}
-
-.search-field label {
-    white-space: nowrap;
-    font-weight: 500;
-    color: var(--text-color);
-}
-
-.filter-form {
-    display: flex;
-    gap: 1.5rem;
-    align-items: center;
-    flex-wrap: wrap;
-}
-
-.filter-group {
-    display: flex;
-    align-items: center;
-    gap: 1rem;
-}
-
-.filter-group select,
-.filter-group input[type="number"] {
-    padding: 0.6rem 1rem;
-    border: 2px solid var(--border-color);
-    border-radius: 6px;
-    background-color: white;
-    min-width: 120px;
-}
-
-.lead-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
-    gap: 1.5rem;
-    margin-top: 2rem;
-}
-
-.lead-card {
-    background: white;
-    border-radius: 10px;
-    padding: 1.5rem;
-    position: relative;
-    box-shadow: var(--shadow);
-    transition: transform 0.2s ease, box-shadow 0.2s ease;
-    border: 1px solid var(--border-color);
-}
-
-.lead-card:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-}
-
-.lead-card h2 {
-    font-size: 1.25rem;
-    margin-bottom: 1rem;
-    color: var(--text-color);
-}
-
-.lead-card p {
-    margin: 0.5rem 0;
-    line-height: 1.5;
-}
-
-.btn {
-    padding: 0.6rem 1.2rem;
-    border-radius: 6px;
-    font-weight: 500;
-    cursor: pointer;
-    transition: all 0.2s ease;
-    border: none;
-    text-decoration: none;
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    gap: 0.5rem;
-}
-
-.btn-primary {
-    background-color: var(--primary-color);
-    color: white;
-}
-
-.btn-primary:hover {
-    background-color: #357abd;
-}
-
-.btn-danger {
-    background-color: var(--danger-color);
-    color: white;
-}
-
-.btn-danger:hover {
-    background-color: #bd2130;
-}
-
-.btn-edit {
-    background-color: var(--primary-color);
-    color: white;
-}
-
-.btn-delete {
-    background-color: var(--danger-color);
-    color: white;
-}
-
-.card-actions {
-    display: flex;
-    gap: 1rem;
-    margin-top: 1rem;
-    justify-content: flex-end;
-}
-
-.bulk-actions {
-    margin: 1.5rem 0;
-    padding: 1rem;
-    background-color: var(--secondary-color);
-    border-radius: 8px;
-    display: flex;
-    gap: 1rem;
-    align-items: center;
-    flex-wrap: wrap;
-}
-
-.select-all-container {
-    display: flex;
-    align-items: center;
-    gap: 0.5rem;
-}
-
-.lead-select {
-    position: absolute;
-    top: 1rem;
-    right: 1rem;
-}
-
-#new-score {
-    width: 100px;
-}
-
-/* アニメーション */
-@keyframes fadeIn {
-    from { opacity: 0; transform: translateY(10px); }
-    to { opacity: 1; transform: translateY(0); }
-}
-
-.lead-card {
-    animation: fadeIn 0.3s ease-out;
-}
-
-/* 日本語フォントの最適化 */
-.lead-card h2,
-.lead-card p,
-.search-field input::placeholder {
-    font-feature-settings: "palt";
-    text-align: justify;
-}
-
-/* レスポンシブデザイン */
-@media (max-width: 768px) {
-    .search-group {
-        flex-direction: column;
-    }
-    
-    .search-field {
-        width: 100%;
-    }
-    
-    .bulk-actions {
-        flex-direction: column;
-        align-items: stretch;
-    }
-}
-</style>
 {% endblock %}

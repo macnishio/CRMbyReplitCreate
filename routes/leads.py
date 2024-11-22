@@ -48,7 +48,7 @@ def update_empty_names():
 @login_required
 def list_leads():
     query = Lead.query.filter_by(user_id=current_user.id)
-    
+
     # Get filter preferences from UserSettings
     user_settings = current_user.settings
     if user_settings and user_settings.filter_preferences:
@@ -69,19 +69,19 @@ def list_leads():
         for group in filter_groups:
             group_operator = group.get('operator', 'AND')
             conditions = []
-            
+
             for condition in group.get('conditions', []):
                 field = condition.get('field')
                 operator = condition.get('operator')
                 value = condition.get('value')
-                
+
                 if not all([field, operator, value]):
                     continue
 
                 # Handle Japanese text properly
                 if isinstance(value, str):
                     value = value.strip()
-                    
+
                 if field == 'name':
                     if operator == 'contains':
                         conditions.append(Lead.name.ilike(f'%{value}%'))
@@ -120,24 +120,24 @@ def list_leads():
                         conditions.append(Lead.status == value)
                     elif operator == 'not_equals':
                         conditions.append(Lead.status != value)
-                        
+
             if conditions:
                 if group_operator == 'OR':
                     group_conditions.append(db.or_(*conditions))
                 else:  # AND
                     group_conditions.append(db.and_(*conditions))
-        
+
         if group_conditions:
             query = query.filter(db.and_(*group_conditions))
     else:  # Fall back to basic search
         search_name = request.args.get('search_name', '').strip()
         search_email = request.args.get('search_email', '').strip()
         search_operator = request.args.get('search_operator', 'AND')
-        
+
         if search_name or search_email:
             name_filter = Lead.name.ilike(f'%{search_name}%') if search_name else None
             email_filter = Lead.email.ilike(f'%{search_email}%') if search_email else None
-            
+
             conditions = []
             if search_name:
                 conditions.append(Lead.name.ilike(f'%{search_name}%'))
@@ -149,12 +149,12 @@ def list_leads():
                     query = query.filter(db.or_(*conditions))
                 else:  # AND
                     query = query.filter(db.and_(*conditions))
-    
+
     # Apply status filters
     statuses = request.args.getlist('status')
     if statuses:
         query = query.filter(Lead.status.in_(statuses))
-    
+
     # Apply score range filter
     min_score = request.args.get('min_score')
     max_score = request.args.get('max_score')
@@ -162,12 +162,12 @@ def list_leads():
         query = query.filter(Lead.score >= float(min_score))
     if max_score and max_score.isdigit():
         query = query.filter(Lead.score <= float(max_score))
-    
+
     # Apply date filters
     date_from = request.args.get('date_from')
     date_to = request.args.get('date_to')
     date_field = request.args.get('date_field', 'created_at')
-    
+
     if date_from:
         try:
             date_from = datetime.strptime(date_from, '%Y-%m-%d')
@@ -177,7 +177,7 @@ def list_leads():
                 query = query.filter(Lead.created_at >= date_from)
         except ValueError:
             flash('Invalid date format for Date From', 'error')
-    
+
     if date_to:
         try:
             date_to = datetime.strptime(date_to, '%Y-%m-%d')
@@ -187,11 +187,11 @@ def list_leads():
                 query = query.filter(Lead.created_at <= date_to)
         except ValueError:
             flash('Invalid date format for Date To', 'error')
-    
+
     # Apply sorting
     sort_by = request.args.get('sort_by', 'last_contact')
     sort_order = request.args.get('sort_order', 'desc')
-    
+
     if sort_by == 'name':
         sort_field = Lead.name
     elif sort_by == 'email':
@@ -202,40 +202,21 @@ def list_leads():
         sort_field = Lead.created_at
     else:
         sort_field = Lead.last_contact
-    
+
     if sort_order == 'asc':
         query = query.order_by(sort_field.asc().nullslast())
     else:
         query = query.order_by(sort_field.desc().nullslast())
-    
-    # Save current filters if requested
-    if request.args.get('save_filters'):
-        current_filters = {
-            'search_name': search_name,
-            'search_email': search_email,
-            'search_operator': search_operator,
-            'statuses': statuses,
-            'min_score': min_score,
-            'max_score': max_score,
-            'date_from': date_from.strftime('%Y-%m-%d') if isinstance(date_from, datetime) else date_from,
-            'date_to': date_to.strftime('%Y-%m-%d') if isinstance(date_to, datetime) else date_to,
-            'date_field': date_field,
-            'sort_by': sort_by,
-            'sort_order': sort_order
-        }
-        
-        if not user_settings:
-            user_settings = UserSettings(user_id=current_user.id)
-            db.session.add(user_settings)
-        
-        saved_filters = json.loads(user_settings.filter_preferences) if user_settings.filter_preferences else {}
-        saved_filters['leads'] = current_filters
-        user_settings.filter_preferences = json.dumps(saved_filters)
-        db.session.commit()
-        flash('Filter preferences saved successfully', 'success')
-    
-    leads = query.all()
-    return render_template('leads/list_leads.html', leads=leads, saved_filters=saved_filters)
+
+    # Apply pagination
+    page = request.args.get('page', 1, type=int)
+    per_page = 10  # Number of leads per page
+    pagination = query.paginate(page=page, per_page=per_page, error_out=False)
+    leads = pagination.items
+
+    return render_template('leads/list_leads.html', leads=leads, saved_filters=saved_filters, pagination=pagination)
+
+
 
 @bp.route('/bulk_action', methods=['POST'])
 @login_required
@@ -339,3 +320,56 @@ def delete_lead(id):
     db.session.commit()
     flash('リードが削除されました。', 'success')
     return redirect(url_for('leads.list_leads'))
+
+@bp.route('/api/save_filter_state', methods=['POST'])
+@login_required
+def save_filter_state():
+    try:
+        data = request.get_json()
+        if not data:
+            return jsonify({'error': 'No data provided'}), 400
+
+        section = data.get('section')
+        state = data.get('state')
+        
+        if not section or not state:
+            return jsonify({'error': 'Missing required fields'}), 400
+
+        user_settings = current_user.settings
+        if not user_settings:
+            user_settings = UserSettings(user_id=current_user.id)
+            db.session.add(user_settings)
+
+        try:
+            current_filters = json.loads(user_settings.filter_preferences) if user_settings.filter_preferences else {}
+        except json.JSONDecodeError:
+            current_filters = {}
+
+        current_filters[section] = state
+        user_settings.filter_preferences = json.dumps(current_filters)
+        
+        db.session.commit()
+        return jsonify({'message': 'Filter state saved successfully'}), 200
+
+    except Exception as e:
+        current_app.logger.error(f"Error saving filter state: {str(e)}")
+        return jsonify({'error': 'Failed to save filter state'}), 500
+
+@bp.route('/api/get_filter_state/<section>', methods=['GET'])
+@login_required
+def get_filter_state(section):
+    try:
+        user_settings = current_user.settings
+        if not user_settings or not user_settings.filter_preferences:
+            return jsonify({}), 200
+
+        try:
+            all_filters = json.loads(user_settings.filter_preferences)
+            section_filters = all_filters.get(section, {})
+            return jsonify(section_filters), 200
+        except json.JSONDecodeError:
+            return jsonify({}), 200
+
+    except Exception as e:
+        current_app.logger.error(f"Error getting filter state: {str(e)}")
+        return jsonify({'error': 'Failed to get filter state'}), 500

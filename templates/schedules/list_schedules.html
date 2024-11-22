@@ -3,47 +3,52 @@
 
 {% block styles %}
 <style>
-/* Filter section styles */
+/* 一般的なスタイル */
+:root {
+    --primary-color: #5a67d8;
+    --secondary-color: #edf2f7;
+    --success-color: #48bb78;
+    --info-color: #4299e1;
+    --danger-color: #e53e3e;
+    --warning-color: #ffbf00;
+    --background-light: #f7fafc;
+    --text-primary: #2d3748;
+    --text-secondary: #4a5568;
+}
+
+/* フィルターセクションのスタイル */
 .filter-section {
-    background: white;
+    background: #ffffff;
     padding: 1.5rem;
-    border-radius: 8px;
-    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    border-radius: 10px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
     margin-bottom: 2rem;
 }
 
 .filter-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
     gap: 1.5rem;
-    margin-bottom: 1.5rem;
-}
-
-.filter-group {
-    display: flex;
-    flex-direction: column;
-    gap: 0.5rem;
 }
 
 .filter-group label {
-    font-weight: 500;
-    color: #4a5568;
+    font-weight: 600;
+    color: var(--text-primary);
 }
 
 .filter-group select,
 .filter-group input {
-    padding: 0.5rem;
-    border: 1px solid #e2e8f0;
+    padding: 0.6rem;
+    border: 1px solid #ced4da;
     border-radius: 6px;
     font-size: 0.95rem;
-    transition: border-color 0.2s;
+    transition: all 0.3s ease;
 }
 
 .filter-group select:focus,
 .filter-group input:focus {
-    border-color: #3182ce;
-    outline: none;
-    box-shadow: 0 0 0 3px rgba(49,130,206,0.1);
+    border-color: var(--primary-color);
+    box-shadow: 0 0 0 3px rgba(90, 103, 216, 0.25);
 }
 
 .date-range {
@@ -54,40 +59,38 @@
 
 .filter-actions {
     display: flex;
-    flex-wrap: wrap;
     gap: 1rem;
     align-items: center;
     padding-top: 1rem;
     border-top: 1px solid #e2e8f0;
 }
 
+/* ボタンのスタイル */
 .btn {
-    padding: 0.5rem 1rem;
+    padding: 0.5rem 1.2rem;
     border-radius: 6px;
     font-weight: 500;
     display: inline-flex;
     align-items: center;
     gap: 0.5rem;
-    transition: all 0.2s;
-}
-
-.btn i {
-    font-size: 0.9em;
+    transition: background-color 0.3s, transform 0.3s;
+    cursor: pointer;
 }
 
 .btn-primary {
-    background: #3182ce;
-    color: white;
+    background: var(--primary-color);
+    color: #fff;
     border: none;
 }
 
 .btn-primary:hover {
-    background: #2c5282;
+    background: #434190;
+    transform: translateY(-2px);
 }
 
 .btn-secondary {
-    background: #edf2f7;
-    color: #4a5568;
+    background: var(--secondary-color);
+    color: var(--text-secondary);
     border: 1px solid #e2e8f0;
 }
 
@@ -96,8 +99,8 @@
 }
 
 .btn-success {
-    background: #48bb78;
-    color: white;
+    background: var(--success-color);
+    color: #fff;
     border: none;
 }
 
@@ -106,8 +109,8 @@
 }
 
 .btn-info {
-    background: #4299e1;
-    color: white;
+    background: var(--info-color);
+    color: #fff;
     border: none;
 }
 
@@ -115,76 +118,221 @@
     background: #3182ce;
 }
 
-/* Pagination styles */
-.pagination-controls {
+.btn-delete {
+    background: var(--danger-color);
+    color: #fff;
+}
+
+.btn-edit {
+    background: var(--warning-color);
+    color: #000;
+}
+
+/* ページネーションのスタイル */
+.pagination-container {
     margin-top: 2rem;
-    margin-bottom: 2rem;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.5rem;
 }
 
 .pagination {
     display: flex;
-    justify-content: center;
+    gap: 0.5rem;
     list-style: none;
-    padding: 0;
-    margin: 1rem 0;
-}
-
-.page-item {
-    margin: 0 0.25rem;
 }
 
 .page-link {
-    display: block;
     padding: 0.5rem 1rem;
-    color: #0d6efd;
-    background-color: #fff;
     border: 1px solid #dee2e6;
-    border-radius: 0.25rem;
+    border-radius: 5px;
+    color: #007bff;
     text-decoration: none;
-    transition: all 0.2s ease-in-out;
+    transition: background-color 0.3s, color 0.3s;
 }
 
-.page-item.active .page-link {
-    background-color: #0d6efd;
+.page-link:hover {
+    background-color: #e9ecef;
+    color: #0056b3;
+}
+
+.page-link.active {
+    background-color: #007bff;
     color: #fff;
-    border-color: #0d6efd;
+    border-color: #007bff;
 }
 
-.page-item.disabled .page-link {
-    color: #6c757d;
-    pointer-events: none;
-    background-color: #fff;
-    border-color: #dee2e6;
+/* スケジュール分析セクションの改善 */
+.analysis-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 2rem;
+    padding: 2rem;
+    background: var(--background-light);
+    border-radius: 10px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
 }
 
-.pagination-info {
+.analysis-card {
+    background: #ffffff;
+    padding: 1.5rem;
+    border-radius: 10px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.analysis-card h3 {
+    margin-bottom: 1rem;
+    font-weight: 600;
+    color: var(--text-primary);
+}
+
+.stat-item {
     text-align: center;
-    color: #6c757d;
-    margin-top: 1rem;
+    padding: 1rem;
+    background: #e2e8f0;
+    border-radius: 6px;
 }
 
-/* Schedule analysis styles */
-.analysis-content {
-    max-height: 0;
+.status-item {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.8rem;
+    border-radius: 6px;
+    background: #f1f5f9;
+}
+
+.progress-bar {
+    flex-grow: 1;
+    height: 10px;
+    background: #e2e8f0;
+    border-radius: 5px;
     overflow: hidden;
-    transition: max-height 0.3s ease-out;
 }
 
-.analysis-content.active {
-    max-height: 1000px;
+.progress {
+    height: 100%;
+    background: var(--primary-color);
+    transition: width 0.3s ease;
 }
 
-.toggle-icon {
-    display: inline-block;
+/* 一括操作の改善スタイル */
+.bulk-actions {
+    background: #f9fafb;
+    padding: 1.5rem;
+    border-radius: 10px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    display: flex;
+    gap: 1rem;
+    align-items: center;
+    flex-wrap: wrap;
+}
+
+#reschedule-inputs {
+    display: none;
+    gap: 0.5rem;
+    align-items: center;
+}
+
+/* スケジュールカードの改善スタイル */
+.schedule-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    gap: 1.5rem;
+    margin-top: 2rem;
+}
+
+.schedule-card {
+    background: #ffffff;
+    border-radius: 10px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    padding: 1.5rem;
+    transition: transform 0.3s;
+}
+
+.schedule-card:hover {
+    transform: translateY(-5px);
+}
+
+.card-actions {
+    margin-top: 1.5rem;
+    display: flex;
+    gap: 1rem;
+}
+
+/* AIバッジ */
+.ai-badge {
+    background-color: #6c5ce7;
+    color: white;
+    padding: 0.4rem 0.8rem;
+    border-radius: 12px;
+    font-size: 0.8em;
+}
+
+/* モーダルスタイル */
+.modal {
+    display: none;
+    position: fixed;
+    z-index: 1000;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.5);
+}
+
+.modal-content {
+    background-color: #fff;
+    margin: 5% auto;
+    padding: 20px;
+    width: 90%;
+    max-width: 700px;
+    border-radius: 10px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+.close-modal {
+    position: absolute;
+    right: 20px;
+    top: 10px;
+    font-size: 1.5rem;
+    color: #666;
+    cursor: pointer;
+}
+
+.email-metadata {
+    display: flex;
+    gap: 1rem;
+    color: var(--text-secondary);
+}
+
+/* 関連コンテンツの改善 */
+.related-content {
+    background: var(--background-light);
+    padding: 1rem;
+    border-radius: 10px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+    margin-top: 1.5rem;
+}
+
+.email-preview {
+    cursor: pointer;
+    padding: 1rem;
+    background: #ffffff;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
     transition: transform 0.3s ease;
 }
 
-/* Hidden sort input */
-#sort {
-    display: none;
+.email-preview:hover {
+    transform: translateY(-3px);
 }
+
 </style>
 {% endblock %}
+
+
 
 {% block content %}
 <h1>スケジュール一覧</h1>
@@ -1161,262 +1309,5 @@ window.onclick = function(event) {
 }
 </script>
 
-<style>
-.bulk-actions {
-    margin: 20px 0;
-    padding: 15px;
-    background-color: #f8f9fa;
-    border-radius: 5px;
-    display: flex;
-    gap: 10px;
-    align-items: center;
-    flex-wrap: wrap;
-}
 
-.select-all-container {
-    display: flex;
-    align-items: center;
-    gap: 5px;
-    margin-right: 15px;
-}
-
-#reschedule-inputs {
-    display: none;
-    gap: 10px;
-    align-items: center;
-}
-
-#reschedule-inputs input {
-    padding: 5px;
-    border: 1px solid #ddd;
-    border-radius: 4px;
-}
-
-.schedule-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
-    gap: 20px;
-    margin: 20px 0;
-}
-
-.schedule-card {
-    position: relative;
-    padding: 20px;
-    background: white;
-    border-radius: 8px;
-    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-}
-
-.schedule-select {
-    position: absolute;
-    top: 10px;
-    right: 10px;
-}
-
-.lead-info {
-    margin-top: 15px;
-    padding: 10px;
-    background-color: #f8f9fa;
-    border-radius: 5px;
-}
-
-.lead-info ul {
-    list-style: none;
-    padding-left: 0;
-    margin: 5px 0;
-}
-
-.lead-info li {
-    margin: 5px 0;
-}
-
-.no-lead {
-    color: #6c757d;
-    font-style: italic;
-    margin-top: 10px;
-}
-
-.card-actions {
-    margin-top: 15px;
-    display: flex;
-    gap: 10px;
-}
-
-.btn {
-    padding: 8px 16px;
-    border: none;
-    border-radius: 4px;
-    cursor: pointer;
-    font-size: 14px;
-    text-decoration: none;
-    display: inline-block;
-}
-
-.btn-primary {
-    background-color: #007bff;
-    color: white;
-}
-
-.btn-success {
-    background-color: #28a745;
-    color: white;
-}
-
-.btn-edit {
-    background-color: #ffc107;
-    color: #000;
-}
-
-.btn-delete {
-    background-color: #dc3545;
-    color: white;
-}
-
-.btn-add {
-    background-color: #28a745;
-    color: white;
-}
-
-.btn:disabled {
-    opacity: 0.6;
-    cursor: not-allowed;
-}
-
-.btn:not(:disabled):hover {
-    opacity: 0.9;
-}
-
-.analysis-section {
-    margin: 20px 0;
-}
-
-.analysis-header {
-    cursor: pointer;
-    padding: 10px;
-    background-color: #f8f9fa;
-    border-radius: 5px 5px 0 0;
-}
-
-.analysis-content {
-    max-height: 0;
-    overflow: hidden;
-    transition: max-height 0.3s ease-out;
-}
-
-.analysis-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-    gap: 20px;
-    padding: 20px;
-    background-color: #fff;
-    border-radius: 0 0 5px 5px;
-}
-
-.analysis-card {
-    padding: 15px;
-    background-color: #f8f9fa;
-    border-radius: 5px;
-}
-
-.toggle-icon {
-    display: inline-block;
-    transition: transform 0.3s ease;
-}
-
-.add-schedule {
-    margin: 20px 0;
-    text-align: center;
-}
-
-/* 既存のスタイルに追加 */
-.ai-badge {
-    background-color: #6c5ce7;
-    color: white;
-    padding: 4px 8px;
-    border-radius: 12px;
-    font-size: 0.8em;
-    display: inline-flex;
-    align-items: center;
-    gap: 4px;
-}
-
-.schedule-card.ai-generated {
-    border-left: 4px solid #6c5ce7;
-}
-
-.related-content {
-    margin-top: 15px;
-    padding: 15px;
-    background: #f8f9fa;
-    border-radius: 8px;
-}
-
-.email-preview {
-    cursor: pointer;
-    padding: 12px;
-    background: white;
-    border-radius: 6px;
-    border: 1px solid #dee2e6;
-    transition: all 0.2s ease;
-}
-
-.email-preview:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-}
-
-.ai-analysis-section {
-    margin-top: 20px;
-    padding: 15px;
-    background: #f8f9fa;
-    border-radius: 8px;
-    border-left: 4px solid #6c5ce7;
-}
-
-.modal {
-    display: none;
-    position: fixed;
-    z-index: 1000;
-    left: 0;
-    top: 0;
-    width: 100%;
-    height: 100%;
-    background-color: rgba(0,0,0,0.5);
-}
-
-.modal-content {
-    position: relative;
-    background-color: #fff;
-    margin: 5% auto;
-    padding: 20px;
-    width: 80%;
-    max-width: 800px;
-    border-radius: 8px;
-    box-shadow: 0 4px 6px rgba(0,0,0,0.1);
-}
-
-.close-modal {
-    position: absolute;
-    right: 20px;
-    top: 10px;
-    font-size: 28px;
-    font-weight: bold;
-    color: #666;
-    cursor: pointer;
-}
-
-.email-metadata {
-    display: flex;
-    gap: 10px;
-    color: #666;
-    font-size: 0.9em;
-}
-
-.lead-details {
-    background: white;
-    padding: 12px;
-    border-radius: 6px;
-    border: 1px solid #dee2e6;
-}
-</style>
 {% endblock %}
