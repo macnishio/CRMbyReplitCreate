@@ -284,9 +284,6 @@
                 };
                 
                 localStorage.setItem('filter-section-state', JSON.stringify(filterState));
-                
-                // Save section state and form values
-                const formData = new FormData(filterForm);
                 const filterState = {
                     isCollapsed: content.classList.contains('collapsed'),
                     formValues: Object.fromEntries(formData.entries()),
@@ -913,27 +910,62 @@ document.addEventListener('DOMContentLoaded', function() {
                     icon.style.transform = 'rotate(0deg)';
                 }
                 
-                // Save state to localStorage
-                localStorage.setItem('filter-section-state', !isCollapsed);
+                // フィルターの状態をlocalStorageに保存
+                const filterState = {
+                    isCollapsed: !isCollapsed,
+                    filterGroups: {}
+                };
+
+                // 各フィルターグループの状態を保存
+                ['search', 'advanced', 'status', 'score', 'date', 'sort'].forEach(groupId => {
+                    const groupContent = document.querySelector(`#${groupId}-content`);
+                    filterState.filterGroups[groupId] = groupContent.classList.contains('active');
+                });
+
+                localStorage.setItem('filter-section-state', JSON.stringify(filterState));
             }
 
-            // Initialize filter states on page load
+            // フィルター状態の初期化
             document.addEventListener('DOMContentLoaded', function() {
-                // Initialize filter section state
                 const content = document.getElementById('filter-content');
                 const icon = document.getElementById('filter-toggle-icon');
-                const savedState = localStorage.getItem('filter-section-state');
+                const savedStateJSON = localStorage.getItem('filter-section-state');
                 
-                if (savedState === 'true') {
-                    content.classList.remove('collapsed');
-                    content.style.maxHeight = content.scrollHeight + 'px';
-                    icon.textContent = '×';
-                    icon.style.transform = 'rotate(180deg)';
-                } else {
-                    content.classList.add('collapsed');
-                    content.style.maxHeight = '0';
-                    icon.textContent = '≡';
-                    icon.style.transform = 'rotate(0deg)';
+                if (savedStateJSON) {
+                    const savedState = JSON.parse(savedStateJSON);
+                    
+                    // メインフィルターセクションの状態を復元
+                    if (!savedState.isCollapsed) {
+                        content.classList.remove('collapsed');
+                        content.style.maxHeight = content.scrollHeight + 'px';
+                        icon.textContent = '×';
+                        icon.style.transform = 'rotate(180deg)';
+                    } else {
+                        content.classList.add('collapsed');
+                        content.style.maxHeight = '0';
+                        icon.textContent = '≡';
+                        icon.style.transform = 'rotate(0deg)';
+                    }
+                    
+                    // 各フィルターグループの状態を復元
+                    if (savedState.filterGroups) {
+                        Object.entries(savedState.filterGroups).forEach(([groupId, isActive]) => {
+                            const groupContent = document.querySelector(`#${groupId}-content`);
+                            const groupIcon = document.querySelector(`#${groupId}-icon`);
+                            
+                            if (groupContent && groupIcon) {
+                                if (isActive) {
+                                    groupContent.classList.add('active');
+                                    groupContent.style.display = 'block';
+                                    groupIcon.textContent = '▼';
+                                } else {
+                                    groupContent.classList.remove('active');
+                                    groupContent.style.display = 'none';
+                                    groupIcon.textContent = '▶';
+                                }
+                            }
+                        });
+                    }
                 }
                 const mainContent = document.getElementById('main-filter-content');
                 const mainIcon = document.getElementById('main-filter-icon');
