@@ -8,7 +8,7 @@
     <form method="GET" action="{{ url_for('leads.list_leads') }}" class="filter-form" id="leadFilterForm">
         <!-- Main Filter Toggle -->
         <div class="main-filter-header" onclick="toggleMainFilter()">
-            <span class="filter-group-icon" id="main-filter-icon">▶</span>
+            <span class="hamburger-icon" id="main-filter-icon">≡</span>
             <h3>フィルターオプション</h3>
         </div>
         <div class="main-filter-content collapsed" id="main-filter-content">
@@ -305,10 +305,12 @@
                 
                 if (isCollapsed) {
                     content.classList.remove('collapsed');
-                    icon.textContent = '▼';
+                    icon.textContent = '×';
+                    icon.style.transform = 'rotate(180deg)';
                 } else {
                     content.classList.add('collapsed');
-                    icon.textContent = '▶';
+                    icon.textContent = '≡';
+                    icon.style.transform = 'rotate(0deg)';
                 }
                 
                 // Save state to localStorage
@@ -504,19 +506,48 @@
         padding: 1rem;
         background-color: var(--primary-color);
         color: white;
-        border-radius: 4px;
-        transition: background-color 0.3s ease;
+        border-radius: 4px 4px 0 0;
+        transition: all 0.3s ease;
         margin-bottom: 0;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
     }
 
     .main-filter-header:hover {
         background-color: var(--secondary-color);
+        transform: translateY(-1px);
     }
 
     .main-filter-header h3 {
         margin: 0;
-        margin-left: 0.5rem;
+        margin-left: 1rem;
         font-size: 1.1rem;
+        font-weight: 500;
+    }
+
+    .hamburger-icon {
+        font-size: 1.5rem;
+        width: 24px;
+        height: 24px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        transition: transform 0.3s ease;
+    }
+
+    .main-filter-content {
+        transition: max-height 0.3s ease-in-out, opacity 0.3s ease-in-out;
+        max-height: 2000px;
+        opacity: 1;
+        overflow: hidden;
+    }
+
+    .main-filter-content.collapsed {
+        max-height: 0;
+        opacity: 0;
+    }
+
+    .main-filter-header:hover .hamburger-icon {
+        transform: scale(1.1);
     }
 
     .main-filter-content {
