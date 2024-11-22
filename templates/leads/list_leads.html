@@ -8,10 +8,10 @@
     <form method="GET" action="{{ url_for('leads.list_leads') }}" class="filter-form" id="leadFilterForm">
         <!-- Main Filter Toggle -->
         <div class="main-filter-header" onclick="toggleMainFilter()">
-            <span class="filter-group-icon" id="main-filter-icon">▼</span>
+            <span class="filter-group-icon" id="main-filter-icon">▶</span>
             <h3>フィルターオプション</h3>
         </div>
-        <div class="main-filter-content" id="main-filter-content">
+        <div class="main-filter-content collapsed" id="main-filter-content">
         <!-- Search Fields -->
         <div class="filter-group-section">
             <div class="filter-group-header" onclick="toggleFilterGroup('search')">
@@ -298,10 +298,43 @@
                 localStorage.setItem(`filter-${groupId}-state`, content.classList.contains('active'));
             }
 
+            function toggleMainFilter() {
+                const content = document.getElementById('main-filter-content');
+                const icon = document.getElementById('main-filter-icon');
+                const isCollapsed = content.classList.contains('collapsed');
+                
+                if (isCollapsed) {
+                    content.classList.remove('collapsed');
+                    icon.textContent = '▼';
+                } else {
+                    content.classList.add('collapsed');
+                    icon.textContent = '▶';
+                }
+                
+                // Save state to localStorage
+                localStorage.setItem('main-filter-state', !isCollapsed);
+            }
+
             // Initialize filter states on page load
             document.addEventListener('DOMContentLoaded', function() {
-                const filterGroups = ['search', 'advanced', 'status', 'score', 'date', 'sort'];
+                const mainContent = document.getElementById('main-filter-content');
+                const mainIcon = document.getElementById('main-filter-icon');
+                const savedMainState = localStorage.getItem('main-filter-state');
                 
+                // Default to collapsed if no saved state
+                if (savedMainState === null) {
+                    localStorage.setItem('main-filter-state', 'false');
+                }
+                
+                if (savedMainState === 'true') {
+                    mainContent.classList.remove('collapsed');
+                    mainIcon.textContent = '▼';
+                } else {
+                    mainContent.classList.add('collapsed');
+                    mainIcon.textContent = '▶';
+                }
+                
+                const filterGroups = ['search', 'advanced', 'status', 'score', 'date', 'sort'];
                 filterGroups.forEach(groupId => {
                     const content = document.querySelector(`#${groupId}-content`);
                     const icon = document.querySelector(`#${groupId}-icon`);
@@ -446,6 +479,61 @@
         box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
     }
 
+    .main-filter-content {
+        max-height: 2000px;
+        overflow: hidden;
+        transition: max-height 0.3s ease-out, padding 0.3s ease-out;
+        padding: 1rem;
+        background-color: white;
+        border: 1px solid var(--border-color);
+        border-top: none;
+        border-radius: 0 0 4px 4px;
+    }
+
+    .main-filter-content.collapsed {
+        max-height: 0;
+        padding: 0;
+        border-color: transparent;
+    }
+
+    /* Main filter toggle styles */
+    .main-filter-header {
+        display: flex;
+        align-items: center;
+        cursor: pointer;
+        padding: 1rem;
+        background-color: var(--primary-color);
+        color: white;
+        border-radius: 4px;
+        transition: background-color 0.3s ease;
+        margin-bottom: 0;
+    }
+
+    .main-filter-header:hover {
+        background-color: var(--secondary-color);
+    }
+
+    .main-filter-header h3 {
+        margin: 0;
+        margin-left: 0.5rem;
+        font-size: 1.1rem;
+    }
+
+    .main-filter-content {
+        max-height: 0;
+        overflow: hidden;
+        transition: max-height 0.3s ease-out;
+        background-color: white;
+        border: 1px solid transparent;
+        border-radius: 0 0 4px 4px;
+    }
+
+    .main-filter-content.expanded {
+        max-height: 2000px;
+        border-color: var(--border-color);
+        padding: 1rem;
+    }
+
     .main-filter-header {
         display: flex;
         align-items: center;
@@ -533,14 +621,19 @@
     document.addEventListener('DOMContentLoaded', function() {
         const content = document.getElementById('main-filter-content');
         const icon = document.getElementById('main-filter-icon');
-        const savedState = localStorage.getItem('main-filter-state') === 'true';
+        const savedState = localStorage.getItem('main-filter-state');
         
-        if (savedState) {
+        // Default to collapsed if no saved state
+        if (savedState === null) {
+            localStorage.setItem('main-filter-state', 'false');
+        }
+        
+        const isExpanded = savedState === 'true';
+        
+        if (isExpanded) {
             content.classList.add('expanded');
-            content.classList.remove('collapsed');
             icon.textContent = '▼';
         } else {
-            content.classList.add('collapsed');
             content.classList.remove('expanded');
             icon.textContent = '▶';
         }
