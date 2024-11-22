@@ -217,10 +217,11 @@
         </div>
 
         <script>
-            // フィルターの開閉機能
+            // フィルターの開閉機能とフィルター状態の保存
             function toggleFilters() {
                 const content = document.getElementById('filter-content');
                 const icon = document.getElementById('filter-toggle-icon');
+                const filterForm = document.getElementById('leadFilterForm');
                 
                 // Get current state
                 const isCollapsed = content.classList.contains('collapsed');
@@ -230,57 +231,98 @@
                 
                 if (isCollapsed) {
                     // Expanding
-                    // Set max-height before removing collapsed to trigger animation
                     content.style.maxHeight = content.scrollHeight + 'px';
                     content.classList.remove('collapsed');
                     
-                    // After animation completes, set max-height to none to allow content changes
                     setTimeout(() => {
                         if (!content.classList.contains('collapsed')) {
                             content.style.maxHeight = 'none';
                         }
-                    }, 500); // Match the transition duration
+                    }, 500);
                 } else {
                     // Collapsing
-                    // First set fixed height to enable animation
                     content.style.maxHeight = content.scrollHeight + 'px';
-                    // Force reflow
                     content.offsetHeight;
-                    // Add collapsed class and set max-height to 0
                     content.classList.add('collapsed');
                     content.style.maxHeight = '0';
                 }
                 
-                // Save state to localStorage
-                localStorage.setItem('filter-section-state', content.classList.contains('collapsed'));
+                // Save section state and form values
+                const formData = new FormData(filterForm);
+                const filterState = {
+                    isCollapsed: content.classList.contains('collapsed'),
+                    formValues: Object.fromEntries(formData.entries()),
+                    filterGroups: filterGroups // Save advanced filter groups
+                };
+                
+                localStorage.setItem('filter-section-state', JSON.stringify(filterState));
             }
 
-            // ページ読み込み時の初期化
+            // フィルターフォームの値が変更されたときも状態を保存
+            document.getElementById('leadFilterForm').addEventListener('change', function() {
+                const formData = new FormData(this);
+                const filterState = {
+                    isCollapsed: document.getElementById('filter-content').classList.contains('collapsed'),
+                    formValues: Object.fromEntries(formData.entries()),
+                    filterGroups: filterGroups
+                };
+                localStorage.setItem('filter-section-state', JSON.stringify(filterState));
+            });
+
+            // ページ読み込み時の初期化と保存された状態の復元
             document.addEventListener('DOMContentLoaded', function() {
                 const content = document.getElementById('filter-content');
                 const icon = document.getElementById('filter-toggle-icon');
-                const savedState = localStorage.getItem('filter-section-state');
+                const filterForm = document.getElementById('leadFilterForm');
                 
-                // 初期状態のアニメーションを無効化
+                // アニメーションを一時的に無効化
                 content.style.transition = 'none';
                 
-                if (savedState === 'false') {
-                    content.classList.remove('collapsed');
-                    icon.textContent = '▼';
-                    icon.style.transform = 'rotate(0deg)';
-                    content.style.maxHeight = content.scrollHeight + 'px';
-                } else {
-                    content.classList.add('collapsed');
-                    icon.textContent = '▼';
-                    icon.style.transform = 'rotate(-90deg)';
-                    content.style.maxHeight = '0';
+                try {
+                    const savedState = JSON.parse(localStorage.getItem('filter-section-state'));
+                    
+                    if (savedState) {
+                        // セクションの開閉状態を復元
+                        if (!savedState.isCollapsed) {
+                            content.classList.remove('collapsed');
+                            icon.textContent = '▼';
+                            icon.style.transform = 'rotate(0deg)';
+                            content.style.maxHeight = 'none';
+                        } else {
+                            content.classList.add('collapsed');
+                            icon.textContent = '▼';
+                            icon.style.transform = 'rotate(-90deg)';
+                            content.style.maxHeight = '0';
+                        }
+                        
+                        // フォームの値を復元
+                        if (savedState.formValues) {
+                            Object.entries(savedState.formValues).forEach(([key, value]) => {
+                                const input = filterForm.elements[key];
+                                if (input) {
+                                    if (input.type === 'checkbox') {
+                                        input.checked = value === 'on';
+                                    } else {
+                                        input.value = value;
+                                    }
+                                }
+                            });
+                        }
+                        
+                        // 高度なフィルターグループを復元
+                        if (savedState.filterGroups) {
+                            filterGroups = savedState.filterGroups;
+                            renderFilterGroups();
+                        }
+                    }
+                } catch (error) {
+                    console.error('Error restoring filter state:', error);
                 }
                 
-                // 強制的にリフロー
-                content.offsetHeight;
-                
                 // アニメーションを再有効化
-                content.style.transition = 'max-height 0.3s ease-in-out, opacity 0.3s ease-in-out';
+                setTimeout(() => {
+                    content.style.transition = 'max-height 0.3s ease-in-out, opacity 0.3s ease-in-out';
+                }, 0);
             });
 
             let filterGroups = [];
