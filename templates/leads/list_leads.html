@@ -5,14 +5,11 @@
 <style>
 /* Page Layout */
 .page-container {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
     padding: 1rem;
     position: relative;
-}
-
-.content-wrapper {
-    display: grid;
-    grid-template-columns: 1fr;
-    gap: 1rem;
 }
 
 /* Filter Section */
@@ -24,30 +21,6 @@
     position: relative;
     z-index: 20;
     transition: all 0.3s ease-in-out;
-}
-
-/* Data Table Container */
-.data-table-container {
-    background-color: #fff;
-    border-radius: 8px;
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-    position: relative;
-    z-index: 10;
-    padding: 1rem;
-    margin-top: 1rem;
-}
-
-@media (min-width: 1024px) {
-    .content-wrapper {
-        grid-template-columns: minmax(300px, 30%) 1fr;
-        align-items: start;
-    }
-    
-    .filter-section {
-        position: sticky;
-        top: 1rem;
-        margin-bottom: 0;
-    }
 }
 
 /* Data Table Container */
@@ -185,17 +158,16 @@
 
 {% block content %}
 <div class="page-container">
-    <div class="content-wrapper">
-        <!-- Filter Section -->
-        <div class="filter-section">
-            <!-- Filter Toggle Header -->
-            <div class="filter-header" onclick="toggleFilters()">
-                <span class="filter-icon" id="filter-toggle-icon">▼</span>
-                <h3>フィルターオプション</h3>
-            </div>
-            
-            <!-- Collapsible Filter Content -->
-            <div class="filter-content" id="filter-content">
+    <!-- Filter Section -->
+    <div class="filter-section">
+        <!-- Filter Toggle Header -->
+        <div class="filter-header" onclick="toggleFilters()">
+            <span class="filter-icon" id="filter-toggle-icon">▼</span>
+            <h3>フィルターオプション</h3>
+        </div>
+        
+        <!-- Collapsible Filter Content -->
+        <div class="filter-content collapsed" id="filter-content">
             <form method="GET" action="{{ url_for('leads.list_leads') }}" class="filter-form" id="leadFilterForm">
         
         <!-- Search Fields -->
@@ -274,16 +246,9 @@
                     content.classList.add('collapsed');
                     content.style.maxHeight = '0';
                 }
-
-                // Save filter section state and form values
-                const formData = new FormData(filterForm);
-                const filterState = {
-                    isCollapsed: content.classList.contains('collapsed'),
-                    formValues: Object.fromEntries(formData.entries()),
-                    filterGroups: filterGroups // Save advanced filter groups
-                };
                 
-                localStorage.setItem('filter-section-state', JSON.stringify(filterState));
+                // Save section state and form values
+                const formData = new FormData(filterForm);
                 const filterState = {
                     isCollapsed: content.classList.contains('collapsed'),
                     formValues: Object.fromEntries(formData.entries()),
@@ -296,59 +261,6 @@
             // フィルターフォームの値が変更されたときも状態を保存
             document.getElementById('leadFilterForm').addEventListener('change', function() {
                 const formData = new FormData(this);
-// Initialize filter states and restore saved values on page load
-document.addEventListener('DOMContentLoaded', function() {
-    const content = document.getElementById('filter-content');
-    const icon = document.getElementById('filter-toggle-icon');
-    const filterForm = document.getElementById('leadFilterForm');
-    
-    // Temporarily disable transitions
-    content.style.transition = 'none';
-    
-    try {
-        const savedState = JSON.parse(localStorage.getItem('filter-section-state'));
-        
-        if (savedState) {
-            // Restore section collapse state
-            if (!savedState.isCollapsed) {
-                content.classList.remove('collapsed');
-                icon.classList.remove('collapsed');
-                content.style.maxHeight = 'none';
-            } else {
-                content.classList.add('collapsed');
-                icon.classList.add('collapsed');
-                content.style.maxHeight = '0';
-            }
-            
-            // Restore form values
-            if (savedState.formValues) {
-                Object.entries(savedState.formValues).forEach(([key, value]) => {
-                    const input = filterForm.elements[key];
-                    if (input) {
-                        if (input.type === 'checkbox') {
-                            input.checked = value === 'on';
-                        } else {
-                            input.value = value;
-                        }
-                    }
-                });
-            }
-            
-            // Restore advanced filter groups
-            if (savedState.filterGroups) {
-                filterGroups = savedState.filterGroups;
-                renderFilterGroups();
-            }
-        }
-    } catch (error) {
-        console.error('Error restoring filter state:', error);
-    }
-    
-    // Re-enable transitions
-    setTimeout(() => {
-        content.style.transition = 'max-height 0.3s ease-in-out, opacity 0.3s ease-in-out';
-    }, 0);
-});
                 const filterState = {
                     isCollapsed: document.getElementById('filter-content').classList.contains('collapsed'),
                     formValues: Object.fromEntries(formData.entries()),
@@ -521,124 +433,6 @@ document.addEventListener('DOMContentLoaded', function() {
         </script>
 
         <style>
-<style>
-/* レスポンシブデザインの基本設定 */
-@viewport {
-    width: device-width;
-    initial-scale: 1;
-}
-
-/* ベースレイアウト */
-.page-container {
-    width: 100%;
-    max-width: 1200px;
-    margin: 0 auto;
-    padding: 1rem;
-}
-
-/* フィルターセクションのレスポンシブ対応 */
-.filter-section {
-    width: 100%;
-    max-width: 100%;
-    margin: 0 auto;
-    background-color: #fff;
-    border-radius: 8px;
-    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
-    transition: all 0.3s ease;
-}
-
-/* デスクトップ表示用のメディアクエリ */
-@media screen and (min-width: 768px) {
-    .filter-section {
-        padding: 1.5rem;
-        margin-bottom: 2rem;
-    }
-
-    .filter-form {
-        display: grid;
-        grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-        gap: 1.5rem;
-    }
-
-    .search-group {
-        display: grid;
-        grid-template-columns: 1fr;
-        gap: 1rem;
-    }
-
-    .filter-group {
-        background-color: #f8fafc;
-        padding: 1.5rem;
-        border-radius: 8px;
-        border: 1px solid #e2e8f0;
-    }
-
-    .status-checkboxes {
-        display: grid;
-        grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
-        gap: 1rem;
-    }
-
-    .score-range,
-    .date-range {
-        display: flex;
-        align-items: center;
-        gap: 1rem;
-    }
-
-    .filter-actions {
-        grid-column: 1 / -1;
-        display: flex;
-        justify-content: flex-end;
-        gap: 1rem;
-        margin-top: 1.5rem;
-    }
-}
-
-/* タブレット表示用のメディアクエリ */
-@media screen and (min-width: 481px) and (max-width: 767px) {
-    .filter-section {
-        padding: 1rem;
-    }
-
-    .filter-form {
-        display: flex;
-        flex-direction: column;
-        gap: 1rem;
-    }
-}
-
-/* モバイル表示用のメディアクエリ */
-@media screen and (max-width: 480px) {
-    .filter-section {
-        padding: 0.8rem;
-    }
-
-    .filter-form {
-        display: flex;
-        flex-direction: column;
-        gap: 0.8rem;
-    }
-
-    .search-field {
-        flex-direction: column;
-        align-items: stretch;
-    }
-
-    .search-field label {
-        margin-bottom: 0.5rem;
-    }
-
-    .filter-actions {
-        flex-direction: column;
-        gap: 0.8rem;
-    }
-
-    .btn {
-        width: 100%;
-    }
-}
-</style>
             /* Page Layout */
             .page-container {
                 display: flex;
@@ -910,62 +704,27 @@ document.addEventListener('DOMContentLoaded', function() {
                     icon.style.transform = 'rotate(0deg)';
                 }
                 
-                // フィルターの状態をlocalStorageに保存
-                const filterState = {
-                    isCollapsed: !isCollapsed,
-                    filterGroups: {}
-                };
-
-                // 各フィルターグループの状態を保存
-                ['search', 'advanced', 'status', 'score', 'date', 'sort'].forEach(groupId => {
-                    const groupContent = document.querySelector(`#${groupId}-content`);
-                    filterState.filterGroups[groupId] = groupContent.classList.contains('active');
-                });
-
-                localStorage.setItem('filter-section-state', JSON.stringify(filterState));
+                // Save state to localStorage
+                localStorage.setItem('filter-section-state', !isCollapsed);
             }
 
-            // フィルター状態の初期化
+            // Initialize filter states on page load
             document.addEventListener('DOMContentLoaded', function() {
+                // Initialize filter section state
                 const content = document.getElementById('filter-content');
                 const icon = document.getElementById('filter-toggle-icon');
-                const savedStateJSON = localStorage.getItem('filter-section-state');
+                const savedState = localStorage.getItem('filter-section-state');
                 
-                if (savedStateJSON) {
-                    const savedState = JSON.parse(savedStateJSON);
-                    
-                    // メインフィルターセクションの状態を復元
-                    if (!savedState.isCollapsed) {
-                        content.classList.remove('collapsed');
-                        content.style.maxHeight = content.scrollHeight + 'px';
-                        icon.textContent = '×';
-                        icon.style.transform = 'rotate(180deg)';
-                    } else {
-                        content.classList.add('collapsed');
-                        content.style.maxHeight = '0';
-                        icon.textContent = '≡';
-                        icon.style.transform = 'rotate(0deg)';
-                    }
-                    
-                    // 各フィルターグループの状態を復元
-                    if (savedState.filterGroups) {
-                        Object.entries(savedState.filterGroups).forEach(([groupId, isActive]) => {
-                            const groupContent = document.querySelector(`#${groupId}-content`);
-                            const groupIcon = document.querySelector(`#${groupId}-icon`);
-                            
-                            if (groupContent && groupIcon) {
-                                if (isActive) {
-                                    groupContent.classList.add('active');
-                                    groupContent.style.display = 'block';
-                                    groupIcon.textContent = '▼';
-                                } else {
-                                    groupContent.classList.remove('active');
-                                    groupContent.style.display = 'none';
-                                    groupIcon.textContent = '▶';
-                                }
-                            }
-                        });
-                    }
+                if (savedState === 'true') {
+                    content.classList.remove('collapsed');
+                    content.style.maxHeight = content.scrollHeight + 'px';
+                    icon.textContent = '×';
+                    icon.style.transform = 'rotate(180deg)';
+                } else {
+                    content.classList.add('collapsed');
+                    content.style.maxHeight = '0';
+                    icon.textContent = '≡';
+                    icon.style.transform = 'rotate(0deg)';
                 }
                 const mainContent = document.getElementById('main-filter-content');
                 const mainIcon = document.getElementById('main-filter-icon');
