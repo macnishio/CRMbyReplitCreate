@@ -161,48 +161,34 @@
         </script>
 
         <style>
-<script>
-// Add toggle functionality for filter groups
-function toggleFilterGroup(groupId) {
-    const content = document.querySelector(`#${groupId}-content`);
-    const icon = document.querySelector(`#${groupId}-icon`);
-    if (content.style.display === 'none' || !content.style.display) {
-        content.style.display = 'block';
-        icon.textContent = '▼';
-    } else {
-        content.style.display = 'none';
-        icon.textContent = '▶';
-    }
-}
-</script>
+            /* Filter group styles */
+            .filter-group-header {
+                display: flex;
+                align-items: center;
+                cursor: pointer;
+                padding: 0.5rem;
+                background-color: var(--secondary-color);
+                border-radius: 4px;
+                margin-bottom: 0.5rem;
+            }
 
-<style>
-.filter-group-header {
-    display: flex;
-    align-items: center;
-    cursor: pointer;
-    padding: 0.5rem;
-    background-color: var(--secondary-color);
-    border-radius: 4px;
-    margin-bottom: 0.5rem;
-}
+            .filter-group-header h4 {
+                margin: 0;
+                flex-grow: 1;
+            }
 
-.filter-group-header h4 {
-    margin: 0;
-    flex-grow: 1;
-}
+            .filter-group-icon {
+                margin-right: 0.5rem;
+            }
 
-.filter-group-icon {
-    margin-right: 0.5rem;
-}
+            .filter-group-content {
+                padding: 1rem;
+                border: 1px solid var(--border-color);
+                border-radius: 4px;
+                margin-bottom: 1rem;
+            }
 
-.filter-group-content {
-    padding: 1rem;
-    border: 1px solid var(--border-color);
-    border-radius: 4px;
-    margin-bottom: 1rem;
-}
-</style>
+            /* Advanced filters styles */
             .advanced-filters {
                 margin-top: 1rem;
                 padding: 1rem;
@@ -238,6 +224,21 @@ function toggleFilterGroup(groupId) {
                 border-radius: 4px;
             }
         </style>
+
+        <script>
+            // Add toggle functionality for filter groups
+            function toggleFilterGroup(groupId) {
+                const content = document.querySelector(`#${groupId}-content`);
+                const icon = document.querySelector(`#${groupId}-icon`);
+                if (content.style.display === 'none' || !content.style.display) {
+                    content.style.display = 'block';
+                    icon.textContent = '▼';
+                } else {
+                    content.style.display = 'none';
+                    icon.textContent = '▶';
+                }
+            }
+        </script>
         </div>
 
         <!-- Status Multi-select -->
