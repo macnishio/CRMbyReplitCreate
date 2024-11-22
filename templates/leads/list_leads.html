@@ -1,15 +1,141 @@
 {% extends "base.html" %}
 {% block title %}リード一覧{% endblock %}
-{% block content %}
-<h1>リード一覧</h1>
 
-<!-- Page Layout -->
+{% block styles %}
+<style>
+/* Page Layout */
+.page-container {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+    padding: 1rem;
+    position: relative;
+}
+
+/* Filter Section */
+.filter-section {
+    background-color: #fff;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    margin-bottom: 1rem;
+    position: relative;
+    z-index: 10;
+    transition: all 0.3s ease-in-out;
+}
+
+.filter-header {
+    display: flex;
+    align-items: center;
+    padding: 1rem;
+    cursor: pointer;
+    background-color: #f8fafc;
+    border-radius: 8px 8px 0 0;
+    border-bottom: 1px solid #e2e8f0;
+}
+
+.filter-header:hover {
+    background-color: #edf2f7;
+}
+
+.filter-icon {
+    margin-right: 0.8rem;
+    font-size: 1.2rem;
+    transition: transform 0.3s ease;
+}
+
+.filter-content {
+    padding: 1rem;
+    overflow: hidden;
+    transition: max-height 0.3s ease-in-out, opacity 0.3s ease-in-out;
+    max-height: 2000px;
+    opacity: 1;
+}
+
+.filter-content.collapsed {
+    max-height: 0;
+    padding-top: 0;
+    padding-bottom: 0;
+    opacity: 0;
+}
+
+/* Data Table Container */
+.data-table-container {
+    background-color: #fff;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    position: relative;
+    z-index: 5;
+}
+
+.filter-header {
+    display: flex;
+    align-items: center;
+    padding: 1rem;
+    cursor: pointer;
+    background-color: #f8fafc;
+    border-radius: 8px 8px 0 0;
+    border-bottom: 1px solid #e2e8f0;
+    transition: background-color 0.2s ease;
+}
+
+.filter-header:hover {
+    background-color: #edf2f7;
+}
+
+.filter-icon {
+    margin-right: 0.8rem;
+    font-size: 1.2rem;
+    transition: transform 0.3s ease;
+}
+
+.filter-header h3 {
+    margin: 0;
+    font-size: 1rem;
+    font-weight: 600;
+    color: #2d3748;
+}
+
+.filter-content {
+    overflow: hidden;
+    transition: max-height 0.3s ease-in-out;
+    max-height: 2000px;
+    opacity: 1;
+}
+
+.filter-content.collapsed {
+    max-height: 0;
+    opacity: 0;
+}
+
+/* Data Table Container */
+.data-table-container {
+    background-color: #fff;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    position: relative;
+    z-index: 5;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+    .page-container {
+        padding: 0.5rem;
+    }
+    
+    .filter-header {
+        padding: 0.8rem;
+    }
+}
+</style>
+{% endblock %}
+
+{% block content %}
 <div class="page-container">
     <!-- Filter Section -->
     <div class="filter-section">
         <!-- Filter Toggle Header -->
         <div class="filter-header" onclick="toggleFilters()">
-            <span class="filter-icon" id="filter-toggle-icon">≡</span>
+            <span class="filter-icon" id="filter-toggle-icon">▼</span>
             <h3>フィルターオプション</h3>
         </div>
         
@@ -69,13 +195,20 @@
                 const content = document.getElementById('filter-content');
                 const icon = document.getElementById('filter-toggle-icon');
                 
+                // アニメーション中のフラグを設定
+                content.style.transition = 'max-height 0.3s ease-in-out, opacity 0.3s ease-in-out';
+                
                 if (content.classList.contains('collapsed')) {
                     content.classList.remove('collapsed');
                     icon.textContent = '▼';
-                    content.style.maxHeight = content.scrollHeight + 'px';
+                    icon.style.transform = 'rotate(0deg)';
+                    // スクロール高さを計算して設定
+                    const height = content.scrollHeight;
+                    content.style.maxHeight = height + 'px';
                 } else {
                     content.classList.add('collapsed');
-                    icon.textContent = '▶';
+                    icon.textContent = '▼';
+                    icon.style.transform = 'rotate(-90deg)';
                     content.style.maxHeight = '0';
                 }
                 
@@ -89,15 +222,26 @@
                 const icon = document.getElementById('filter-toggle-icon');
                 const savedState = localStorage.getItem('filter-section-state');
                 
+                // 初期状態のアニメーションを無効化
+                content.style.transition = 'none';
+                
                 if (savedState === 'false') {
                     content.classList.remove('collapsed');
                     icon.textContent = '▼';
+                    icon.style.transform = 'rotate(0deg)';
                     content.style.maxHeight = content.scrollHeight + 'px';
                 } else {
                     content.classList.add('collapsed');
-                    icon.textContent = '▶';
+                    icon.textContent = '▼';
+                    icon.style.transform = 'rotate(-90deg)';
                     content.style.maxHeight = '0';
                 }
+                
+                // 強制的にリフロー
+                content.offsetHeight;
+                
+                // アニメーションを再有効化
+                content.style.transition = 'max-height 0.3s ease-in-out, opacity 0.3s ease-in-out';
             });
 
             let filterGroups = [];
