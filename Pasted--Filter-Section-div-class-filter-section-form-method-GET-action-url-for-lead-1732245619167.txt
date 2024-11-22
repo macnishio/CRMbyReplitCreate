@@ -1,0 +1,266 @@
+<!-- Filter Section -->
+<div class="filter-section">
+    <form method="GET" action="{{ url_for('leads.list_leads') }}" class="filter-form" id="leadFilterForm">
+        <!-- Search Fields -->
+        <div class="search-group">
+            <div class="search-field">
+                <label for="search_name">名前で検索:</label>
+                <input type="text" name="search_name" id="search_name" 
+                       value="{{ request.args.get('search_name', '') }}"
+                       placeholder="顧客名を入力してください..."
+                       class="search-input">
+            </div>
+            <div class="search-operator">
+                <label for="search_operator">検索条件:</label>
+                <select name="search_operator" id="search_operator">
+                    <option value="AND" {% if request.args.get('search_operator') == 'AND' %}selected{% endif %}>AND</option>
+                    <option value="OR" {% if request.args.get('search_operator') == 'OR' %}selected{% endif %}>OR</option>
+                </select>
+            </div>
+            <div class="search-field">
+                <label for="search_email">メールで検索:</label>
+                <input type="text" name="search_email" id="search_email" 
+                       value="{{ request.args.get('search_email', '') }}"
+                       placeholder="メールアドレスを入力してください..."
+                       class="search-input">
+            </div>
+        <!-- Advanced Filter Groups -->
+        <div class="advanced-filters" id="advancedFilters">
+            <h3>高度なフィルター</h3>
+            <div id="filterGroups">
+                <!-- Filter groups will be dynamically added here -->
+            </div>
+            <button type="button" class="btn btn-secondary" onclick="addFilterGroup()">フィルターグループを追加</button>
+        </div>
+
+        <script>
+            let filterGroups = [];
+            
+            function addFilterGroup() {
+                const groupId = Date.now();
+                const group = {
+                    id: groupId,
+                    operator: 'AND',
+                    conditions: []
+                };
+                filterGroups.push(group);
+                renderFilterGroups();
+            }
+            
+            function addCondition(groupId) {
+                const group = filterGroups.find(g => g.id === groupId);
+                if (group) {
+                    group.conditions.push({
+                        field: 'name',
+                        operator: 'contains',
+                        value: ''
+                    });
+                    renderFilterGroups();
+                }
+            }
+            
+            function removeCondition(groupId, index) {
+                const group = filterGroups.find(g => g.id === groupId);
+                if (group && group.conditions[index]) {
+                    group.conditions.splice(index, 1);
+                    renderFilterGroups();
+                }
+            }
+            
+            function removeGroup(groupId) {
+                filterGroups = filterGroups.filter(g => g.id !== groupId);
+                renderFilterGroups();
+            }
+            
+            function updateGroupOperator(groupId, operator) {
+                const group = filterGroups.find(g => g.id === groupId);
+                if (group) {
+                    group.operator = operator;
+                }
+            }
+            
+            function updateCondition(groupId, index, field, value) {
+                const group = filterGroups.find(g => g.id === groupId);
+                if (group && group.conditions[index]) {
+                    group.conditions[index][field] = value;
+                }
+            }
+            
+            function renderFilterGroups() {
+                const container = document.getElementById('filterGroups');
+                container.innerHTML = filterGroups.map(group => `
+                    <div class="filter-group" data-group-id="${group.id}">
+                        <div class="group-header">
+                            <select onchange="updateGroupOperator(${group.id}, this.value)">
+                                <option value="AND" ${group.operator === 'AND' ? 'selected' : ''}>すべての条件に一致</option>
+                                <option value="OR" ${group.operator === 'OR' ? 'selected' : ''}>いずれかの条件に一致</option>
+                            </select>
+                            <button type="button" class="btn btn-danger" onclick="removeGroup(${group.id})">グループを削除</button>
+                        </div>
+                        ${group.conditions.map((condition, index) => `
+                            <div class="condition">
+                                <select onchange="updateCondition(${group.id}, ${index}, 'field', this.value)">
+                                    <option value="name" ${condition.field === 'name' ? 'selected' : ''}>名前</option>
+                                    <option value="email" ${condition.field === 'email' ? 'selected' : ''}>メール</option>
+                                    <option value="score" ${condition.field === 'score' ? 'selected' : ''}>スコア</option>
+                                    <option value="status" ${condition.field === 'status' ? 'selected' : ''}>ステータス</option>
+                                </select>
+                                <select onchange="updateCondition(${group.id}, ${index}, 'operator', this.value)">
+                                    ${condition.field === 'score' ? `
+                                        <option value="equals" ${condition.operator === 'equals' ? 'selected' : ''}>一致する</option>
+                                        <option value="greater_than" ${condition.operator === 'greater_than' ? 'selected' : ''}>より大きい</option>
+                                        <option value="less_than" ${condition.operator === 'less_than' ? 'selected' : ''}>より小さい</option>
+                                        <option value="greater_equal" ${condition.operator === 'greater_equal' ? 'selected' : ''}>以上</option>
+                                        <option value="less_equal" ${condition.operator === 'less_equal' ? 'selected' : ''}>以下</option>
+                                    ` : condition.field === 'status' ? `
+                                        <option value="equals" ${condition.operator === 'equals' ? 'selected' : ''}>一致する</option>
+                                        <option value="not_equals" ${condition.operator === 'not_equals' ? 'selected' : ''}>一致しない</option>
+                                    ` : `
+                                        <option value="contains" ${condition.operator === 'contains' ? 'selected' : ''}>含む</option>
+                                        <option value="equals" ${condition.operator === 'equals' ? 'selected' : ''}>一致する</option>
+                                        <option value="starts_with" ${condition.operator === 'starts_with' ? 'selected' : ''}>で始まる</option>
+                                        <option value="ends_with" ${condition.operator === 'ends_with' ? 'selected' : ''}>で終わる</option>
+                                    `}
+                                </select>
+                                <input type="text" value="${condition.value}" onchange="updateCondition(${group.id}, ${index}, 'value', this.value)" />
+                                <button type="button" class="btn btn-danger" onclick="removeCondition(${group.id}, ${index})">削除</button>
+                            </div>
+                        `).join('')}
+                        <button type="button" class="btn btn-secondary" onclick="addCondition(${group.id})">条件を追加</button>
+                    </div>
+                `).join('');
+            }
+
+            // Add filter_groups to form submission
+            document.getElementById('leadFilterForm').addEventListener('submit', function(e) {
+                const input = document.createElement('input');
+                input.type = 'hidden';
+                input.name = 'filter_groups';
+                input.value = JSON.stringify(filterGroups);
+                this.appendChild(input);
+            });
+        </script>
+
+        <style>
+            .advanced-filters {
+                margin-top: 1rem;
+                padding: 1rem;
+                background: var(--secondary-color);
+                border-radius: 8px;
+            }
+
+            .filter-group {
+                margin: 1rem 0;
+                padding: 1rem;
+                border: 1px solid var(--border-color);
+                border-radius: 4px;
+            }
+
+            .group-header {
+                display: flex;
+                justify-content: space-between;
+                align-items: center;
+                margin-bottom: 1rem;
+            }
+
+            .condition {
+                display: flex;
+                gap: 0.5rem;
+                margin: 0.5rem 0;
+                align-items: center;
+            }
+
+            .condition select,
+            .condition input {
+                padding: 0.5rem;
+                border: 1px solid var(--border-color);
+                border-radius: 4px;
+            }
+        </style>
+        </div>
+
+        <!-- Status Multi-select -->
+        <div class="filter-group">
+            <label>ステータス:</label>
+            <div class="status-checkboxes">
+                <label>
+                    <input type="checkbox" name="status" value="New" 
+                           {% if 'New' in request.args.getlist('status') %}checked{% endif %}> 新規
+                </label>
+                <label>
+                    <input type="checkbox" name="status" value="Contacted"
+                           {% if 'Contacted' in request.args.getlist('status') %}checked{% endif %}> 連絡済み
+                </label>
+                <label>
+                    <input type="checkbox" name="status" value="Qualified"
+                           {% if 'Qualified' in request.args.getlist('status') %}checked{% endif %}> 適格
+                </label>
+                <label>
+                    <input type="checkbox" name="status" value="Lost"
+                           {% if 'Lost' in request.args.getlist('status') %}checked{% endif %}> 失注
+                </label>
+                <label>
+                    <input type="checkbox" name="status" value="Spam"
+                           {% if 'Spam' in request.args.getlist('status') %}checked{% endif %}> 迷惑メール
+                </label>
+            </div>
+        </div>
+
+        <!-- Score Range -->
+        <div class="filter-group">
+            <label>スコア範囲:</label>
+            <div class="score-range">
+                <input type="number" name="min_score" id="min_score" min="0" max="100" step="1" 
+                       placeholder="最小" value="{{ request.args.get('min_score', '') }}">
+                <span>～</span>
+                <input type="number" name="max_score" id="max_score" min="0" max="100" step="1" 
+                       placeholder="最大" value="{{ request.args.get('max_score', '') }}">
+            </div>
+        </div>
+
+        <!-- Date Range -->
+        <div class="filter-group">
+            <label>日付範囲:</label>
+            <div class="date-range">
+                <select name="date_field" id="date_field">
+                    <option value="created_at" {% if request.args.get('date_field') == 'created_at' %}selected{% endif %}>作成日</option>
+                    <option value="last_contact" {% if request.args.get('date_field') == 'last_contact' %}selected{% endif %}>最終接触日</option>
+                </select>
+                <input type="date" name="date_from" id="date_from" 
+                       value="{{ request.args.get('date_from', '') }}">
+                <span>～</span>
+                <input type="date" name="date_to" id="date_to" 
+                       value="{{ request.args.get('date_to', '') }}">
+            </div>
+        </div>
+
+        <!-- Sort Options -->
+        <div class="filter-group">
+            <label>並び替え:</label>
+            <div class="sort-options">
+                <select name="sort_by" id="sort_by">
+                    <option value="last_contact" {% if request.args.get('sort_by') == 'last_contact' %}selected{% endif %}>最終接触日</option>
+                    <option value="name" {% if request.args.get('sort_by') == 'name' %}selected{% endif %}>名前</option>
+                    <option value="email" {% if request.args.get('sort_by') == 'email' %}selected{% endif %}>メール</option>
+                    <option value="score" {% if request.args.get('sort_by') == 'score' %}selected{% endif %}>スコア</option>
+                    <option value="created_at" {% if request.args.get('sort_by') == 'created_at' %}selected{% endif %}>作成日</option>
+                </select>
+                <select name="sort_order" id="sort_order">
+                    <option value="desc" {% if request.args.get('sort_order', 'desc') == 'desc' %}selected{% endif %}>降順</option>
+                    <option value="asc" {% if request.args.get('sort_order') == 'asc' %}selected{% endif %}>昇順</option>
+                </select>
+            </div>
+        </div>
+        <div class="filter-actions">
+            <button type="submit" class="btn btn-primary">フィルター適用</button>
+            <a href="{{ url_for('leads.list_leads') }}" class="btn btn-secondary">リセット</a>
+            <button type="submit" name="save_filters" value="1" class="btn btn-success">フィルターを保存</button>
+            {% if saved_filters %}
+            <button type="button" class="btn btn-info" onclick="loadSavedFilters()">保存したフィルターを読み込む</button>
+            {% endif %}
+        </div>
+    </form>
+    <div class="action-buttons">
+        <a href="{{ url_for('leads.update_empty_names') }}" class="btn btn-info">空の名前を更新</a>
+    </div>
+</div>
