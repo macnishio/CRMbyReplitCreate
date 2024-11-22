@@ -5,11 +5,14 @@
 <style>
 /* Page Layout */
 .page-container {
-    display: flex;
-    flex-direction: column;
-    gap: 1rem;
     padding: 1rem;
     position: relative;
+}
+
+.content-wrapper {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 1rem;
 }
 
 /* Filter Section */
@@ -21,6 +24,30 @@
     position: relative;
     z-index: 20;
     transition: all 0.3s ease-in-out;
+}
+
+/* Data Table Container */
+.data-table-container {
+    background-color: #fff;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    position: relative;
+    z-index: 10;
+    padding: 1rem;
+    margin-top: 1rem;
+}
+
+@media (min-width: 1024px) {
+    .content-wrapper {
+        grid-template-columns: minmax(300px, 30%) 1fr;
+        align-items: start;
+    }
+    
+    .filter-section {
+        position: sticky;
+        top: 1rem;
+        margin-bottom: 0;
+    }
 }
 
 /* Data Table Container */
@@ -158,16 +185,17 @@
 
 {% block content %}
 <div class="page-container">
-    <!-- Filter Section -->
-    <div class="filter-section">
-        <!-- Filter Toggle Header -->
-        <div class="filter-header" onclick="toggleFilters()">
-            <span class="filter-icon" id="filter-toggle-icon">▼</span>
-            <h3>フィルターオプション</h3>
-        </div>
-        
-        <!-- Collapsible Filter Content -->
-        <div class="filter-content collapsed" id="filter-content">
+    <div class="content-wrapper">
+        <!-- Filter Section -->
+        <div class="filter-section">
+            <!-- Filter Toggle Header -->
+            <div class="filter-header" onclick="toggleFilters()">
+                <span class="filter-icon" id="filter-toggle-icon">▼</span>
+                <h3>フィルターオプション</h3>
+            </div>
+            
+            <!-- Collapsible Filter Content -->
+            <div class="filter-content" id="filter-content">
             <form method="GET" action="{{ url_for('leads.list_leads') }}" class="filter-form" id="leadFilterForm">
         
         <!-- Search Fields -->
@@ -246,6 +274,16 @@
                     content.classList.add('collapsed');
                     content.style.maxHeight = '0';
                 }
+
+                // Save filter section state and form values
+                const formData = new FormData(filterForm);
+                const filterState = {
+                    isCollapsed: content.classList.contains('collapsed'),
+                    formValues: Object.fromEntries(formData.entries()),
+                    filterGroups: filterGroups // Save advanced filter groups
+                };
+                
+                localStorage.setItem('filter-section-state', JSON.stringify(filterState));
                 
                 // Save section state and form values
                 const formData = new FormData(filterForm);
@@ -261,6 +299,59 @@
             // フィルターフォームの値が変更されたときも状態を保存
             document.getElementById('leadFilterForm').addEventListener('change', function() {
                 const formData = new FormData(this);
+// Initialize filter states and restore saved values on page load
+document.addEventListener('DOMContentLoaded', function() {
+    const content = document.getElementById('filter-content');
+    const icon = document.getElementById('filter-toggle-icon');
+    const filterForm = document.getElementById('leadFilterForm');
+    
+    // Temporarily disable transitions
+    content.style.transition = 'none';
+    
+    try {
+        const savedState = JSON.parse(localStorage.getItem('filter-section-state'));
+        
+        if (savedState) {
+            // Restore section collapse state
+            if (!savedState.isCollapsed) {
+                content.classList.remove('collapsed');
+                icon.classList.remove('collapsed');
+                content.style.maxHeight = 'none';
+            } else {
+                content.classList.add('collapsed');
+                icon.classList.add('collapsed');
+                content.style.maxHeight = '0';
+            }
+            
+            // Restore form values
+            if (savedState.formValues) {
+                Object.entries(savedState.formValues).forEach(([key, value]) => {
+                    const input = filterForm.elements[key];
+                    if (input) {
+                        if (input.type === 'checkbox') {
+                            input.checked = value === 'on';
+                        } else {
+                            input.value = value;
+                        }
+                    }
+                });
+            }
+            
+            // Restore advanced filter groups
+            if (savedState.filterGroups) {
+                filterGroups = savedState.filterGroups;
+                renderFilterGroups();
+            }
+        }
+    } catch (error) {
+        console.error('Error restoring filter state:', error);
+    }
+    
+    // Re-enable transitions
+    setTimeout(() => {
+        content.style.transition = 'max-height 0.3s ease-in-out, opacity 0.3s ease-in-out';
+    }, 0);
+});
                 const filterState = {
                     isCollapsed: document.getElementById('filter-content').classList.contains('collapsed'),
                     formValues: Object.fromEntries(formData.entries()),
