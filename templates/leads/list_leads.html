@@ -107,14 +107,31 @@
 
 .filter-content {
     overflow: hidden;
-    transition: max-height 0.3s ease-in-out;
+    transition: max-height 0.5s cubic-bezier(0.4, 0, 0.2, 1), 
+                opacity 0.3s cubic-bezier(0.4, 0, 0.2, 1),
+                padding 0.3s cubic-bezier(0.4, 0, 0.2, 1);
     max-height: 2000px;
     opacity: 1;
+    padding: 1rem;
+    will-change: max-height, opacity, padding;
 }
 
 .filter-content.collapsed {
     max-height: 0;
     opacity: 0;
+    padding-top: 0;
+    padding-bottom: 0;
+    pointer-events: none;
+}
+
+.filter-icon {
+    display: inline-block;
+    transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    will-change: transform;
+}
+
+.filter-icon.collapsed {
+    transform: rotate(-90deg);
 }
 
 /* Data Table Container */
@@ -205,24 +222,36 @@
                 const content = document.getElementById('filter-content');
                 const icon = document.getElementById('filter-toggle-icon');
                 
-                // アニメーション中のフラグを設定
-                content.style.transition = 'max-height 0.3s ease-in-out, opacity 0.3s ease-in-out';
+                // Get current state
+                const isCollapsed = content.classList.contains('collapsed');
                 
-                if (content.classList.contains('collapsed')) {
+                // Toggle icon class for rotation
+                icon.classList.toggle('collapsed');
+                
+                if (isCollapsed) {
+                    // Expanding
+                    // Set max-height before removing collapsed to trigger animation
+                    content.style.maxHeight = content.scrollHeight + 'px';
                     content.classList.remove('collapsed');
-                    icon.textContent = '▼';
-                    icon.style.transform = 'rotate(0deg)';
-                    // スクロール高さを計算して設定
-                    const height = content.scrollHeight;
-                    content.style.maxHeight = height + 'px';
+                    
+                    // After animation completes, set max-height to none to allow content changes
+                    setTimeout(() => {
+                        if (!content.classList.contains('collapsed')) {
+                            content.style.maxHeight = 'none';
+                        }
+                    }, 500); // Match the transition duration
                 } else {
+                    // Collapsing
+                    // First set fixed height to enable animation
+                    content.style.maxHeight = content.scrollHeight + 'px';
+                    // Force reflow
+                    content.offsetHeight;
+                    // Add collapsed class and set max-height to 0
                     content.classList.add('collapsed');
-                    icon.textContent = '▼';
-                    icon.style.transform = 'rotate(-90deg)';
                     content.style.maxHeight = '0';
                 }
                 
-                // フィルターの状態をlocalStorageに保存
+                // Save state to localStorage
                 localStorage.setItem('filter-section-state', content.classList.contains('collapsed'));
             }
 
