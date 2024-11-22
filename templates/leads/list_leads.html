@@ -3,15 +3,20 @@
 {% block content %}
 <h1>リード一覧</h1>
 
-<!-- Filter Section -->
-<div class="filter-section">
-    <form method="GET" action="{{ url_for('leads.list_leads') }}" class="filter-form" id="leadFilterForm">
-        <!-- Main Filter Toggle -->
-        <div class="main-filter-header" onclick="toggleMainFilter()">
-            <span class="hamburger-icon" id="main-filter-icon">≡</span>
+<!-- Page Layout -->
+<div class="page-container">
+    <!-- Filter Section -->
+    <div class="filter-section">
+        <!-- Filter Toggle Header -->
+        <div class="filter-header" onclick="toggleFilters()">
+            <span class="filter-icon" id="filter-toggle-icon">≡</span>
             <h3>フィルターオプション</h3>
         </div>
-        <div class="main-filter-content collapsed" id="main-filter-content">
+        
+        <!-- Collapsible Filter Content -->
+        <div class="filter-content collapsed" id="filter-content">
+            <form method="GET" action="{{ url_for('leads.list_leads') }}" class="filter-form" id="leadFilterForm">
+        
         <!-- Search Fields -->
         <div class="filter-group-section">
             <div class="filter-group-header" onclick="toggleFilterGroup('search')">
@@ -167,6 +172,62 @@
         </script>
 
         <style>
+            /* Page Layout */
+            .page-container {
+                display: flex;
+                flex-direction: column;
+                gap: 1rem;
+                padding: 1rem;
+            }
+
+            /* Filter Section */
+            .filter-section {
+                background-color: #fff;
+                border-radius: 8px;
+                box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+                margin-bottom: 1rem;
+            }
+
+            .filter-header {
+                display: flex;
+                align-items: center;
+                padding: 1rem;
+                cursor: pointer;
+                background-color: #f8f9fa;
+                border-radius: 8px 8px 0 0;
+                transition: background-color 0.3s ease;
+            }
+
+            .filter-header:hover {
+                background-color: #e9ecef;
+            }
+
+            .filter-icon {
+                font-size: 1.5rem;
+                margin-right: 0.5rem;
+                transition: transform 0.3s ease;
+            }
+
+            .filter-content {
+                padding: 1rem;
+                border-top: 1px solid #dee2e6;
+                transition: max-height 0.3s ease-in-out;
+                overflow: hidden;
+            }
+
+            .filter-content.collapsed {
+                max-height: 0;
+                padding: 0;
+                border-top: none;
+            }
+
+            /* Form Styles */
+            .filter-form {
+                display: flex;
+                flex-direction: column;
+                gap: 1rem;
+            }
+
             /* Search field styles */
             .search-field {
                 display: flex;
@@ -317,8 +378,46 @@
                 localStorage.setItem('main-filter-state', !isCollapsed);
             }
 
+            // Toggle filter section
+            function toggleFilters() {
+                const content = document.getElementById('filter-content');
+                const icon = document.getElementById('filter-toggle-icon');
+                const isCollapsed = content.classList.contains('collapsed');
+                
+                if (isCollapsed) {
+                    content.classList.remove('collapsed');
+                    content.style.maxHeight = content.scrollHeight + 'px';
+                    icon.textContent = '×';
+                    icon.style.transform = 'rotate(180deg)';
+                } else {
+                    content.classList.add('collapsed');
+                    content.style.maxHeight = '0';
+                    icon.textContent = '≡';
+                    icon.style.transform = 'rotate(0deg)';
+                }
+                
+                // Save state to localStorage
+                localStorage.setItem('filter-section-state', !isCollapsed);
+            }
+
             // Initialize filter states on page load
             document.addEventListener('DOMContentLoaded', function() {
+                // Initialize filter section state
+                const content = document.getElementById('filter-content');
+                const icon = document.getElementById('filter-toggle-icon');
+                const savedState = localStorage.getItem('filter-section-state');
+                
+                if (savedState === 'true') {
+                    content.classList.remove('collapsed');
+                    content.style.maxHeight = content.scrollHeight + 'px';
+                    icon.textContent = '×';
+                    icon.style.transform = 'rotate(180deg)';
+                } else {
+                    content.classList.add('collapsed');
+                    content.style.maxHeight = '0';
+                    icon.textContent = '≡';
+                    icon.style.transform = 'rotate(0deg)';
+                }
                 const mainContent = document.getElementById('main-filter-content');
                 const mainIcon = document.getElementById('main-filter-icon');
                 const savedMainState = localStorage.getItem('main-filter-state');
