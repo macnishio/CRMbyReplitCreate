@@ -215,10 +215,42 @@
                 overflow: hidden;
             }
 
+            .filter-content {
+                max-height: 2000px; /* Large enough to contain all content */
+                padding: 1rem;
+                border-top: 1px solid #dee2e6;
+                transition: all 0.3s ease-in-out;
+                overflow: hidden;
+            }
+
             .filter-content.collapsed {
                 max-height: 0;
-                padding: 0;
+                padding-top: 0;
+                padding-bottom: 0;
                 border-top: none;
+                margin: 0;
+            }
+
+            .filter-icon {
+                font-size: 1.5rem;
+                margin-right: 0.5rem;
+                transition: transform 0.3s ease;
+                display: inline-block;
+            }
+
+            .filter-header {
+                cursor: pointer;
+                user-select: none;
+                transition: background-color 0.3s ease;
+            }
+
+            .filter-header:hover {
+                background-color: #e9ecef;
+            }
+
+            .filter-header:focus {
+                outline: 2px solid #007bff;
+                outline-offset: -2px;
             }
 
             /* Form Styles */
@@ -359,29 +391,53 @@
                 localStorage.setItem(`filter-${groupId}-state`, content.classList.contains('active'));
             }
 
-            function toggleMainFilter() {
-                const content = document.getElementById('main-filter-content');
-                const icon = document.getElementById('main-filter-icon');
-                const isCollapsed = content.classList.contains('collapsed');
-                
-                if (isCollapsed) {
-                    content.classList.remove('collapsed');
-                    icon.textContent = '×';
-                    icon.style.transform = 'rotate(180deg)';
-                } else {
-                    content.classList.add('collapsed');
-                    icon.textContent = '≡';
-                    icon.style.transform = 'rotate(0deg)';
-                }
-                
-                // Save state to localStorage
-                localStorage.setItem('main-filter-state', !isCollapsed);
-            }
-
-            // Toggle filter section
+            // Toggle filter section with animation and state persistence
             function toggleFilters() {
                 const content = document.getElementById('filter-content');
                 const icon = document.getElementById('filter-toggle-icon');
+                const header = document.querySelector('.filter-header');
+                const isCollapsed = content.classList.contains('collapsed');
+                
+                // Toggle collapsed state
+                if (isCollapsed) {
+                    content.classList.remove('collapsed');
+                    content.style.maxHeight = content.scrollHeight + 'px';
+                    icon.style.transform = 'rotate(180deg)';
+                    header.setAttribute('aria-expanded', 'true');
+                } else {
+                    content.classList.add('collapsed');
+                    content.style.maxHeight = '0';
+                    icon.style.transform = 'rotate(0deg)';
+                    header.setAttribute('aria-expanded', 'false');
+                }
+                
+                // Save state to localStorage
+                localStorage.setItem('filter-section-state', !isCollapsed);
+            }
+
+            // Initialize filter section state from localStorage
+            document.addEventListener('DOMContentLoaded', function() {
+                const content = document.getElementById('filter-content');
+                const icon = document.getElementById('filter-toggle-icon');
+                const header = document.querySelector('.filter-header');
+                const isExpanded = localStorage.getItem('filter-section-state') === 'true';
+                
+                // Set initial ARIA attributes
+                header.setAttribute('role', 'button');
+                header.setAttribute('aria-controls', 'filter-content');
+                
+                if (isExpanded) {
+                    content.classList.remove('collapsed');
+                    content.style.maxHeight = content.scrollHeight + 'px';
+                    icon.style.transform = 'rotate(180deg)';
+                    header.setAttribute('aria-expanded', 'true');
+                } else {
+                    content.classList.add('collapsed');
+                    content.style.maxHeight = '0';
+                    icon.style.transform = 'rotate(0deg)';
+                    header.setAttribute('aria-expanded', 'false');
+                }
+            });
                 const isCollapsed = content.classList.contains('collapsed');
                 
                 if (isCollapsed) {
