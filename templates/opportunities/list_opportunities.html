@@ -12,7 +12,7 @@
         <div class="filter-tags">
             {% if filters.stage %}
                 <div class="filter-tag">
-                    <span>ステージ: {{ filters.stage }}</span>
+                    <span>ステージ: {{ filters.stage }}</span>ひょうじさｒて
                     <button onclick="removeFilter('stage')" class="remove-filter">×</button>
                 </div>
             {% endif %}
@@ -96,6 +96,132 @@
 </style>
 
 <script>
+// フィルターの開閉機能とフィルター状態の保存
+function toggleFilters() {
+    const content = document.getElementById('filter-content');
+    const icon = document.getElementById('filter-toggle-icon');
+    const filterForm = document.getElementById('filterForm');
+    
+    // Get current state
+    const isCollapsed = content.classList.contains('collapsed');
+    
+    // Toggle icon class for rotation
+    icon.classList.toggle('collapsed');
+    icon.style.transform = isCollapsed ? 'rotate(0deg)' : 'rotate(-90deg)';
+    
+    if (isCollapsed) {
+        // Expanding
+        content.style.maxHeight = content.scrollHeight + 'px';
+        content.classList.remove('collapsed');
+        
+        setTimeout(() => {
+            if (!content.classList.contains('collapsed')) {
+                content.style.maxHeight = 'none';
+            }
+        }, 300);
+    } else {
+        // Collapsing
+        content.style.maxHeight = content.scrollHeight + 'px';
+        content.offsetHeight;
+        content.classList.add('collapsed');
+        content.style.maxHeight = '0';
+    }
+    
+    // Save section state and form values
+    saveFilterState();
+}
+
+// フィルター状態の保存
+function saveFilterState() {
+    const content = document.getElementById('filter-content');
+    const filterForm = document.getElementById('filterForm');
+    const formData = new FormData(filterForm);
+    
+    // チェックボックスの状態を保存
+    const checkboxStates = {};
+    filterForm.querySelectorAll('input[type="checkbox"]').forEach(checkbox => {
+        checkboxStates[checkbox.name + '_' + checkbox.value] = checkbox.checked;
+    });
+
+    const filterState = {
+        isCollapsed: content.classList.contains('collapsed'),
+        formValues: Object.fromEntries(formData.entries()),
+        checkboxStates: checkboxStates,
+        lastUpdated: new Date().toISOString()
+    };
+    
+    localStorage.setItem('opportunity-filter-section-state', JSON.stringify(filterState));
+}
+
+// フィルターフォームの値が変更されたときも状態を保存
+document.getElementById('filterForm').addEventListener('change', saveFilterState);
+
+// ページ読み込み時の初期化と保存された状態の復元
+document.addEventListener('DOMContentLoaded', function() {
+    const content = document.getElementById('filter-content');
+    const icon = document.getElementById('filter-toggle-icon');
+    const filterForm = document.getElementById('filterForm');
+    
+    // アニメーションを一時的に無効化
+    content.style.transition = 'none';
+    
+    try {
+        const savedState = JSON.parse(localStorage.getItem('opportunity-filter-section-state'));
+        
+        if (savedState && savedState.lastUpdated) {
+            const lastUpdated = new Date(savedState.lastUpdated);
+            const now = new Date();
+            const hoursDiff = (now - lastUpdated) / (1000 * 60 * 60);
+            
+            // 24時間以内の状態のみを復元
+            if (hoursDiff <= 24) {
+                // セクションの開閉状態を復元
+                if (!savedState.isCollapsed) {
+                    content.classList.remove('collapsed');
+                    icon.style.transform = 'rotate(0deg)';
+                    content.style.maxHeight = 'none';
+                } else {
+                    content.classList.add('collapsed');
+                    icon.style.transform = 'rotate(-90deg)';
+                    content.style.maxHeight = '0';
+                }
+                
+                // フォームの値を復元
+                if (savedState.formValues) {
+                    Object.entries(savedState.formValues).forEach(([key, value]) => {
+                        const input = filterForm.elements[key];
+                        if (input && input.type !== 'checkbox') {
+                            input.value = value;
+                        }
+                    });
+                }
+                
+                // チェックボックスの状態を復元
+                if (savedState.checkboxStates) {
+                    Object.entries(savedState.checkboxStates).forEach(([key, checked]) => {
+                        const [name, value] = key.split('_');
+                        const checkbox = filterForm.querySelector(`input[type="checkbox"][name="${name}"][value="${value}"]`);
+                        if (checkbox) {
+                            checkbox.checked = checked;
+                        }
+                    });
+                }
+            } else {
+                // 24時間以上経過している場合は状態をクリア
+                localStorage.removeItem('opportunity-filter-section-state');
+            }
+        }
+    } catch (error) {
+        console.error('Error restoring filter state:', error);
+        localStorage.removeItem('opportunity-filter-section-state');
+    }
+    
+    // アニメーションを再有効化
+    setTimeout(() => {
+        content.style.transition = 'max-height 0.3s ease-in-out, opacity 0.3s ease-in-out';
+    }, 0);
+});
+
 function removeFilter(filterType) {
     const form = document.getElementById('filterForm');
     
