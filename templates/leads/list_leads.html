@@ -17,13 +17,16 @@
 
 /* Page Layout */
 .page-container {
-    display: flex;
-    flex-direction: column;
-    gap: 1.5rem;
     padding: 1.5rem;
-    position: relative;
     font-family: var(--font-family);
     color: var(--text-color);
+}
+
+.content-wrapper {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 1.5rem;
+    position: relative;
 }
 
 /* Filter Section */
@@ -31,11 +34,11 @@
     background-color: #fff;
     border-radius: 12px;
     box-shadow: var(--shadow-md);
-    margin-bottom: 1.5rem;
     position: relative;
     z-index: 20;
     transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
     border: 1px solid var(--border-color);
+    margin-bottom: 0;
 }
 
 /* Data Table Container */
@@ -213,17 +216,18 @@
 
 {% block content %}
 <div class="page-container">
-    <!-- Filter Section -->
-    <div class="filter-section">
-        <!-- Filter Toggle Header -->
-        <div class="filter-header" onclick="toggleFilters()">
-            <span class="filter-icon" id="filter-toggle-icon">▼</span>
-            <h3>フィルターオプション</h3>
-        </div>
-        
-        <!-- Collapsible Filter Content -->
-        <div class="filter-content collapsed" id="filter-content">
-            <form method="GET" action="{{ url_for('leads.list_leads') }}" class="filter-form" id="leadFilterForm">
+    <div class="content-wrapper">
+        <!-- Filter Section -->
+        <div class="filter-section">
+            <!-- Filter Toggle Header -->
+            <div class="filter-header" onclick="toggleFilters()">
+                <span class="filter-icon" id="filter-toggle-icon">▼</span>
+                <h3>フィルターオプション</h3>
+            </div>
+            
+            <!-- Collapsible Filter Content -->
+            <div class="filter-content collapsed" id="filter-content">
+                <form method="GET" action="{{ url_for('leads.list_leads') }}" class="filter-form" id="leadFilterForm">
         
         <!-- Search Fields -->
         <div class="filter-group-section">
