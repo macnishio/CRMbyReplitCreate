@@ -23,8 +23,8 @@
 }
 
 .content-wrapper {
-    display: grid;
-    grid-template-columns: 1fr;
+    display: flex;
+    flex-direction: column;
     gap: 1.5rem;
     position: relative;
 }
@@ -39,6 +39,17 @@
     transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
     border: 1px solid var(--border-color);
     margin-bottom: 0;
+}
+
+/* Data Table Container */
+.data-table-container {
+    background-color: #fff;
+    border-radius: 12px;
+    box-shadow: var(--shadow-md);
+    position: relative;
+    z-index: 10;
+    padding: 1.5rem;
+    border: 1px solid var(--border-color);
 }
 
 /* Data Table Container */
@@ -297,7 +308,7 @@
                         if (!content.classList.contains('collapsed')) {
                             content.style.maxHeight = 'none';
                         }
-                    }, 500);
+                    }, 300);
                 } else {
                     // Collapsing
                     content.style.maxHeight = content.scrollHeight + 'px';
