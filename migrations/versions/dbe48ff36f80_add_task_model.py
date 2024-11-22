@@ -1,8 +1,8 @@
-"""fresh_start
+"""Add Task model
 
-Revision ID: 63f6954ad904
-Revises: 
-Create Date: 2024-11-22 05:04:03.092473
+Revision ID: dbe48ff36f80
+Revises: 9bc956d7fd64
+Create Date: 2024-11-10 05:30:51.667339
 
 """
 from alembic import op
@@ -10,8 +10,8 @@ import sqlalchemy as sa
 from sqlalchemy.dialects import postgresql
 
 # revision identifiers, used by Alembic.
-revision = '63f6954ad904'
-down_revision = None
+revision = 'dbe48ff36f80'
+down_revision = '9bc956d7fd64'
 branch_labels = None
 depends_on = None
 
@@ -27,7 +27,6 @@ def upgrade():
                existing_type=postgresql.TIMESTAMP(),
                nullable=False,
                existing_server_default=sa.text('CURRENT_TIMESTAMP'))
-        batch_op.drop_constraint('subscription_plans_stripe_price_id_key', type_='unique')
 
     with op.batch_alter_table('subscriptions', schema=None) as batch_op:
         batch_op.alter_column('created_at',
@@ -55,7 +54,6 @@ def downgrade():
                existing_server_default=sa.text('CURRENT_TIMESTAMP'))
 
     with op.batch_alter_table('subscription_plans', schema=None) as batch_op:
-        batch_op.create_unique_constraint('subscription_plans_stripe_price_id_key', ['stripe_price_id'])
         batch_op.alter_column('updated_at',
                existing_type=postgresql.TIMESTAMP(),
                nullable=True,
