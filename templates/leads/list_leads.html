@@ -186,8 +186,6 @@
                 border-radius: 8px;
                 box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
                 margin-bottom: 1rem;
-                position: relative;
-                z-index: 10;
             }
 
             .filter-header {
@@ -196,17 +194,8 @@
                 padding: 1rem;
                 cursor: pointer;
                 background-color: #f8f9fa;
-                border-radius: 8px;
-                transition: all 0.3s ease;
-                font-size: 1rem;
-                user-select: none;
-            }
-
-            .filter-header h3 {
-                margin: 0;
-                font-size: 1rem;
-                font-weight: 500;
-                color: #333;
+                border-radius: 8px 8px 0 0;
+                transition: background-color 0.3s ease;
             }
 
             .filter-header:hover {
@@ -226,44 +215,10 @@
                 overflow: hidden;
             }
 
-            .filter-content {
-                max-height: 2000px;
-                padding: 1rem;
-                border-top: 1px solid #dee2e6;
-                transition: all 0.3s ease-in-out;
-                overflow: hidden;
-                opacity: 1;
-            }
-
             .filter-content.collapsed {
                 max-height: 0;
                 padding: 0;
-                opacity: 0;
                 border-top: none;
-                margin: 0;
-                pointer-events: none;
-            }
-
-            .filter-icon {
-                font-size: 1.5rem;
-                margin-right: 0.5rem;
-                transition: transform 0.3s ease;
-                display: inline-block;
-            }
-
-            .filter-header {
-                cursor: pointer;
-                user-select: none;
-                transition: background-color 0.3s ease;
-            }
-
-            .filter-header:hover {
-                background-color: #e9ecef;
-            }
-
-            .filter-header:focus {
-                outline: 2px solid #007bff;
-                outline-offset: -2px;
             }
 
             /* Form Styles */
@@ -383,31 +338,6 @@
         </style>
 
         <script>
-            // Initialize filter section as collapsed by default
-            document.addEventListener('DOMContentLoaded', function() {
-                const content = document.getElementById('filter-content');
-                const icon = document.getElementById('filter-toggle-icon');
-                content.classList.add('collapsed');
-                icon.textContent = '≡';
-            });
-
-            // Toggle filter section with animation
-            function toggleFilters() {
-                const content = document.getElementById('filter-content');
-                const icon = document.getElementById('filter-toggle-icon');
-                const isCollapsed = content.classList.contains('collapsed');
-                
-                if (isCollapsed) {
-                    content.classList.remove('collapsed');
-                    content.style.maxHeight = content.scrollHeight + 'px';
-                    icon.textContent = '×';
-                } else {
-                    content.classList.add('collapsed');
-                    content.style.maxHeight = '0';
-                    icon.textContent = '≡';
-                }
-            }
-
             // Add toggle functionality for filter groups
             function toggleFilterGroup(groupId) {
                 const content = document.querySelector(`#${groupId}-content`);
@@ -429,53 +359,29 @@
                 localStorage.setItem(`filter-${groupId}-state`, content.classList.contains('active'));
             }
 
-            // Toggle filter section with animation and state persistence
-            function toggleFilters() {
-                const content = document.getElementById('filter-content');
-                const icon = document.getElementById('filter-toggle-icon');
-                const header = document.querySelector('.filter-header');
+            function toggleMainFilter() {
+                const content = document.getElementById('main-filter-content');
+                const icon = document.getElementById('main-filter-icon');
                 const isCollapsed = content.classList.contains('collapsed');
                 
-                // Toggle collapsed state
                 if (isCollapsed) {
                     content.classList.remove('collapsed');
-                    content.style.maxHeight = content.scrollHeight + 'px';
+                    icon.textContent = '×';
                     icon.style.transform = 'rotate(180deg)';
-                    header.setAttribute('aria-expanded', 'true');
                 } else {
                     content.classList.add('collapsed');
-                    content.style.maxHeight = '0';
+                    icon.textContent = '≡';
                     icon.style.transform = 'rotate(0deg)';
-                    header.setAttribute('aria-expanded', 'false');
                 }
                 
                 // Save state to localStorage
-                localStorage.setItem('filter-section-state', !isCollapsed);
+                localStorage.setItem('main-filter-state', !isCollapsed);
             }
 
-            // Initialize filter section state from localStorage
-            document.addEventListener('DOMContentLoaded', function() {
+            // Toggle filter section
+            function toggleFilters() {
                 const content = document.getElementById('filter-content');
                 const icon = document.getElementById('filter-toggle-icon');
-                const header = document.querySelector('.filter-header');
-                const isExpanded = localStorage.getItem('filter-section-state') === 'true';
-                
-                // Set initial ARIA attributes
-                header.setAttribute('role', 'button');
-                header.setAttribute('aria-controls', 'filter-content');
-                
-                if (isExpanded) {
-                    content.classList.remove('collapsed');
-                    content.style.maxHeight = content.scrollHeight + 'px';
-                    icon.style.transform = 'rotate(180deg)';
-                    header.setAttribute('aria-expanded', 'true');
-                } else {
-                    content.classList.add('collapsed');
-                    content.style.maxHeight = '0';
-                    icon.style.transform = 'rotate(0deg)';
-                    header.setAttribute('aria-expanded', 'false');
-                }
-            });
                 const isCollapsed = content.classList.contains('collapsed');
                 
                 if (isCollapsed) {
