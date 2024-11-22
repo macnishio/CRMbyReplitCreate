@@ -7,7 +7,13 @@
 <div class="filter-section">
     <form method="GET" action="{{ url_for('leads.list_leads') }}" class="filter-form" id="leadFilterForm">
         <!-- Search Fields -->
-        <div class="search-group">
+        <div class="filter-group-section">
+            <div class="filter-group-header" onclick="toggleFilterGroup('search')">
+                <span class="filter-group-icon" id="search-icon">▼</span>
+                <h4>検索フィルター</h4>
+            </div>
+            <div class="filter-group-content" id="search-content">
+                <div class="search-group">
             <div class="search-field">
                 <label for="search_name">名前で検索:</label>
                 <input type="text" name="search_name" id="search_name" 
@@ -29,8 +35,16 @@
                        placeholder="メールアドレスを入力してください..."
                        class="search-input">
             </div>
+            </div>
+        </div>
         <!-- Advanced Filter Groups -->
-        <div class="advanced-filters" id="advancedFilters">
+        <div class="filter-group-section">
+            <div class="filter-group-header" onclick="toggleFilterGroup('advanced')">
+                <span class="filter-group-icon" id="advanced-icon">▼</span>
+                <h4>高度なフィルター</h4>
+            </div>
+            <div class="filter-group-content" id="advanced-content">
+                <div class="advanced-filters" id="advancedFilters">
             <h3>高度なフィルター</h3>
             <div id="filterGroups">
                 <!-- Filter groups will be dynamically added here -->
@@ -147,6 +161,48 @@
         </script>
 
         <style>
+<script>
+// Add toggle functionality for filter groups
+function toggleFilterGroup(groupId) {
+    const content = document.querySelector(`#${groupId}-content`);
+    const icon = document.querySelector(`#${groupId}-icon`);
+    if (content.style.display === 'none' || !content.style.display) {
+        content.style.display = 'block';
+        icon.textContent = '▼';
+    } else {
+        content.style.display = 'none';
+        icon.textContent = '▶';
+    }
+}
+</script>
+
+<style>
+.filter-group-header {
+    display: flex;
+    align-items: center;
+    cursor: pointer;
+    padding: 0.5rem;
+    background-color: var(--secondary-color);
+    border-radius: 4px;
+    margin-bottom: 0.5rem;
+}
+
+.filter-group-header h4 {
+    margin: 0;
+    flex-grow: 1;
+}
+
+.filter-group-icon {
+    margin-right: 0.5rem;
+}
+
+.filter-group-content {
+    padding: 1rem;
+    border: 1px solid var(--border-color);
+    border-radius: 4px;
+    margin-bottom: 1rem;
+}
+</style>
             .advanced-filters {
                 margin-top: 1rem;
                 padding: 1rem;
@@ -185,9 +241,15 @@
         </div>
 
         <!-- Status Multi-select -->
-        <div class="filter-group">
-            <label>ステータス:</label>
-            <div class="status-checkboxes">
+        <div class="filter-group-section">
+            <div class="filter-group-header" onclick="toggleFilterGroup('status')">
+                <span class="filter-group-icon" id="status-icon">▼</span>
+                <h4>ステータス フィルター</h4>
+            </div>
+            <div class="filter-group-content" id="status-content">
+                <div class="filter-group">
+                    <label>ステータス:</label>
+                    <div class="status-checkboxes">
                 <label>
                     <input type="checkbox" name="status" value="New" 
                            {% if 'New' in request.args.getlist('status') %}checked{% endif %}> 新規
@@ -208,11 +270,19 @@
                     <input type="checkbox" name="status" value="Spam"
                            {% if 'Spam' in request.args.getlist('status') %}checked{% endif %}> 迷惑メール
                 </label>
+                </div>
             </div>
+        </div>
         </div>
 
         <!-- Score Range -->
-        <div class="filter-group">
+        <div class="filter-group-section">
+            <div class="filter-group-header" onclick="toggleFilterGroup('score')">
+                <span class="filter-group-icon" id="score-icon">▼</span>
+                <h4>スコア フィルター</h4>
+            </div>
+            <div class="filter-group-content" id="score-content">
+                <div class="filter-group">
             <label>スコア範囲:</label>
             <div class="score-range">
                 <input type="number" name="min_score" id="min_score" min="0" max="100" step="1" 
@@ -221,10 +291,17 @@
                 <input type="number" name="max_score" id="max_score" min="0" max="100" step="1" 
                        placeholder="最大" value="{{ request.args.get('max_score', '') }}">
             </div>
+            </div>
         </div>
 
         <!-- Date Range -->
-        <div class="filter-group">
+        <div class="filter-group-section">
+            <div class="filter-group-header" onclick="toggleFilterGroup('date')">
+                <span class="filter-group-icon" id="date-icon">▼</span>
+                <h4>日付 フィルター</h4>
+            </div>
+            <div class="filter-group-content" id="date-content">
+                <div class="filter-group">
             <label>日付範囲:</label>
             <div class="date-range">
                 <select name="date_field" id="date_field">
@@ -237,10 +314,17 @@
                 <input type="date" name="date_to" id="date_to" 
                        value="{{ request.args.get('date_to', '') }}">
             </div>
+            </div>
         </div>
 
         <!-- Sort Options -->
-        <div class="filter-group">
+        <div class="filter-group-section">
+            <div class="filter-group-header" onclick="toggleFilterGroup('sort')">
+                <span class="filter-group-icon" id="sort-icon">▼</span>
+                <h4>並び替え オプション</h4>
+            </div>
+            <div class="filter-group-content" id="sort-content">
+                <div class="filter-group">
             <label>並び替え:</label>
             <div class="sort-options">
                 <select name="sort_by" id="sort_by">
@@ -254,6 +338,7 @@
                     <option value="desc" {% if request.args.get('sort_order', 'desc') == 'desc' %}selected{% endif %}>降順</option>
                     <option value="asc" {% if request.args.get('sort_order') == 'asc' %}selected{% endif %}>昇順</option>
                 </select>
+            </div>
             </div>
         </div>
         <div class="filter-actions">
