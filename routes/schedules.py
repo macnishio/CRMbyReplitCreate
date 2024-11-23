@@ -371,3 +371,13 @@ def analyze():
             'message': 'スケジュールの分析中にエラーが発生しました。',
             'error': str(e)
         }), 500
+
+@bp.route('/<int:id>/detail', methods=['GET'])
+@login_required
+def schedule_detail(id):
+    schedule = Schedule.query.get_or_404(id)
+    if schedule.user_id != current_user.id:
+        flash('このスケジュールを閲覧する権限がありません。', 'error')
+        return redirect(url_for('schedules.list_schedules'))
+    
+    return render_template('schedules/detail.html', schedule=schedule)

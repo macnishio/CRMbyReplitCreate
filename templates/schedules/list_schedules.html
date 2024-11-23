@@ -664,6 +664,9 @@ window.onclick = function(event) {
 
             <!-- アクションボタン -->
             <div class="card-actions">
+                <a href="{{ url_for('schedules.schedule_detail', id=schedule.id) }}" class="btn btn-info">
+                    <i class="fas fa-info-circle"></i> 詳細
+                </a>
                 <a href="{{ url_for('schedules.edit_schedule', id=schedule.id) }}" class="btn btn-edit">
                     <i class="fas fa-edit"></i> 編集
                 </a>
