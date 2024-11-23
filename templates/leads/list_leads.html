@@ -133,6 +133,9 @@
                                     <p><strong>スコア:</strong> {{ "%.1f"|format(lead.score) }}</p>
                                     <p><strong>最終接触:</strong> {{ lead.last_contact.strftime('%Y-%m-%d %H:%M') if lead.last_contact }}</p>
                                     <div class="card-actions">
+                                        <a href="{{ url_for('leads.lead_detail', id=lead.id) }}" class="btn btn-info">
+                                            <i class="fas fa-info-circle"></i> 詳細
+                                        </a>
                                         <a href="{{ url_for('leads.edit_lead', id=lead.id) }}" class="btn btn-edit">編集</a>
                                         <form method="POST" action="{{ url_for('leads.delete_lead', id=lead.id) }}" style="display: inline;">
                                             <button type="submit" class="btn btn-delete" onclick="return confirm('このリードを削除してもよろしいですか？');">削除</button>
