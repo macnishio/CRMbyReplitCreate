@@ -169,7 +169,9 @@
                                 <ul class="pagination-list">
                                     {% if pagination.has_prev %}
                                     <li class="page-item">
-                                        <a href="{{ url_for('leads.list_leads', page=pagination.prev_num, **request.args) }}" class="page-link">前へ</a>
+                                        {% set args = dict(request.args.items()) %}
+                                        {% set _ = args.pop('page', None) %}
+                                        <a href="{{ url_for('leads.list_leads', page=pagination.prev_num, **args) }}" class="page-link">前へ</a>
                                     </li>
                                     {% endif %}
                                     {% for page_num in pagination.iter_pages(left_edge=1, right_edge=1, left_current=2, right_current=2) %}
@@ -180,7 +182,9 @@
                                         </li>
                                         {% else %}
                                         <li class="page-item">
-                                            <a href="{{ url_for('leads.list_leads', page=page_num, **request.args) }}" class="page-link">{{ page_num }}</a>
+                                            {% set args = dict(request.args.items()) %}
+                                            {% set _ = args.pop('page', None) %}
+                                            <a href="{{ url_for('leads.list_leads', page=page_num, **args) }}" class="page-link">{{ page_num }}</a>
                                         </li>
                                         {% endif %}
                                     {% else %}
@@ -189,7 +193,9 @@
                                     {% endfor %}
                                     {% if pagination.has_next %}
                                     <li class="page-item">
-                                        <a href="{{ url_for('leads.list_leads', page=pagination.next_num, **request.args) }}" class="page-link">次へ</a>
+                                        {% set args = dict(request.args.items()) %}
+                                        {% set _ = args.pop('page', None) %}
+                                        <a href="{{ url_for('leads.list_leads', page=pagination.next_num, **args) }}" class="page-link">次へ</a>
                                     </li>
                                     {% endif %}
                                 </ul>
