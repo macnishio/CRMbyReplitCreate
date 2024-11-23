@@ -222,7 +222,7 @@ def edit_schedule(id):
 
     return render_template('schedules/edit.html', form=form, schedule=schedule, leads=leads)
 
-@bp.route('/delete/<int:id>', methods=['POST'])
+@bp.route('/<int:id>/delete', methods=['POST'])
 @login_required
 def delete_schedule(id):
     try:
