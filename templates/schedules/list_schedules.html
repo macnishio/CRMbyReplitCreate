@@ -280,19 +280,6 @@
     width: 100%;
     height: 100%;
     background-color: rgba(0, 0, 0, 0.5);
-<!-- Delete Confirmation Modal -->
-<div class="modal" id="deleteConfirmModal">
-    <div class="modal-content">
-        <span class="close-modal" onclick="closeDeleteConfirmModal()">&times;</span>
-        <h2>スケジュールの削除確認</h2>
-        <p>このスケジュールを削除してもよろしいですか？</p>
-        <p>この操作は取り消せません。</p>
-        <div class="modal-actions">
-            <button class="btn btn-secondary" onclick="closeDeleteConfirmModal()">キャンセル</button>
-            <button class="btn btn-delete" onclick="executeDelete()">削除</button>
-        </div>
-    </div>
-</div>
 }
 
 .modal-content {
@@ -375,6 +362,19 @@
         <div class="filter-grid">
             <!-- 状態フィルター -->
             <div class="filter-group">
+<!-- Delete Confirmation Modal -->
+<div class="modal" id="deleteConfirmModal">
+    <div class="modal-content">
+        <span class="close-modal" onclick="closeDeleteConfirmModal()">&times;</span>
+        <h2>スケジュールの削除確認</h2>
+        <p>このスケジュールを削除してもよろしいですか？</p>
+        <p>この操作は取り消せません。</p>
+        <div class="modal-actions">
+            <button class="btn btn-secondary" onclick="closeDeleteConfirmModal()">キャンセル</button>
+            <button class="btn btn-delete" onclick="executeDelete()">削除</button>
+        </div>
+    </div>
+</div>
                 <label for="status">状態:</label>
                 <select name="status" id="status">
                     <option value="">全て</option>
