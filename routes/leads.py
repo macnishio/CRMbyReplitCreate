@@ -315,7 +315,10 @@ def lead_detail(id):
     if lead.user_id != current_user.id:
         flash('このリードを閲覧する権限がありません。', 'error')
         return redirect(url_for('leads.list_leads'))
-    return render_template('leads/detail.html', lead=lead)
+    
+    # 関連メールを取得
+    emails = Email.query.filter_by(lead_id=lead.id).order_by(Email.received_at.desc()).all()
+    return render_template('leads/detail.html', lead=lead, emails=emails)
 
 @bp.route('/delete/<int:id>', methods=['POST'])
 @login_required

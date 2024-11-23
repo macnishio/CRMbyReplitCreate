@@ -173,7 +173,6 @@
 
     <div class="email-section">
         <h2>関連メール</h2>
-        <a href="{{ url_for('leads.refresh_lead_emails', id=lead.id) }}" class="button">メールを更新</a>
         {% if emails %}
             <table class="email-table">
                 <thead>
