@@ -328,11 +328,8 @@
 .email-preview:hover {
     transform: translateY(-3px);
 }
-
 </style>
 {% endblock %}
-
-
 
 {% block content %}
 <h1>スケジュール一覧</h1>
@@ -340,6 +337,9 @@
 <!-- フィルターセクション -->
 <div class="filter-section">
     <form method="GET" class="filter-form" id="filterForm">
+        <!-- ソート順のhidden input を追加 -->
+        <input type="hidden" id="sort_order" name="sort_order" value="{{ request.args.get('sort_order', 'asc') }}">
+
         <div class="filter-grid">
             <!-- 状態フィルター -->
             <div class="filter-group">
@@ -409,7 +409,8 @@
             </button>
             <div class="sort-controls">
                 <button type="button" class="btn btn-secondary" id="sortButton">
-                    開始日時でソート <i id="sortIcon" class="fas fa-sort"></i>
+                    開始日時でソート 
+                    <i id="sortIcon" class="fas fa-sort{% if request.args.get('sort_order') == 'desc' %}-up{% elif request.args.get('sort_order') == 'asc' %}-down{% endif %}"></i>
                 </button>
             </div>
             <button type="button" class="btn btn-info" id="analyzeBtn">
@@ -418,6 +419,7 @@
         </div>
     </form>
 </div>
+
 <!-- Bulk Operations Form -->
 <form method="POST" action="{{ url_for('schedules.bulk_action') }}" id="bulkForm" onsubmit="return confirmBulkAction()">
     <div class="bulk-actions">
@@ -438,7 +440,9 @@
     </div>
 
     <!-- Google Calendar Transfer Button -->
-    <button type="button" id="transfer-to-google" class="btn btn-success" disabled>選択したスケジュールをGoogleカレンダーに転送</button>
+    <button type="button" id="transfer-to-google" class="btn btn-success" disabled>
+        選択したスケジュールをGoogleカレンダーに転送
+    </button>
 
     <!-- AI Analysis Section -->
     <div class="ai-analysis-section">
@@ -591,16 +595,7 @@
         </div>
         {% endfor %}
     </div>
-    <select name="action" id="bulk-action" required>
-        <option value="">一括操作を選択...</option>
-        <option value="delete">削除</option>
-        <option value="reschedule">日時変更</option>
-    </select>
-    <div id="reschedule-inputs" style="display: none;">
-        <input type="date" name="new_date" id="new-date">
-        <input type="time" name="new_time" id="new-time">
-    </div>
-    <button type="submit" class="btn btn-primary" id="bulk-apply-btn">適用</button>
+
     <!-- Pagination Controls -->
     <div class="pagination-controls">
         {% if pagination.pages > 1 %}
@@ -631,683 +626,174 @@
         </nav>
         <div class="pagination-info">
             {% if total_count > 0 %}
-    全{{ total_count }}件中 {{ (pagination.page - 1) * pagination.per_page + 1 }}～{{ ((pagination.page * pagination.per_page) if (pagination.page * pagination.per_page) <= total_count else total_count) }}件を表示
-{% else %}
-    表示するスケジュールがありません
-{% endif %}
+                全{{ total_count }}件中 {{ (pagination.page - 1) * pagination.per_page + 1 }}～{{ ((pagination.page * pagination.per_page) if (pagination.page * pagination.per_page) <= total_count else total_count) }}件を表示
+            {% else %}
+                表示するスケジュールがありません
+            {% endif %}
         </div>
         {% endif %}
     </div>
-</form>
+    </form>
 
-<div class="add-schedule">
-<script>
-async function analyzeSchedules() {
-    const loadingDiv = document.getElementById('analysisLoading');
-    const resultDiv = document.getElementById('analysisResult');
-    
-    try {
-        loadingDiv.style.display = 'block';
-        resultDiv.innerHTML = '';
-        
-        // Get current filter values
-        const filters = {
-            status: document.getElementById('status').value,
-            date_range: document.getElementById('date_range').value,
-            date_from: document.getElementById('date_from').value,
-            date_to: document.getElementById('date_to').value,
-        };
-        
-        const response = await fetch('/schedules/analyze', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-            },
-            body: JSON.stringify(filters)
-        });
-        
-        const data = await response.json();
-        
-        if (data.success) {
-            resultDiv.innerHTML = data.analysis;
-        } else {
-            resultDiv.innerHTML = `<p class="error-message">${data.message}</p>`;
-        }
-    } catch (error) {
-        resultDiv.innerHTML = '<p class="error-message">分析中にエラーが発生しました。</p>';
-        console.error('Analysis error:', error);
-    } finally {
-        loadingDiv.style.display = 'none';
-    }
-}
-
-// Add event listener to the analyze button
-document.getElementById('analyzeBtn').addEventListener('click', analyzeSchedules);
-
-// Initialize tooltips and other components
-document.addEventListener('DOMContentLoaded', function() {
-    // Initialize tooltips
-    const tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
-    tooltipTriggerList.map(function (tooltipTriggerEl) {
-        return new bootstrap.Tooltip(tooltipTriggerEl);
-    });
-});
-</script>
-    <a href="{{ url_for('schedules.add_schedule') }}" class="btn btn-add">新規スケジュールを追加</a>
-</div>
-
-<!-- メールモーダルを追加 -->
-<div id="emailModal" class="modal">
-    <div class="modal-content">
-        <span class="close-modal">×</span>
-        <div class="email-header">
-{% block scripts %}
-{{ super() }}
-<script>
-function toggleAnalysis() {
-    const content = document.getElementById('analysisContent');
-    const icon = document.querySelector('.toggle-icon');
-    if (content) {
-        content.classList.toggle('active');
-        if (content.classList.contains('active')) {
-            icon.style.transform = 'rotate(180deg)';
-        } else {
-            icon.style.transform = 'rotate(0deg)';
-        }
-    }
-}
-
-// Initialize tooltips
-$(function () {
-    $('[data-toggle="tooltip"]').tooltip();
-});
-
-// Handle bulk actions
-document.getElementById('bulk-action').addEventListener('change', function() {
-    const rescheduleInputs = document.getElementById('reschedule-inputs');
-    rescheduleInputs.style.display = this.value === 'reschedule' ? 'inline-block' : 'none';
-});
-
-// Handle checkboxes
-function toggleAllCheckboxes() {
-    const mainCheckbox = document.getElementById('select-all');
-    const checkboxes = document.getElementsByClassName('schedule-checkbox');
-    Array.from(checkboxes).forEach(checkbox => {
-        checkbox.checked = mainCheckbox.checked;
-    });
-    updateGoogleTransferButton();
-}
-
-function updateGoogleTransferButton() {
-    const checkboxes = document.getElementsByClassName('schedule-checkbox');
-    const checkedCount = Array.from(checkboxes).filter(cb => cb.checked).length;
-    document.getElementById('transfer-to-google').disabled = checkedCount === 0;
-}
-
-// Add change event listener to all schedule checkboxes
-document.querySelectorAll('.schedule-checkbox').forEach(checkbox => {
-    checkbox.addEventListener('change', updateGoogleTransferButton);
-});
-
-// Handle Google Calendar transfer
-document.getElementById('transfer-to-google').addEventListener('click', function() {
-    const selectedSchedules = Array.from(document.getElementsByClassName('schedule-checkbox'))
-        .filter(cb => cb.checked)
-        .map(cb => cb.value);
-    
-    if (selectedSchedules.length === 0) {
-        alert('転送するスケジュールを選択してください。');
-        return;
-    }
-
-    fetch('{{ url_for("schedules.transfer_to_google") }}', {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({schedules: selectedSchedules})
-    })
-    .then(response => response.json())
-    .then(data => {
-        if (data.success) {
-            alert(data.message);
-            if (data.errors && data.errors.length > 0) {
-                console.warn('Errors occurred:', data.errors);
-            }
-        } else {
-            alert(data.message || 'エラーが発生しました。');
-        }
-    })
-    .catch(error => {
-        console.error('Error:', error);
-        alert('転送中にエラーが発生しました。');
-    });
-});
-
-// Handle schedule deletion
-function deleteSchedule(id) {
-    if (confirm('このスケジュールを削除してもよろしいですか？')) {
-        fetch(`/schedules/delete/${id}`, {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json'
-            }
-        })
-        .then(response => response.json())
-        .then(data => {
-            if (data.success) {
-                location.reload();
-            } else {
-                alert(data.message || 'エラーが発生しました。');
-            }
-        })
-        .catch(error => {
-            console.error('Error:', error);
-            alert('削除中にエラーが発生しました。');
-        });
-    }
-}
-
-// Confirm bulk actions
-function confirmBulkAction() {
-    const action = document.getElementById('bulk-action').value;
-    const selectedSchedules = document.querySelectorAll('input[name="selected_schedules[]"]:checked');
-    
-    if (selectedSchedules.length === 0) {
-        alert('スケジュールを選択してください。');
-        return false;
-    }
-
-    if (action === '') {
-        alert('操作を選択してください。');
-        return false;
-    }
-
-    if (action === 'delete') {
-        return confirm(`選択された${selectedSchedules.length}件のスケジュールを削除してもよろしいですか？`);
-    }
-
-    if (action === 'reschedule') {
-        const newDate = document.getElementById('new-date').value;
-        const newTime = document.getElementById('new-time').value;
-        if (!newDate || !newTime) {
-            alert('新しい日時を選択してください。');
-            return false;
-        }
-        return confirm(`選択された${selectedSchedules.length}件のスケジュールの日時を変更してもよろしいですか？`);
-    }
-
-    return true;
-}
-</script>
-{% endblock %}
-            <h2 id="modalSubject"></h2>
-            <div class="email-metadata">
-                <p id="modalSender"></p>
-                <p id="modalDate"></p>
-            </div>
-        </div>
-        <div class="email-content" id="modalContent"></div>
-
-        {% if email and email.ai_analysis %}
-        <div class="ai-analysis-section">
-            <h3><i class="fas fa-robot"></i> AI分析結果</h3>
-            <div class="analysis-content">{{ email.ai_analysis }}</div>
-
-            <div id="generatedItems">
-                {% if email.tasks %}
-                <div class="generated-tasks">
-                    <h4>関連タスク</h4>
-                    <ul>
-                        {% for task in email.tasks %}
-                        <li>
-                            <a href="{{ url_for('tasks.edit_task', id=task.id) }}">
-                                {{ task.title }} (期限: {{ task.due_date.strftime('%Y-%m-%d') }})
-                            </a>
-                        </li>
-                        {% endfor %}
-                    </ul>
-                </div>
-                {% endif %}
-
-                {% if email.schedules %}
-                <div class="generated-schedules">
-                    <h4>関連予定</h4>
-                    <ul>
-                        {% for schedule in email.schedules %}
-                        <li>
-                            <a href="{{ url_for('schedules.edit_schedule', id=schedule.id) }}">
-                                {{ schedule.title }} 
-                                ({{ schedule.start_time.strftime('%Y-%m-%d %H:%M') }})
-                            </a>
-                        </li>
-                        {% endfor %}
-                    </ul>
-                </div>
-                {% endif %}
-            </div>
-        </div>
-        {% endif %}
+    <div class="add-schedule">
+        <a href="{{ url_for('schedules.add_schedule') }}" class="btn btn-add">新規スケジュールを追加</a>
     </div>
-</div>
 
-<script>
-function toggleAnalysis() {
-    const content = document.getElementById('analysisContent');
-    const icon = document.querySelector('.toggle-icon');
-    
-    if (content) {
-        content.classList.toggle('active');
-        if (content.classList.contains('active')) {
-            icon.style.transform = 'rotate(180deg)';
-        } else {
-            icon.style.transform = 'rotate(0deg)';
-        }
-    }
-}
+    <!-- メールモーダル -->
+    <div id="emailModal" class="modal">
+        <div class="modal-content">
+            <span class="close-modal">&times;</span>
+            <div class="email-header">
+                <h2 id="modalSubject"></h2>
+                <div class="email-metadata">
+                    <p id="modalSender"></p>
+                    <p id="modalDate"></p>
+                </div>
+            </div>
+            <div class="email-content" id="modalContent"></div>
+        </div>
+    </div>
+    {% endblock %}
 
-// Initialize analysis section on page load
-document.addEventListener('DOMContentLoaded', function() {
-    const content = document.getElementById('analysisContent');
-    if (content) {
-        content.style.transition = 'max-height 0.3s ease-out';
-        content.style.maxHeight = '0px';
-        content.style.overflow = 'hidden';
-    }
-});
+    {% block scripts %}
+    <script>
+        // スケジュール分析の実行
+        async function analyzeSchedules() {
+            const loadingDiv = document.getElementById('analysisLoading');
+            const resultDiv = document.getElementById('analysisResult');
 
-function toggleAllCheckboxes() {
-    const selectAll = document.getElementById('select-all');
-    const checkboxes = document.querySelectorAll('.schedule-checkbox');
-    checkboxes.forEach(checkbox => {
-        checkbox.checked = selectAll.checked;
-    });
-    updateButtonStates();
-}
+            try {
+                loadingDiv.style.display = 'block';
+                resultDiv.innerHTML = '';
 
-function confirmBulkAction() {
-    const action = document.getElementById('bulk-action').value;
-    const selectedSchedules = document.querySelectorAll('input[name="selected_schedules[]"]:checked').length;
+                // 現在のフィルター値を取得
+                const filters = {
+                    status: document.getElementById('status').value,
+                    date_range: document.getElementById('date_range').value,
+                    date_from: document.getElementById('date_from').value,
+                    date_to: document.getElementById('date_to').value,
+                };
 
-    if (!action) {
-        alert('操作を選択してください。');
-        return false;
-    }
+                const response = await fetch('/schedules/analyze', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(filters)
+                });
 
-    if (selectedSchedules === 0) {
-        alert('スケジュールを選択してください。');
-        return false;
-    }
+                const data = await response.json();
 
-// フィルター関連の機能
-document.addEventListener('DOMContentLoaded', function() {
-    // リセットボタンの処理
-    document.getElementById('resetFiltersBtn').addEventListener('click', function() {
-        document.getElementById('filterForm').reset();
-        document.getElementById('filterForm').submit();
-    });
-
-    // ソートボタンの処理
-    document.getElementById('sortButton').addEventListener('click', function() {
-        const icon = this.querySelector('i');
-        const currentSort = document.getElementById('sort').value;
-        const newSort = currentSort === 'asc' ? 'desc' : 'asc';
-        
-        // Update the hidden sort input
-        document.getElementById('sort').value = newSort;
-        
-        // Update the icon
-        icon.className = `fas fa-sort-${newSort === 'asc' ? 'up' : 'down'}`;
-        
-        // Submit the form
-        document.getElementById('filterForm').submit();
-    });
-
-    // AI分析ボタンの処理
-    document.getElementById('analyzeBtn').addEventListener('click', function() {
-        this.disabled = true;
-        this.innerHTML = '<i class="fas fa-spinner fa-spin"></i> 分析中...';
-        
-        fetch('/schedules/analyze', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-            },
-            body: JSON.stringify(getFilterValues())
-        })
-        .then(response => response.json())
-        .then(data => {
-            document.getElementById('aiAnalysisContent').innerHTML = data.analysis;
-            this.disabled = false;
-            this.innerHTML = '<i class="fas fa-brain"></i> AI分析を実行';
-        })
-        .catch(error => {
-            console.error('Error:', error);
-            this.disabled = false;
-            this.innerHTML = '<i class="fas fa-brain"></i> AI分析を実行';
-            alert('分析中にエラーが発生しました。');
-        });
-    });
-
-    // カスタム期間の制御
-    const dateRange = document.getElementById('date_range');
-    const customDateInputs = document.querySelectorAll('.date-range input');
-    
-    dateRange.addEventListener('change', function() {
-        const isCustom = !this.value;
-        customDateInputs.forEach(input => {
-            input.disabled = !isCustom;
-        });
-    });
-
-    // ページサイズ変更時の処理
-    document.getElementById('page_size').addEventListener('change', function() {
-        document.getElementById('filterForm').submit();
-    });
-});
-
-// フィルター値を取得する関数
-function getFilterValues() {
-    return {
-        status: document.getElementById('status').value,
-        date_range: document.getElementById('date_range').value,
-        lead_search: document.getElementById('lead_search').value,
-        date_from: document.getElementById('date_from').value,
-        date_to: document.getElementById('date_to').value,
-        page_size: document.getElementById('page_size').value
-    };
-}
-    if (action === 'delete') {
-        return confirm(`選択された${selectedSchedules}件のスケジュールを削除してもよろしいですか？`);
-    }
-
-    if (action === 'reschedule') {
-        const newDate = document.getElementById('new-date').value;
-        const newTime = document.getElementById('new-time').value;
-        if (!newDate || !newTime) {
-            alert('新しい日時を選択してください。');
-            return false;
-        }
-        return confirm(`選択された${selectedSchedules}件のスケジュールを ${newDate} ${newTime} に変更してもよろしいですか？`);
-    }
-
-    return true;
-}
-
-function deleteSchedule(scheduleId) {
-    if (confirm('このスケジュールを削除してもよろしいですか？')) {
-        fetch(`/schedules/delete/${scheduleId}`, {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-            },
-        })
-        .then(response => {
-            if (response.ok) {
-                location.reload();
-            } else {
-                alert('削除中にエラーが発生しました。');
+                if (data.success) {
+                    resultDiv.innerHTML = data.analysis;
+                } else {
+                    resultDiv.innerHTML = `<p class="error-message">${data.message}</p>`;
+                }
+            } catch (error) {
+                resultDiv.innerHTML = '<p class="error-message">分析中にエラーが発生しました。</p>';
+                console.error('Analysis error:', error);
+            } finally {
+                loadingDiv.style.display = 'none';
             }
-        })
-        .catch(error => {
-            console.error('Error:', error);
-            alert('削除中にエラーが発生しました。');
-        });
-    }
-}
-
-document.getElementById('bulk-action').addEventListener('change', function() {
-    const rescheduleInputs = document.getElementById('reschedule-inputs');
-    rescheduleInputs.style.display = this.value === 'reschedule' ? 'block' : 'none';
-});
-
-document.addEventListener('DOMContentLoaded', function() {
-    const checkboxes = document.querySelectorAll('.schedule-checkbox');
-    checkboxes.forEach(checkbox => {
-        checkbox.addEventListener('change', updateButtonStates);
-    });
-    updateButtonStates();
-});
-
-function updateButtonStates() {
-    const selectedCount = document.querySelectorAll('input[name="selected_schedules[]"]:checked').length;
-    document.getElementById('transfer-to-google').disabled = selectedCount === 0;
-    document.getElementById('bulk-apply-btn').disabled = selectedCount === 0;
-}
-
-document.getElementById('transfer-to-google').addEventListener('click', function() {
-    const selectedSchedules = Array.from(document.querySelectorAll('input[name="selected_schedules[]"]:checked'))
-        .map(checkbox => checkbox.value);
-
-    if (selectedSchedules.length === 0) {
-        alert('転送するイベントを選択してください。');
-        return;
-    }
-
-    if (!confirm('選択したイベントをGoogleカレンダーに転送してもよろしいですか？')) {
-        return;
-    }
-
-    fetch("{{ url_for('schedules.transfer_to_google') }}", {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ schedules: selectedSchedules }),
-    })
-    .then(response => response.json())
-    .then(data => {
-        alert(data.message);
-        if (data.success) {
-            location.reload();
-/* Filter section styles */
-.filter-section {
-    background-color: #f8f9fa;
-    padding: 20px;
-    border-radius: 8px;
-    margin-bottom: 20px;
-    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-}
-
-.filter-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-    gap: 15px;
-    margin-bottom: 20px;
-}
-
-.filter-group {
-    display: flex;
-    flex-direction: column;
-    gap: 5px;
-}
-
-.filter-group label {
-    font-weight: 500;
-    color: #495057;
-}
-
-.filter-group select,
-.filter-group input {
-    padding: 8px;
-    border: 1px solid #ced4da;
-    border-radius: 4px;
-    font-size: 14px;
-}
-
-.date-range {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-}
-
-.filter-actions {
-    display: flex;
-    gap: 10px;
-    flex-wrap: wrap;
-    align-items: center;
-}
-
-/* Analysis section styles */
-.analysis-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-    gap: 20px;
-    padding: 20px;
-}
-
-.analysis-card {
-    background: white;
-    padding: 20px;
-    border-radius: 8px;
-    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-}
-
-.analysis-card h3 {
-    margin-bottom: 15px;
-    color: #2c3e50;
-    display: flex;
-    align-items: center;
-    gap: 10px;
-}
-
-.stats-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
-    gap: 15px;
-}
-
-.stat-item {
-    text-align: center;
-    padding: 10px;
-    background-color: #f8f9fa;
-    border-radius: 6px;
-}
-
-.stat-label {
-    display: block;
-    font-size: 14px;
-    color: #6c757d;
-    margin-bottom: 5px;
-}
-
-.stat-value {
-    font-size: 24px;
-    font-weight: bold;
-    color: #2c3e50;
-}
-
-.status-distribution,
-.time-distribution {
-    display: flex;
-    flex-direction: column;
-    gap: 10px;
-}
-
-.status-item,
-.time-slot {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-}
-
-.progress-bar {
-    flex-grow: 1;
-    height: 8px;
-    background-color: #e9ecef;
-    border-radius: 4px;
-    overflow: hidden;
-}
-
-.progress {
-    height: 100%;
-    background-color: #007bff;
-    transition: width 0.3s ease;
-}
-
-/* Pagination styles */
-.pagination-container {
-    margin-top: 20px;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 10px;
-}
-
-.pagination {
-    display: flex;
-    gap: 5px;
-}
-
-.page-link {
-    padding: 8px 12px;
-    border: 1px solid #dee2e6;
-    border-radius: 4px;
-    color: #007bff;
-    text-decoration: none;
-    transition: all 0.2s;
-}
-
-.page-link:hover {
-    background-color: #e9ecef;
-}
-
-.page-link.active {
-    background-color: #007bff;
-    color: white;
-    border-color: #007bff;
-}
-
-.pagination-info {
-    color: #6c757d;
-    font-size: 14px;
-}
         }
-    })
-    .catch(error => {
-        console.error('Error:', error);
-        alert('イベントの転送中にエラーが発生しました。');
-    });
-});
 
-function showEmailModal(emailId) {
-    fetch(`/api/emails/${emailId}`)
-        .then(response => response.json())
-        .then(data => {
-            if (data.error) {
-                console.error('Error:', data.error);
-                return;
+        // ソート用のhidden inputを更新または作成する関数
+        function updateSortInput(value) {
+            const filterForm = document.getElementById('filterForm');
+            let sortInput = document.getElementById('sort_order');
+
+            if (!sortInput) {
+                sortInput = document.createElement('input');
+                sortInput.type = 'hidden';
+                sortInput.id = 'sort_order';
+                sortInput.name = 'sort_order';
+                filterForm.appendChild(sortInput);
             }
 
+            sortInput.value = value;
+        }
+
+        // 分析コンテンツの表示切り替え機能
+        function toggleAnalysis() {
+            const content = document.getElementById('analysisContent');
+            const icon = document.querySelector('.toggle-icon');
+
+            if (content) {
+                content.classList.toggle('active');
+                icon.style.transform = content.classList.contains('active') ? 
+                    'rotate(180deg)' : 'rotate(0deg)';
+            }
+        }
+
+        // すべての初期化処理をDOMContentLoadedイベントでまとめて実行
+        document.addEventListener('DOMContentLoaded', function() {
+            // 分析ボタンのイベントリスナー
+            document.getElementById('analyzeBtn').addEventListener('click', analyzeSchedules);
+
+            // リセットボタンの機能
+            document.getElementById('resetFiltersBtn').addEventListener('click', function() {
+                const sortInput = document.getElementById('sort_order');
+                sortInput.value = 'asc'; // ソート順もリセット
+                const sortIcon = document.getElementById('sortIcon');
+                sortIcon.className = 'fas fa-sort';
+                document.getElementById('filterForm').reset();
+                document.getElementById('filterForm').submit();
+            });
+
+            // ソートボタンの機能
+            document.getElementById('sortButton').addEventListener('click', function() {
+                const sortIcon = document.getElementById('sortIcon');
+                const sortInput = document.getElementById('sort_order');
+                const currentSort = sortInput.value || 'asc';
+
+                // ソート順を切り替え
+                const newSort = currentSort === 'asc' ? 'desc' : 'asc';
+
+                // hidden inputの値を更新
+                sortInput.value = newSort;
+
+                // アイコンの表示を更新
+                sortIcon.className = `fas fa-sort-${newSort === 'desc' ? 'up' : 'down'}`;
+
+                // フォームを送信
+                document.getElementById('filterForm').submit();
+            });
+
+            // 初期表示時のソートアイコン設定
+            const urlParams = new URLSearchParams(window.location.search);
+            const currentSort = urlParams.get('sort_order');
+            const sortIcon = document.getElementById('sortIcon');
+
+            if (currentSort) {
+                if (currentSort === 'desc') {
+                    sortIcon.classList.remove('fa-sort', 'fa-sort-down');
+                    sortIcon.classList.add('fa-sort-up');
+                } else {
+                    sortIcon.classList.remove('fa-sort', 'fa-sort-up');
+                    sortIcon.classList.add('fa-sort-down');
+                }
+                updateSortInput(currentSort);
+            }
+
+            // 分析ヘッダーのクリックイベント
+            document.querySelector('.analysis-header').addEventListener('click', toggleAnalysis);
+
+            // モーダル関連の処理
             const modal = document.getElementById('emailModal');
-            document.getElementById('modalSubject').textContent = data.subject || '(件名なし)';
-            document.getElementById('modalSender').textContent = 
-                `送信者: ${data.sender_name || data.sender}`;
-            document.getElementById('modalDate').textContent = 
-                `受信日時: ${new Date(data.received_date).toLocaleString('ja-JP')}`;
-            document.getElementById('modalContent').innerHTML = 
-                data.content.replace(/\n/g, '<br>') || '(本文なし)';
+            const closeModal = document.querySelector('.close-modal');
 
-            modal.style.display = 'block';
-        })
-        .catch(error => {
-            console.error('Error:', error);
-            alert('メール情報の取得中にエラーが発生しました。');
+            if (closeModal) {
+                closeModal.onclick = function() {
+                    modal.style.display = 'none';
+                };
+            }
+
+            // モーダル外クリックで閉じる
+            window.onclick = function(event) {
+                if (event.target === modal) {
+                    modal.style.display = 'none';
+                }
+            };
         });
-}
-
-// モーダルを閉じる処理
-document.querySelector('.close-modal').onclick = function() {
-    document.getElementById('emailModal').style.display = 'none';
-}
-
-window.onclick = function(event) {
-    const modal = document.getElementById('emailModal');
-    if (event.target == modal) {
-        modal.style.display = 'none';
-    }
-}
-</script>
-
-
-{% endblock %}
+    </script>
+    {% endblock %}

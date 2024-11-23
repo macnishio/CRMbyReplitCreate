@@ -1,0 +1,41 @@
+2024-11-23 16:14:19,741 ERROR: Exception on /leads [GET] [in /home/runner/CRM/.pythonlibs/lib/python3.11/site-packages/flask/app.py:1744]
+Traceback (most recent call last):
+  File "/home/runner/CRM/.pythonlibs/lib/python3.11/site-packages/flask/app.py", line 2529, in wsgi_app
+    response = self.full_dispatch_request()
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/runner/CRM/.pythonlibs/lib/python3.11/site-packages/flask/app.py", line 1825, in full_dispatch_request
+    rv = self.handle_user_exception(e)
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/runner/CRM/.pythonlibs/lib/python3.11/site-packages/flask/app.py", line 1823, in full_dispatch_request
+    rv = self.dispatch_request()
+         ^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/runner/CRM/.pythonlibs/lib/python3.11/site-packages/flask/app.py", line 1799, in dispatch_request
+    return self.ensure_sync(self.view_functions[rule.endpoint])(**view_args)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/runner/CRM/.pythonlibs/lib/python3.11/site-packages/flask_login/utils.py", line 290, in decorated_view
+    return current_app.ensure_sync(func)(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/runner/CRM/routes/leads.py", line 217, in list_leads
+    return render_template('leads/list_leads.html', leads=leads, saved_filters=saved_filters, pagination=pagination)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/runner/CRM/.pythonlibs/lib/python3.11/site-packages/flask/templating.py", line 147, in render_template
+    return _render(app, template, context)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/runner/CRM/.pythonlibs/lib/python3.11/site-packages/flask/templating.py", line 130, in _render
+    rv = template.render(context)
+         ^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/runner/CRM/.pythonlibs/lib/python3.11/site-packages/jinja2/environment.py", line 1304, in render
+    self.environment.handle_exception()
+  File "/home/runner/CRM/.pythonlibs/lib/python3.11/site-packages/jinja2/environment.py", line 939, in handle_exception
+    raise rewrite_traceback_stack(source=source)
+  File "/home/runner/CRM/templates/leads/list_leads.html", line 1, in top-level template code
+    {% extends "base.html" %}
+  File "/home/runner/CRM/templates/base.html", line 387, in top-level template code
+    {% block content %}{% endblock %}
+    ^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/runner/CRM/templates/leads/list_leads.html", line 172, in block 'content'
+    <a href="{{ url_for('leads.list_leads', page=pagination.prev_num, **request.args) }}" class="page-link">前へ</a>
+    ^^^^^^^^^^^^^^^^^^^^^^^^^
+TypeError: jinja2.runtime.Context.call() got multiple values for keyword argument 'page'
+2024-11-23 16:14:20,892 INFO: 127.0.0.1 - - [23/Nov/2024 16:14:20] "GET /leads?page=2 HTTP/1.1" 500 - [in /home/runner/CRM/.pythonlibs/lib/python3.11/site-packages/werkzeug/_internal.py:224]
+2024-11-23 16:14:21,125 INFO: 127.0.0.1 - - [23/Nov/2024 16:14:21] "GET /static/css/filter.css HTTP/1.1" 304 - [in /home/runner/CRM/.pythonlibs/lib/python3.11/site-packages/werkzeug

@@ -1,0 +1,78 @@
+<!-- Bulk Operations Form -->
+<form method="POST" action="{{ url_for('leads.bulk_action') }}" id="bulkForm">
+    <div class="bulk-actions">
+        <div class="select-all-container">
+            <input type="checkbox" id="select-all" onclick="toggleAllCheckboxes()">
+            <label for="select-all">すべて選択</label>
+        </div>
+        <select name="action" id="bulk-action">
+            <option value="">一括操作を選択...</option>
+            <option value="delete">削除</option>
+            <option value="change_status">ステータス変更</option>
+            <option value="update_score">スコア更新</option>
+        </select>
+        <select name="new_status" id="new-status" style="display: none;">
+            <option value="New">新規</option>
+            <option value="Contacted">連絡済み</option>
+            <option value="Qualified">適格</option>
+            <option value="Lost">失注</option>
+            <option value="Spam">迷惑メール</option>
+        </select>
+        <input type="number" name="new_score" id="new-score" min="0" max="100" step="1" 
+               placeholder="新しいスコア" style="display: none;">
+        <button type="submit" class="btn btn-primary" onclick="return confirmBulkAction()">適用</button>
+    </div>
+
+    <!-- Lead Grid -->
+    <div class="lead-grid">
+        {% for lead in leads %}
+        <div class="lead-card">
+            <div class="lead-select">
+                <input type="checkbox" name="selected_leads[]" value="{{ lead.id }}" class="lead-checkbox">
+            </div>
+            <h2>{{ lead.name or '名前なし' }}</h2>
+            <p><strong>メール:</strong> {{ lead.email }}</p>
+            <p><strong>電話:</strong> {{ lead.phone }}</p>
+            <p><strong>ステータス:</strong> {{ lead.status }}</p>
+            <p><strong>スコア:</strong> {{ "%.1f"|format(lead.score) }}</p>
+            <p><strong>最終接触:</strong> {{ lead.last_contact.strftime('%Y-%m-%d %H:%M') if lead.last_contact }}</p>
+            <div class="card-actions">
+                <a href="{{ url_for('leads.edit_lead', id=lead.id) }}" class="btn btn-edit">編集</a>
+                <form method="POST" action="{{ url_for('leads.delete_lead', id=lead.id) }}" style="display: inline;">
+                    <button type="submit" class="btn btn-delete" onclick="return confirm('このリードを削除してもよろしいですか？');">削除</button>
+                </form>
+        </div>
+    </div>
+    {% endfor %}
+</div>
+    <div class="pagination">
+        <ul class="pagination-list">
+            {% if pagination.has_prev %}
+            <li class="page-item">
+                <a href="{{ url_for('leads.list_leads', page=pagination.prev_num, **request.args) }}" class="page-link">前へ</a>
+            </li>
+            {% endif %}
+            {% for page_num in pagination.iter_pages(left_edge=1, right_edge=1, left_current=2, right_current=2) %}
+            {% if page_num %}
+                {% if page_num == pagination.page %}
+                <li class="page-item active">
+                    <span class="page-link">{{ page_num }}</span>
+                </li>
+                {% else %}
+                <li class="page-item">
+                    <a href="{{ url_for('leads.list_leads', page=page_num, **request.args) }}" class="page-link">{{ page_num }}</a>
+                </li>
+                {% endif %}
+            {% else %}
+            <li class="page-item disabled"><span class="page-link">...</span></li>
+            {% endif %}
+            {% endfor %}
+            {% if pagination.has_next %}
+            <li class="page-item">
+                <a href="{{ url_for('leads.list_leads', page=pagination.next_num, **request.args) }}" class="page-link">次へ</a>
+            </li>
+            {% endif %}
+        </ul>
+    </div>
+
+</form>

@@ -1,325 +1,6 @@
 {% extends "base.html" %}
 {% block title %}リード一覧{% endblock %}
 
-{% block styles %}
-<style>
-    /* Global Variables */
-    :root {
-        --primary-color: #4a90e2;
-        --secondary-color: #f8fafc;
-        --border-color: #e2e8f0;
-        --text-color: #2d3748;
-        --hover-color: #3182ce;
-        --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.05);
-        --shadow-md: 0 4px 6px rgba(0, 0, 0, 0.1);
-        --font-family: -apple-system, "Segoe UI", "Hiragino Kaku Gothic ProN", "Hiragino Sans", Meiryo, sans-serif;
-        --success-color: #28a745;
-        --danger-color: #dc3545;
-        --shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-    }
-
-    body {
-        font-family: var(--font-family);
-        color: var(--text-color);
-        line-height: 1.6;
-    }
-
-    /* Page Layout */
-    .page-container {
-        padding: 1.5rem;
-    }
-
-    .content-wrapper {
-        display: flex;
-        flex-direction: column;
-        gap: 1.5rem;
-        position: relative;
-    }
-
-    /* Filter Section */
-    .filter-section {
-        background: #fff;
-        border: 1px solid var(--border-color);
-        border-radius: 12px;
-        box-shadow: var(--shadow-md);
-        margin-bottom: 1.5rem;
-        position: relative;
-        z-index: 20;
-        transition: all 0.3s cubic-bezier(.4,0,.2,1);
-    }
-
-    .filter-header {
-        align-items: center;
-        background-color: var(--secondary-color);
-        border-bottom: 1px solid var(--border-color);
-        border-radius: 12px 12px 0 0;
-        cursor: pointer;
-        display: flex;
-        padding: 1rem 1.25rem;
-        transition: background-color .3s ease-in-out;
-    }
-
-    .filter-header:hover {
-        background-color: #edf2f7;
-    }
-
-    .filter-header:focus-within {
-        outline: 2px solid var(--primary-color);
-        outline-offset: -2px;
-    }
-
-    .filter-header h3, .filter-group-header h4 {
-        color: var(--text-color);
-        font-size: .9rem;
-        font-weight: 600;
-        margin: 0;
-    }
-
-    .filter-icon {
-        font-size: 1.2rem;
-        margin-right: .8rem;
-        transition: transform .3s ease;
-    }
-
-    .filter-content {
-        background-color: #fff;
-        overflow: hidden;
-        padding: 1.25rem;
-        max-height: 2000px;  /* For transition */
-        transition: all .3s cubic-bezier(.4,0,.2,1);
-        opacity: 1;
-    }
-
-    .filter-content.collapsed {
-        max-height: 0;
-        opacity: 0;
-        padding: 0;
-        pointer-events: none;
-    }
-
-    .filter-group-section {
-        background-color: #fff;
-        border-radius: 8px;
-        box-shadow: var(--shadow-sm);
-        margin-bottom: 1.5rem;
-    }
-
-    .filter-group-header {
-        align-items: center;
-        background-color: var(--secondary-color);
-        border-radius: 8px;
-        cursor: pointer;
-        display: flex;
-        padding: .75rem 1rem;
-        transition: all .3s ease-in-out;
-    }
-
-    .filter-group-header:hover {
-        background-color: #edf2f7;
-        transform: translateY(-1px);
-    }
-
-    .filter-group-header:active {
-        transform: translateY(0);
-    }
-
-    .filter-icon.collapsed {
-        transform: rotate(-90deg);
-    }
-
-    .data-table-container {
-        background-color: #fff;
-        border: 1px solid var(--border-color);
-        border-radius: 8px;
-        box-shadow: var(--shadow);
-        margin-top: 1rem;
-        padding: 1.5rem;
-        position: relative;
-        z-index: 10;
-    }
-
-    /* Lead Grid */
-    .lead-grid {
-        display: grid;
-        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-        gap: 1rem;
-        margin-top: 1rem;
-    }
-
-    .lead-card {
-        background: white;
-        border: 1px solid var(--border-color);
-        border-radius: 8px;
-        padding: 0.75rem;
-        box-shadow: var(--shadow-sm);
-        transition: transform 0.2s ease, box-shadow 0.2s ease;
-        overflow: hidden;
-    }
-
-    .lead-card:hover {
-        transform: translateY(-3px);
-        box-shadow: var(--shadow-md);
-    }
-
-    .lead-card h2 {
-        font-size: 1rem;
-        margin-bottom: 0.5rem;
-        color: var(--text-color);
-        font-weight: 600;
-    }
-
-    .lead-card p {
-        margin: 0.3rem 0;
-        line-height: 1.4;
-        color: #4a5568;
-    }
-
-    .lead-card p strong {
-        color: var(--text-color);
-    }
-
-    .card-actions {
-        display: flex;
-        gap: 0.75rem;
-        margin-top: 0.75rem;
-        justify-content: flex-end;
-        align-items: center;
-    }
-
-    /* Buttons */
-    .btn {
-        padding: 0.5rem 1rem;
-        border-radius: 6px;
-        font-weight: 500;
-        cursor: pointer;
-        transition: all 0.2s ease;
-        border: none;
-        text-decoration: none;
-        display: inline-flex;
-        align-items: center;
-        justify-content: center;
-        gap: 0.5rem;
-    }
-
-    .btn-primary {
-        background-color: var(--primary-color);
-        color: white;
-    }
-
-    .btn-primary:hover {
-        background-color: var(--hover-color);
-    }
-
-    .btn-danger {
-        background-color: var(--danger-color);
-        color: white;
-    }
-
-    .btn-danger:hover {
-        background-color: darken(var(--danger-color), 10%);
-    }
-
-    .btn-edit {
-        background-color: var(--primary-color);
-        color: white;
-    }
-
-    .btn-delete {
-        background-color: var(--danger-color);
-        color: white;
-    }
-
-    /* Bulk Actions */
-    .bulk-actions {
-        margin: 1.5rem 0;
-        padding: 1rem;
-        background-color: var(--secondary-color);
-        border-radius: 8px;
-        display: flex;
-        gap: 1rem;
-        align-items: center;
-        flex-wrap: wrap;
-    }
-
-    .select-all-container {
-        display: flex;
-        align-items: center;
-        gap: 0.5rem;
-    }
-
-    .lead-select {
-        position: absolute;
-        top: 1rem;
-        right: 1rem;
-    }
-
-    #new-score {
-        width: 100px;
-    }
-
-    /* Animations */
-    @keyframes fadeInUp {
-        from { opacity: 0; transform: translateY(10px); }
-        to { opacity: 1; transform: translateY(0); }
-    }
-
-    .lead-card {
-        animation: fadeInUp 0.3s ease-out;
-    }
-
-    /* Responsive Adjustments */
-    @media (max-width: 768px) {
-        .lead-grid {
-            grid-template-columns: 1fr;
-        }
-        .lead-card {
-            padding: 0.75rem;
-        }
-    }
-
-    .pagination {
-        display: flex;
-        justify-content: center;
-        margin-top: 2rem;
-    }
-
-    .pagination-list {
-        list-style: none;
-        padding: 0;
-        display: flex;
-        gap: 0.5rem;
-    }
-
-    .page-item {
-        margin: 0;
-    }
-
-    .page-link {
-        display: block;
-        padding: 0.5rem 0.75rem;
-        border: 1px solid var(--border-color);
-        border-radius: 4px;
-        text-decoration: none;
-        color: var(--text-color);
-        transition: background-color 0.2s ease;
-    }
-
-    .page-link:hover {
-        background-color: var(--secondary-color);
-    }
-
-    .page-item.active .page-link {
-        background-color: var(--primary-color);
-        color: white;
-    }
-
-    .page-item.disabled .page-link {
-        color: #ccc;
-        pointer-events: none;
-    }
-</style>
-{% endblock %}
-
 {% block content %}
 <div class="page-container">
     <div class="content-wrapper">
@@ -334,788 +15,94 @@
             <!-- Collapsible Filter Content -->
             <div class="filter-content collapsed" id="filter-content">
                 <form method="GET" action="{{ url_for('leads.list_leads') }}" class="filter-form" id="leadFilterForm">
-                    <!-- Search Fields -->
+                    <!-- Status Multi-select -->
                     <div class="filter-group-section">
-                        <div class="filter-group-header">
-                            <h4>検索フィルター</h4>
+                        <div class="filter-group-header" onclick="toggleFilterGroup('status')">
+                            <span class="filter-group-icon" id="status-icon">▼</span>
+                            <h4>ステータス フィルター</h4>
                         </div>
-                        <div class="filter-group-content">
-                            <div class="search-group">
-                                <div class="search-field">
-                                    <label for="search_name">名前で検索:</label>
-                                    <input type="text" name="search_name" id="search_name" 
-                                           value="{{ request.args.get('search_name', '') }}"
-                                           placeholder="顧客名を入力してください..."
-                                           class="search-input">
-                                </div>
-                                <div class="search-operator">
-                                    <label for="search_operator">検索条件:</label>
-                                    <select name="search_operator" id="search_operator">
-                                        <option value="AND" {% if request.args.get('search_operator') == 'AND' %}selected{% endif %}>AND</option>
-                                        <option value="OR" {% if request.args.get('search_operator') == 'OR' %}selected{% endif %}>OR</option>
-                                    </select>
-                                </div>
-                                <div class="search-field">
-                                    <label for="search_email">メールで検索:</label>
-                                    <input type="text" name="search_email" id="search_email" 
-                                           value="{{ request.args.get('search_email', '') }}"
-                                           placeholder="メールアドレスを入力してください..."
-                                           class="search-input">
-                                </div>
+                        <div class="filter-group-content" id="status-content">
+                            <div class="filter-group">
+                                <label>ステータス:</label>
+                                <div class="status-checkboxes">
+                            <label>
+                                <input type="checkbox" name="status" value="New" 
+                                       {% if 'New' in request.args.getlist('status') %}checked{% endif %}> 新規
+                            </label>
+                            <label>
+                                <input type="checkbox" name="status" value="Contacted"
+                                       {% if 'Contacted' in request.args.getlist('status') %}checked{% endif %}> 連絡済み
+                            </label>
+                            <label>
+                                <input type="checkbox" name="status" value="Qualified"
+                                       {% if 'Qualified' in request.args.getlist('status') %}checked{% endif %}> 適格
+                            </label>
+                            <label>
+                                <input type="checkbox" name="status" value="Lost"
+                                       {% if 'Lost' in request.args.getlist('status') %}checked{% endif %}> 失注
+                            </label>
+                            <label>
+                                <input type="checkbox" name="status" value="Spam"
+                                       {% if 'Spam' in request.args.getlist('status') %}checked{% endif %}> 迷惑メール
+                            </label>
                             </div>
                         </div>
+                    </div>
                     </div>
 
-                    <!-- Status Filter -->
+                    <!-- Date Range -->
                     <div class="filter-group-section">
-                        <div class="filter-group-header">
-                            <h4>ステータスフィルター</h4>
+                        <div class="filter-group-header" onclick="toggleFilterGroup('date')">
+                            <span class="filter-group-icon" id="date-icon">▼</span>
+                            <h4>日付 フィルター</h4>
                         </div>
-                        <div class="filter-group-content">
-                            <div class="status-group">
-                                <label for="lead_status">ステータス:</label>
-                                <select name="lead_status" id="lead_status" class="form-select">
-                                    <option value="">全て</option>
-                                    <option value="New" {% if request.args.get('lead_status') == 'New' %}selected{% endif %}>新規</option>
-                                    <option value="Contacted" {% if request.args.get('lead_status') == 'Contacted' %}selected{% endif %}>連絡済み</option>
-                                    <option value="Qualified" {% if request.args.get('lead_status') == 'Qualified' %}selected{% endif %}>適格</option>
-                                    <option value="Unqualified" {% if request.args.get('lead_status') == 'Unqualified' %}selected{% endif %}>不適格</option>
-                                </select>
+                        <div class="filter-group-content" id="date-content">
+                            <div class="filter-group">
+                                <label>日付範囲:</label>
+                                <div class="date-range">
+                                    <select name="date_field" id="date_field">
+                                    <option value="created_at" {% if request.args.get('date_field') == 'created_at' %}selected{% endif %}>作成日</option>
+                                    <option value="last_contact" {% if request.args.get('date_field') == 'last_contact' %}selected{% endif %}>最終接触日</option>
+                                    </select>
+                                    <input type="date" name="date_from" id="date_from" 
+                                        value="{{ request.args.get('date_from', '') }}">
+                                    <span>～</span>
+                                    <input type="date" name="date_to" id="date_to" 
+                                        value="{{ request.args.get('date_to', '') }}">
+                                </div>
                             </div>
                         </div>
-                    </div>
 
                     <!-- Sort Options -->
                     <div class="filter-group-section">
-                        <div class="filter-group-header">
-                            <h4>並べ替えオプション</h4>
+                        <div class="filter-group-header" onclick="toggleFilterGroup('sort')">
+                            <span class="filter-group-icon" id="sort-icon">▼</span>
+                            <h4>並び替え オプション</h4>
                         </div>
-                        <div class="filter-group-content">
-                            <div class="sort-group">
-                                <div class="sort-field">
-                                    <label for="sort_by">並べ替えフィールド:</label>
-                                    <select name="sort_by" id="sort_by" class="form-select">
-                                        <option value="created_at" {% if request.args.get('sort_by') == 'created_at' %}selected{% endif %}>作成日</option>
-                                        <option value="name" {% if request.args.get('sort_by') == 'name' %}selected{% endif %}>名前</option>
-                                        <option value="email" {% if request.args.get('sort_by') == 'email' %}selected{% endif %}>メール</option>
-                                        <option value="status" {% if request.args.get('sort_by') == 'status' %}selected{% endif %}>ステータス</option>
-                                    </select>
-                                </div>
-                                <div class="sort-field">
-                                    <label for="sort_order">並び順:</label>
-                                    <select name="sort_order" id="sort_order" class="form-select">
-                                        <option value="asc" {% if request.args.get('sort_order') == 'asc' %}selected{% endif %}>昇順</option>
-                                        <option value="desc" {% if request.args.get('sort_order') == 'desc' %}selected{% endif %}>降順</option>
-                                    </select>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-
-        <script>
-            // フィルターの開閉機能とフィルター状態の保存
-            function toggleFilters() {
-                const content = document.getElementById('filter-content');
-                const icon = document.getElementById('filter-toggle-icon');
-                const filterForm = document.getElementById('leadFilterForm');
-                
-                // Get current state
-                const isCollapsed = content.classList.contains('collapsed');
-                
-                // Toggle icon class for rotation
-                icon.classList.toggle('collapsed');
-                icon.style.transform = isCollapsed ? 'rotate(0deg)' : 'rotate(-90deg)';
-                
-                if (isCollapsed) {
-                    // Expanding
-                    content.style.maxHeight = content.scrollHeight + 'px';
-                    content.classList.remove('collapsed');
-                    
-                    setTimeout(() => {
-                        if (!content.classList.contains('collapsed')) {
-                            content.style.maxHeight = 'none';
-                        }
-                    }, 300);
-                } else {
-                    // Collapsing
-                    content.style.maxHeight = content.scrollHeight + 'px';
-                    content.offsetHeight;
-                    content.classList.add('collapsed');
-                    content.style.maxHeight = '0';
-                }
-                
-                // Save section state and form values
-                saveFilterState();
-            }
-
-            // フィルター状態の保存
-            async function saveFilterState() {
-                const content = document.getElementById('filter-content');
-                const filterForm = document.getElementById('leadFilterForm');
-                const formData = new FormData(filterForm);
-                
-                // チェックボックスの状態を保存
-                const checkboxStates = {};
-                filterForm.querySelectorAll('input[type="checkbox"]').forEach(checkbox => {
-                    checkboxStates[checkbox.name + '_' + checkbox.value] = checkbox.checked;
-                });
-
-                const filterState = {
-                    isCollapsed: content.classList.contains('collapsed'),
-                    formValues: Object.fromEntries(formData.entries()),
-                    checkboxStates: checkboxStates,
-                    lastUpdated: new Date().toISOString()
-                };
-                
-                // ローカルストレージに保存
-                localStorage.setItem('filter-section-state', JSON.stringify(filterState));
-
-                // サーバーに保存
-                try {
-                    const response = await fetch('/api/save_filter_state', {
-                        method: 'POST',
-                        headers: {
-                            'Content-Type': 'application/json',
-                        },
-                        body: JSON.stringify({
-                            section: 'leads',
-                            state: filterState
-                        })
-                    });
-
-                    if (!response.ok) {
-                        console.error('フィルター状態の保存に失敗しました');
-                    }
-                } catch (error) {
-                    console.error('フィルター状態の保存中にエラーが発生しました:', error);
-                }
-            }
-
-            // フィルターフォームの値が変更されたときも状態を保存
-            document.getElementById('leadFilterForm').addEventListener('change', saveFilterState);
-
-            // フィルターフォームの値が変更されたときも状態を保存
-            document.getElementById('leadFilterForm').addEventListener('change', function() {
-                const formData = new FormData(this);
-                const filterState = {
-                    isCollapsed: document.getElementById('filter-content').classList.contains('collapsed'),
-                    formValues: Object.fromEntries(formData.entries()),
-                    filterGroups: filterGroups
-                };
-                localStorage.setItem('filter-section-state', JSON.stringify(filterState));
-            });
-
-            // ページ読み込み時の初期化と保存された状態の復元
-            document.addEventListener('DOMContentLoaded', function() {
-                const content = document.getElementById('filter-content');
-                const icon = document.getElementById('filter-toggle-icon');
-                const filterForm = document.getElementById('leadFilterForm');
-                
-                // アニメーションを一時的に無効化
-                content.style.transition = 'none';
-                
-                try {
-                    const savedState = JSON.parse(localStorage.getItem('filter-section-state'));
-                    
-                    if (savedState && savedState.lastUpdated) {
-                        const lastUpdated = new Date(savedState.lastUpdated);
-                        const now = new Date();
-                        const hoursDiff = (now - lastUpdated) / (1000 * 60 * 60);
-                        
-                        // 24時間以内の状態のみを復元
-                        if (hoursDiff <= 24) {
-                            // セクションの開閉状態を復元
-                            if (!savedState.isCollapsed) {
-                                content.classList.remove('collapsed');
-                                icon.style.transform = 'rotate(0deg)';
-                                content.style.maxHeight = 'none';
-                            } else {
-                                content.classList.add('collapsed');
-                                icon.style.transform = 'rotate(-90deg)';
-                                content.style.maxHeight = '0';
-                            }
-                            
-                            // フォームの値を復元
-                            if (savedState.formValues) {
-                                Object.entries(savedState.formValues).forEach(([key, value]) => {
-                                    const input = filterForm.elements[key];
-                                    if (input && input.type !== 'checkbox') {
-                                        input.value = value;
-                                    }
-                                });
-                            }
-                            
-                            // チェックボックスの状態を復元
-                            if (savedState.checkboxStates) {
-                                Object.entries(savedState.checkboxStates).forEach(([key, checked]) => {
-                                    const [name, value] = key.split('_');
-                                    const checkbox = filterForm.querySelector(`input[type="checkbox"][name="${name}"][value="${value}"]`);
-                                    if (checkbox) {
-                                        checkbox.checked = checked;
-                                    }
-                                });
-                            }
-                            
-                            // 高度なフィルターグループを復元
-                            if (savedState.filterGroups) {
-                                filterGroups = savedState.filterGroups;
-                                renderFilterGroups();
-                            }
-                        } else {
-                            // 24時間以上経過している場合は状態をクリア
-                            localStorage.removeItem('filter-section-state');
-                        }
-                    }
-                } catch (error) {
-                    console.error('Error restoring filter state:', error);
-                    localStorage.removeItem('filter-section-state');
-                }
-                
-                // アニメーションを再有効化
-                setTimeout(() => {
-                    content.style.transition = 'max-height 0.3s ease-in-out, opacity 0.3s ease-in-out';
-                }, 0);
-            });
-
-            let filterGroups = [];
-            
-            function addFilterGroup() {
-                const groupId = Date.now();
-                const group = {
-                    id: groupId,
-                    operator: 'AND',
-                    conditions: []
-                };
-                filterGroups.push(group);
-                renderFilterGroups();
-            }
-            
-            function addCondition(groupId) {
-                const group = filterGroups.find(g => g.id === groupId);
-                if (group) {
-                    group.conditions.push({
-                        field: 'name',
-                        operator: 'contains',
-                        value: ''
-                    });
-                    renderFilterGroups();
-                }
-            }
-            
-            function removeCondition(groupId, index) {
-                const group = filterGroups.find(g => g.id === groupId);
-                if (group && group.conditions[index]) {
-                    group.conditions.splice(index, 1);
-                    renderFilterGroups();
-                }
-            }
-            
-            function removeGroup(groupId) {
-                filterGroups = filterGroups.filter(g => g.id !== groupId);
-                renderFilterGroups();
-            }
-            
-            function updateGroupOperator(groupId, operator) {
-                const group = filterGroups.find(g => g.id === groupId);
-                if (group) {
-                    group.operator = operator;
-                }
-            }
-            
-            function updateCondition(groupId, index, field, value) {
-                const group = filterGroups.find(g => g.id === groupId);
-                if (group && group.conditions[index]) {
-                    group.conditions[index][field] = value;
-                }
-            }
-            
-            function renderFilterGroups() {
-                const container = document.getElementById('filterGroups');
-                container.innerHTML = filterGroups.map(group => `
-                    <div class="filter-group" data-group-id="${group.id}">
-                        <div class="group-header">
-                            <select onchange="updateGroupOperator(${group.id}, this.value)">
-                                <option value="AND" ${group.operator === 'AND' ? 'selected' : ''}>すべての条件に一致</option>
-                                <option value="OR" ${group.operator === 'OR' ? 'selected' : ''}>いずれかの条件に一致</option>
+                        <div class="filter-group-content" id="sort-content">
+                            <div class="filter-group">
+                        <label>並び替え:</label>
+                        <div class="sort-options">
+                            <select name="sort_by" id="sort_by">
+                                <option value="last_contact" {% if request.args.get('sort_by') == 'last_contact' %}selected{% endif %}>最終接触日</option>
+                                <option value="name" {% if request.args.get('sort_by') == 'name' %}selected{% endif %}>名前</option>
+                                <option value="email" {% if request.args.get('sort_by') == 'email' %}selected{% endif %}>メール</option>
+                                <option value="score" {% if request.args.get('sort_by') == 'score' %}selected{% endif %}>スコア</option>
+                                <option value="created_at" {% if request.args.get('sort_by') == 'created_at' %}selected{% endif %}>作成日</option>
                             </select>
-                            <button type="button" class="btn btn-danger" onclick="removeGroup(${group.id})">グループを削除</button>
+                            <select name="sort_order" id="sort_order">
+                                <option value="desc" {% if request.args.get('sort_order', 'desc') == 'desc' %}selected{% endif %}>降順</option>
+                                <option value="asc" {% if request.args.get('sort_order') == 'asc' %}selected{% endif %}>昇順</option>
+                            </select>
                         </div>
-                        ${group.conditions.map((condition, index) => `
-                            <div class="condition">
-                                <select onchange="updateCondition(${group.id}, ${index}, 'field', this.value)">
-                                    <option value="name" ${condition.field === 'name' ? 'selected' : ''}>名前</option>
-                                    <option value="email" ${condition.field === 'email' ? 'selected' : ''}>メール</option>
-                                    <option value="score" ${condition.field === 'score' ? 'selected' : ''}>スコア</option>
-                                    <option value="status" ${condition.field === 'status' ? 'selected' : ''}>ステータス</option>
-                                </select>
-                                <select onchange="updateCondition(${group.id}, ${index}, 'operator', this.value)">
-                                    ${condition.field === 'score' ? `
-                                        <option value="equals" ${condition.operator === 'equals' ? 'selected' : ''}>一致する</option>
-                                        <option value="greater_than" ${condition.operator === 'greater_than' ? 'selected' : ''}>より大きい</option>
-                                        <option value="less_than" ${condition.operator === 'less_than' ? 'selected' : ''}>より小さい</option>
-                                        <option value="greater_equal" ${condition.operator === 'greater_equal' ? 'selected' : ''}>以上</option>
-                                        <option value="less_equal" ${condition.operator === 'less_equal' ? 'selected' : ''}>以下</option>
-                                    ` : condition.field === 'status' ? `
-                                        <option value="equals" ${condition.operator === 'equals' ? 'selected' : ''}>一致する</option>
-                                        <option value="not_equals" ${condition.operator === 'not_equals' ? 'selected' : ''}>一致しない</option>
-                                    ` : `
-                                        <option value="contains" ${condition.operator === 'contains' ? 'selected' : ''}>含む</option>
-                                        <option value="equals" ${condition.operator === 'equals' ? 'selected' : ''}>一致する</option>
-                                        <option value="starts_with" ${condition.operator === 'starts_with' ? 'selected' : ''}>で始まる</option>
-                                        <option value="ends_with" ${condition.operator === 'ends_with' ? 'selected' : ''}>で終わる</option>
-                                    `}
-                                </select>
-                                <input type="text" value="${condition.value}" onchange="updateCondition(${group.id}, ${index}, 'value', this.value)" />
-                                <button type="button" class="btn btn-danger" onclick="removeCondition(${group.id}, ${index})">削除</button>
-                            </div>
-                        `).join('')}
-                        <button type="button" class="btn btn-secondary" onclick="addCondition(${group.id})">条件を追加</button>
+                        </div>
                     </div>
-                `).join('');
-            }
 
-            // Add filter_groups to form submission
-            document.getElementById('leadFilterForm').addEventListener('submit', function(e) {
-                const input = document.createElement('input');
-                input.type = 'hidden';
-                input.name = 'filter_groups';
-                input.value = JSON.stringify(filterGroups);
-                this.appendChild(input);
-            });
-        </script>
 
-        <style>
-            /* Page Layout */
-            .page-container {
-                display: flex;
-                flex-direction: column;
-                gap: 1rem;
-                padding: 1rem;
-            }
-
-            /* Filter Section */
-            .filter-section {
-                background-color: #fff;
-                border-radius: 8px;
-                box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
-                margin-bottom: 0.8rem;
-                border: 1px solid #edf2f7;
-            }
-
-            .filter-header {
-                display: flex;
-                align-items: center;
-                padding: 0.8rem 1rem;
-                cursor: pointer;
-                background-color: #f8fafc;
-                border-radius: 8px 8px 0 0;
-                transition: all 0.2s ease;
-                font-size: 0.9rem;
-                color: #2d3748;
-                border-bottom: 1px solid #edf2f7;
-            }
-
-            .filter-header:hover {
-                background-color: #edf2f7;
-            }
-
-            .filter-header h3 {
-                font-size: 0.9rem;
-                font-weight: 600;
-                margin: 0;
-            }
-
-            .filter-icon {
-                font-size: 1.2rem;
-                margin-right: 0.8rem;
-                transition: transform 0.2s ease;
-                color: #4a5568;
-            }
-
-            .filter-content {
-                padding: 0.8rem;
-                border-top: 1px solid #edf2f7;
-                transition: all 0.3s ease-in-out;
-                overflow: hidden;
-                background-color: #fff;
-            }
-
-            .filter-content {
-                max-height: 2000px; /* 十分な高さを確保 */
-                overflow: hidden;
-                transition: max-height 0.3s ease-in-out, padding 0.3s ease-in-out, opacity 0.3s ease-in-out;
-                opacity: 1;
-            }
-
-            .filter-content.collapsed {
-                max-height: 0;
-                padding: 0;
-                border-top: none;
-                opacity: 0;
-                transition: max-height 0.3s ease-in-out, padding 0.3s ease-in-out, opacity 0.3s ease-in-out;
-            }
-
-            /* Form Styles */
-            .filter-form {
-                display: flex;
-                flex-direction: column;
-                gap: 0.8rem;
-                font-size: 0.85rem;
-            }
-
-            .filter-form label {
-                font-size: 0.8rem;
-                color: #4a5568;
-                font-weight: 500;
-            }
-
-            /* Search field styles */
-            .search-field {
-                display: flex;
-                align-items: center;
-                gap: 0.8rem;
-                margin: 0.4rem 0;
-                background-color: #f8fafc;
-                padding: 0.6rem;
-                border-radius: 6px;
-            }
-
-            .search-field label {
-                min-width: 110px;
-                margin-right: 0.4rem;
-                color: #4a5568;
-                font-size: 0.8rem;
-            }
-
-            .search-input {
-                flex: 1;
-                padding: 0.4rem 0.6rem;
-                border: 1px solid #e2e8f0;
-                border-radius: 4px;
-                font-size: 0.85rem;
-                transition: border-color 0.2s ease;
-            }
-
-            .search-input:focus {
-                border-color: #4299e1;
-                outline: none;
-                box-shadow: 0 0 0 2px rgba(66, 153, 225, 0.2);
-            }
-
-            /* Filter group styles */
-            .filter-group-header {
-                display: flex;
-                align-items: center;
-                cursor: pointer;
-                padding: 0.6rem 0.8rem;
-                background-color: #f1f5f9;
-                border-radius: 6px;
-                margin-bottom: 0.4rem;
-                transition: all 0.2s ease;
-                border: 1px solid #e2e8f0;
-            }
-
-            .filter-group-header:hover {
-                background-color: #e2e8f0;
-                border-color: #cbd5e1;
-            }
-
-            .filter-group-header:hover {
-                background-color: var(--primary-color);
-                color: white;
-            }
-
-            .filter-group-header h4 {
-                margin: 0;
-                flex-grow: 1;
-            }
-
-            .filter-group-icon {
-                margin-right: 0.5rem;
-            }
-
-            .filter-group-content {
-                padding: 1rem;
-                border: 1px solid var(--border-color);
-                border-radius: 4px;
-                margin-bottom: 1rem;
-                display: none;
-            }
-
-            .filter-group-content.active {
-                display: block;
-            }
-
-            .search-operator {
-                display: flex;
-                align-items: center;
-                gap: 0.5rem;
-                margin: 0.5rem 0;
-            }
-
-            .search-operator select {
-                padding: 0.5rem;
-                border: 1px solid var(--border-color);
-                border-radius: 4px;
-                background-color: white;
-            }
-
-            /* Advanced filters styles */
-            .advanced-filters {
-                margin-top: 1rem;
-                padding: 1rem;
-                background: var(--secondary-color);
-                border-radius: 8px;
-            }
-
-            .filter-group {
-                margin: 1rem 0;
-                padding: 1rem;
-                border: 1px solid var(--border-color);
-                border-radius: 4px;
-            }
-
-            .group-header {
-                display: flex;
-                justify-content: space-between;
-                align-items: center;
-                margin-bottom: 1rem;
-            }
-
-            .condition {
-                display: flex;
-                gap: 0.5rem;
-                margin: 0.5rem 0;
-                align-items: center;
-            }
-
-            .condition select,
-            .condition input {
-                padding: 0.5rem;
-                border: 1px solid var(--border-color);
-                border-radius: 4px;
-            }
-        </style>
-
-        <script>
-            // Add toggle functionality for filter groups
-            function toggleFilterGroup(groupId) {
-                const content = document.querySelector(`#${groupId}-content`);
-                const icon = document.querySelector(`#${groupId}-icon`);
-                
-                // Toggle active class instead of directly setting display
-                content.classList.toggle('active');
-                
-                // Update icon based on content visibility
-                if (content.classList.contains('active')) {
-                    icon.textContent = '▼';
-                    content.style.display = 'block';
-                } else {
-                    icon.textContent = '▶';
-                    content.style.display = 'none';
-                }
-
-                // Save state to localStorage
-                localStorage.setItem(`filter-${groupId}-state`, content.classList.contains('active'));
-            }
-
-            function toggleMainFilter() {
-                const content = document.getElementById('main-filter-content');
-                const icon = document.getElementById('main-filter-icon');
-                const isCollapsed = content.classList.contains('collapsed');
-                
-                if (isCollapsed) {
-                    content.classList.remove('collapsed');
-                    icon.textContent = '×';
-                    icon.style.transform = 'rotate(180deg)';
-                } else {
-                    content.classList.add('collapsed');
-                    icon.textContent = '≡';
-                    icon.style.transform = 'rotate(0deg)';
-                }
-                
-                // Save state to localStorage
-                localStorage.setItem('main-filter-state', !isCollapsed);
-            }
-
-            // Toggle filter section
-            function toggleFilters() {
-                const content = document.getElementById('filter-content');
-                const icon = document.getElementById('filter-toggle-icon');
-                const isCollapsed = content.classList.contains('collapsed');
-                
-                if (isCollapsed) {
-                    content.classList.remove('collapsed');
-                    content.style.maxHeight = content.scrollHeight + 'px';
-                    icon.textContent = '×';
-                    icon.style.transform = 'rotate(180deg)';
-                } else {
-                    content.classList.add('collapsed');
-                    content.style.maxHeight = '0';
-                    icon.textContent = '≡';
-                    icon.style.transform = 'rotate(0deg)';
-                }
-                
-                // Save state to localStorage
-                localStorage.setItem('filter-section-state', !isCollapsed);
-            }
-
-            // Initialize filter states on page load
-            document.addEventListener('DOMContentLoaded', function() {
-                // Initialize filter section state
-                const content = document.getElementById('filter-content');
-                const icon = document.getElementById('filter-toggle-icon');
-                const savedState = localStorage.getItem('filter-section-state');
-                
-                if (savedState === 'true') {
-                    content.classList.remove('collapsed');
-                    content.style.maxHeight = content.scrollHeight + 'px';
-                    icon.textContent = '×';
-                    icon.style.transform = 'rotate(180deg)';
-                } else {
-                    content.classList.add('collapsed');
-                    content.style.maxHeight = '0';
-                    icon.textContent = '≡';
-                    icon.style.transform = 'rotate(0deg)';
-                }
-                const mainContent = document.getElementById('main-filter-content');
-                const mainIcon = document.getElementById('main-filter-icon');
-                const savedMainState = localStorage.getItem('main-filter-state');
-                
-                // Default to collapsed if no saved state
-                if (savedMainState === null) {
-                    localStorage.setItem('main-filter-state', 'false');
-                }
-                
-                if (savedMainState === 'true') {
-                    mainContent.classList.remove('collapsed');
-                    mainIcon.textContent = '▼';
-                } else {
-                    mainContent.classList.add('collapsed');
-                    mainIcon.textContent = '▶';
-                }
-                
-                const filterGroups = ['search', 'advanced', 'status', 'score', 'date', 'sort'];
-                filterGroups.forEach(groupId => {
-                    const content = document.querySelector(`#${groupId}-content`);
-                    const icon = document.querySelector(`#${groupId}-icon`);
-                    const savedState = localStorage.getItem(`filter-${groupId}-state`);
-                    
-                    if (savedState === 'true') {
-                        content.classList.add('active');
-                        content.style.display = 'block';
-                        icon.textContent = '▼';
-                    } else {
-                        content.classList.remove('active');
-                        content.style.display = 'none';
-                        icon.textContent = '▶';
-                    }
-                });
-            });
-        </script>
-        </div>
-
-        <!-- Status Multi-select -->
-        <div class="filter-group-section">
-            <div class="filter-group-header" onclick="toggleFilterGroup('status')">
-                <span class="filter-group-icon" id="status-icon">▼</span>
-                <h4>ステータス フィルター</h4>
-            </div>
-            <div class="filter-group-content" id="status-content">
-                <div class="filter-group">
-                    <label>ステータス:</label>
-                    <div class="status-checkboxes">
-                <label>
-                    <input type="checkbox" name="status" value="New" 
-                           {% if 'New' in request.args.getlist('status') %}checked{% endif %}> 新規
-                </label>
-                <label>
-                    <input type="checkbox" name="status" value="Contacted"
-                           {% if 'Contacted' in request.args.getlist('status') %}checked{% endif %}> 連絡済み
-                </label>
-                <label>
-                    <input type="checkbox" name="status" value="Qualified"
-                           {% if 'Qualified' in request.args.getlist('status') %}checked{% endif %}> 適格
-                </label>
-                <label>
-                    <input type="checkbox" name="status" value="Lost"
-                           {% if 'Lost' in request.args.getlist('status') %}checked{% endif %}> 失注
-                </label>
-                <label>
-                    <input type="checkbox" name="status" value="Spam"
-                           {% if 'Spam' in request.args.getlist('status') %}checked{% endif %}> 迷惑メール
-                </label>
-                </div>
-            </div>
         </div>
         </div>
 
-        <!-- Score Range -->
-        <div class="filter-group-section">
-            <div class="filter-group-header" onclick="toggleFilterGroup('score')">
-                <span class="filter-group-icon" id="score-icon">▼</span>
-                <h4>スコア フィルター</h4>
-            </div>
-            <div class="filter-group-content" id="score-content">
-                <div class="filter-group">
-            <label>スコア範囲:</label>
-            <div class="score-range">
-                <input type="number" name="min_score" id="min_score" min="0" max="100" step="1" 
-                       placeholder="最小" value="{{ request.args.get('min_score', '') }}">
-                <span>～</span>
-                <input type="number" name="max_score" id="max_score" min="0" max="100" step="1" 
-                       placeholder="最大" value="{{ request.args.get('max_score', '') }}">
-            </div>
-            </div>
-        </div>
 
-        <!-- Date Range -->
-        <div class="filter-group-section">
-            <div class="filter-group-header" onclick="toggleFilterGroup('date')">
-                <span class="filter-group-icon" id="date-icon">▼</span>
-                <h4>日付 フィルター</h4>
-            </div>
-            <div class="filter-group-content" id="date-content">
-                <div class="filter-group">
-            <label>日付範囲:</label>
-            <div class="date-range">
-                <select name="date_field" id="date_field">
-                    <option value="created_at" {% if request.args.get('date_field') == 'created_at' %}selected{% endif %}>作成日</option>
-                    <option value="last_contact" {% if request.args.get('date_field') == 'last_contact' %}selected{% endif %}>最終接触日</option>
-                </select>
-                <input type="date" name="date_from" id="date_from" 
-                       value="{{ request.args.get('date_from', '') }}">
-                <span>～</span>
-                <input type="date" name="date_to" id="date_to" 
-                       value="{{ request.args.get('date_to', '') }}">
-            </div>
-            </div>
-        </div>
-
-        <!-- Sort Options -->
-        <div class="filter-group-section">
-            <div class="filter-group-header" onclick="toggleFilterGroup('sort')">
-                <span class="filter-group-icon" id="sort-icon">▼</span>
-                <h4>並び替え オプション</h4>
-            </div>
-            <div class="filter-group-content" id="sort-content">
-                <div class="filter-group">
-            <label>並び替え:</label>
-            <div class="sort-options">
-                <select name="sort_by" id="sort_by">
-                    <option value="last_contact" {% if request.args.get('sort_by') == 'last_contact' %}selected{% endif %}>最終接触日</option>
-                    <option value="name" {% if request.args.get('sort_by') == 'name' %}selected{% endif %}>名前</option>
-                    <option value="email" {% if request.args.get('sort_by') == 'email' %}selected{% endif %}>メール</option>
-                    <option value="score" {% if request.args.get('sort_by') == 'score' %}selected{% endif %}>スコア</option>
-                    <option value="created_at" {% if request.args.get('sort_by') == 'created_at' %}selected{% endif %}>作成日</option>
-                </select>
-                <select name="sort_order" id="sort_order">
-                    <option value="desc" {% if request.args.get('sort_order', 'desc') == 'desc' %}selected{% endif %}>降順</option>
-                    <option value="asc" {% if request.args.get('sort_order') == 'asc' %}selected{% endif %}>昇順</option>
-                </select>
-            </div>
-            </div>
-        </div>
         <div class="filter-actions">
             <button type="submit" class="btn btn-primary">フィルター適用</button>
             <a href="{{ url_for('leads.list_leads') }}" class="btn btn-secondary">リセット</a>
@@ -1124,14 +111,618 @@
             <button type="button" class="btn btn-info" onclick="loadSavedFilters()">保存したフィルターを読み込む</button>
             {% endif %}
         </div>
-        </div>
     </form>
-    <div class="action-buttons">
-        <a href="{{ url_for('leads.update_empty_names') }}" class="btn btn-info">空の名前を更新</a>
-    </div>
 </div>
+            <div class="add-lead">
+                <a href="{{ url_for('leads.add_lead') }}" class="btn btn-add">新規リードを追加</a>
+            </div>
+                        <!-- Bulk Operations Form -->
+                        <form method="POST" action="{{ url_for('leads.bulk_action') }}" id="bulkForm">
 
-<style>
+                            <!-- Lead Grid -->
+                            <div class="lead-grid">
+                                {% for lead in leads %}
+                                <div class="lead-card">
+                                    <div class="lead-select">
+                                        <input type="checkbox" name="selected_leads[]" value="{{ lead.id }}" class="lead-checkbox">
+                                    </div>
+                                    <h2>{{ lead.name or '名前なし' }}</h2>
+                                    <p><strong>メール:</strong> {{ lead.email }}</p>
+                                    <p><strong>電話:</strong> {{ lead.phone }}</p>
+                                    <p><strong>ステータス:</strong> {{ lead.status }}</p>
+                                    <p><strong>スコア:</strong> {{ "%.1f"|format(lead.score) }}</p>
+                                    <p><strong>最終接触:</strong> {{ lead.last_contact.strftime('%Y-%m-%d %H:%M') if lead.last_contact }}</p>
+                                    <div class="card-actions">
+                                        <a href="{{ url_for('leads.edit_lead', id=lead.id) }}" class="btn btn-edit">編集</a>
+                                        <form method="POST" action="{{ url_for('leads.delete_lead', id=lead.id) }}" style="display: inline;">
+                                            <button type="submit" class="btn btn-delete" onclick="return confirm('このリードを削除してもよろしいですか？');">削除</button>
+                                        </form>
+                                </div>
+                            </div>
+
+                            {% endfor %}
+                                </div>
+                                <div class="bulk-actions">
+                                    <div class="select-all-container">
+                                        <input type="checkbox" id="select-all" onclick="toggleAllCheckboxes()">
+                                        <label for="select-all">すべて選択</label>
+                                    </div>
+                                    <select name="action" id="bulk-action">
+                                        <option value="">一括操作を選択...</option>
+                                        <option value="delete">削除</option>
+                                        <option value="change_status">ステータス変更</option>
+                                        <option value="update_score">スコア更新</option>
+                                    </select>
+                                    <select name="new_status" id="new-status" style="display: none;">
+                                        <option value="New">新規</option>
+                                        <option value="Contacted">連絡済み</option>
+                                        <option value="Qualified">適格</option>
+                                        <option value="Lost">失注</option>
+                                        <option value="Spam">迷惑メール</option>
+                                    </select>
+                                    <input type="number" name="new_score" id="new-score" min="0" max="100" step="1" 
+                                           placeholder="新しいスコア" style="display: none;">
+                                    <button type="submit" class="btn btn-primary" onclick="return confirmBulkAction()">適用</button>
+                                </div>
+
+                            <div class="pagination">
+                                <ul class="pagination-list">
+                                    {% if pagination.has_prev %}
+                                    <li class="page-item">
+                                        <a href="{{ url_for('leads.list_leads', page=pagination.prev_num, **request.args) }}" class="page-link">前へ</a>
+                                    </li>
+                                    {% endif %}
+                                    {% for page_num in pagination.iter_pages(left_edge=1, right_edge=1, left_current=2, right_current=2) %}
+                                    {% if page_num %}
+                                        {% if page_num == pagination.page %}
+                                        <li class="page-item active">
+                                            <span class="page-link">{{ page_num }}</span>
+                                        </li>
+                                        {% else %}
+                                        <li class="page-item">
+                                            <a href="{{ url_for('leads.list_leads', page=page_num, **request.args) }}" class="page-link">{{ page_num }}</a>
+                                        </li>
+                                        {% endif %}
+                                    {% else %}
+                                    <li class="page-item disabled"><span class="page-link">...</span></li>
+                                    {% endif %}
+                                    {% endfor %}
+                                    {% if pagination.has_next %}
+                                    <li class="page-item">
+                                        <a href="{{ url_for('leads.list_leads', page=pagination.next_num, **request.args) }}" class="page-link">次へ</a>
+                                    </li>
+                                    {% endif %}
+                                </ul>
+                            </div>
+
+
+
+                            {% block styles %}
+                            <style>
+                                /* Global Variables */
+                                :root {
+                                    --primary-color: #4a90e2;
+                                    --secondary-color: #f8fafc;
+                                    --border-color: #e2e8f0;
+                                    --text-color: #2d3748;
+                                    --hover-color: #3182ce;
+                                    --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.05);
+                                    --shadow-md: 0 4px 6px rgba(0, 0, 0, 0.1);
+                                    --font-family: -apple-system, "Segoe UI", "Hiragino Kaku Gothic ProN", "Hiragino Sans", Meiryo, sans-serif;
+                                    --success-color: #28a745;
+                                    --danger-color: #dc3545;
+                                    --shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+                                }
+
+                                body {
+                                    font-family: var(--font-family);
+                                    color: var(--text-color);
+                                    line-height: 1.6;
+                                }
+
+                                /* Page Layout */
+                                .page-container {
+                                    padding: 1.5rem;
+                                }
+
+                                .content-wrapper {
+                                    display: flex;
+                                    flex-direction: column;
+                                    gap: 1.5rem;
+                                    position: relative;
+                                }
+
+                                /* Filter Section */
+                                .filter-section {
+                                    background: #fff;
+                                    border: 1px solid var(--border-color);
+                                    border-radius: 12px;
+                                    box-shadow: var(--shadow-md);
+                                    margin-bottom: 1.5rem;
+                                    position: relative;
+                                    z-index: 20;
+                                    transition: all 0.3s cubic-bezier(.4,0,.2,1);
+                                }
+
+                                .filter-header {
+                                    align-items: center;
+                                    background-color: var(--secondary-color);
+                                    border-bottom: 1px solid var(--border-color);
+                                    border-radius: 12px 12px 0 0;
+                                    cursor: pointer;
+                                    display: flex;
+                                    padding: 1rem 1.25rem;
+                                    transition: background-color .3s ease-in-out;
+                                }
+
+                                .filter-header:hover {
+                                    background-color: #edf2f7;
+                                }
+
+                                .filter-header:focus-within {
+                                    outline: 2px solid var(--primary-color);
+                                    outline-offset: -2px;
+                                }
+
+                                .filter-header h3, .filter-group-header h4 {
+                                    color: var(--text-color);
+                                    font-size: .9rem;
+                                    font-weight: 600;
+                                    margin: 0;
+                                }
+
+                                .filter-icon {
+                                    font-size: 1.2rem;
+                                    margin-right: .8rem;
+                                    transition: transform .3s ease;
+                                }
+
+                                .filter-content {
+                                    background-color: #fff;
+                                    overflow: hidden;
+                                    padding: 1.25rem;
+                                    max-height: 2000px;  /* For transition */
+                                    transition: all .3s cubic-bezier(.4,0,.2,1);
+                                    opacity: 1;
+                                }
+
+                                .filter-content.collapsed {
+                                    max-height: 0;
+                                    opacity: 0;
+                                    padding: 0;
+                                    pointer-events: none;
+                                }
+
+                                .filter-group-section {
+                                    background-color: #fff;
+                                    border-radius: 8px;
+                                    box-shadow: var(--shadow-sm);
+                                    margin-bottom: 1.5rem;
+                                }
+
+                                .filter-group-header {
+                                    align-items: center;
+                                    background-color: var(--secondary-color);
+                                    border-radius: 8px;
+                                    cursor: pointer;
+                                    display: flex;
+                                    padding: .75rem 1rem;
+                                    transition: all .3s ease-in-out;
+                                }
+
+                                .filter-group-header:hover {
+                                    background-color: #edf2f7;
+                                    transform: translateY(-1px);
+                                }
+
+                                .filter-group-header:active {
+                                    transform: translateY(0);
+                                }
+
+                                .filter-icon.collapsed {
+                                    transform: rotate(-90deg);
+                                }
+
+                                .data-table-container {
+                                    background-color: #fff;
+                                    border: 1px solid var(--border-color);
+                                    border-radius: 8px;
+                                    box-shadow: var(--shadow);
+                                    margin-top: 1rem;
+                                    padding: 1.5rem;
+                                    position: relative;
+                                    z-index: 10;
+                                }
+
+                                /* Lead Grid */
+                                .lead-grid {
+                                    display: grid;
+                                    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+                                    gap: 1rem;
+                                    margin-top: 1rem;
+                                }
+
+                                .lead-card {
+                                    background: white;
+                                    border: 1px solid var(--border-color);
+                                    border-radius: 8px;
+                                    padding: 0.75rem;
+                                    box-shadow: var(--shadow-sm);
+                                    transition: transform 0.2s ease, box-shadow 0.2s ease;
+                                    overflow: hidden;
+                                }
+
+                                .lead-card:hover {
+                                    transform: translateY(-3px);
+                                    box-shadow: var(--shadow-md);
+                                }
+
+                                .lead-card h2 {
+                                    font-size: 1rem;
+                                    margin-bottom: 0.5rem;
+                                    color: var(--text-color);
+                                    font-weight: 600;
+                                }
+
+                                .lead-card p {
+                                    margin: 0.3rem 0;
+                                    line-height: 1.4;
+                                    color: #4a5568;
+                                }
+
+                                .lead-card p strong {
+                                    color: var(--text-color);
+                                }
+
+                                .card-actions {
+                                    display: flex;
+                                    gap: 0.75rem;
+                                    margin-top: 0.75rem;
+                                    justify-content: flex-end;
+                                    align-items: center;
+                                }
+
+                                /* Buttons */
+                                .btn {
+                                    padding: 0.5rem 1rem;
+                                    border-radius: 6px;
+                                    font-weight: 500;
+                                    cursor: pointer;
+                                    transition: all 0.2s ease;
+                                    border: none;
+                                    text-decoration: none;
+                                    display: inline-flex;
+                                    align-items: center;
+                                    justify-content: center;
+                                    gap: 0.5rem;
+                                }
+
+                                .btn-primary {
+                                    background-color: var(--primary-color);
+                                    color: white;
+                                }
+
+                                .btn-primary:hover {
+                                    background-color: var(--hover-color);
+                                }
+
+                                .btn-danger {
+                                    background-color: var(--danger-color);
+                                    color: white;
+                                }
+
+                                .btn-danger:hover {
+                                    background-color: darken(var(--danger-color), 10%);
+                                }
+
+                                .btn-edit {
+                                    background-color: var(--primary-color);
+                                    color: white;
+                                }
+
+                                .btn-delete {
+                                    background-color: var(--danger-color);
+                                    color: white;
+                                }
+
+                                /* Bulk Actions */
+                                .bulk-actions {
+                                    margin: 1.5rem 0;
+                                    padding: 1rem;
+                                    background-color: var(--secondary-color);
+                                    border-radius: 8px;
+                                    display: flex;
+                                    gap: 1rem;
+                                    align-items: center;
+                                    flex-wrap: wrap;
+                                }
+
+                                .select-all-container {
+                                    display: flex;
+                                    align-items: center;
+                                    gap: 0.5rem;
+                                }
+
+                                .lead-select {
+                                    position: absolute;
+                                    top: 1rem;
+                                    right: 1rem;
+                                }
+
+                                #new-score {
+                                    width: 100px;
+                                }
+
+                                /* Animations */
+                                @keyframes fadeInUp {
+                                    from { opacity: 0; transform: translateY(10px); }
+                                    to { opacity: 1; transform: translateY(0); }
+                                }
+
+                                .lead-card {
+                                    animation: fadeInUp 0.3s ease-out;
+                                }
+
+                                /* Responsive Adjustments */
+                                @media (max-width: 768px) {
+                                    .lead-grid {
+                                        grid-template-columns: 1fr;
+                                    }
+                                    .lead-card {
+                                        padding: 0.75rem;
+                                    }
+                                }
+
+                                .pagination {
+                                    display: flex;
+                                    justify-content: center;
+                                    margin-top: 2rem;
+                                }
+
+                                .pagination-list {
+                                    list-style: none;
+                                    padding: 0;
+                                    display: flex;
+                                    gap: 0.5rem;
+                                }
+
+                                .page-item {
+                                    margin: 0;
+                                }
+
+                                .page-link {
+                                    display: block;
+                                    padding: 0.5rem 0.75rem;
+                                    border: 1px solid var(--border-color);
+                                    border-radius: 4px;
+                                    text-decoration: none;
+                                    color: var(--text-color);
+                                    transition: background-color 0.2s ease;
+                                }
+
+                                .page-link:hover {
+                                    background-color: var(--secondary-color);
+                                }
+
+                                .page-item.active .page-link {
+                                    background-color: var(--primary-color);
+                                    color: white;
+                                }
+
+                                .page-item.disabled .page-link {
+                                    color: #ccc;
+                                    pointer-events: none;
+                                }
+                                /* Page Layout */
+                                .page-container {
+                                    display: flex;
+                                    flex-direction: column;
+                                    gap: 1rem;
+                                    padding: 1rem;
+                                }
+
+                                /* Filter Section */
+                                .filter-section {
+                                    background-color: #fff;
+                                    border-radius: 8px;
+                                    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
+                                    margin-bottom: 0.8rem;
+                                    border: 1px solid #edf2f7;
+                                }
+
+                                .filter-header {
+                                    display: flex;
+                                    align-items: center;
+                                    padding: 0.8rem 1rem;
+                                    cursor: pointer;
+                                    background-color: #f8fafc;
+                                    border-radius: 8px 8px 0 0;
+                                    transition: all 0.2s ease;
+                                    font-size: 0.9rem;
+                                    color: #2d3748;
+                                    border-bottom: 1px solid #edf2f7;
+                                }
+
+                                .filter-header:hover {
+                                    background-color: #edf2f7;
+                                }
+
+                                .filter-header h3 {
+                                    font-size: 0.9rem;
+                                    font-weight: 600;
+                                    margin: 0;
+                                }
+
+                                .filter-icon {
+                                    font-size: 1.2rem;
+                                    margin-right: 0.8rem;
+                                    transition: transform 0.2s ease;
+                                    color: #4a5568;
+                                }
+
+                                .filter-content {
+                                    padding: 0.8rem;
+                                    border-top: 1px solid #edf2f7;
+                                    transition: all 0.3s ease-in-out;
+                                    overflow: hidden;
+                                    background-color: #fff;
+                                }
+
+                                .filter-content {
+                                    max-height: 2000px; /* 十分な高さを確保 */
+                                    overflow: hidden;
+                                    transition: max-height 0.3s ease-in-out, padding 0.3s ease-in-out, opacity 0.3s ease-in-out;
+                                    opacity: 1;
+                                }
+
+                                .filter-content.collapsed {
+                                    max-height: 0;
+                                    padding: 0;
+                                    border-top: none;
+                                    opacity: 0;
+                                    transition: max-height 0.3s ease-in-out, padding 0.3s ease-in-out, opacity 0.3s ease-in-out;
+                                }
+
+                                /* Form Styles */
+                                .filter-form {
+                                    display: flex;
+                                    flex-direction: column;
+                                    gap: 0.8rem;
+                                    font-size: 0.85rem;
+                                }
+
+                                .filter-form label {
+                                    font-size: 0.8rem;
+                                    color: #4a5568;
+                                    font-weight: 500;
+                                }
+
+                                /* Search field styles */
+                                .search-field {
+                                    display: flex;
+                                    align-items: center;
+                                    gap: 0.8rem;
+                                    margin: 0.4rem 0;
+                                    background-color: #f8fafc;
+                                    padding: 0.6rem;
+                                    border-radius: 6px;
+                                }
+
+                                .search-field label {
+                                    min-width: 110px;
+                                    margin-right: 0.4rem;
+                                    color: #4a5568;
+                                    font-size: 0.8rem;
+                                }
+
+                                .search-input {
+                                    flex: 1;
+                                    padding: 0.4rem 0.6rem;
+                                    border: 1px solid #e2e8f0;
+                                    border-radius: 4px;
+                                    font-size: 0.85rem;
+                                    transition: border-color 0.2s ease;
+                                }
+
+                                .search-input:focus {
+                                    border-color: #4299e1;
+                                    outline: none;
+                                    box-shadow: 0 0 0 2px rgba(66, 153, 225, 0.2);
+                                }
+
+                                /* Filter group styles */
+                                .filter-group-header {
+                                    display: flex;
+                                    align-items: center;
+                                    cursor: pointer;
+                                    padding: 0.6rem 0.8rem;
+                                    background-color: #f1f5f9;
+                                    border-radius: 6px;
+                                    margin-bottom: 0.4rem;
+                                    transition: all 0.2s ease;
+                                    border: 1px solid #e2e8f0;
+                                }
+
+                                .filter-group-header:hover {
+                                    background-color: #e2e8f0;
+                                    border-color: #cbd5e1;
+                                }
+
+                                .filter-group-header:hover {
+                                    background-color: var(--primary-color);
+                                    color: white;
+                                }
+
+                                .filter-group-header h4 {
+                                    margin: 0;
+                                    flex-grow: 1;
+                                }
+
+                                .filter-group-icon {
+                                    margin-right: 0.5rem;
+                                }
+
+                                .filter-group-content {
+                                    padding: 1rem;
+                                    border: 1px solid var(--border-color);
+                                    border-radius: 4px;
+                                    margin-bottom: 1rem;
+                                    display: none;
+                                }
+
+                                .filter-group-content.active {
+                                    display: block;
+                                }
+
+                                .search-operator {
+                                    display: flex;
+                                    align-items: center;
+                                    gap: 0.5rem;
+                                    margin: 0.5rem 0;
+                                }
+
+                                .search-operator select {
+                                    padding: 0.5rem;
+                                    border: 1px solid var(--border-color);
+                                    border-radius: 4px;
+                                    background-color: white;
+                                }
+
+                                /* Advanced filters styles */
+                                .advanced-filters {
+                                    margin-top: 1rem;
+                                    padding: 1rem;
+                                    background: var(--secondary-color);
+                                    border-radius: 8px;
+                                }
+
+                                .filter-group {
+                                    margin: 1rem 0;
+                                    padding: 1rem;
+                                    border: 1px solid var(--border-color);
+                                    border-radius: 4px;
+                                }
+
+                                .group-header {
+                                    display: flex;
+                                    justify-content: space-between;
+                                    align-items: center;
+                                    margin-bottom: 1rem;
+                                }
+
+                                .condition {
+                                    display: flex;
+                                    gap: 0.5rem;
+                                    margin: 0.5rem 0;
+                                    align-items: center;
+                                }
+
+                                .condition select,
+                                .condition input {
+                                    padding: 0.5rem;
+                                    border: 1px solid var(--border-color);
+                                    border-radius: 4px;
+                                }
     /* Main filter section styles */
     .filter-section {
         margin-bottom: 2rem;
@@ -1276,117 +867,7 @@
         border-radius: 4px;
         box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
     }
-</style>
 
-<script>
-    // Main filter toggle functionality
-    function toggleMainFilter() {
-        const content = document.getElementById('main-filter-content');
-        const icon = document.getElementById('main-filter-icon');
-        const isCollapsed = content.classList.contains('collapsed');
-        
-        // Add transition class before toggling
-        content.style.transition = 'all 0.3s ease-out';
-        
-        if (isCollapsed) {
-            content.classList.remove('collapsed');
-            content.classList.add('expanded');
-            icon.textContent = '▼';
-        } else {
-            content.classList.remove('expanded');
-            content.classList.add('collapsed');
-            icon.textContent = '▶';
-        }
-        
-        // Save state to localStorage
-        localStorage.setItem('main-filter-state', !isCollapsed);
-        
-        // Remove transition after animation completes
-        setTimeout(() => {
-            content.style.transition = '';
-        }, 300);
-    }
-
-    // Initialize main filter state on page load
-    document.addEventListener('DOMContentLoaded', function() {
-        const content = document.getElementById('main-filter-content');
-        const icon = document.getElementById('main-filter-icon');
-        const savedState = localStorage.getItem('main-filter-state');
-        
-        // Default to collapsed if no saved state
-        if (savedState === null) {
-            localStorage.setItem('main-filter-state', 'false');
-        }
-        
-        const isExpanded = savedState === 'true';
-        
-        if (isExpanded) {
-            content.classList.add('expanded');
-            icon.textContent = '▼';
-        } else {
-            content.classList.remove('expanded');
-            icon.textContent = '▶';
-        }
-
-        // Initialize sub-filter groups
-        const filterGroups = ['search', 'advanced', 'status', 'score', 'date', 'sort'];
-        filterGroups.forEach(groupId => {
-            const content = document.querySelector(`#${groupId}-content`);
-            const icon = document.querySelector(`#${groupId}-icon`);
-            const savedState = localStorage.getItem(`filter-${groupId}-state`);
-            
-            if (savedState === 'true') {
-                content.classList.add('active');
-                content.style.display = 'block';
-                icon.textContent = '▼';
-            } else {
-                content.classList.remove('active');
-                content.style.display = 'none';
-                icon.textContent = '▶';
-            }
-        });
-    });
-</script>
-
-<script>
-function loadSavedFilters() {
-    const savedFilters = {{ saved_filters|tojson|safe }};
-    const form = document.getElementById('leadFilterForm');
-    
-    if (savedFilters && savedFilters.leads) {
-        const filters = savedFilters.leads;
-        
-        // Set text inputs
-        form.querySelector('#search_name').value = filters.search_name || '';
-        form.querySelector('#search_email').value = filters.search_email || '';
-        form.querySelector('#search_operator').value = filters.search_operator || 'AND';
-        
-        // Set status checkboxes
-        const statusCheckboxes = form.querySelectorAll('input[name="status"]');
-        statusCheckboxes.forEach(checkbox => {
-            checkbox.checked = filters.statuses && filters.statuses.includes(checkbox.value);
-        });
-        
-        // Set score range
-        form.querySelector('#min_score').value = filters.min_score || '';
-        form.querySelector('#max_score').value = filters.max_score || '';
-        
-        // Set date range
-        form.querySelector('#date_field').value = filters.date_field || 'created_at';
-        form.querySelector('#date_from').value = filters.date_from || '';
-        form.querySelector('#date_to').value = filters.date_to || '';
-        
-        // Set sort options
-        form.querySelector('#sort_by').value = filters.sort_by || 'last_contact';
-        form.querySelector('#sort_order').value = filters.sort_order || 'desc';
-        
-        // Submit the form to apply filters
-        form.submit();
-    }
-}
-</script>
-
-<style>
 .filter-section {
     background: var(--secondary-color);
     padding: 1.5rem;
@@ -1509,89 +990,498 @@ function loadSavedFilters() {
     }
 }
 </style>
+                            {% endblock %}
 
-<!-- Bulk Operations Form -->
-<form method="POST" action="{{ url_for('leads.bulk_action') }}" id="bulkForm">
-    <div class="bulk-actions">
-        <div class="select-all-container">
-            <input type="checkbox" id="select-all" onclick="toggleAllCheckboxes()">
-            <label for="select-all">すべて選択</label>
-        </div>
-        <select name="action" id="bulk-action">
-            <option value="">一括操作を選択...</option>
-            <option value="delete">削除</option>
-            <option value="change_status">ステータス変更</option>
-            <option value="update_score">スコア更新</option>
-        </select>
-        <select name="new_status" id="new-status" style="display: none;">
-            <option value="New">新規</option>
-            <option value="Contacted">連絡済み</option>
-            <option value="Qualified">適格</option>
-            <option value="Lost">失注</option>
-            <option value="Spam">迷惑メール</option>
-        </select>
-        <input type="number" name="new_score" id="new-score" min="0" max="100" step="1" 
-               placeholder="新しいスコア" style="display: none;">
-        <button type="submit" class="btn btn-primary" onclick="return confirmBulkAction()">適用</button>
-    </div>
+                            <script>
+                                // フィルターの開閉機能とフィルター状態の保存
+                                function toggleFilters() {
+                                    const content = document.getElementById('filter-content');
+                                    const icon = document.getElementById('filter-toggle-icon');
+                                    const filterForm = document.getElementById('leadFilterForm');
 
-    <!-- Lead Grid -->
-    <div class="lead-grid">
-        {% for lead in leads %}
-        <div class="lead-card">
-            <div class="lead-select">
-                <input type="checkbox" name="selected_leads[]" value="{{ lead.id }}" class="lead-checkbox">
-            </div>
-            <h2>{{ lead.name or '名前なし' }}</h2>
-            <p><strong>メール:</strong> {{ lead.email }}</p>
-            <p><strong>電話:</strong> {{ lead.phone }}</p>
-            <p><strong>ステータス:</strong> {{ lead.status }}</p>
-            <p><strong>スコア:</strong> {{ "%.1f"|format(lead.score) }}</p>
-            <p><strong>最終接触:</strong> {{ lead.last_contact.strftime('%Y-%m-%d %H:%M') if lead.last_contact }}</p>
-            <div class="card-actions">
-                <a href="{{ url_for('leads.edit_lead', id=lead.id) }}" class="btn btn-edit">編集</a>
-                <form method="POST" action="{{ url_for('leads.delete_lead', id=lead.id) }}" style="display: inline;">
-                    <button type="submit" class="btn btn-delete" onclick="return confirm('このリードを削除してもよろしいですか？');">削除</button>
-                </form>
-        </div>
-    </div>
-    {% endfor %}
-</div>
-    <div class="pagination">
-        <ul class="pagination-list">
-            {% if pagination.has_prev %}
-            <li class="page-item">
-                <a href="{{ url_for('leads.list_leads', page=pagination.prev_num, **request.args) }}" class="page-link">前へ</a>
-            </li>
-            {% endif %}
-            {% for page_num in pagination.iter_pages(left_edge=1, right_edge=1, left_current=2, right_current=2) %}
-            {% if page_num %}
-                {% if page_num == pagination.page %}
-                <li class="page-item active">
-                    <span class="page-link">{{ page_num }}</span>
-                </li>
-                {% else %}
-                <li class="page-item">
-                    <a href="{{ url_for('leads.list_leads', page=page_num, **request.args) }}" class="page-link">{{ page_num }}</a>
-                </li>
-                {% endif %}
-            {% else %}
-            <li class="page-item disabled"><span class="page-link">...</span></li>
-            {% endif %}
-            {% endfor %}
-            {% if pagination.has_next %}
-            <li class="page-item">
-                <a href="{{ url_for('leads.list_leads', page=pagination.next_num, **request.args) }}" class="page-link">次へ</a>
-            </li>
-            {% endif %}
-        </ul>
-    </div>
+                                    // Get current state
+                                    const isCollapsed = content.classList.contains('collapsed');
 
-</form>
+                                    // Toggle icon class for rotation
+                                    icon.classList.toggle('collapsed');
+                                    icon.style.transform = isCollapsed ? 'rotate(0deg)' : 'rotate(-90deg)';
 
-<div class="add-lead">
-    <a href="{{ url_for('leads.add_lead') }}" class="btn btn-add">新規リードを追加</a>
-</div>
+                                    if (isCollapsed) {
+                                        // Expanding
+                                        content.style.maxHeight = content.scrollHeight + 'px';
+                                        content.classList.remove('collapsed');
+
+                                        setTimeout(() => {
+                                            if (!content.classList.contains('collapsed')) {
+                                                content.style.maxHeight = 'none';
+                                            }
+                                        }, 300);
+                                    } else {
+                                        // Collapsing
+                                        content.style.maxHeight = content.scrollHeight + 'px';
+                                        content.offsetHeight;
+                                        content.classList.add('collapsed');
+                                        content.style.maxHeight = '0';
+                                    }
+
+                                    // Save section state and form values
+                                    saveFilterState();
+                                }
+
+                                // フィルター状態の保存
+                                async function saveFilterState() {
+                                    const content = document.getElementById('filter-content');
+                                    const filterForm = document.getElementById('leadFilterForm');
+                                    const formData = new FormData(filterForm);
+
+                                    // チェックボックスの状態を保存
+                                    const checkboxStates = {};
+                                    filterForm.querySelectorAll('input[type="checkbox"]').forEach(checkbox => {
+                                        checkboxStates[checkbox.name + '_' + checkbox.value] = checkbox.checked;
+                                    });
+
+                                    const filterState = {
+                                        isCollapsed: content.classList.contains('collapsed'),
+                                        formValues: Object.fromEntries(formData.entries()),
+                                        checkboxStates: checkboxStates,
+                                        lastUpdated: new Date().toISOString()
+                                    };
+
+                                    // ローカルストレージに保存
+                                    localStorage.setItem('filter-section-state', JSON.stringify(filterState));
+
+                                    // サーバーに保存
+                                    try {
+                                        const response = await fetch('/api/save_filter_state', {
+                                            method: 'POST',
+                                            headers: {
+                                                'Content-Type': 'application/json',
+                                            },
+                                            body: JSON.stringify({
+                                                section: 'leads',
+                                                state: filterState
+                                            })
+                                        });
+
+                                        if (!response.ok) {
+                                            console.error('フィルター状態の保存に失敗しました');
+                                        }
+                                    } catch (error) {
+                                        console.error('フィルター状態の保存中にエラーが発生しました:', error);
+                                    }
+                                }
+
+                                // フィルターフォームの値が変更されたときも状態を保存
+                                document.getElementById('leadFilterForm').addEventListener('change', saveFilterState);
+
+                                // フィルターフォームの値が変更されたときも状態を保存
+                                document.getElementById('leadFilterForm').addEventListener('change', function() {
+                                    const formData = new FormData(this);
+                                    const filterState = {
+                                        isCollapsed: document.getElementById('filter-content').classList.contains('collapsed'),
+                                        formValues: Object.fromEntries(formData.entries()),
+                                        filterGroups: filterGroups
+                                    };
+                                    localStorage.setItem('filter-section-state', JSON.stringify(filterState));
+                                });
+
+                                // ページ読み込み時の初期化と保存された状態の復元
+                                document.addEventListener('DOMContentLoaded', function() {
+                                    const content = document.getElementById('filter-content');
+                                    const icon = document.getElementById('filter-toggle-icon');
+                                    const filterForm = document.getElementById('leadFilterForm');
+
+                                    // アニメーションを一時的に無効化
+                                    content.style.transition = 'none';
+
+                                    try {
+                                        const savedState = JSON.parse(localStorage.getItem('filter-section-state'));
+
+                                        if (savedState && savedState.lastUpdated) {
+                                            const lastUpdated = new Date(savedState.lastUpdated);
+                                            const now = new Date();
+                                            const hoursDiff = (now - lastUpdated) / (1000 * 60 * 60);
+
+                                            // 24時間以内の状態のみを復元
+                                            if (hoursDiff <= 24) {
+                                                // セクションの開閉状態を復元
+                                                if (!savedState.isCollapsed) {
+                                                    content.classList.remove('collapsed');
+                                                    icon.style.transform = 'rotate(0deg)';
+                                                    content.style.maxHeight = 'none';
+                                                } else {
+                                                    content.classList.add('collapsed');
+                                                    icon.style.transform = 'rotate(-90deg)';
+                                                    content.style.maxHeight = '0';
+                                                }
+
+                                                // フォームの値を復元
+                                                if (savedState.formValues) {
+                                                    Object.entries(savedState.formValues).forEach(([key, value]) => {
+                                                        const input = filterForm.elements[key];
+                                                        if (input && input.type !== 'checkbox') {
+                                                            input.value = value;
+                                                        }
+                                                    });
+                                                }
+
+                                                // チェックボックスの状態を復元
+                                                if (savedState.checkboxStates) {
+                                                    Object.entries(savedState.checkboxStates).forEach(([key, checked]) => {
+                                                        const [name, value] = key.split('_');
+                                                        const checkbox = filterForm.querySelector(`input[type="checkbox"][name="${name}"][value="${value}"]`);
+                                                        if (checkbox) {
+                                                            checkbox.checked = checked;
+                                                        }
+                                                    });
+                                                }
+
+                                                // 高度なフィルターグループを復元
+                                                if (savedState.filterGroups) {
+                                                    filterGroups = savedState.filterGroups;
+                                                    renderFilterGroups();
+                                                }
+                                            } else {
+                                                // 24時間以上経過している場合は状態をクリア
+                                                localStorage.removeItem('filter-section-state');
+                                            }
+                                        }
+                                    } catch (error) {
+                                        console.error('Error restoring filter state:', error);
+                                        localStorage.removeItem('filter-section-state');
+                                    }
+
+                                    // アニメーションを再有効化
+                                    setTimeout(() => {
+                                        content.style.transition = 'max-height 0.3s ease-in-out, opacity 0.3s ease-in-out';
+                                    }, 0);
+                                });
+
+                                let filterGroups = [];
+
+                                function addFilterGroup() {
+                                    const groupId = Date.now();
+                                    const group = {
+                                        id: groupId,
+                                        operator: 'AND',
+                                        conditions: []
+                                    };
+                                    filterGroups.push(group);
+                                    renderFilterGroups();
+                                }
+
+                                function addCondition(groupId) {
+                                    const group = filterGroups.find(g => g.id === groupId);
+                                    if (group) {
+                                        group.conditions.push({
+                                            field: 'name',
+                                            operator: 'contains',
+                                            value: ''
+                                        });
+                                        renderFilterGroups();
+                                    }
+                                }
+
+                                function removeCondition(groupId, index) {
+                                    const group = filterGroups.find(g => g.id === groupId);
+                                    if (group && group.conditions[index]) {
+                                        group.conditions.splice(index, 1);
+                                        renderFilterGroups();
+                                    }
+                                }
+
+                                function removeGroup(groupId) {
+                                    filterGroups = filterGroups.filter(g => g.id !== groupId);
+                                    renderFilterGroups();
+                                }
+
+                                function updateGroupOperator(groupId, operator) {
+                                    const group = filterGroups.find(g => g.id === groupId);
+                                    if (group) {
+                                        group.operator = operator;
+                                    }
+                                }
+
+                                function updateCondition(groupId, index, field, value) {
+                                    const group = filterGroups.find(g => g.id === groupId);
+                                    if (group && group.conditions[index]) {
+                                        group.conditions[index][field] = value;
+                                    }
+                                }
+
+                                function renderFilterGroups() {
+                                    const container = document.getElementById('filterGroups');
+                                    container.innerHTML = filterGroups.map(group => `
+                                        <div class="filter-group" data-group-id="${group.id}">
+                                            <div class="group-header">
+                                                <select onchange="updateGroupOperator(${group.id}, this.value)">
+                                                    <option value="AND" ${group.operator === 'AND' ? 'selected' : ''}>すべての条件に一致</option>
+                                                    <option value="OR" ${group.operator === 'OR' ? 'selected' : ''}>いずれかの条件に一致</option>
+                                                </select>
+                                                <button type="button" class="btn btn-danger" onclick="removeGroup(${group.id})">グループを削除</button>
+                                            </div>
+                                            ${group.conditions.map((condition, index) => `
+                                                <div class="condition">
+                                                    <select onchange="updateCondition(${group.id}, ${index}, 'field', this.value)">
+                                                        <option value="name" ${condition.field === 'name' ? 'selected' : ''}>名前</option>
+                                                        <option value="email" ${condition.field === 'email' ? 'selected' : ''}>メール</option>
+                                                        <option value="score" ${condition.field === 'score' ? 'selected' : ''}>スコア</option>
+                                                        <option value="status" ${condition.field === 'status' ? 'selected' : ''}>ステータス</option>
+                                                    </select>
+                                                    <select onchange="updateCondition(${group.id}, ${index}, 'operator', this.value)">
+                                                        ${condition.field === 'score' ? `
+                                                            <option value="equals" ${condition.operator === 'equals' ? 'selected' : ''}>一致する</option>
+                                                            <option value="greater_than" ${condition.operator === 'greater_than' ? 'selected' : ''}>より大きい</option>
+                                                            <option value="less_than" ${condition.operator === 'less_than' ? 'selected' : ''}>より小さい</option>
+                                                            <option value="greater_equal" ${condition.operator === 'greater_equal' ? 'selected' : ''}>以上</option>
+                                                            <option value="less_equal" ${condition.operator === 'less_equal' ? 'selected' : ''}>以下</option>
+                                                        ` : condition.field === 'status' ? `
+                                                            <option value="equals" ${condition.operator === 'equals' ? 'selected' : ''}>一致する</option>
+                                                            <option value="not_equals" ${condition.operator === 'not_equals' ? 'selected' : ''}>一致しない</option>
+                                                        ` : `
+                                                            <option value="contains" ${condition.operator === 'contains' ? 'selected' : ''}>含む</option>
+                                                            <option value="equals" ${condition.operator === 'equals' ? 'selected' : ''}>一致する</option>
+                                                            <option value="starts_with" ${condition.operator === 'starts_with' ? 'selected' : ''}>で始まる</option>
+                                                            <option value="ends_with" ${condition.operator === 'ends_with' ? 'selected' : ''}>で終わる</option>
+                                                        `}
+                                                    </select>
+                                                    <input type="text" value="${condition.value}" onchange="updateCondition(${group.id}, ${index}, 'value', this.value)" />
+                                                    <button type="button" class="btn btn-danger" onclick="removeCondition(${group.id}, ${index})">削除</button>
+                                                </div>
+                                            `).join('')}
+                                            <button type="button" class="btn btn-secondary" onclick="addCondition(${group.id})">条件を追加</button>
+                                        </div>
+                                    `).join('');
+                                }
+
+                                // Add filter_groups to form submission
+                                document.getElementById('leadFilterForm').addEventListener('submit', function(e) {
+                                    const input = document.createElement('input');
+                                    input.type = 'hidden';
+                                    input.name = 'filter_groups';
+                                    input.value = JSON.stringify(filterGroups);
+                                    this.appendChild(input);
+                                });
+                                // Add toggle functionality for filter groups
+                                function toggleFilterGroup(groupId) {
+                                    const content = document.querySelector(`#${groupId}-content`);
+                                    const icon = document.querySelector(`#${groupId}-icon`);
+
+                                    // Toggle active class instead of directly setting display
+                                    content.classList.toggle('active');
+
+                                    // Update icon based on content visibility
+                                    if (content.classList.contains('active')) {
+                                        icon.textContent = '▼';
+                                        content.style.display = 'block';
+                                    } else {
+                                        icon.textContent = '▶';
+                                        content.style.display = 'none';
+                                    }
+
+                                    // Save state to localStorage
+                                    localStorage.setItem(`filter-${groupId}-state`, content.classList.contains('active'));
+                                }
+
+                                function toggleMainFilter() {
+                                    const content = document.getElementById('main-filter-content');
+                                    const icon = document.getElementById('main-filter-icon');
+                                    const isCollapsed = content.classList.contains('collapsed');
+
+                                    if (isCollapsed) {
+                                        content.classList.remove('collapsed');
+                                        icon.textContent = '×';
+                                        icon.style.transform = 'rotate(180deg)';
+                                    } else {
+                                        content.classList.add('collapsed');
+                                        icon.textContent = '≡';
+                                        icon.style.transform = 'rotate(0deg)';
+                                    }
+
+                                    // Save state to localStorage
+                                    localStorage.setItem('main-filter-state', !isCollapsed);
+                                }
+
+                                // Toggle filter section
+                                function toggleFilters() {
+                                    const content = document.getElementById('filter-content');
+                                    const icon = document.getElementById('filter-toggle-icon');
+                                    const isCollapsed = content.classList.contains('collapsed');
+
+                                    if (isCollapsed) {
+                                        content.classList.remove('collapsed');
+                                        content.style.maxHeight = content.scrollHeight + 'px';
+                                        icon.textContent = '×';
+                                        icon.style.transform = 'rotate(180deg)';
+                                    } else {
+                                        content.classList.add('collapsed');
+                                        content.style.maxHeight = '0';
+                                        icon.textContent = '≡';
+                                        icon.style.transform = 'rotate(0deg)';
+                                    }
+
+                                    // Save state to localStorage
+                                    localStorage.setItem('filter-section-state', !isCollapsed);
+                                }
+
+                                // Initialize filter states on page load
+                                document.addEventListener('DOMContentLoaded', function() {
+                                    // Initialize filter section state
+                                    const content = document.getElementById('filter-content');
+                                    const icon = document.getElementById('filter-toggle-icon');
+                                    const savedState = localStorage.getItem('filter-section-state');
+
+                                    if (savedState === 'true') {
+                                        content.classList.remove('collapsed');
+                                        content.style.maxHeight = content.scrollHeight + 'px';
+                                        icon.textContent = '×';
+                                        icon.style.transform = 'rotate(180deg)';
+                                    } else {
+                                        content.classList.add('collapsed');
+                                        content.style.maxHeight = '0';
+                                        icon.textContent = '≡';
+                                        icon.style.transform = 'rotate(0deg)';
+                                    }
+                                    const mainContent = document.getElementById('main-filter-content');
+                                    const mainIcon = document.getElementById('main-filter-icon');
+                                    const savedMainState = localStorage.getItem('main-filter-state');
+
+                                    // Default to collapsed if no saved state
+                                    if (savedMainState === null) {
+                                        localStorage.setItem('main-filter-state', 'false');
+                                    }
+
+                                    if (savedMainState === 'true') {
+                                        mainContent.classList.remove('collapsed');
+                                        mainIcon.textContent = '▼';
+                                    } else {
+                                        mainContent.classList.add('collapsed');
+                                        mainIcon.textContent = '▶';
+                                    }
+
+                                    const filterGroups = ['search', 'advanced', 'status', 'score', 'date', 'sort'];
+                                    filterGroups.forEach(groupId => {
+                                        const content = document.querySelector(`#${groupId}-content`);
+                                        const icon = document.querySelector(`#${groupId}-icon`);
+                                        const savedState = localStorage.getItem(`filter-${groupId}-state`);
+
+                                        if (savedState === 'true') {
+                                            content.classList.add('active');
+                                            content.style.display = 'block';
+                                            icon.textContent = '▼';
+                                        } else {
+                                            content.classList.remove('active');
+                                            content.style.display = 'none';
+                                            icon.textContent = '▶';
+                                        }
+                                    });
+                                });
+                                // Main filter toggle functionality
+                                function toggleMainFilter() {
+                                    const content = document.getElementById('main-filter-content');
+                                    const icon = document.getElementById('main-filter-icon');
+                                    const isCollapsed = content.classList.contains('collapsed');
+
+                                    // Add transition class before toggling
+                                    content.style.transition = 'all 0.3s ease-out';
+
+                                    if (isCollapsed) {
+                                        content.classList.remove('collapsed');
+                                        content.classList.add('expanded');
+                                        icon.textContent = '▼';
+                                    } else {
+                                        content.classList.remove('expanded');
+                                        content.classList.add('collapsed');
+                                        icon.textContent = '▶';
+                                    }
+
+                                    // Save state to localStorage
+                                    localStorage.setItem('main-filter-state', !isCollapsed);
+
+                                    // Remove transition after animation completes
+                                    setTimeout(() => {
+                                        content.style.transition = '';
+                                    }, 300);
+                                }
+
+                                // Initialize main filter state on page load
+                                document.addEventListener('DOMContentLoaded', function() {
+                                    const content = document.getElementById('main-filter-content');
+                                    const icon = document.getElementById('main-filter-icon');
+                                    const savedState = localStorage.getItem('main-filter-state');
+
+                                    // Default to collapsed if no saved state
+                                    if (savedState === null) {
+                                        localStorage.setItem('main-filter-state', 'false');
+                                    }
+
+                                    const isExpanded = savedState === 'true';
+
+                                    if (isExpanded) {
+                                        content.classList.add('expanded');
+                                        icon.textContent = '▼';
+                                    } else {
+                                        content.classList.remove('expanded');
+                                        icon.textContent = '▶';
+                                    }
+
+                                    // Initialize sub-filter groups
+                                    const filterGroups = ['search', 'advanced', 'status', 'score', 'date', 'sort'];
+                                    filterGroups.forEach(groupId => {
+                                        const content = document.querySelector(`#${groupId}-content`);
+                                        const icon = document.querySelector(`#${groupId}-icon`);
+                                        const savedState = localStorage.getItem(`filter-${groupId}-state`);
+
+                                        if (savedState === 'true') {
+                                            content.classList.add('active');
+                                            content.style.display = 'block';
+                                            icon.textContent = '▼';
+                                        } else {
+                                            content.classList.remove('active');
+                                            content.style.display = 'none';
+                                            icon.textContent = '▶';
+                                        }
+                                    });
+                                });
+                            </script>
+
+                            <script>
+                            function loadSavedFilters() {
+                                const savedFilters = {{ saved_filters|tojson|safe }};
+                                const form = document.getElementById('leadFilterForm');
+
+                                if (savedFilters && savedFilters.leads) {
+                                    const filters = savedFilters.leads;
+
+                                    // Set text inputs
+                                    form.querySelector('#search_name').value = filters.search_name || '';
+                                    form.querySelector('#search_email').value = filters.search_email || '';
+                                    form.querySelector('#search_operator').value = filters.search_operator || 'AND';
+
+                                    // Set status checkboxes
+                                    const statusCheckboxes = form.querySelectorAll('input[name="status"]');
+                                    statusCheckboxes.forEach(checkbox => {
+                                        checkbox.checked = filters.statuses && filters.statuses.includes(checkbox.value);
+                                    });
+
+                                    // Set score range
+                                    form.querySelector('#min_score').value = filters.min_score || '';
+                                    form.querySelector('#max_score').value = filters.max_score || '';
+
+                                    // Set date range
+                                    form.querySelector('#date_field').value = filters.date_field || 'created_at';
+                                    form.querySelector('#date_from').value = filters.date_from || '';
+                                    form.querySelector('#date_to').value = filters.date_to || '';
+
+                                    // Set sort options
+                                    form.querySelector('#sort_by').value = filters.sort_by || 'last_contact';
+                                    form.querySelector('#sort_order').value = filters.sort_order || 'desc';
+
+                                    // Submit the form to apply filters
+                                    form.submit();
+                                }
+                            }
+                            </script>
 
 <script>
 function toggleAllCheckboxes() {
