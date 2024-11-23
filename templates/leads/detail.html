@@ -73,6 +73,52 @@
 .btn:hover {
     opacity: 0.9;
 }
+
+.email-section {
+    margin-top: 2rem;
+    padding: 1rem;
+    background: #f8fafc;
+    border-radius: 8px;
+}
+
+.email-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 1rem;
+}
+
+.email-table th,
+.email-table td {
+    padding: 0.75rem;
+    border: 1px solid #e2e8f0;
+    text-align: left;
+}
+
+.email-table th {
+    background: #edf2f7;
+    font-weight: 600;
+}
+
+.email-content {
+    background: #fff;
+    padding: 1rem;
+    border-radius: 4px;
+    margin-top: 0.5rem;
+}
+
+.button {
+    display: inline-block;
+    padding: 0.5rem 1rem;
+    background: #4299e1;
+    color: white;
+    text-decoration: none;
+    border-radius: 4px;
+    margin: 1rem 0;
+}
+
+.button:hover {
+    background: #3182ce;
+}
 </style>
 {% endblock %}
 
@@ -124,42 +170,43 @@
             </button>
         </form>
     </div>
-</div>
-{% endblock %}
 
-    <h2>Associated Emails</h2>
-    <a href="{{ url_for('leads.refresh_lead_emails', id=lead.id) }}" class="button">Refresh Emails</a>
-    {% if emails %}
-        <table>
-            <thead>
-                <tr>
-                    <th>Sender</th>
-                    <th>Subject</th>
-                    <th>Received At</th>
-                    <th>Actions</th>
-                </tr>
-            </thead>
-            <tbody>
-                {% for email in emails %}
+    <div class="email-section">
+        <h2>関連メール</h2>
+        <a href="{{ url_for('leads.refresh_lead_emails', id=lead.id) }}" class="button">メールを更新</a>
+        {% if emails %}
+            <table class="email-table">
+                <thead>
                     <tr>
-                        <td>{{ email.sender }}</td>
-                        <td>{{ email.subject }}</td>
-                        <td>{{ email.received_at.strftime('%Y-%m-%d %H:%M:%S') }}</td>
-                        <td>
-                            <button onclick="toggleEmailContent({{ email.id }})">View Content</button>
-                        </td>
+                        <th>送信者</th>
+                        <th>件名</th>
+                        <th>受信日時</th>
+                        <th>操作</th>
                     </tr>
-                    <tr id="email-content-{{ email.id }}" style="display: none;">
-                        <td colspan="4">
-                            <pre>{{ email.content }}</pre>
-                        </td>
-                    </tr>
-                {% endfor %}
-            </tbody>
-        </table>
-    {% else %}
-        <p>No emails associated with this lead.</p>
-    {% endif %}
+                </thead>
+                <tbody>
+                    {% for email in emails %}
+                        <tr>
+                            <td>{{ email.sender }}</td>
+                            <td>{{ email.subject }}</td>
+                            <td>{{ email.received_at.strftime('%Y年%m月%d日 %H:%M:%S') }}</td>
+                            <td>
+                                <button onclick="toggleEmailContent({{ email.id }})">内容を表示</button>
+                            </td>
+                        </tr>
+                        <tr id="email-content-{{ email.id }}" style="display: none;">
+                            <td colspan="4">
+                                <pre class="email-content">{{ email.content }}</pre>
+                            </td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        {% else %}
+            <p>このリードに関連するメールはありません。</p>
+        {% endif %}
+    </div>
+</div>
 {% endblock %}
 
 {% block scripts %}
