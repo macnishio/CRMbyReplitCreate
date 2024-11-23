@@ -666,7 +666,7 @@ window.onclick = function(event) {
                 <a href="{{ url_for('schedules.edit_schedule', id=schedule.id) }}" class="btn btn-edit">
                     <i class="fas fa-edit"></i> 編集
                 </a>
-                <button type="button" onclick="deleteSchedule({{ schedule.id }})" class="btn btn-delete">
+                <button type="button" onclick="showDeleteConfirmModal({{ schedule.id }})" class="btn btn-delete">
                     <i class="fas fa-trash"></i> 削除
                 </button>
             </div>
