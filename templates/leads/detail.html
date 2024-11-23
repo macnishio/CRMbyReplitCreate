@@ -188,7 +188,7 @@
                         <tr>
                             <td>{{ email.sender }}</td>
                             <td>{{ email.subject }}</td>
-                            <td>{{ email.received_at.strftime('%Y年%m月%d日 %H:%M:%S') }}</td>
+                            <td>{{ email.created_at.strftime('%Y年%m月%d日 %H:%M:%S') }}</td>
                             <td>
                                 <button onclick="toggleEmailContent({{ email.id }})">内容を表示</button>
                             </td>

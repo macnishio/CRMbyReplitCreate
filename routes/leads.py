@@ -316,8 +316,8 @@ def lead_detail(id):
         flash('このリードを閲覧する権限がありません。', 'error')
         return redirect(url_for('leads.list_leads'))
     
-    # 関連メールを取得
-    emails = Email.query.filter_by(lead_id=lead.id).order_by(Email.received_at.desc()).all()
+    # 関連メールを作成日時でソート
+    emails = Email.query.filter_by(lead_id=lead.id).order_by(Email.created_at.desc()).all()
     return render_template('leads/detail.html', lead=lead, emails=emails)
 
 @bp.route('/delete/<int:id>', methods=['POST'])
