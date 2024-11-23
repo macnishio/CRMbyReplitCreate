@@ -500,8 +500,6 @@
                             <span class="stat-value">{{ schedules|selectattr('start_time', 'le', now() + timedelta(days=7))|selectattr('start_time', 'ge', now())|list|length }}件</span>
                         </div>
 <script>
-// ソート機能のJavaScriptコードは{% block scripts %}内に移動しました
-</script>
 let scheduleToDelete = null;
 
 function showDeleteConfirmModal(scheduleId) {
@@ -509,6 +507,7 @@ function showDeleteConfirmModal(scheduleId) {
     const modal = document.getElementById('deleteConfirmModal');
     modal.style.display = 'block';
 }
+</script>
 
 function closeDeleteConfirmModal() {
     const modal = document.getElementById('deleteConfirmModal');
