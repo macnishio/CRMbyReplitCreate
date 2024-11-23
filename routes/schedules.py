@@ -24,7 +24,7 @@ def list_schedules():
         'date_from': request.args.get('date_from', ''),
         'date_to': request.args.get('date_to', ''),
         'page_size': int(request.args.get('page_size', 10)),
-        'sort_order': request.args.get('sort_order', 'asc')
+        'sort_order': request.args.get('sort_order', 'desc')
     }
     
     page = request.args.get('page', 1, type=int)

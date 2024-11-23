@@ -732,8 +732,6 @@ window.onclick = function(event) {
             <div class="email-content" id="modalContent"></div>
         </div>
     </div>
-    {% endblock %}
-
     {% block scripts %}
     <script>
         // スケジュール分析の実行
@@ -812,7 +810,7 @@ window.onclick = function(event) {
             // リセットボタンの機能
             document.getElementById('resetFiltersBtn').addEventListener('click', function() {
                 const sortInput = document.getElementById('sort_order');
-                sortInput.value = 'asc'; // ソート順もリセット
+                sortInput.value = 'desc'; // ソート順もリセット
                 const sortIcon = document.getElementById('sortIcon');
                 sortIcon.className = 'fas fa-sort';
                 document.getElementById('filterForm').reset();
@@ -875,4 +873,5 @@ window.onclick = function(event) {
             };
         });
     </script>
-    {% endblock %}
+    {% endblock scripts %}
+    {% endblock content %}
