@@ -500,6 +500,28 @@
                             <span class="stat-value">{{ schedules|selectattr('start_time', 'le', now() + timedelta(days=7))|selectattr('start_time', 'ge', now())|list|length }}件</span>
                         </div>
 <script>
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const sortButton = document.getElementById('sortButton');
+    const sortOrderInput = document.getElementById('sort_order');
+    const sortIcon = document.getElementById('sortIcon');
+    
+    sortButton.addEventListener('click', function() {
+        // 現在のソート順を取得
+        const currentOrder = sortOrderInput.value;
+        
+        // ソート順を切り替え
+        const newOrder = currentOrder === 'asc' ? 'desc' : 'asc';
+        sortOrderInput.value = newOrder;
+        
+        // アイコンを更新
+        sortIcon.className = `fas fa-sort-${newOrder === 'desc' ? 'up' : 'down'}`;
+        
+        // フォームを送信
+        document.getElementById('filterForm').submit();
+    });
+});
+</script>
 let scheduleToDelete = null;
 
 function showDeleteConfirmModal(scheduleId) {
