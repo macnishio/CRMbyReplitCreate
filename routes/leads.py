@@ -308,6 +308,15 @@ def edit_lead(id):
         return redirect(url_for('leads.list_leads'))
     return render_template('leads/edit_lead.html', lead=lead)
 
+@bp.route('/<int:id>/detail', methods=['GET'])
+@login_required
+def lead_detail(id):
+    lead = Lead.query.get_or_404(id)
+    if lead.user_id != current_user.id:
+        flash('このリードを閲覧する権限がありません。', 'error')
+        return redirect(url_for('leads.list_leads'))
+    return render_template('leads/detail.html', lead=lead)
+
 @bp.route('/delete/<int:id>', methods=['POST'])
 @login_required
 def delete_lead(id):

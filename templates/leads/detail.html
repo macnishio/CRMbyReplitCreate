@@ -1,25 +1,131 @@
 {% extends "base.html" %}
 
-{% block title %}Lead Details{% endblock %}
+{% block title %}リード詳細{% endblock %}
+
+{% block styles %}
+<style>
+.detail-container {
+    max-width: 800px;
+    margin: 2rem auto;
+    padding: 2rem;
+    background: #fff;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.lead-details {
+    margin-top: 1.5rem;
+}
+
+.detail-item {
+    padding: 1rem;
+    border-bottom: 1px solid #eee;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.detail-item:last-child {
+    border-bottom: none;
+}
+
+.detail-label {
+    font-weight: 600;
+    color: #4a5568;
+    width: 200px;
+}
+
+.detail-value {
+    color: #2d3748;
+    flex: 1;
+}
+
+.actions {
+    margin-top: 2rem;
+    display: flex;
+    gap: 1rem;
+    justify-content: flex-end;
+}
+
+.btn {
+    padding: 0.5rem 1.5rem;
+    border-radius: 4px;
+    cursor: pointer;
+    text-decoration: none;
+    transition: background-color 0.3s;
+}
+
+.btn-primary {
+    background: #4299e1;
+    color: white;
+}
+
+.btn-edit {
+    background: #48bb78;
+    color: white;
+}
+
+.btn-delete {
+    background: #f56565;
+    color: white;
+}
+
+.btn:hover {
+    opacity: 0.9;
+}
+</style>
+{% endblock %}
 
 {% block content %}
-    <h1>Lead Details</h1>
+<div class="detail-container">
+    <h1>リード詳細</h1>
     <div class="lead-details">
-        <p><strong>Name:</strong> {{ lead.name }}</p>
-        <p><strong>Email:</strong> {{ lead.email }}</p>
-        <p><strong>Phone:</strong> {{ lead.phone }}</p>
-        <p><strong>Status:</strong> {{ lead.status }}</p>
-        <p><strong>Score:</strong> {{ lead.score }}</p>
-        <p><strong>Created At:</strong> {{ lead.created_at.strftime('%Y-%m-%d %H:%M:%S') }}</p>
-        <p><strong>Last Contact:</strong> {{ lead.last_contact.strftime('%Y-%m-%d %H:%M:%S') }}</p>
+        <div class="detail-item">
+            <span class="detail-label">名前:</span>
+            <span class="detail-value">{{ lead.name or '未設定' }}</span>
+        </div>
+        <div class="detail-item">
+            <span class="detail-label">メールアドレス:</span>
+            <span class="detail-value">{{ lead.email }}</span>
+        </div>
+        <div class="detail-item">
+            <span class="detail-label">電話番号:</span>
+            <span class="detail-value">{{ lead.phone or '未設定' }}</span>
+        </div>
+        <div class="detail-item">
+            <span class="detail-label">ステータス:</span>
+            <span class="detail-value">{{ lead.status }}</span>
+        </div>
+        <div class="detail-item">
+            <span class="detail-label">スコア:</span>
+            <span class="detail-value">{{ "%.1f"|format(lead.score) }}</span>
+        </div>
+        <div class="detail-item">
+            <span class="detail-label">作成日時:</span>
+            <span class="detail-value">{{ lead.created_at.strftime('%Y年%m月%d日 %H:%M:%S') }}</span>
+        </div>
+        <div class="detail-item">
+            <span class="detail-label">最終接触日時:</span>
+            <span class="detail-value">
+                {% if lead.last_contact %}
+                    {{ lead.last_contact.strftime('%Y年%m月%d日 %H:%M:%S') }}
+                {% else %}
+                    未接触
+                {% endif %}
+            </span>
+        </div>
     </div>
     <div class="actions">
-        <a href="{{ url_for('leads.edit_lead', id=lead.id) }}" class="button">Edit Lead</a>
+        <a href="{{ url_for('leads.list_leads') }}" class="btn btn-primary">一覧に戻る</a>
+        <a href="{{ url_for('leads.edit_lead', id=lead.id) }}" class="btn btn-edit">編集</a>
         <form action="{{ url_for('leads.delete_lead', id=lead.id) }}" method="POST" style="display: inline;">
-            <input type="submit" value="Delete Lead" class="button delete" onclick="return confirm('Are you sure?');">
+            <button type="submit" class="btn btn-delete" onclick="return confirm('このリードを削除してもよろしいですか？');">
+                削除
+            </button>
         </form>
-        <a href="{{ url_for('leads.send_individual_follow_up', id=lead.id) }}" class="button">Send Follow-up Email</a>
     </div>
+</div>
+{% endblock %}
 
     <h2>Associated Emails</h2>
     <a href="{{ url_for('leads.refresh_lead_emails', id=lead.id) }}" class="button">Refresh Emails</a>
