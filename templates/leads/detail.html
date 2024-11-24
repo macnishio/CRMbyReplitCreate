@@ -92,14 +92,60 @@
     background: #fff;
     border: 1px solid #e2e8f0;
     border-radius: 8px;
-    padding: 1rem;
-    cursor: pointer;
-    transition: all 0.3s ease;
+    margin-bottom: 1rem;
+    overflow: hidden;
 }
 
-.email-card:hover, .email-card:active {
-    transform: translateY(-2px);
-    box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+.email-card-header {
+    background: #f8fafc;
+    padding: 1rem;
+    cursor: pointer;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    transition: background-color 0.3s ease;
+}
+
+.email-card-header:hover {
+    background: #edf2f7;
+}
+
+.header-content {
+    flex: 1;
+}
+
+.accordion-icon {
+    margin-left: 1rem;
+    transition: transform 0.3s ease;
+}
+
+.accordion-icon.active {
+    transform: rotate(180deg);
+}
+
+.email-card-body {
+    max-height: 0;
+    overflow: hidden;
+    transition: max-height 0.3s ease-out;
+    padding: 0 1rem;
+}
+
+.email-card-body.active {
+    max-height: 500px;
+    padding: 1rem;
+}
+
+.preview-content {
+    margin-bottom: 1rem;
+    color: #4a5568;
+    font-size: 0.9rem;
+    line-height: 1.5;
+}
+
+.view-details {
+    display: inline-block;
+    padding: 0.5rem 1rem;
+    font-size: 0.875rem;
 }
 
 .email-card-header {
@@ -399,18 +445,24 @@
         {% if emails %}
             <div class="email-cards">
                 {% for email in emails %}
-                    <div class="email-card" onclick="showEmailModal('{{ email.id }}')">
-                        <div class="email-card-header">
-                            <h3 class="email-subject">{{ email.subject or '(件名なし)' }}</h3>
-                            <span class="email-date">{{ email.created_at.strftime('%Y年%m月%d日 %H:%M:%S') }}</span>
+                    <div class="email-card">
+                        <div class="email-card-header" onclick="toggleAccordion({{ email.id }})">
+                            <div class="header-content">
+                                <h3 class="email-subject">{{ email.subject or '(件名なし)' }}</h3>
+                                <span class="email-date">{{ email.created_at.strftime('%Y年%m月%d日 %H:%M:%S') }}</span>
+                            </div>
+                            <span class="accordion-icon">▼</span>
                         </div>
-                        <div class="email-card-body">
+                        <div class="email-card-body" id="email-content-{{ email.id }}">
                             <div class="email-sender">
                                 <span class="label">送信者:</span>
                                 <span class="value">{{ email.sender }}</span>
                             </div>
                             <div class="email-preview">
-                                タップして詳細を表示
+                                <div class="preview-content">{{ email.content[:200] + '...' if email.content else '本文なし' }}</div>
+                                <button class="btn btn-primary view-details" onclick="showEmailModal('{{ email.id }}')">
+                                    詳細を表示
+                                </button>
                             </div>
                         </div>
                     </div>
@@ -464,6 +516,31 @@
 <!-- Font Awesome from cdnjs -->
 <script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/js/all.min.js" crossorigin="anonymous"></script>
 <script>
+// アコーディオンの開閉を制御する関数
+function toggleAccordion(emailId) {
+    const content = document.getElementById(`email-content-${emailId}`);
+    const icon = content.previousElementSibling.querySelector('.accordion-icon');
+    const allContents = document.querySelectorAll('.email-card-body');
+    const allIcons = document.querySelectorAll('.accordion-icon');
+
+    // 他のすべてのアコーディオンを閉じる
+    allContents.forEach(item => {
+        if (item !== content && item.classList.contains('active')) {
+            item.classList.remove('active');
+        }
+    });
+    
+    allIcons.forEach(item => {
+        if (item !== icon && item.classList.contains('active')) {
+            item.classList.remove('active');
+        }
+    });
+
+    // クリックされたアコーディオンの状態を切り替え
+    content.classList.toggle('active');
+    icon.classList.toggle('active');
+}
+
 // Define showEmailModal function first
 window.showEmailModal = async function(emailId) {
     try {
