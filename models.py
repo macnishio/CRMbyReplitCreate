@@ -170,6 +170,7 @@ class Email(db.Model):
     subject: Mapped[str] = mapped_column(String(200))
     content: Mapped[str] = mapped_column(Text)
     received_date: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow)
+    created_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow)
     lead_id: Mapped[int] = mapped_column(Integer, ForeignKey('leads.id'), nullable=False)
     user_id: Mapped[int] = mapped_column(Integer, ForeignKey('users.id'), nullable=False)
     ai_analysis: Mapped[Optional[str]] = mapped_column(Text, nullable=True)
