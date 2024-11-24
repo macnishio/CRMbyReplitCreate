@@ -81,22 +81,94 @@
     border-radius: 8px;
 }
 
-.email-table {
-    width: 100%;
-    border-collapse: collapse;
+.email-cards {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
     margin-top: 1rem;
 }
 
-.email-table th,
-.email-table td {
-    padding: 0.75rem;
+.email-card {
+    background: #fff;
     border: 1px solid #e2e8f0;
-    text-align: left;
+    border-radius: 8px;
+    padding: 1rem;
+    cursor: pointer;
+    transition: all 0.3s ease;
 }
 
-.email-table th {
-    background: #edf2f7;
+.email-card:hover, .email-card:active {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+}
+
+.email-card-header {
+    margin-bottom: 0.5rem;
+}
+
+.email-subject {
+    font-size: 1rem;
     font-weight: 600;
+    margin: 0;
+    color: #2d3748;
+}
+
+.email-date {
+    display: block;
+    font-size: 0.875rem;
+    color: #718096;
+    margin-top: 0.25rem;
+}
+
+.email-card-body {
+    font-size: 0.875rem;
+}
+
+.email-sender {
+    display: flex;
+    gap: 0.5rem;
+    margin-bottom: 0.5rem;
+}
+
+.email-sender .label {
+    color: #718096;
+}
+
+.email-sender .value {
+    color: #2d3748;
+}
+
+.email-preview {
+    color: #718096;
+    font-style: italic;
+}
+
+/* モバイル向けのモーダル最適化 */
+@media (max-width: 768px) {
+    .modal-content {
+        width: 95%;
+        margin: 2.5% auto;
+        padding: 1rem;
+    }
+
+    .close-button {
+        font-size: 24px;
+        padding: 0.5rem;
+    }
+
+    .modal-header h3 {
+        font-size: 1.1rem;
+        padding-right: 2rem;
+    }
+
+    .modal-body {
+        padding: 1rem 0;
+    }
+
+    .email-content {
+        font-size: 0.9rem;
+        padding: 0.75rem;
+    }
 }
 
 .email-content {
@@ -325,28 +397,25 @@
     <div class="email-section">
         <h2>関連メール</h2>
         {% if emails %}
-            <table class="email-table">
-                <thead>
-                    <tr>
-                        <th>送信者</th>
-                        <th>件名</th>
-                        <th>受信日時</th>
-                        <th>操作</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {% for email in emails %}
-                        <tr>
-                            <td>{{ email.sender }}</td>
-                            <td>{{ email.subject }}</td>
-                            <td>{{ email.created_at.strftime('%Y年%m月%d日 %H:%M:%S') }}</td>
-                            <td>
-                                <button onclick="showEmailModal('{{ email.id }}')">内容を表示</button>
-                            </td>
-                        </tr>
-                    {% endfor %}
-                </tbody>
-            </table>
+            <div class="email-cards">
+                {% for email in emails %}
+                    <div class="email-card" onclick="showEmailModal('{{ email.id }}')">
+                        <div class="email-card-header">
+                            <h3 class="email-subject">{{ email.subject or '(件名なし)' }}</h3>
+                            <span class="email-date">{{ email.created_at.strftime('%Y年%m月%d日 %H:%M:%S') }}</span>
+                        </div>
+                        <div class="email-card-body">
+                            <div class="email-sender">
+                                <span class="label">送信者:</span>
+                                <span class="value">{{ email.sender }}</span>
+                            </div>
+                            <div class="email-preview">
+                                タップして詳細を表示
+                            </div>
+                        </div>
+                    </div>
+                {% endfor %}
+            </div>
         {% else %}
             <p>このリードに関連するメールはありません。</p>
         {% endif %}
