@@ -94,6 +94,37 @@
     border-radius: 8px;
     margin-bottom: 1rem;
     overflow: hidden;
+    touch-action: pan-x pan-y;
+    transition: transform 0.2s ease;
+}
+
+.email-menu {
+    background: white;
+    border-radius: 8px;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+    overflow: hidden;
+    z-index: 1000;
+}
+
+.menu-item {
+    padding: 12px 20px;
+    cursor: pointer;
+    transition: background-color 0.2s;
+}
+
+.menu-item:hover {
+    background-color: #f7fafc;
+}
+
+@media (max-width: 768px) {
+    .email-card {
+        user-select: none;
+        -webkit-user-select: none;
+    }
+    
+    .email-menu {
+        width: 200px;
+    }
 }
 
 .email-card-header {
@@ -513,6 +544,121 @@
 {% endblock %}
 
 {% block scripts %}
+<!-- タッチジェスチャー用のスクリプトを追加 -->
+<script>
+// タッチ操作の状態を管理する変数
+let touchStartX = 0;
+let touchStartY = 0;
+let touchStartTime = 0;
+let longPressTimer;
+let isSwiping = false;
+
+// タッチ開始時の処理
+function handleTouchStart(event, emailCard) {
+    touchStartX = event.touches[0].clientX;
+    touchStartY = event.touches[0].clientY;
+    touchStartTime = new Date().getTime();
+    
+    // 長押し検出用のタイマーを設定
+    longPressTimer = setTimeout(() => {
+        showEmailMenu(emailCard);
+    }, 500);
+    
+    isSwiping = false;
+}
+
+// タッチ移動時の処理
+function handleTouchMove(event, emailCard) {
+    if (!touchStartX || !touchStartY) return;
+    
+    const touchEndX = event.touches[0].clientX;
+    const touchEndY = event.touches[0].clientY;
+    const deltaX = touchEndX - touchStartX;
+    const deltaY = touchEndY - touchStartY;
+    
+    // 水平方向の移動が垂直方向より大きい場合のみスワイプと判定
+    if (Math.abs(deltaX) > Math.abs(deltaY) && Math.abs(deltaX) > 30) {
+        isSwiping = true;
+        clearTimeout(longPressTimer);
+        
+        // スワイプ中のアニメーション
+        emailCard.style.transform = `translateX(${deltaX}px)`;
+    }
+}
+
+// タッチ終了時の処理
+function handleTouchEnd(event, emailCard, emailId) {
+    const touchEndTime = new Date().getTime();
+    const touchDuration = touchEndTime - touchStartTime;
+    
+    clearTimeout(longPressTimer);
+    
+    if (isSwiping) {
+        const touchEndX = event.changedTouches[0].clientX;
+        const deltaX = touchEndX - touchStartX;
+        
+        // スワイプ距離が十分な場合、アコーディオンを開閉
+        if (Math.abs(deltaX) > 100) {
+            toggleAccordion(emailId);
+        }
+        
+        // 位置をリセット
+        emailCard.style.transform = '';
+    } else if (touchDuration < 500) {
+        // タップ（短押し）の場合、メール詳細を表示
+        showEmailModal(emailId);
+    }
+    
+    // 状態をリセット
+    touchStartX = 0;
+    touchStartY = 0;
+    isSwiping = false;
+}
+
+// メールメニューを表示
+function showEmailMenu(emailCard) {
+    const menu = document.createElement('div');
+    menu.className = 'email-menu';
+    menu.innerHTML = `
+        <div class="menu-item">返信</div>
+        <div class="menu-item">転送</div>
+        <div class="menu-item">タスク作成</div>
+        <div class="menu-item">スケジュール作成</div>
+    `;
+    
+    // メニューの位置を設定
+    const rect = emailCard.getBoundingClientRect();
+    menu.style.position = 'fixed';
+    menu.style.top = `${rect.top}px`;
+    menu.style.left = `${rect.left}px`;
+    
+    document.body.appendChild(menu);
+    
+    // メニュー以外をクリックしたら閉じる
+    const closeMenu = (e) => {
+        if (!menu.contains(e.target)) {
+            menu.remove();
+            document.removeEventListener('click', closeMenu);
+        }
+    };
+    
+    setTimeout(() => {
+        document.addEventListener('click', closeMenu);
+    }, 0);
+}
+
+// 各メールカードにタッチイベントを設定
+document.addEventListener('DOMContentLoaded', () => {
+    const emailCards = document.querySelectorAll('.email-card');
+    emailCards.forEach(card => {
+        const emailId = card.querySelector('.email-card-body').id.replace('email-content-', '');
+        
+        card.addEventListener('touchstart', (e) => handleTouchStart(e, card));
+        card.addEventListener('touchmove', (e) => handleTouchMove(e, card));
+        card.addEventListener('touchend', (e) => handleTouchEnd(e, card, emailId));
+    });
+});
+</script>
 <!-- Font Awesome from cdnjs -->
 <script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/js/all.min.js" crossorigin="anonymous"></script>
 <script>
