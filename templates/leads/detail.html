@@ -392,25 +392,78 @@
 {% endblock %}
 
 {% block scripts %}
-<!-- Font Awesome -->
-<script src="https://kit.fontawesome.com/your-code.js" crossorigin="anonymous"></script>
+<!-- Font Awesome from cdnjs -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/js/all.min.js" crossorigin="anonymous"></script>
 <script>
+// Initialize global variables
+let currentEmailId = null;
+let modal = null;
+let modalSubject = null;
+let modalInfo = null;
+let modalContent = null;
+let aiAnalysisContent = null;
+let closeButton = null;
+
+// Initialize modal elements and event listeners when DOM is loaded
 document.addEventListener('DOMContentLoaded', function() {
-    let currentEmailId = null;
-
     // Initialize modal elements
-    const modal = document.getElementById('emailModal');
-    const modalSubject = document.getElementById('modalEmailSubject');
-    const modalInfo = document.getElementById('modalEmailInfo');
-    const modalContent = document.getElementById('modalEmailContent');
-    const aiAnalysisContent = document.getElementById('aiAnalysisContent');
-    const closeButton = document.querySelector('.close-button');
+    modal = document.getElementById('emailModal');
+    modalSubject = document.getElementById('modalEmailSubject');
+    modalInfo = document.getElementById('modalEmailInfo');
+    modalContent = document.getElementById('modalEmailContent');
+    aiAnalysisContent = document.getElementById('aiAnalysisContent');
+    closeButton = document.querySelector('.close-button');
 
-    // Define showEmailModal function in global scope
-    window.showEmailModal = function(emailId) {
+    // Add event listeners if elements exist
+    if (modal && closeButton) {
+        // Close modal when clicking outside
+        window.onclick = function(event) {
+            if (event.target === modal) {
+                closeModal();
+            }
+        };
+
+        // Close modal with Escape key
+        document.addEventListener('keydown', function(event) {
+            if (event.key === 'Escape' && modal.style.display === 'block') {
+                closeModal();
+            }
+        });
+
+        // Close button event listener
+        closeButton.addEventListener('click', closeModal);
+    } else {
+        console.error('Modal elements not found. Modal functionality will be limited.');
+    }
+});
+
+// Helper function to safely set text content
+function safeSetTextContent(element, text) {
+    if (element) {
+        element.textContent = text || '';
+    }
+}
+
+// Helper function to safely set innerHTML
+function safeSetInnerHTML(element, html) {
+    if (element) {
+        element.innerHTML = html || '';
+    }
+}
+
+// Close modal function
+function closeModal() {
+    if (modal) {
+        modal.style.display = 'none';
+        currentEmailId = null;
+    }
+}
+
+// Define showEmailModal function in global scope
+window.showEmailModal = function(emailId) {
+        try {
         if (!modal || !modalSubject || !modalInfo || !modalContent || !aiAnalysisContent) {
-            console.error('必要なモーダル要素が見つかりません');
-            return;
+            throw new Error('必要なモーダル要素が見つかりません');
         }
 
         currentEmailId = emailId;
@@ -418,18 +471,22 @@ document.addEventListener('DOMContentLoaded', function() {
         // Find the email row in the table
         const emailButton = document.querySelector(`button[onclick="showEmailModal('${emailId}')"]`);
         if (!emailButton) {
-            console.error('メール行が見つかりません');
-            return;
+            throw new Error('メール行が見つかりません');
         }
 
         const emailRow = emailButton.closest('tr');
-        const subject = emailRow.cells[1].textContent;
-        const sender = emailRow.cells[0].textContent;
-        const date = emailRow.cells[2].textContent;
+        if (!emailRow || !emailRow.cells || emailRow.cells.length < 3) {
+            throw new Error('メールデータが不正です');
+        }
+
+        // Safely get text content
+        const subject = emailRow.cells[1].textContent || '件名なし';
+        const sender = emailRow.cells[0].textContent || '送信者不明';
+        const date = emailRow.cells[2].textContent || '日時不明';
         
-        // Update modal content
-        modalSubject.textContent = subject;
-        modalInfo.innerHTML = `<strong>送信者:</strong> ${sender}<br><strong>受信日時:</strong> ${date}`;
+        // Safely update modal content
+        safeSetTextContent(modalSubject, subject);
+        safeSetInnerHTML(modalInfo, `<strong>送信者:</strong> ${sender}<br><strong>受信日時:</strong> ${date}`);
         
         {% for email in emails %}
         if (emailId === '{{ email.id }}') {
