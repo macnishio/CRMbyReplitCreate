@@ -530,5 +530,85 @@ document.addEventListener('keydown', function(event) {
     }
 });
 </script>
+<script>
+// AI Analysis function
+async function analyzeEmail() {
+    try {
+        const currentEmailId = document.querySelector('#emailModal').dataset.emailId;
+        const analysisButton = document.querySelector('#analyzeButton');
+        const analysisContent = document.querySelector('#aiAnalysisContent');
+        const analysisResult = document.querySelector('#analysisResult');
+        
+        // Update button state
+        analysisButton.disabled = true;
+        analysisButton.innerHTML = '<i class="fas fa-spinner fa-spin"></i> 分析中...';
+        
+        // Show analysis section
+        analysisContent.style.display = 'block';
+        analysisResult.innerHTML = '<div class="loading-spinner">AI分析を実行中...</div>';
+        
+        // Call API endpoint
+        const response = await fetch(`/api/emails/${currentEmailId}/analyze`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            }
+        });
+        
+        const data = await response.json();
+        
+        if (!response.ok) {
+            throw new Error(data.error || 'AI分析中にエラーが発生しました');
+        }
+        
+        // Parse and display analysis results
+        let analysisHtml = '';
+        
+        if (data.tasks && data.tasks.length > 0) {
+            const tasksList = document.getElementById('tasksList');
+            const tasksContainer = document.getElementById('tasksContainer');
+            
+            tasksList.style.display = 'block';
+            tasksContainer.innerHTML = data.tasks.map(task => `
+                <li class="list-group-item">
+                    <strong>${escapeHtml(task.title)}</strong><br>
+                    期限: ${new Date(task.due_date).toLocaleDateString('ja-JP')}
+                </li>
+            `).join('');
+        }
+        
+        if (data.schedules && data.schedules.length > 0) {
+            const schedulesList = document.getElementById('schedulesList');
+            const schedulesContainer = document.getElementById('schedulesContainer');
+            
+            schedulesList.style.display = 'block';
+            schedulesContainer.innerHTML = data.schedules.map(schedule => `
+                <li class="list-group-item">
+                    <strong>${escapeHtml(schedule.title)}</strong><br>
+                    開始: ${new Date(schedule.start_time).toLocaleString('ja-JP')}<br>
+                    終了: ${new Date(schedule.end_time).toLocaleString('ja-JP')}
+                </li>
+            `).join('');
+        }
+        
+        // Show success message
+        analysisResult.innerHTML = '<div class="alert alert-success">AI分析が完了しました。</div>';
+        
+    } catch (error) {
+        console.error('AI分析エラー:', error);
+        const analysisResult = document.querySelector('#analysisResult');
+        analysisResult.innerHTML = `
+            <div class="alert alert-danger">
+                ${error.message || 'AI分析中にエラーが発生しました。'}
+            </div>
+        `;
+    } finally {
+        // Reset button state
+        const analysisButton = document.querySelector('#analyzeButton');
+        analysisButton.disabled = false;
+        analysisButton.innerHTML = '<i class="fas fa-robot"></i> AI分析を実行';
+    }
+}
+</script>
 
 {% endblock %}
