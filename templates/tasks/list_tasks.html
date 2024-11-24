@@ -209,122 +209,6 @@
                         <input type="date" name="date_to" value="{{ filters.date_to or '' }}">
                     </div>
                 </div>
-// タスク削除の処理
-document.querySelectorAll('.task-delete-btn').forEach(btn => {
-    btn.addEventListener('click', async function(e) {
-        e.preventDefault();
-        
-        if (!confirm('このタスクを削除してもよろしいですか？')) {
-            return;
-        }
-        
-        const taskId = this.dataset.taskId;
-        try {
-            const response = await fetch(`/tasks/delete/${taskId}`, {
-                method: 'DELETE',
-                headers: {
-                    'X-Requested-With': 'XMLHttpRequest'
-                }
-            });
-            
-            const result = await response.json();
-            
-            if (result.success) {
-                // タスクカードを削除
-                const taskCard = this.closest('.task-card');
-                taskCard.remove();
-                
-                // 成功メッセージを表示
-                const alertDiv = document.createElement('div');
-                alertDiv.className = 'alert alert-success';
-                alertDiv.textContent = result.message;
-                document.querySelector('.task-manager').insertBefore(alertDiv, document.querySelector('.filter-section'));
-                
-                // 3秒後にメッセージを消す
-                setTimeout(() => alertDiv.remove(), 3000);
-            } else {
-                // エラーメッセージを表示
-                const alertDiv = document.createElement('div');
-                alertDiv.className = 'alert alert-danger';
-                alertDiv.textContent = result.message;
-                document.querySelector('.task-manager').insertBefore(alertDiv, document.querySelector('.filter-section'));
-                
-                // 3秒後にメッセージを消す
-                setTimeout(() => alertDiv.remove(), 3000);
-            }
-        } catch (error) {
-            console.error('Error:', error);
-            // エラーメッセージを表示
-            const alertDiv = document.createElement('div');
-            alertDiv.className = 'alert alert-danger';
-            alertDiv.textContent = 'タスクの削除中にエラーが発生しました。';
-            document.querySelector('.task-manager').insertBefore(alertDiv, document.querySelector('.filter-section'));
-            
-            // 3秒後にメッセージを消す
-            setTimeout(() => alertDiv.remove(), 3000);
-        }
-    });
-});
-
-// 一括削除の処理
-document.getElementById('bulkForm').addEventListener('submit', async function(e) {
-    if (this.querySelector('#bulk-action').value === 'delete') {
-        e.preventDefault();
-        
-        if (!confirm('選択したタスクを削除してもよろしいですか？')) {
-            return;
-        }
-        
-        try {
-            const formData = new FormData(this);
-            const response = await fetch('/tasks/bulk_action', {
-                method: 'POST',
-                headers: {
-                    'X-Requested-With': 'XMLHttpRequest'
-                },
-                body: formData
-            });
-            
-            const result = await response.json();
-            
-            if (result.success) {
-                // 選択されたタスクを削除
-                formData.getAll('selected_tasks[]').forEach(taskId => {
-                    const taskCard = document.querySelector(`.task-card[data-task-id="${taskId}"]`);
-                    if (taskCard) taskCard.remove();
-                });
-                
-                // 成功メッセージを表示
-                const alertDiv = document.createElement('div');
-                alertDiv.className = 'alert alert-success';
-                alertDiv.textContent = result.message;
-                document.querySelector('.task-manager').insertBefore(alertDiv, document.querySelector('.filter-section'));
-                
-                // 3秒後にメッセージを消す
-                setTimeout(() => alertDiv.remove(), 3000);
-            } else {
-                // エラーメッセージを表示
-                const alertDiv = document.createElement('div');
-                alertDiv.className = 'alert alert-danger';
-                alertDiv.textContent = result.message;
-                document.querySelector('.task-manager').insertBefore(alertDiv, document.querySelector('.filter-section'));
-                
-                // 3秒後にメッセージを消す
-                setTimeout(() => alertDiv.remove(), 3000);
-            }
-        } catch (error) {
-            console.error('Error:', error);
-            // エラーメッセージを表示
-            const alertDiv = document.createElement('div');
-            alertDiv.className = 'alert alert-danger';
-            alertDiv.textContent = '一括削除中にエラーが発生しました。';
-            document.querySelector('.task-manager').insertBefore(alertDiv, document.querySelector('.filter-section'));
-            
-            // 3秒後にメッセージを消す
-            setTimeout(() => alertDiv.remove(), 3000);
-        }
-    }
-});
             </div>
 
             <!-- フィルターアクション -->
@@ -573,6 +457,133 @@ document.getElementById('bulkForm').addEventListener('submit', async function(e)
     </div>
 </div>
 
+{% block scripts %}
+<script>
+// タスク削除のUI関連のヘルパー関数
+const createMessage = (message, type) => {
+    const alertDiv = document.createElement('div');
+    alertDiv.className = `alert alert-${type}`;
+    alertDiv.textContent = message;
+    
+    const taskManager = document.querySelector('.task-manager');
+    const filterSection = document.querySelector('.filter-section');
+    taskManager.insertBefore(alertDiv, filterSection);
+    
+    setTimeout(() => alertDiv.remove(), 3000);
+};
+
+const setLoadingState = (button, isLoading) => {
+    if (isLoading) {
+        button.disabled = true;
+        button.innerHTML = '<i class="fas fa-spinner fa-spin"></i>';
+    } else {
+        button.disabled = false;
+        button.innerHTML = '<i class="fas fa-trash"></i>';
+    }
+};
+
+// タスク削除の処理
+document.querySelectorAll('.task-delete-btn').forEach(btn => {
+    btn.addEventListener('click', async function(e) {
+        e.preventDefault();
+        
+        if (!confirm('このタスクを削除してもよろしいですか？')) {
+            return;
+        }
+        
+        setLoadingState(this, true);
+        const taskId = this.dataset.taskId;
+        
+        try {
+            const response = await fetch(`/tasks/delete/${taskId}`, {
+                method: 'DELETE',
+                headers: {
+                    'X-Requested-With': 'XMLHttpRequest',
+                    'Content-Type': 'application/json'
+                }
+            });
+            
+            const result = await response.json();
+            
+            if (response.ok && result.success) {
+                // タスクカードをフェードアウトして削除
+                const taskCard = this.closest('.task-card');
+                taskCard.style.transition = 'opacity 0.3s ease';
+                taskCard.style.opacity = '0';
+                setTimeout(() => taskCard.remove(), 300);
+                
+                createMessage(result.message, 'success');
+            } else {
+                let errorMessage = result.message;
+                if (response.status === 404) {
+                    errorMessage = 'タスクが見つかりません。';
+                } else if (response.status === 403) {
+                    errorMessage = 'このタスクを削除する権限がありません。';
+                } else if (response.status === 500) {
+                    errorMessage = 'サーバーエラーが発生しました。';
+                }
+                createMessage(errorMessage, 'danger');
+            }
+        } catch (error) {
+            console.error('Error:', error);
+            createMessage('タスクの削除中にエラーが発生しました。', 'danger');
+        } finally {
+            setLoadingState(this, false);
+        }
+    });
+});
+
+// 一括削除の処理
+document.getElementById('bulkForm').addEventListener('submit', async function(e) {
+    if (this.querySelector('#bulk-action').value === 'delete') {
+        e.preventDefault();
+        
+        if (!confirm('選択したタスクを削除してもよろしいですか？')) {
+            return;
+        }
+        
+        const submitButton = this.querySelector('#bulkActionSubmit');
+        submitButton.disabled = true;
+        submitButton.innerHTML = '<i class="fas fa-spinner fa-spin"></i> 処理中...';
+        
+        try {
+            const formData = new FormData(this);
+            const response = await fetch('/tasks/bulk_action', {
+                method: 'POST',
+                headers: {
+                    'X-Requested-With': 'XMLHttpRequest'
+                },
+                body: formData
+            });
+            
+            const result = await response.json();
+            
+            if (response.ok && result.success) {
+                // 選択されたタスクをフェードアウトして削除
+                formData.getAll('selected_tasks[]').forEach(taskId => {
+                    const taskCard = document.querySelector(`.task-card[data-task-id="${taskId}"]`);
+                    if (taskCard) {
+                        taskCard.style.transition = 'opacity 0.3s ease';
+                        taskCard.style.opacity = '0';
+                        setTimeout(() => taskCard.remove(), 300);
+                    }
+                });
+                
+                createMessage(result.message, 'success');
+            } else {
+                createMessage(result.message || 'タスクの削除中にエラーが発生しました。', 'danger');
+            }
+        } catch (error) {
+            console.error('Error:', error);
+            createMessage('一括削除中にエラーが発生しました。', 'danger');
+        } finally {
+            submitButton.disabled = false;
+            submitButton.innerHTML = '適用';
+        }
+    }
+});
+</script>
+{% endblock %}
 <style>
 /* Base styles */
 .task-manager {
@@ -1310,5 +1321,122 @@ document.addEventListener('DOMContentLoaded', function() {
         return confirm('選択したタスクに対して操作を実行してもよろしいですか？');
     };
 });
+
+    // タスク削除の処理
+    document.querySelectorAll('.task-delete-btn').forEach(btn => {
+        btn.addEventListener('click', async function(e) {
+            e.preventDefault();
+
+            if (!confirm('このタスクを削除してもよろしいですか？')) {
+                return;
+            }
+
+            const taskId = this.dataset.taskId;
+            try {
+                const response = await fetch(`/tasks/delete/${taskId}`, {
+                    method: 'DELETE',
+                    headers: {
+                        'X-Requested-With': 'XMLHttpRequest'
+                    }
+                });
+
+                const result = await response.json();
+
+                if (result.success) {
+                    // タスクカードを削除
+                    const taskCard = this.closest('.task-card');
+                    taskCard.remove();
+
+                    // 成功メッセージを表示
+                    const alertDiv = document.createElement('div');
+                    alertDiv.className = 'alert alert-success';
+                    alertDiv.textContent = result.message;
+                    document.querySelector('.task-manager').insertBefore(alertDiv, document.querySelector('.filter-section'));
+
+                    // 3秒後にメッセージを消す
+                    setTimeout(() => alertDiv.remove(), 3000);
+                } else {
+                    // エラーメッセージを表示
+                    const alertDiv = document.createElement('div');
+                    alertDiv.className = 'alert alert-danger';
+                    alertDiv.textContent = result.message;
+                    document.querySelector('.task-manager').insertBefore(alertDiv, document.querySelector('.filter-section'));
+
+                    // 3秒後にメッセージを消す
+                    setTimeout(() => alertDiv.remove(), 3000);
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                // エラーメッセージを表示
+                const alertDiv = document.createElement('div');
+                alertDiv.className = 'alert alert-danger';
+                alertDiv.textContent = 'タスクの削除中にエラーが発生しました。';
+                document.querySelector('.task-manager').insertBefore(alertDiv, document.querySelector('.filter-section'));
+
+                // 3秒後にメッセージを消す
+                setTimeout(() => alertDiv.remove(), 3000);
+            }
+        });
+    });
+
+    // 一括削除の処理
+    document.getElementById('bulkForm').addEventListener('submit', async function(e) {
+        if (this.querySelector('#bulk-action').value === 'delete') {
+            e.preventDefault();
+
+            if (!confirm('選択したタスクを削除してもよろしいですか？')) {
+                return;
+            }
+
+            try {
+                const formData = new FormData(this);
+                const response = await fetch('/tasks/bulk_action', {
+                    method: 'POST',
+                    headers: {
+                        'X-Requested-With': 'XMLHttpRequest'
+                    },
+                    body: formData
+                });
+
+                const result = await response.json();
+
+                if (result.success) {
+                    // 選択されたタスクを削除
+                    formData.getAll('selected_tasks[]').forEach(taskId => {
+                        const taskCard = document.querySelector(`.task-card[data-task-id="${taskId}"]`);
+                        if (taskCard) taskCard.remove();
+                    });
+
+                    // 成功メッセージを表示
+                    const alertDiv = document.createElement('div');
+                    alertDiv.className = 'alert alert-success';
+                    alertDiv.textContent = result.message;
+                    document.querySelector('.task-manager').insertBefore(alertDiv, document.querySelector('.filter-section'));
+
+                    // 3秒後にメッセージを消す
+                    setTimeout(() => alertDiv.remove(), 3000);
+                } else {
+                    // エラーメッセージを表示
+                    const alertDiv = document.createElement('div');
+                    alertDiv.className = 'alert alert-danger';
+                    alertDiv.textContent = result.message;
+                    document.querySelector('.task-manager').insertBefore(alertDiv, document.querySelector('.filter-section'));
+
+                    // 3秒後にメッセージを消す
+                    setTimeout(() => alertDiv.remove(), 3000);
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                // エラーメッセージを表示
+                const alertDiv = document.createElement('div');
+                alertDiv.className = 'alert alert-danger';
+                alertDiv.textContent = '一括削除中にエラーが発生しました。';
+                document.querySelector('.task-manager').insertBefore(alertDiv, document.querySelector('.filter-section'));
+
+                // 3秒後にメッセージを消す
+                setTimeout(() => alertDiv.remove(), 3000);
+            }
+        }
+    });
 </script>
 {% endblock %}

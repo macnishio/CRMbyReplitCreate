@@ -284,41 +284,64 @@ def edit_task(id):
 @tasks_bp.route('/delete/<int:id>', methods=['POST', 'DELETE']) 
 @login_required
 def delete_task(id):
+    # Check if the request is AJAX
+    is_ajax = request.headers.get('X-Requested-With') == 'XMLHttpRequest'
+
     try:
-        task = Task.query.get_or_404(id)
-        
-        if task.user_id != current_user.id:
-            if request.is_xhr:
+        # Try to get the task and handle 404
+        task = Task.query.get(id)
+        if not task:
+            error_message = 'タスクが見つかりません。'
+            if is_ajax:
                 return jsonify({
                     'success': False,
-                    'message': 'このタスクを削除する権限がありません。'
-                }), 403
-            flash('このタスクを削除する権限がありません。', 'error')
+                    'message': error_message,
+                    'error_code': 'NOT_FOUND'
+                }), 404, {'Content-Type': 'application/json'}
+            flash(error_message, 'error')
+            return redirect(url_for('tasks.list_tasks'))
+        
+        # Check user permission
+        if task.user_id != current_user.id:
+            error_message = 'このタスクを削除する権限がありません。'
+            if is_ajax:
+                return jsonify({
+                    'success': False,
+                    'message': error_message,
+                    'error_code': 'FORBIDDEN'
+                }), 403, {'Content-Type': 'application/json'}
+            flash(error_message, 'error')
             return redirect(url_for('tasks.list_tasks'))
 
+        # Perform deletion
         db.session.delete(task)
         db.session.commit()
         
-        if request.is_xhr:
+        success_message = 'タスクが正常に削除されました。'
+        if is_ajax:
             return jsonify({
                 'success': True,
-                'message': 'タスクが正常に削除されました。'
-            })
+                'message': success_message,
+                'task_id': id
+            }), 200, {'Content-Type': 'application/json'}
             
-        flash('タスクが削除されました。', 'success')
+        flash(success_message, 'success')
         return redirect(url_for('tasks.list_tasks'))
         
     except Exception as e:
         db.session.rollback()
         current_app.logger.error(f"Task deletion error: {str(e)}")
         
-        if request.is_xhr:
+        error_message = 'タスクの削除中にエラーが発生しました。'
+        if is_ajax:
             return jsonify({
                 'success': False,
-                'message': 'タスクの削除中にエラーが発生しました。'
-            }), 500
+                'message': error_message,
+                'error_code': 'SERVER_ERROR',
+                'error_details': str(e) if current_app.debug else None
+            }), 500, {'Content-Type': 'application/json'}
             
-        flash('タスクの削除中にエラーが発生しました。', 'error')
+        flash(error_message, 'error')
         return redirect(url_for('tasks.list_tasks'))
 
 @tasks_bp.route('/analyze', methods=['POST'])
