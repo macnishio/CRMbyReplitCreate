@@ -414,9 +414,7 @@ window.showEmailModal = async function(emailId) {
         modalSubject.textContent = '';
         modalInfo.textContent = '';
         modalContent.textContent = '';
-        if (aiAnalysisContent.classList) {
-            aiAnalysisContent.innerHTML = '<div class="analysis-placeholder">AIによる分析を実行してください。</div>';
-        }
+        aiAnalysisContent.innerHTML = '<div class="analysis-placeholder">AIによる分析を実行してください。</div>';
 
         // Fetch email data
         const response = await fetch(`/api/emails/${emailId}`);
@@ -425,40 +423,28 @@ window.showEmailModal = async function(emailId) {
         }
 
         const data = await response.json();
-        
+
         // Safely update modal content
-        if (modalSubject) modalSubject.textContent = data.subject || '';
-        if (modalInfo) modalInfo.textContent = `${data.sender} - ${data.created_at}`;
-        if (modalContent) modalContent.textContent = data.content || '';
-        
+        modalSubject.textContent = data.subject || '';
+        modalInfo.textContent = `${data.sender} - ${data.created_at}`;
+        modalContent.textContent = data.content || '';
+
         // Load related items
         await loadRelatedItems(emailId);
-        
+
         // Show modal
-        if (modal.style) {
-            modal.style.display = 'block';
-        }
+        modal.style.display = 'block';
     } catch (error) {
         console.error('メールモーダルの表示中にエラーが発生しました:', error);
     }
 };
 
-// Define helper functions
-function escapeHtml(unsafe) {
-    return unsafe
-        .replace(/&/g, "&amp;")
-        .replace(/</g, "&lt;")
-        .replace(/>/g, "&gt;")
-        .replace(/"/g, "&quot;")
-        .replace(/'/g, "&#039;");
-}
-
-// Add loadRelatedItems function
+// Define loadRelatedItems function
 async function loadRelatedItems(emailId) {
-    try {
-        const tasksContainer = document.getElementById('relatedTasks');
-        const schedulesContainer = document.getElementById('relatedSchedules');
+    const tasksContainer = document.getElementById('relatedTasks');
+    const schedulesContainer = document.getElementById('relatedSchedules');
 
+    try {
         if (!tasksContainer || !schedulesContainer) {
             console.error('関連アイテムのコンテナが見つかりません');
             return;
@@ -502,312 +488,47 @@ async function loadRelatedItems(emailId) {
         }
     } catch (error) {
         console.error('関連アイテムの読み込み中にエラーが発生しました:', error);
-        document.getElementById('relatedTasks').innerHTML = '<div class="error">タスクの読み込みに失敗しました</div>';
-        document.getElementById('relatedSchedules').innerHTML = '<div class="error">スケジュールの読み込みに失敗しました</div>';
-    }
-}
-
-// Helper function to safely set text content
-function safeSetTextContent(element, text) {
-    if (element) {
-        element.textContent = text || '';
-    }
-}
-
-// Helper function to safely set innerHTML with escaping
-function safeSetInnerHTML(element, html) {
-    if (element) {
-        element.innerHTML = html || '';
-    }
-}
-
-// Initialize global variables
-let currentEmailId = null;
-let modal = null;
-let modalSubject = null;
-let modalInfo = null;
-let modalContent = null;
-let aiAnalysisContent = null;
-let closeButton = null;
-let relatedTasksContainer = null;
-let relatedSchedulesContainer = null;
-
-// Initialize modal elements and event listeners when DOM is loaded
-document.addEventListener('DOMContentLoaded', function() {
-    try {
-        // Initialize modal elements with null checks
-        const modal = document.getElementById('emailModal');
-        const modalSubject = document.getElementById('modalEmailSubject');
-        const modalInfo = document.getElementById('modalEmailInfo');
-        const modalContent = document.getElementById('modalEmailContent');
-        const aiAnalysisContent = document.getElementById('aiAnalysisContent');
-        const closeButton = document.querySelector('.close-button');
-        const relatedTasksContainer = document.getElementById('relatedTasks');
-        const relatedSchedulesContainer = document.getElementById('relatedSchedules');
-        const emailTableBody = document.querySelector('.email-table tbody');
-
-        // Verify all required elements exist
-        const requiredElements = [
-            { element: modal, name: 'modal' },
-            { element: modalSubject, name: 'modalSubject' },
-            { element: modalInfo, name: 'modalInfo' },
-            { element: modalContent, name: 'modalContent' },
-            { element: aiAnalysisContent, name: 'aiAnalysisContent' },
-            { element: closeButton, name: 'closeButton' }
-        ];
-
-        const missingElements = requiredElements
-            .filter(({ element }) => !element)
-            .map(({ name }) => name);
-
-        if (missingElements.length > 0) {
-            throw new Error(`Missing required elements: ${missingElements.join(', ')}`);
+        if (tasksContainer) {
+            tasksContainer.innerHTML = '<div class="error">タスクの読み込みに失敗しました</div>';
         }
-
-    // Add event listeners if elements exist
-    if (modal && closeButton) {
-        // Set up event delegation for email buttons
-        document.querySelector('.email-table tbody').addEventListener('click', function(event) {
-            const button = event.target.closest('button[onclick^="showEmailModal"]');
-            if (button) {
-                event.preventDefault();
-                const emailId = button.getAttribute('onclick').match(/'([^']+)'/)[1];
-                showEmailModal(emailId);
-            }
-        });
-
-        // Close modal when clicking outside
-        window.addEventListener('click', function(event) {
-            if (event.target === modal) {
-                closeModal();
-            }
-        });
-
-        // Close modal with Escape key
-        document.addEventListener('keydown', function(event) {
-            if (event.key === 'Escape' && modal && modal.style.display === 'block') {
-                closeModal();
-            }
-        });
-
-        // Close button event listener
-        closeButton.addEventListener('click', closeModal);
-    } else {
-        console.error('Modal elements not found. Modal functionality will be limited.');
-    }
-});
-
-// Helper function to safely set text content
-function safeSetTextContent(element, text) {
-    if (element) {
-        element.textContent = text || '';
+        if (schedulesContainer) {
+            schedulesContainer.innerHTML = '<div class="error">スケジュールの読み込みに失敗しました</div>';
+        }
     }
 }
 
-// Helper function to safely set innerHTML
-function safeSetInnerHTML(element, html) {
-    if (element) {
-        element.innerHTML = html || '';
-    }
+// Helper function to safely set text content
+function escapeHtml(unsafe) {
+    return unsafe
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;")
+        .replace(/'/g, "&#039;");
 }
 
 // Close modal function
-function closeModal() {
+window.closeEmailModal = function() {
+    const modal = document.getElementById('emailModal');
     if (modal) {
         modal.style.display = 'none';
-        currentEmailId = null;
     }
-}
+};
 
-// Define showEmailModal function in global scope
-// Define showEmailModal function
-window.showEmailModal = function(emailId) {
-    try {
-        // Check if all required elements are initialized
-        if (!modal || !modalSubject || !modalInfo || !modalContent || !aiAnalysisContent) {
-            console.error('必要なモーダル要素が見つかりません');
-            return;
-        }
-
-        currentEmailId = emailId;
-
-        // Reset modal content before loading new data
-        safeSetTextContent(modalSubject, '');
-        safeSetTextContent(modalContent, '');
-        safeSetInnerHTML(modalInfo, '');
-        safeSetInnerHTML(aiAnalysisContent, '<div class="analysis-placeholder">AIによる分析を実行してください。</div>');
-        
-        // Find the email row in the table
-        const emailButton = document.querySelector(`button[onclick="showEmailModal('${emailId}')"]`);
-        if (!emailButton) {
-            throw new Error('メール行が見つかりません');
-        }
-
-        const emailRow = emailButton.closest('tr');
-        if (!emailRow || !emailRow.cells || emailRow.cells.length < 3) {
-            throw new Error('メールデータが不正です');
-        }
-
-        // Safely get text content
-        const subject = emailRow.cells[1].textContent || '件名なし';
-        const sender = emailRow.cells[0].textContent || '送信者不明';
-        const date = emailRow.cells[2].textContent || '日時不明';
-        
-        // Safely update modal content
-        safeSetTextContent(modalSubject, subject);
-        safeSetInnerHTML(modalInfo, `<strong>送信者:</strong> ${sender}<br><strong>受信日時:</strong> ${date}`);
-        
-        {% for email in emails %}
-        if (emailId === '{{ email.id }}') {
-            modalContent.textContent = `{{ email.content }}`;
-            if ('{{ email.ai_analysis }}') {
-                aiAnalysisContent.innerHTML = `{{ email.ai_analysis|safe }}`;
-            } else {
-                aiAnalysisContent.innerHTML = '<div class="analysis-placeholder">AIによる分析を実行してください。</div>';
-            }
-        }
-        {% endfor %}
-        
-        // Load related tasks and schedules
-        loadRelatedItems(emailId);
-        
-        modal.style.display = 'block';
-    } catch (error) {
-        console.error('メールモーダルの表示中にエラーが発生しました:', error);
+// Setup event listeners
+window.addEventListener('click', function(event) {
+    const modal = document.getElementById('emailModal');
+    if (event.target === modal) {
+        modal.style.display = 'none';
     }
+});
 
-// Define analyzeEmail function
-    window.analyzeEmail = async function() {
-        if (!currentEmailId) {
-            console.error('現在のメールIDが設定されていません');
-            return;
-        }
-        
-        const analyzeButton = document.getElementById('analyzeButton');
-        const aiAnalysisContent = document.getElementById('aiAnalysisContent');
-        
-        if (!analyzeButton || !aiAnalysisContent) {
-            console.error('分析に必要な要素が見つかりません');
-            return;
-        }
-        
-        try {
-            analyzeButton.disabled = true;
-            aiAnalysisContent.innerHTML = '<div class="loading-spinner"><i class="fas fa-spinner fa-spin"></i> 分析中...</div>';
-            
-            const response = await fetch(`/api/analyze_email/${currentEmailId}`, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                }
-            });
-            
-            if (!response.ok) {
-                throw new Error('分析に失敗しました');
-            }
-            
-            const data = await response.json();
-            aiAnalysisContent.innerHTML = data.analysis;
-            
-        } catch (error) {
-            console.error('AI分析エラー:', error);
-            aiAnalysisContent.innerHTML = `<div class="error-message">エラー: ${error.message}</div>`;
-        } finally {
-            analyzeButton.disabled = false;
-        }
-    };
-
-// Define loadRelatedItems function
-    async function loadRelatedItems(emailId) {
-        const tasksDiv = document.getElementById('relatedTasks');
-        const schedulesDiv = document.getElementById('relatedSchedules');
-        
-        if (!tasksDiv || !schedulesDiv) {
-            console.error('関連項目のコンテナが見つかりません');
-            return;
-        }
-        
-        tasksDiv.innerHTML = '<div class="loading-spinner"><i class="fas fa-spinner fa-spin"></i> 読み込み中...</div>';
-        schedulesDiv.innerHTML = '<div class="loading-spinner"><i class="fas fa-spinner fa-spin"></i> 読み込み中...</div>';
-        
-        try {
-            const [tasksResponse, schedulesResponse] = await Promise.all([
-                fetch(`/api/email/${emailId}/tasks`),
-                fetch(`/api/email/${emailId}/schedules`)
-            ]);
-            
-            if (!tasksResponse.ok || !schedulesResponse.ok) {
-                throw new Error('APIリクエストが失敗しました');
-            }
-            
-            const tasksData = await tasksResponse.json();
-            const schedulesData = await schedulesResponse.json();
-            
-            tasksDiv.innerHTML = tasksData.tasks.length ? 
-                tasksData.tasks.map(task => `
-                    <div class="related-item">
-                        <h5>${escapeHtml(task.title)}</h5>
-                        <p>${escapeHtml(task.description)}</p>
-                        <small>期限: ${new Date(task.due_date).toLocaleDateString('ja-JP')}</small>
-                    </div>
-                `).join('') :
-                '<p>関連するタスクはありません。</p>';
-                
-            schedulesDiv.innerHTML = schedulesData.schedules.length ?
-                schedulesData.schedules.map(schedule => `
-                    <div class="related-item">
-                        <h5>${escapeHtml(schedule.title)}</h5>
-                        <p>${escapeHtml(schedule.description)}</p>
-                        <small>${new Date(schedule.start_time).toLocaleString('ja-JP')} - ${new Date(schedule.end_time).toLocaleString('ja-JP')}</small>
-                    </div>
-                `).join('') :
-                '<p>関連するスケジュールはありません。</p>';
-                
-        } catch (error) {
-            console.error('関連項目の読み込みに失敗しました:', error);
-            tasksDiv.innerHTML = '<p>タスクの読み込みに失敗しました。</p>';
-            schedulesDiv.innerHTML = '<p>スケジュールの読み込みに失敗しました。</p>';
-        }
-    }
-
-    // Helper function to escape HTML
-    function escapeHtml(unsafe) {
-        return unsafe
-            .replace(/&/g, "&amp;")
-            .replace(/</g, "&lt;")
-            .replace(/>/g, "&gt;")
-            .replace(/"/g, "&quot;")
-            .replace(/'/g, "&#039;");
-    }
-
-// Define closeEmailModal function
-    window.closeEmailModal = function() {
-        if (modal) {
-            modal.style.display = 'none';
-        }
-    };
-
-    // Setup event listeners
-    if (modal) {
-        // Close modal when clicking outside
-        window.onclick = function(event) {
-            if (event.target === modal) {
-                modal.style.display = 'none';
-            }
-        };
-
-        // Close modal with Escape key
-        document.addEventListener('keydown', function(event) {
-            if (event.key === 'Escape') {
-                modal.style.display = 'none';
-            }
-        });
-    }
-
-    // Close button event listener
-    if (closeButton) {
-        closeButton.addEventListener('click', closeEmailModal);
+document.addEventListener('keydown', function(event) {
+    const modal = document.getElementById('emailModal');
+    if (event.key === 'Escape' && modal.style.display === 'block') {
+        modal.style.display = 'none';
     }
 });
 </script>
+
 {% endblock %}
