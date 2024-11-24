@@ -138,8 +138,18 @@ def bulk_action():
     action = request.form.get('action')
     selected_tasks = request.form.getlist('selected_tasks[]')
 
+    response_data = {
+        'success': False,
+        'message': '',
+        'affected_count': 0
+    }
+
     if not action or not selected_tasks:
-        flash('操作とタスクを選択してください。', 'error')
+        message = '操作とタスクを選択してください。'
+        if request.is_xhr:
+            response_data['message'] = message
+            return jsonify(response_data), 400
+        flash(message, 'error')
         return redirect(url_for('tasks.list_tasks'))
 
     try:
@@ -148,32 +158,59 @@ def bulk_action():
             Task.user_id == current_user.id
         ).all()
 
+        if not tasks:
+            message = '選択されたタスクが見つかりませんでした。'
+            if request.is_xhr:
+                response_data['message'] = message
+                return jsonify(response_data), 404
+            flash(message, 'error')
+            return redirect(url_for('tasks.list_tasks'))
+
+        affected_count = len(tasks)
         if action == 'complete':
             for task in tasks:
                 task.completed = True
                 task.status = 'Completed'
-            flash(f'{len(tasks)}件のタスクを完了にしました。', 'success')
+            message = f'{affected_count}件のタスクを完了にしました。'
 
         elif action == 'delete':
             for task in tasks:
                 db.session.delete(task)
-            flash(f'{len(tasks)}件のタスクを削除しました。', 'success')
+            message = f'{affected_count}件のタスクを削除しました。'
 
         elif action == 'change_status':
             new_status = request.form.get('new_status')
             if new_status:
                 for task in tasks:
                     task.status = new_status
-                flash(f'{len(tasks)}件のタスクのステータスを変更しました。', 'success')
+                message = f'{affected_count}件のタスクのステータスを変更しました。'
             else:
-                flash('新しいステータスを選択してください。', 'error')
+                message = '新しいステータスを選択してください。'
+                if request.is_xhr:
+                    response_data['message'] = message
+                    return jsonify(response_data), 400
+                flash(message, 'error')
+                return redirect(url_for('tasks.list_tasks'))
 
         db.session.commit()
+        
+        response_data['success'] = True
+        response_data['message'] = message
+        response_data['affected_count'] = affected_count
+
+        if request.is_xhr:
+            return jsonify(response_data)
+        flash(message, 'success')
 
     except Exception as e:
         db.session.rollback()
-        flash('操作中にエラーが発生しました。', 'error')
+        message = '操作中にエラーが発生しました。'
         current_app.logger.error(f"Bulk action error: {str(e)}")
+        
+        if request.is_xhr:
+            response_data['message'] = message
+            return jsonify(response_data), 500
+        flash(message, 'error')
 
     return redirect(url_for('tasks.list_tasks'))
 
@@ -247,15 +284,42 @@ def edit_task(id):
 @tasks_bp.route('/delete/<int:id>', methods=['POST', 'DELETE']) 
 @login_required
 def delete_task(id):
-    task = Task.query.get_or_404(id)
-    if task.user_id != current_user.id:
-        flash('このタスクを削除する権限がありません。', 'error')
-        return redirect(url_for('tasks.list_tasks'))
+    try:
+        task = Task.query.get_or_404(id)
+        
+        if task.user_id != current_user.id:
+            if request.is_xhr:
+                return jsonify({
+                    'success': False,
+                    'message': 'このタスクを削除する権限がありません。'
+                }), 403
+            flash('このタスクを削除する権限がありません。', 'error')
+            return redirect(url_for('tasks.list_tasks'))
 
-    db.session.delete(task)
-    db.session.commit()
-    flash('タスクが削除されました。', 'success')
-    return redirect(url_for('tasks.list_tasks'))
+        db.session.delete(task)
+        db.session.commit()
+        
+        if request.is_xhr:
+            return jsonify({
+                'success': True,
+                'message': 'タスクが正常に削除されました。'
+            })
+            
+        flash('タスクが削除されました。', 'success')
+        return redirect(url_for('tasks.list_tasks'))
+        
+    except Exception as e:
+        db.session.rollback()
+        current_app.logger.error(f"Task deletion error: {str(e)}")
+        
+        if request.is_xhr:
+            return jsonify({
+                'success': False,
+                'message': 'タスクの削除中にエラーが発生しました。'
+            }), 500
+            
+        flash('タスクの削除中にエラーが発生しました。', 'error')
+        return redirect(url_for('tasks.list_tasks'))
 
 @tasks_bp.route('/analyze', methods=['POST'])
 @login_required
