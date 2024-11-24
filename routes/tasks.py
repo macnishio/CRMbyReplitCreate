@@ -243,8 +243,8 @@ def edit_task(id):
             flash('タスクの更新中にエラーが発生しました。', 'error')
 
     return render_template('tasks/edit.html', form=form, task=task, leads=leads)
-
-@tasks_bp.route('/delete/<int:id>', methods=['POST'])
+    
+@tasks_bp.route('/delete/<int:id>', methods=['POST', 'DELETE']) 
 @login_required
 def delete_task(id):
     task = Task.query.get_or_404(id)
