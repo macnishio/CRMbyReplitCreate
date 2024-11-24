@@ -395,6 +395,30 @@
 <!-- Font Awesome from cdnjs -->
 <script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/js/all.min.js" crossorigin="anonymous"></script>
 <script>
+// Define helper functions first
+function escapeHtml(unsafe) {
+    return unsafe
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;")
+        .replace(/'/g, "&#039;");
+}
+
+// Helper function to safely set text content
+function safeSetTextContent(element, text) {
+    if (element) {
+        element.textContent = text || '';
+    }
+}
+
+// Helper function to safely set innerHTML with escaping
+function safeSetInnerHTML(element, html) {
+    if (element) {
+        element.innerHTML = html || '';
+    }
+}
+
 // Initialize global variables
 let currentEmailId = null;
 let modal = null;
@@ -403,29 +427,63 @@ let modalInfo = null;
 let modalContent = null;
 let aiAnalysisContent = null;
 let closeButton = null;
+let relatedTasksContainer = null;
+let relatedSchedulesContainer = null;
 
 // Initialize modal elements and event listeners when DOM is loaded
+// Initialize DOM elements and set up event listeners
 document.addEventListener('DOMContentLoaded', function() {
-    // Initialize modal elements
-    modal = document.getElementById('emailModal');
-    modalSubject = document.getElementById('modalEmailSubject');
-    modalInfo = document.getElementById('modalEmailInfo');
-    modalContent = document.getElementById('modalEmailContent');
-    aiAnalysisContent = document.getElementById('aiAnalysisContent');
-    closeButton = document.querySelector('.close-button');
+    try {
+        // Initialize modal elements
+        modal = document.getElementById('emailModal');
+        modalSubject = document.getElementById('modalEmailSubject');
+        modalInfo = document.getElementById('modalEmailInfo');
+        modalContent = document.getElementById('modalEmailContent');
+        aiAnalysisContent = document.getElementById('aiAnalysisContent');
+        closeButton = document.querySelector('.close-button');
+        relatedTasksContainer = document.getElementById('relatedTasks');
+        relatedSchedulesContainer = document.getElementById('relatedSchedules');
+
+        // Verify all required elements exist
+        const requiredElements = [
+            { element: modal, name: 'modal' },
+            { element: modalSubject, name: 'modalSubject' },
+            { element: modalInfo, name: 'modalInfo' },
+            { element: modalContent, name: 'modalContent' },
+            { element: aiAnalysisContent, name: 'aiAnalysisContent' },
+            { element: closeButton, name: 'closeButton' }
+        ];
+
+        const missingElements = requiredElements
+            .filter(({ element }) => !element)
+            .map(({ name }) => name);
+
+        if (missingElements.length > 0) {
+            throw new Error(`Missing required elements: ${missingElements.join(', ')}`);
+        }
 
     // Add event listeners if elements exist
     if (modal && closeButton) {
+        // Set up event delegation for email buttons
+        document.querySelector('.email-table tbody').addEventListener('click', function(event) {
+            const button = event.target.closest('button[onclick^="showEmailModal"]');
+            if (button) {
+                event.preventDefault();
+                const emailId = button.getAttribute('onclick').match(/'([^']+)'/)[1];
+                showEmailModal(emailId);
+            }
+        });
+
         // Close modal when clicking outside
-        window.onclick = function(event) {
+        window.addEventListener('click', function(event) {
             if (event.target === modal) {
                 closeModal();
             }
-        };
+        });
 
         // Close modal with Escape key
         document.addEventListener('keydown', function(event) {
-            if (event.key === 'Escape' && modal.style.display === 'block') {
+            if (event.key === 'Escape' && modal && modal.style.display === 'block') {
                 closeModal();
             }
         });
@@ -460,13 +518,22 @@ function closeModal() {
 }
 
 // Define showEmailModal function in global scope
+// Define showEmailModal function
 window.showEmailModal = function(emailId) {
-        try {
+    try {
+        // Check if all required elements are initialized
         if (!modal || !modalSubject || !modalInfo || !modalContent || !aiAnalysisContent) {
-            throw new Error('必要なモーダル要素が見つかりません');
+            console.error('必要なモーダル要素が見つかりません');
+            return;
         }
 
         currentEmailId = emailId;
+
+        // Reset modal content before loading new data
+        safeSetTextContent(modalSubject, '');
+        safeSetTextContent(modalContent, '');
+        safeSetInnerHTML(modalInfo, '');
+        safeSetInnerHTML(aiAnalysisContent, '<div class="analysis-placeholder">AIによる分析を実行してください。</div>');
         
         // Find the email row in the table
         const emailButton = document.querySelector(`button[onclick="showEmailModal('${emailId}')"]`);
