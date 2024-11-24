@@ -1,0 +1,49 @@
+Uncaught SyntaxError: Unexpected token ')'
+/api/emails/37274/related-items:1 
+        
+        
+        Failed to load resource: the server responded with a status of 404 (Not Found)
+hook.js:608  関連アイテムの読み込み中にエラーが発生しました: Error: 関連アイテムの取得に失敗しました
+    at loadRelatedItems (detail:837:19)
+    at async window.showEmailModal (detail:811:9)
+overrideMethod @ hook.js:608
+その他の 1 個のフレームを表示する
+簡易表示
+hook.js:608  AI分析エラー: TypeError: Cannot set properties of null (setting 'innerHTML')
+    at analyzeEmail (detail:926:34)
+    at HTMLButtonElement.onclick (detail:740:101)
+overrideMethod @ hook.js:608
+その他の 1 個のフレームを表示する
+簡易表示
+detail:978  Uncaught (in promise) TypeError: Cannot set properties of null (setting 'innerHTML')
+    at analyzeEmail (detail:978:34)
+    at HTMLButtonElement.onclick (detail:740:101)
+hook.js:608  AI分析エラー: TypeError: Cannot set properties of null (setting 'innerHTML')
+    at analyzeEmail (detail:926:34)
+    at HTMLButtonElement.onclick (detail:740:101)
+overrideMethod @ hook.js:608
+その他の 1 個のフレームを表示する
+簡易表示
+detail:978  Uncaught (in promise) TypeError: Cannot set properties of null (setting 'innerHTML')
+    at analyzeEmail (detail:978:34)
+    at HTMLButtonElement.onclick (detail:740:101)
+hook.js:608  AI分析エラー: TypeError: Cannot set properties of null (setting 'innerHTML')
+    at analyzeEmail (detail:926:34)
+    at HTMLButtonElement.onclick (detail:740:101)
+overrideMethod @ hook.js:608
+その他の 1 個のフレームを表示する
+簡易表示
+detail:978  Uncaught (in promise) TypeError: Cannot set properties of null (setting 'innerHTML')
+    at analyzeEmail (detail:978:34)
+    at HTMLButtonElement.onclick (detail:740:101)
+hook.js:608  AI分析エラー: TypeError: Cannot set properties of null (setting 'innerHTML')
+    at analyzeEmail (detail:926:34)
+    at HTMLButtonElement.onclick (detail:740:101)
+overrideMethod @ hook.js:608
+その他の 1 個のフレームを表示する
+簡易表示
+detail:978  Uncaught (in promise) TypeError: Cannot set properties of null (setting 'innerHTML')
+    at analyzeEmail (detail:978:34)
+    at HTMLButtonElement.onclick (detail:740:101)
+2detail:1040  Uncaught TypeError: Cannot set properties of null (setting 'className')
+    at detail:1040:59
