@@ -4,6 +4,35 @@
 {% block styles %}
 <style>
     /* Base Grid Layout */
+<style>
+.truncate-text {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    display: -webkit-box;
+    -webkit-line-clamp: 3;
+    -webkit-box-orient: vertical;
+    font-size: 0.813rem;
+    line-height: 1.4;
+    margin: 0;
+    color: #4a5568;
+}
+
+/* Tippyツールチップのカスタマイズ */
+.tippy-box[data-theme~='light'] {
+    background-color: white;
+    color: #2d3748;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+    border-radius: 8px;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+}
+
+.tippy-box[data-theme~='light'] .tippy-content {
+    padding: 0.75rem;
+    font-size: 0.813rem;
+    line-height: 1.5;
+    max-width: 300px;
+}
+</style>
     .opportunity-grid,
     .task-grid {
       display: grid;
@@ -69,6 +98,23 @@
       margin: 0 0 0.75rem 0;
       padding-right: 1.5rem;
       line-height: 1.25;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      display: -webkit-box;
+      -webkit-line-clamp: 2;
+      -webkit-box-orient: vertical;
+      position: relative;
+    }
+
+    .task-card h2:hover {
+      overflow: visible;
+      -webkit-line-clamp: unset;
+      background-color: white;
+      z-index: 100;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+      padding: 0.5rem;
+      border-radius: 4px;
+      transition: all 0.2s ease;
     }
 
     .metadata-item {
@@ -163,6 +209,9 @@
 
 {% block extra_head %}
 <script src="{{ url_for('static', filename='js/mobile-filters.js') }}"></script>
+<link rel="stylesheet" href="https://unpkg.com/tippy.js@6/themes/light.css"/>
+<script src="https://unpkg.com/@popperjs/core@2"></script>
+<script src="https://unpkg.com/tippy.js@6"></script>
 {% endblock %}
 
 {% block content %}
@@ -428,6 +477,19 @@
                             due_date=filters.due_date,
                             lead_search=filters.lead_search,
                             date_from=filters.date_from,
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // タスク説明のツールチップを初期化
+    tippy('.truncate-text', {
+        theme: 'light',
+        animation: 'scale',
+        duration: [150, 100],
+        placement: 'top',
+        maxWidth: 300,
+        allowHTML: true
+    });
+});
+</script>
                             date_to=filters.date_to) }}" 
                            class="page-link">次へ &raquo;</a>
                     {% endif %}
