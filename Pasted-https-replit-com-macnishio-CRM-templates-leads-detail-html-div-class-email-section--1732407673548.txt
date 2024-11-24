@@ -1,0 +1,73 @@
+https://replit.com/@macnishio/CRM#templates/leads/detail.html
+この中の
+    <div class="email-section">
+        <h2>関連メール</h2>
+        {% if emails %}
+            <table class="email-table">
+                <thead>
+                    <tr>
+                        <th>送信者</th>
+                        <th>件名</th>
+                        <th>受信日時</th>
+                        <th>操作</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for email in emails %}
+                        <tr>
+                            <td>{{ email.sender }}</td>
+                            <td>{{ email.subject }}</td>
+                            <td>{{ email.created_at.strftime('%Y年%m月%d日 %H:%M:%S') }}</td>
+                            <td>
+                                <button onclick="toggleEmailContent({{ email.id }})">内容を表示</button>
+                            </td>
+                        </tr>
+                        <tr id="email-content-{{ email.id }}" style="display: none;">
+                            <td colspan="4">
+                                <pre class="email-content">{{ email.content }}</pre>
+                            </td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        {% else %}
+            <p>このリードに関連するメールはありません。</p>
+        {% endif %}
+    </div>
+</div>
+下記の部分
+<button onclick="toggleEmailContent({{ email.id }})">内容を表示</button>
+これで表示されるメールを
+
+次のダッシュボードの機能
+https://replit.com/@macnishio/CRM#templates/dashboard.html
+このダッシュボードの  
+      <div class="dashboard-section email-section">
+            <h2>最近のメール</h2>
+            <div class="dashboard-list email-grid">
+                {% if emails and emails.items %}
+                    {% for email in emails.items %}
+            <div class="dashboard-item email-card" onclick="showEmailModal('{{ email.id }}')">
+                <h3>{{ email.subject or '件名なし' }}</h3>
+                <p>送信者: {{ email.sender_name or email.sender }}</p>
+                <p>受信日時: {{ email.received_date.strftime('%Y-%m-%d %H:%M') if email.received_date }}</p>
+            </div>
+            {% endfor %}
+            {% if emails.pages > 1 %}
+            <div class="pagination">
+                {% if emails.has_prev %}
+                    <a href="{{ url_for('main.dashboard', emails_page=emails.prev_num, leads_page=request.args.get('leads_page', 1), tasks_page=request.args.get('tasks_page', 1), schedules_page=request.args.get('schedules_page', 1)) }}" class="page-link">&laquo; 前へ</a>
+                {% endif %}
+                <span class="page-info">{{ emails.page }} / {{ emails.pages }}</span>
+                {% if emails.has_next %}
+                    <a href="{{ url_for('main.dashboard', emails_page=emails.next_num, leads_page=request.args.get('leads_page', 1), tasks_page=request.args.get('tasks_page', 1), schedules_page=request.args.get('schedules_page', 1)) }}" class="page-link">次へ &raquo;</a>
+                {% endif %}
+            </div>
+            {% endif %}
+        {% else %}
+            <p>メールはありません</p>
+        {% endif %}
+    </div>
+この部分のうち
+onclick="showEmailModal('{{ email.id }}')
+この機能に変えてください
