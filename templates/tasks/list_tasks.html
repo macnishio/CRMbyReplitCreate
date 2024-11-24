@@ -393,7 +393,6 @@
             {% endfor %}
         </div
             {% if pagination.pages > 1 %}
-            <!-- デスクトップ向けページネーション -->
             <div class="pagination-container">
                 <div class="pagination">
                     {% if pagination.has_prev %}
@@ -417,59 +416,7 @@
                             {{ page_num }}
                         </a>
                     {% endfor %}
-                    
-                    {% if pagination.has_next %}
-                        <a href="{{ url_for('tasks.list_tasks', page=pagination.next_num,
-                            status=filters.status,
-                            due_date=filters.due_date,
-                            lead_search=filters.lead_search,
-                            date_from=filters.date_from,
-                            date_to=filters.date_to) }}"
-                           class="page-link">次へ &raquo;</a>
-                    {% endif %}
-                </div>
-            </div>
 
-            <!-- モバイル向けページネーション -->
-            <div class="pagination-mobile">
-                <div class="page-info">
-                    {{ pagination.page }} / {{ pagination.pages }} ページ
-                </div>
-                
-                <div class="page-links">
-                    {% if pagination.has_prev %}
-                        <a href="{{ url_for('tasks.list_tasks', page=pagination.prev_num, 
-                            status=filters.status, 
-                            due_date=filters.due_date, 
-                            lead_search=filters.lead_search, 
-                            date_from=filters.date_from, 
-                            date_to=filters.date_to) }}" 
-                           class="page-link">&laquo;</a>
-                    {% endif %}
-
-                    <a href="#" class="page-link active">{{ pagination.page }}</a>
-
-                    {% if pagination.has_next %}
-                        <a href="{{ url_for('tasks.list_tasks', page=pagination.next_num,
-                            status=filters.status,
-                            due_date=filters.due_date,
-                            lead_search=filters.lead_search,
-                            date_from=filters.date_from,
-                            date_to=filters.date_to) }}"
-                           class="page-link">&raquo;</a>
-                    {% endif %}
-                </div>
-
-                <div class="page-size-selector">
-                    <label for="mobile-page-size">表示件数:</label>
-                    <select id="mobile-page-size" onchange="changePageSize(this.value)">
-                        <option value="10" {% if request.args.get('page_size', '10') == '10' %}selected{% endif %}>10件</option>
-                        <option value="25" {% if request.args.get('page_size') == '25' %}selected{% endif %}>25件</option>
-                        <option value="50" {% if request.args.get('page_size') == '50' %}selected{% endif %}>50件</option>
-                    </select>
-                </div>
-            </div>
-                    {% endfor %}
 
                     {% if pagination.has_next %}
                         <a href="{{ url_for('tasks.list_tasks', page=pagination.next_num,
