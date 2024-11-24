@@ -570,97 +570,13 @@ async function analyzeEmail() {
         }
 
         const data = await response.json();
-        
-        // Update UI with analysis results
-        if (data.analysis) {
-            const aiAnalysisContent = document.getElementById('aiAnalysisContent');
-            if (aiAnalysisContent) {
-                aiAnalysisContent.style.display = 'block';
-                aiAnalysisContent.innerHTML = `
-                    <div class="analysis-result">${data.analysis}</div>
-                `;
-            }
 
-            // Update tasks
-            const tasksContainer = document.getElementById('tasksContainer');
-            const tasksList = document.getElementById('tasksList');
-            if (data.tasks && data.tasks.length > 0 && tasksContainer && tasksList) {
-                tasksList.style.display = 'block';
-                tasksContainer.innerHTML = data.tasks.map(task => `
-                    <div class="list-group-item">
-                        <h6 class="mb-1">${escapeHtml(task.title)}</h6>
-                        <p class="mb-1">期限: ${new Date(task.due_date).toLocaleDateString('ja-JP')}</p>
-                    </div>
-                `).join('');
-            }
-
-            // Update schedules
-            const schedulesContainer = document.getElementById('schedulesContainer');
-            const schedulesList = document.getElementById('schedulesList');
-            if (data.schedules && data.schedules.length > 0 && schedulesContainer && schedulesList) {
-                schedulesList.style.display = 'block';
-                schedulesContainer.innerHTML = data.schedules.map(schedule => `
-                    <div class="list-group-item">
-                        <h6 class="mb-1">${escapeHtml(schedule.title)}</h6>
-                        <p class="mb-1">開始: ${new Date(schedule.start_time).toLocaleDateString('ja-JP')}</p>
-                        <p class="mb-1">終了: ${new Date(schedule.end_time).toLocaleDateString('ja-JP')}</p>
-                    </div>
-                `).join('');
-            }
-        } else {
-            const aiAnalysisContent = document.getElementById('aiAnalysisContent');
-            if (aiAnalysisContent) {
-                aiAnalysisContent.innerHTML = `
-                    <div class="alert alert-danger">
-                        AI分析の結果を取得できませんでした。
-                    </div>
-                `;
-            }
-        }
-        const schedulesContainer = document.getElementById('schedulesContainer');
-        const tasksList = document.getElementById('tasksList');
-        const schedulesList = document.getElementById('schedulesList');
-
-        // Show analysis content section
-        if (analysisContent) {
-            analysisContent.style.display = 'block';
-        }
-        const schedulesList = document.getElementById('schedulesList');
-
-        try {
-            // Display analysis results
-            if (analysisResult && data.analysis) {
-                analysisResult.innerHTML = `<div class="analysis-content">${escapeHtml(data.analysis)}</div>`;
-            }
-
-            // Update tasks
-            if (data.tasks && data.tasks.length > 0 && tasksContainer && tasksList) {
-                tasksList.style.display = 'block';
-                tasksContainer.innerHTML = data.tasks.map(task => `
-                    <div class="list-group-item">
-                        <h6 class="mb-1">${escapeHtml(task.title)}</h6>
-                        <p class="mb-1">期限: ${new Date(task.due_date).toLocaleDateString('ja-JP')}</p>
-                    </div>
-                `).join('');
-            } else if (tasksList) {
-                tasksList.style.display = 'none';
-            }
-
-        // Update schedules
-        if (data.schedules && data.schedules.length > 0 && schedulesContainer) {
-            schedulesList.style.display = 'block';
-            schedulesContainer.innerHTML = data.schedules.map(schedule => `
-                <div class="list-group-item">
-                    <h6 class="mb-1">${escapeHtml(schedule.title)}</h6>
-                    <p class="mb-1">開始: ${new Date(schedule.start_time).toLocaleString('ja-JP')}</p>
-                    <p class="mb-1">終了: ${new Date(schedule.end_time).toLocaleString('ja-JP')}</p>
-                </div>
-            `).join('');
-        }
-
+        // Parse and display analysis results
+        analysisContent.innerHTML = `<div>${escapeHtml(data.analysis)}</div>`;
     } catch (error) {
         console.error('AI分析エラー:', error);
-        if (analysisResult) {
+        const analysisContent = document.getElementById('aiAnalysisContent');
+        if (analysisContent) {
             analysisContent.innerHTML = `<div class="alert alert-danger">${error.message || 'AI分析中にエラーが発生しました。'}</div>`;
         }
     } finally {
