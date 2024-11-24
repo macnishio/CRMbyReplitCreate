@@ -236,8 +236,11 @@ author = "agent"
 agentRequireRestartOnSave = false
 
 [[workflows.workflow.tasks]]
+task = "packager.installForAll"
+
+[[workflows.workflow.tasks]]
 task = "shell.exec"
-args = "flask db init && flask db migrate -m 'Initial migration' && flask db upgrade"
+args = "flask db init"
 
 # 削除された"Clean Migrations"ワークフロー
 # [[workflows.workflow]]
