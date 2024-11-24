@@ -161,6 +161,10 @@
 </style>
 {% endblock %}
 
+{% block extra_head %}
+<script src="{{ url_for('static', filename='js/mobile-filters.js') }}"></script>
+{% endblock %}
+
 {% block content %}
 <div class="task-manager">
     <!-- フィルターセクション -->
