@@ -209,9 +209,7 @@
 
 {% block extra_head %}
 <script src="{{ url_for('static', filename='js/mobile-filters.js') }}"></script>
-<link rel="stylesheet" href="https://unpkg.com/tippy.js@6/themes/light.css"/>
-<script src="https://unpkg.com/@popperjs/core@2"></script>
-<script src="https://unpkg.com/tippy.js@6"></script>
+<!-- カスタムツールチップのためのスタイルは既存のCSSで定義 -->
 {% endblock %}
 
 {% block content %}
@@ -480,13 +478,25 @@
 <script>
 document.addEventListener('DOMContentLoaded', function() {
     // タスク説明のツールチップを初期化
-    tippy('.truncate-text', {
-        theme: 'light',
-        animation: 'scale',
-        duration: [150, 100],
-        placement: 'top',
-        maxWidth: 300,
-        allowHTML: true
+    document.querySelectorAll('.truncate-text').forEach(element => {
+        const tooltip = document.createElement('div');
+        tooltip.className = 'task-tooltip';
+        tooltip.textContent = element.textContent;
+        
+        element.addEventListener('mouseenter', function(e) {
+            document.body.appendChild(tooltip);
+            const rect = element.getBoundingClientRect();
+            tooltip.style.top = rect.top - tooltip.offsetHeight - 10 + 'px';
+            tooltip.style.left = rect.left + (rect.width - tooltip.offsetWidth) / 2 + 'px';
+            tooltip.classList.add('show');
+        });
+        
+        element.addEventListener('mouseleave', function() {
+            tooltip.classList.remove('show');
+            if (tooltip.parentNode) {
+                tooltip.parentNode.removeChild(tooltip);
+            }
+        });
     });
 });
 </script>
