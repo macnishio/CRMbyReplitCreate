@@ -395,7 +395,55 @@
 <!-- Font Awesome from cdnjs -->
 <script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/js/all.min.js" crossorigin="anonymous"></script>
 <script>
-// Define helper functions first
+// Define showEmailModal function first
+window.showEmailModal = async function(emailId) {
+    try {
+        const modal = document.getElementById('emailModal');
+        const modalSubject = document.getElementById('modalEmailSubject');
+        const modalInfo = document.getElementById('modalEmailInfo');
+        const modalContent = document.getElementById('modalEmailContent');
+        const aiAnalysisContent = document.getElementById('aiAnalysisContent');
+
+        // Verify all required elements exist
+        if (!modal || !modalSubject || !modalInfo || !modalContent || !aiAnalysisContent) {
+            console.error('Required modal elements not found');
+            return;
+        }
+
+        // Reset modal content
+        modalSubject.textContent = '';
+        modalInfo.textContent = '';
+        modalContent.textContent = '';
+        if (aiAnalysisContent.classList) {
+            aiAnalysisContent.innerHTML = '<div class="analysis-placeholder">AIによる分析を実行してください。</div>';
+        }
+
+        // Fetch email data
+        const response = await fetch(`/api/emails/${emailId}`);
+        if (!response.ok) {
+            throw new Error('メールデータの取得に失敗しました');
+        }
+
+        const data = await response.json();
+        
+        // Safely update modal content
+        if (modalSubject) modalSubject.textContent = data.subject || '';
+        if (modalInfo) modalInfo.textContent = `${data.sender} - ${data.created_at}`;
+        if (modalContent) modalContent.textContent = data.content || '';
+        
+        // Load related items
+        await loadRelatedItems(emailId);
+        
+        // Show modal
+        if (modal.style) {
+            modal.style.display = 'block';
+        }
+    } catch (error) {
+        console.error('メールモーダルの表示中にエラーが発生しました:', error);
+    }
+};
+
+// Define helper functions
 function escapeHtml(unsafe) {
     return unsafe
         .replace(/&/g, "&amp;")
@@ -485,18 +533,18 @@ let relatedTasksContainer = null;
 let relatedSchedulesContainer = null;
 
 // Initialize modal elements and event listeners when DOM is loaded
-// Initialize DOM elements and set up event listeners
 document.addEventListener('DOMContentLoaded', function() {
     try {
-        // Initialize modal elements
-        modal = document.getElementById('emailModal');
-        modalSubject = document.getElementById('modalEmailSubject');
-        modalInfo = document.getElementById('modalEmailInfo');
-        modalContent = document.getElementById('modalEmailContent');
-        aiAnalysisContent = document.getElementById('aiAnalysisContent');
-        closeButton = document.querySelector('.close-button');
-        relatedTasksContainer = document.getElementById('relatedTasks');
-        relatedSchedulesContainer = document.getElementById('relatedSchedules');
+        // Initialize modal elements with null checks
+        const modal = document.getElementById('emailModal');
+        const modalSubject = document.getElementById('modalEmailSubject');
+        const modalInfo = document.getElementById('modalEmailInfo');
+        const modalContent = document.getElementById('modalEmailContent');
+        const aiAnalysisContent = document.getElementById('aiAnalysisContent');
+        const closeButton = document.querySelector('.close-button');
+        const relatedTasksContainer = document.getElementById('relatedTasks');
+        const relatedSchedulesContainer = document.getElementById('relatedSchedules');
+        const emailTableBody = document.querySelector('.email-table tbody');
 
         // Verify all required elements exist
         const requiredElements = [

@@ -3,10 +3,14 @@ document.addEventListener('DOMContentLoaded', function() {
   const resetButton = document.querySelector('button[onclick="resetFilters()"]');
   const exportButton = document.querySelector('button[onclick="exportOpportunities()"]');
   
-  // Add loading class during form submission
-  filterForm.addEventListener('submit', function(e) {
-    filterForm.classList.add('loading');
-  });
+  // Add null check before accessing filterForm
+  if (filterForm) {
+    // Add loading class during form submission
+    filterForm.addEventListener('submit', function(e) {
+      if (filterForm.classList) {
+        filterForm.classList.add('loading');
+      }
+    });
   
   // Reset filters function
   window.resetFilters = function() {
