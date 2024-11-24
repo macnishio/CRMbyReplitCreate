@@ -392,136 +392,193 @@
 {% endblock %}
 
 {% block scripts %}
+<!-- Font Awesome -->
+<script src="https://kit.fontawesome.com/your-code.js" crossorigin="anonymous"></script>
 <script>
-let currentEmailId = null;
+document.addEventListener('DOMContentLoaded', function() {
+    let currentEmailId = null;
 
-function showEmailModal(emailId) {
-    currentEmailId = emailId;
+    // Initialize modal elements
     const modal = document.getElementById('emailModal');
     const modalSubject = document.getElementById('modalEmailSubject');
     const modalInfo = document.getElementById('modalEmailInfo');
     const modalContent = document.getElementById('modalEmailContent');
     const aiAnalysisContent = document.getElementById('aiAnalysisContent');
-    
-    // Find the email row in the table
-    const emailRow = document.querySelector(`button[onclick="showEmailModal('${emailId}')"]`).closest('tr');
-    const subject = emailRow.cells[1].textContent;
-    const sender = emailRow.cells[0].textContent;
-    const date = emailRow.cells[2].textContent;
-    
-    // Update modal content
-    modalSubject.textContent = subject;
-    modalInfo.innerHTML = `<strong>送信者:</strong> ${sender}<br><strong>受信日時:</strong> ${date}`;
-    
-    {% for email in emails %}
-    if (emailId === '{{ email.id }}') {
-        modalContent.textContent = `{{ email.content }}`;
-        if ('{{ email.ai_analysis }}') {
-            aiAnalysisContent.innerHTML = `{{ email.ai_analysis|safe }}`;
-        } else {
-            aiAnalysisContent.innerHTML = '<div class="analysis-placeholder">AIによる分析を実行してください。</div>';
+    const closeButton = document.querySelector('.close-button');
+
+    // Define showEmailModal function in global scope
+    window.showEmailModal = function(emailId) {
+        if (!modal || !modalSubject || !modalInfo || !modalContent || !aiAnalysisContent) {
+            console.error('必要なモーダル要素が見つかりません');
+            return;
+        }
+
+        currentEmailId = emailId;
+        
+        // Find the email row in the table
+        const emailButton = document.querySelector(`button[onclick="showEmailModal('${emailId}')"]`);
+        if (!emailButton) {
+            console.error('メール行が見つかりません');
+            return;
+        }
+
+        const emailRow = emailButton.closest('tr');
+        const subject = emailRow.cells[1].textContent;
+        const sender = emailRow.cells[0].textContent;
+        const date = emailRow.cells[2].textContent;
+        
+        // Update modal content
+        modalSubject.textContent = subject;
+        modalInfo.innerHTML = `<strong>送信者:</strong> ${sender}<br><strong>受信日時:</strong> ${date}`;
+        
+        {% for email in emails %}
+        if (emailId === '{{ email.id }}') {
+            modalContent.textContent = `{{ email.content }}`;
+            if ('{{ email.ai_analysis }}') {
+                aiAnalysisContent.innerHTML = `{{ email.ai_analysis|safe }}`;
+            } else {
+                aiAnalysisContent.innerHTML = '<div class="analysis-placeholder">AIによる分析を実行してください。</div>';
+            }
+        }
+        {% endfor %}
+        
+        // Load related tasks and schedules
+        loadRelatedItems(emailId);
+        
+        modal.style.display = 'block';
+    };
+
+// Define analyzeEmail function
+    window.analyzeEmail = async function() {
+        if (!currentEmailId) {
+            console.error('現在のメールIDが設定されていません');
+            return;
+        }
+        
+        const analyzeButton = document.getElementById('analyzeButton');
+        const aiAnalysisContent = document.getElementById('aiAnalysisContent');
+        
+        if (!analyzeButton || !aiAnalysisContent) {
+            console.error('分析に必要な要素が見つかりません');
+            return;
+        }
+        
+        try {
+            analyzeButton.disabled = true;
+            aiAnalysisContent.innerHTML = '<div class="loading-spinner"><i class="fas fa-spinner fa-spin"></i> 分析中...</div>';
+            
+            const response = await fetch(`/api/analyze_email/${currentEmailId}`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                }
+            });
+            
+            if (!response.ok) {
+                throw new Error('分析に失敗しました');
+            }
+            
+            const data = await response.json();
+            aiAnalysisContent.innerHTML = data.analysis;
+            
+        } catch (error) {
+            console.error('AI分析エラー:', error);
+            aiAnalysisContent.innerHTML = `<div class="error-message">エラー: ${error.message}</div>`;
+        } finally {
+            analyzeButton.disabled = false;
+        }
+    };
+
+// Define loadRelatedItems function
+    async function loadRelatedItems(emailId) {
+        const tasksDiv = document.getElementById('relatedTasks');
+        const schedulesDiv = document.getElementById('relatedSchedules');
+        
+        if (!tasksDiv || !schedulesDiv) {
+            console.error('関連項目のコンテナが見つかりません');
+            return;
+        }
+        
+        tasksDiv.innerHTML = '<div class="loading-spinner"><i class="fas fa-spinner fa-spin"></i> 読み込み中...</div>';
+        schedulesDiv.innerHTML = '<div class="loading-spinner"><i class="fas fa-spinner fa-spin"></i> 読み込み中...</div>';
+        
+        try {
+            const [tasksResponse, schedulesResponse] = await Promise.all([
+                fetch(`/api/email/${emailId}/tasks`),
+                fetch(`/api/email/${emailId}/schedules`)
+            ]);
+            
+            if (!tasksResponse.ok || !schedulesResponse.ok) {
+                throw new Error('APIリクエストが失敗しました');
+            }
+            
+            const tasksData = await tasksResponse.json();
+            const schedulesData = await schedulesResponse.json();
+            
+            tasksDiv.innerHTML = tasksData.tasks.length ? 
+                tasksData.tasks.map(task => `
+                    <div class="related-item">
+                        <h5>${escapeHtml(task.title)}</h5>
+                        <p>${escapeHtml(task.description)}</p>
+                        <small>期限: ${new Date(task.due_date).toLocaleDateString('ja-JP')}</small>
+                    </div>
+                `).join('') :
+                '<p>関連するタスクはありません。</p>';
+                
+            schedulesDiv.innerHTML = schedulesData.schedules.length ?
+                schedulesData.schedules.map(schedule => `
+                    <div class="related-item">
+                        <h5>${escapeHtml(schedule.title)}</h5>
+                        <p>${escapeHtml(schedule.description)}</p>
+                        <small>${new Date(schedule.start_time).toLocaleString('ja-JP')} - ${new Date(schedule.end_time).toLocaleString('ja-JP')}</small>
+                    </div>
+                `).join('') :
+                '<p>関連するスケジュールはありません。</p>';
+                
+        } catch (error) {
+            console.error('関連項目の読み込みに失敗しました:', error);
+            tasksDiv.innerHTML = '<p>タスクの読み込みに失敗しました。</p>';
+            schedulesDiv.innerHTML = '<p>スケジュールの読み込みに失敗しました。</p>';
         }
     }
-    {% endfor %}
-    
-    // Load related tasks and schedules
-    loadRelatedItems(emailId);
-    
-    modal.style.display = 'block';
-}
 
-async function analyzeEmail() {
-    if (!currentEmailId) return;
-    
-    const analyzeButton = document.getElementById('analyzeButton');
-    const aiAnalysisContent = document.getElementById('aiAnalysisContent');
-    
-    try {
-        analyzeButton.disabled = true;
-        aiAnalysisContent.innerHTML = '<div class="loading-spinner"><i class="fas fa-spinner fa-spin"></i> 分析中...</div>';
-        
-        const response = await fetch(`/api/analyze_email/${currentEmailId}`, {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
+    // Helper function to escape HTML
+    function escapeHtml(unsafe) {
+        return unsafe
+            .replace(/&/g, "&amp;")
+            .replace(/</g, "&lt;")
+            .replace(/>/g, "&gt;")
+            .replace(/"/g, "&quot;")
+            .replace(/'/g, "&#039;");
+    }
+
+// Define closeEmailModal function
+    window.closeEmailModal = function() {
+        if (modal) {
+            modal.style.display = 'none';
+        }
+    };
+
+    // Setup event listeners
+    if (modal) {
+        // Close modal when clicking outside
+        window.onclick = function(event) {
+            if (event.target === modal) {
+                modal.style.display = 'none';
+            }
+        };
+
+        // Close modal with Escape key
+        document.addEventListener('keydown', function(event) {
+            if (event.key === 'Escape') {
+                modal.style.display = 'none';
             }
         });
-        
-        if (!response.ok) {
-            throw new Error('分析に失敗しました');
-        }
-        
-        const data = await response.json();
-        aiAnalysisContent.innerHTML = data.analysis;
-        
-    } catch (error) {
-        aiAnalysisContent.innerHTML = `<div class="error-message">エラー: ${error.message}</div>`;
-    } finally {
-        analyzeButton.disabled = false;
     }
-}
 
-async function loadRelatedItems(emailId) {
-    const tasksDiv = document.getElementById('relatedTasks');
-    const schedulesDiv = document.getElementById('relatedSchedules');
-    
-    tasksDiv.innerHTML = '<div class="loading-spinner"><i class="fas fa-spinner fa-spin"></i> 読み込み中...</div>';
-    schedulesDiv.innerHTML = '<div class="loading-spinner"><i class="fas fa-spinner fa-spin"></i> 読み込み中...</div>';
-    
-    try {
-        const [tasksResponse, schedulesResponse] = await Promise.all([
-            fetch(`/api/email/${emailId}/tasks`),
-            fetch(`/api/email/${emailId}/schedules`)
-        ]);
-        
-        const tasksData = await tasksResponse.json();
-        const schedulesData = await schedulesResponse.json();
-        
-        tasksDiv.innerHTML = tasksData.tasks.length ? 
-            tasksData.tasks.map(task => `
-                <div class="related-item">
-                    <h5>${task.title}</h5>
-                    <p>${task.description}</p>
-                    <small>期限: ${new Date(task.due_date).toLocaleDateString('ja-JP')}</small>
-                </div>
-            `).join('') :
-            '<p>関連するタスクはありません。</p>';
-            
-        schedulesDiv.innerHTML = schedulesData.schedules.length ?
-            schedulesData.schedules.map(schedule => `
-                <div class="related-item">
-                    <h5>${schedule.title}</h5>
-                    <p>${schedule.description}</p>
-                    <small>${new Date(schedule.start_time).toLocaleString('ja-JP')} - ${new Date(schedule.end_time).toLocaleString('ja-JP')}</small>
-                </div>
-            `).join('') :
-            '<p>関連するスケジュールはありません。</p>';
-            
-    } catch (error) {
-        console.error('関連項目の読み込みに失敗しました:', error);
-        tasksDiv.innerHTML = '<p>タスクの読み込みに失敗しました。</p>';
-        schedulesDiv.innerHTML = '<p>スケジュールの読み込みに失敗しました。</p>';
-    }
-}
-
-function closeEmailModal() {
-    const modal = document.getElementById('emailModal');
-    modal.style.display = 'none';
-}
-
-// Close modal when clicking outside
-window.onclick = function(event) {
-    const modal = document.getElementById('emailModal');
-    if (event.target === modal) {
-        modal.style.display = 'none';
-    }
-}
-
-// Close modal with Escape key
-document.addEventListener('keydown', function(event) {
-    if (event.key === 'Escape') {
-        const modal = document.getElementById('emailModal');
-        modal.style.display = 'none';
+    // Close button event listener
+    if (closeButton) {
+        closeButton.addEventListener('click', closeEmailModal);
     }
 });
 </script>
