@@ -1,0 +1,39 @@
+2024-11-24 00:03:36,650 DEBUG: Added content part: 1621 chars [in /home/runner/CRM/email_receiver.py:124]
+2024-11-24 00:03:36,650 DEBUG: Final content length: 1621 [in /home/runner/CRM/email_receiver.py:149]
+2024-11-24 00:03:36,738 INFO: 172.31.196.11 - - [24/Nov/2024 00:03:36] "GET /leads/10839/detail HTTP/1.1" 500 - [in /home/runner/CRM/.pythonlibs/lib/python3.11/site-packages/werkzeug/_internal.py:224]
+Traceback (most recent call last):
+  File "/home/runner/CRM/.pythonlibs/lib/python3.11/site-packages/flask/app.py", line 2552, in __call__
+    return self.wsgi_app(environ, start_response)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/runner/CRM/.pythonlibs/lib/python3.11/site-packages/flask/app.py", line 2532, in wsgi_app
+    response = self.handle_exception(e)
+               ^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/runner/CRM/.pythonlibs/lib/python3.11/site-packages/flask/app.py", line 2529, in wsgi_app
+    response = self.full_dispatch_request()
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/runner/CRM/.pythonlibs/lib/python3.11/site-packages/flask/app.py", line 1825, in full_dispatch_request
+    rv = self.handle_user_exception(e)
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/runner/CRM/.pythonlibs/lib/python3.11/site-packages/flask/app.py", line 1823, in full_dispatch_request
+    rv = self.dispatch_request()
+         ^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/runner/CRM/.pythonlibs/lib/python3.11/site-packages/flask/app.py", line 1799, in dispatch_request
+    return self.ensure_sync(self.view_functions[rule.endpoint])(**view_args)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/runner/CRM/.pythonlibs/lib/python3.11/site-packages/flask_login/utils.py", line 290, in decorated_view
+    return current_app.ensure_sync(func)(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/runner/CRM/routes/leads.py", line 320, in lead_detail
+    emails = Email.query.filter_by(lead_id=lead.id).order_by(Email.created_at.desc()).all()
+                                                             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AttributeError: type object 'Email' has no attribute 'created_at'
+2024-11-24 00:03:36,811 INFO: Found existing email with message_id: <4Xvjkl2GyDzhZWLs@mailout.ml3.sbcr.jp>, lead_id: 6869 [in /home/runner/CRM/email_receiver.py:818]
+2024-11-24 00:03:36,811 INFO: Duplicate email detected from event-bit@ml3.sbcr.jp [in /home/runner/CRM/email_receiver.py:1047]
+2024-11-24 00:03:36,840 INFO: Found existing email with message_id: <1488749204.4234.1732255760265@ip-10-1-11-109.ap-northeast-1.compute.internal>, lead_id: 1209 [in /home/runner/CRM/email_receiver.py:818]
+2024-11-24 00:03:36,840 INFO: Duplicate email detected from message_r@mail2.apl01.spmode.ne.jp [in /home/runner/CRM/email_receiver.py:1047]
+2024-11-24 00:03:36,867 DEBUG: Session committed successfully. Duration: 1.44s [in /home/runner/CRM/email_receiver.py:667]
+2024-11-24 00:03:36,867 DEBUG: Session closed. Total duration: 1.44s [in /home/runner/CRM/email_receiver.py:683]
+2024-11-24 00:03:36,974 INFO: 172.31.196.11 - - [24/Nov/2024 00:03:36] "GET /leads/10839/detail?__debugger__=yes&cmd=resource&f=debugger.js HTTP/1.1" 304 - [in /home/runner/CRM/.pythonlibs/lib/python3.11/site-packages/werkzeug/_internal.py:224]
+2024-11-24 00:03:36,975 INFO: 172.31.196.11 - - [24/Nov/2024 00:03:36] "GET /leads/10839/detail?__debugger__=yes&cmd=resource&f=style.css HTTP/1.1" 304 - [in /home/runner/CRM/.pythonlibs/lib/python3.11/site-packages/werkzeug/_internal.py:224]
+2024-11-24 00:03:37,223 INFO: 172.31.196.11 - - [24/Nov/2024 00:03:37] "GET /leads/10839/detail?__debugger__=yes&cmd=resource&f=console.png HTTP/1.1" 304 - [in /home/runner/CRM/.pythonlibs/lib/python3.11/site-packages/werkzeug/_internal.py:224]
+2024-11-24 00:03:37,289 DEBUG: Session committed successfully. Duration: 1.43s [in /home/runner/CRM/email_receiver.py:667]
