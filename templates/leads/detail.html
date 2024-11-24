@@ -405,6 +405,60 @@ function escapeHtml(unsafe) {
         .replace(/'/g, "&#039;");
 }
 
+// Add loadRelatedItems function
+async function loadRelatedItems(emailId) {
+    try {
+        const tasksContainer = document.getElementById('relatedTasks');
+        const schedulesContainer = document.getElementById('relatedSchedules');
+
+        if (!tasksContainer || !schedulesContainer) {
+            console.error('関連アイテムのコンテナが見つかりません');
+            return;
+        }
+
+        // Show loading state
+        tasksContainer.innerHTML = '<div class="loading-spinner">タスクを読み込み中...</div>';
+        schedulesContainer.innerHTML = '<div class="loading-spinner">スケジュールを読み込み中...</div>';
+
+        const response = await fetch(`/api/emails/${emailId}/related-items`);
+        if (!response.ok) {
+            throw new Error('関連アイテムの取得に失敗しました');
+        }
+
+        const data = await response.json();
+
+        // Update tasks
+        if (data.tasks && data.tasks.length > 0) {
+            tasksContainer.innerHTML = data.tasks.map(task => `
+                <div class="related-item">
+                    <div><strong>${escapeHtml(task.title)}</strong></div>
+                    <div>${escapeHtml(task.description || '')}</div>
+                    <div>期限: ${task.due_date || '未設定'}</div>
+                </div>
+            `).join('');
+        } else {
+            tasksContainer.innerHTML = '<div class="analysis-placeholder">関連するタスクはありません</div>';
+        }
+
+        // Update schedules
+        if (data.schedules && data.schedules.length > 0) {
+            schedulesContainer.innerHTML = data.schedules.map(schedule => `
+                <div class="related-item">
+                    <div><strong>${escapeHtml(schedule.title)}</strong></div>
+                    <div>${escapeHtml(schedule.description || '')}</div>
+                    <div>日時: ${schedule.datetime || '未設定'}</div>
+                </div>
+            `).join('');
+        } else {
+            schedulesContainer.innerHTML = '<div class="analysis-placeholder">関連するスケジュールはありません</div>';
+        }
+    } catch (error) {
+        console.error('関連アイテムの読み込み中にエラーが発生しました:', error);
+        document.getElementById('relatedTasks').innerHTML = '<div class="error">タスクの読み込みに失敗しました</div>';
+        document.getElementById('relatedSchedules').innerHTML = '<div class="error">スケジュールの読み込みに失敗しました</div>';
+    }
+}
+
 // Helper function to safely set text content
 function safeSetTextContent(element, text) {
     if (element) {
@@ -570,7 +624,9 @@ window.showEmailModal = function(emailId) {
         loadRelatedItems(emailId);
         
         modal.style.display = 'block';
-    };
+    } catch (error) {
+        console.error('メールモーダルの表示中にエラーが発生しました:', error);
+    }
 
 // Define analyzeEmail function
     window.analyzeEmail = async function() {
