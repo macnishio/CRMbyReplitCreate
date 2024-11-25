@@ -56,7 +56,7 @@ def create_app(config_name='default'):
 
     # Register blueprints
     from routes import main, auth, leads, opportunities, accounts, reports
-    from routes import tracking, mobile, schedules, tasks, settings
+    from routes import tracking, mobile, schedules, tasks, settings, system_management
 
     blueprints = {
         main.bp: '/',
@@ -69,7 +69,8 @@ def create_app(config_name='default'):
         mobile.bp: '/mobile',
         schedules.bp: '/schedules',
         tasks.tasks_bp: '/tasks',
-        settings.bp: '/settings'
+        settings.bp: '/settings',
+        system_management.bp: '/system'
     }
 
     for blueprint, url_prefix in blueprints.items():
