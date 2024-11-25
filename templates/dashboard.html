@@ -495,6 +495,206 @@ async function showEmailModal(emailId) {
         document.getElementById('modalSender').textContent = `送信者: ${data.sender_name || data.sender}`;
         document.getElementById('modalDate').textContent = `受信日時: ${new Date(data.received_date).toLocaleString('ja-JP')}`;
         document.getElementById('modalContent').innerHTML = data.content.replace(/\n/g, '<br>') || '(本文なし)';
+        
+        // モーダルのメールIDを設定
+        const modal = document.getElementById('emailModal');
+        modal.setAttribute('data-email-id', emailId);
+        
+        // 要約セクションをリセット
+        const summaryContent = document.getElementById('emailSummaryContent');
+        summaryContent.style.display = 'none';
+        summaryContent.querySelector('.summary-content').innerHTML = '';
+        
+        // モーダルを表示
+        modal.style.display = 'block';
+    } catch (error) {
+        console.error('Error:', error);
+        alert('メールの取得中にエラーが発生しました。');
+    }
+}
+
+async function summarizeEmail() {
+    try {
+        const modal = document.getElementById('emailModal');
+        const emailId = modal.getAttribute('data-email-id');
+        const summaryButton = document.getElementById('summarizeButton');
+        const summaryContent = document.getElementById('emailSummaryContent');
+        
+        // ボタンを無効化し、ローディング表示
+        summaryButton.disabled = true;
+        summaryButton.innerHTML = '<i class="fas fa-spinner fa-spin"></i> 要約生成中...';
+        
+        const response = await fetch(`/api/emails/${emailId}/summarize`, {
+            method: 'POST'
+        });
+        
+        const data = await response.json();
+        
+        if (data.error) {
+            throw new Error(data.error);
+        }
+        
+        // 要約を表示
+        summaryContent.style.display = 'block';
+        summaryContent.querySelector('.summary-content').innerHTML = data.summary;
+        
+    } catch (error) {
+        console.error('Error:', error);
+        alert('要約の生成中にエラーが発生しました。');
+    } finally {
+        // ボタンを元に戻す
+        const summaryButton = document.getElementById('summarizeButton');
+        summaryButton.disabled = false;
+        summaryButton.innerHTML = '<i class="fas fa-file-alt"></i> メールを要約';
+    }
+        document.getElementById('emailModal').setAttribute('data-email-id', emailId);
+        
+        // 要約セクションをリセット
+        document.getElementById('emailSummaryContent').style.display = 'none';
+        document.getElementById('emailSummaryContent').querySelector('.summary-content').innerHTML = '';
+        
+        // モーダルを表示
+        document.getElementById('emailModal').style.display = 'block';
+    } catch (error) {
+        console.error('Error:', error);
+        alert('メールの取得中にエラーが発生しました。');
+    }
+}
+
+async function summarizeEmail() {
+    try {
+        const emailId = document.getElementById('emailModal').getAttribute('data-email-id');
+        const summaryButton = document.getElementById('summarizeButton');
+        const summaryContent = document.getElementById('emailSummaryContent');
+        
+        // ボタンを無効化し、ローディング表示
+        summaryButton.disabled = true;
+        summaryButton.innerHTML = '<i class="fas fa-spinner fa-spin"></i> 要約生成中...';
+        
+        const response = await fetch(`/api/emails/${emailId}/summarize`, {
+            method: 'POST'
+        });
+        
+        const data = await response.json();
+        
+        if (data.error) {
+            throw new Error(data.error);
+        }
+        
+        // 要約を表示
+        summaryContent.style.display = 'block';
+        summaryContent.querySelector('.summary-content').innerHTML = data.summary;
+        
+    } catch (error) {
+        console.error('Error:', error);
+        alert('要約の生成中にエラーが発生しました。');
+    } finally {
+        // ボタンを元に戻す
+        const summaryButton = document.getElementById('summarizeButton');
+        summaryButton.disabled = false;
+        summaryButton.innerHTML = '<i class="fas fa-file-alt"></i> メールを要約';
+    }
+        const modal = document.getElementById('emailModal');
+        modal.setAttribute('data-email-id', emailId);
+        
+        // 要約セクションをリセット
+        const summaryContent = document.getElementById('emailSummaryContent');
+        summaryContent.style.display = 'none';
+        summaryContent.querySelector('.summary-content').innerHTML = '';
+        
+        // モーダルを表示
+        modal.style.display = 'block';
+    } catch (error) {
+        console.error('Error:', error);
+        alert('メールの取得中にエラーが発生しました。');
+    }
+}
+
+async function summarizeEmail() {
+    try {
+        const modal = document.getElementById('emailModal');
+        const emailId = modal.getAttribute('data-email-id');
+        const summaryButton = document.getElementById('summarizeButton');
+        const summaryContent = document.getElementById('emailSummaryContent');
+        
+        // ボタンを無効化し、ローディング表示
+        summaryButton.disabled = true;
+        summaryButton.innerHTML = '<i class="fas fa-spinner fa-spin"></i> 要約生成中...';
+        
+        const response = await fetch(`/api/emails/${emailId}/summarize`, {
+            method: 'POST'
+        });
+        
+        const data = await response.json();
+        
+        if (data.error) {
+            throw new Error(data.error);
+        }
+        
+        // 要約を表示
+        summaryContent.style.display = 'block';
+        summaryContent.querySelector('.summary-content').innerHTML = data.summary;
+        
+    } catch (error) {
+        console.error('Error:', error);
+        alert('要約の生成中にエラーが発生しました。');
+    } finally {
+        // ボタンを元に戻す
+        const summaryButton = document.getElementById('summarizeButton');
+        summaryButton.disabled = false;
+        summaryButton.innerHTML = '<i class="fas fa-file-alt"></i> メールを要約';
+    }
+}
+        
+        // モーダルのメールIDを設定
+        document.getElementById('emailModal').setAttribute('data-email-id', emailId);
+        
+        // 要約セクションをリセット
+        document.getElementById('emailSummaryContent').style.display = 'none';
+        document.getElementById('emailSummaryContent').querySelector('.summary-content').innerHTML = '';
+        
+        // モーダルを表示
+        document.getElementById('emailModal').style.display = 'block';
+    } catch (error) {
+        console.error('Error:', error);
+        alert('メールの取得中にエラーが発生しました。');
+    }
+}
+
+async function summarizeEmail() {
+    try {
+        const emailId = document.getElementById('emailModal').getAttribute('data-email-id');
+        const summaryButton = document.getElementById('summarizeButton');
+        const summaryContent = document.getElementById('emailSummaryContent');
+        
+        // ボタンを無効化し、ローディング表示
+        summaryButton.disabled = true;
+        summaryButton.innerHTML = '<i class="fas fa-spinner fa-spin"></i> 要約生成中...';
+        
+        const response = await fetch(`/api/emails/${emailId}/summarize`, {
+            method: 'POST'
+        });
+        
+        const data = await response.json();
+        
+        if (data.error) {
+            throw new Error(data.error);
+        }
+        
+        // 要約を表示
+        summaryContent.style.display = 'block';
+        summaryContent.querySelector('.summary-content').innerHTML = data.summary;
+        
+    } catch (error) {
+        console.error('Error:', error);
+        alert('要約の生成中にエラーが発生しました。');
+    } finally {
+        // ボタンを元に戻す
+        const summaryButton = document.getElementById('summarizeButton');
+        summaryButton.disabled = false;
+        summaryButton.innerHTML = '<i class="fas fa-file-alt"></i> メールを要約';
+    }
+}
 
         // AI分析セクションの表示制御
         const analysisContent = document.getElementById('analysisContent');

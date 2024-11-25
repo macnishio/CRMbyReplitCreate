@@ -4,6 +4,33 @@
 
 {% block styles %}
 <style>
+<style>
+.ai-buttons {
+    display: flex;
+    gap: 10px;
+}
+
+.email-summary-content {
+    margin: 20px 0;
+    padding: 15px;
+    background: #f8fafc;
+    border-radius: 6px;
+}
+
+.email-summary-content h5 {
+    margin: 0 0 10px 0;
+    color: #2d3748;
+}
+
+.summary-content {
+    font-size: 0.95em;
+    line-height: 1.6;
+}
+
+.summary-content p {
+    margin-bottom: 10px;
+}
+</style>
 .detail-container {
     max-width: 800px;
     margin: 2rem auto;
@@ -518,9 +545,18 @@
                 <div class="ai-analysis-section">
                     <div class="ai-analysis-header">
                         <h4>AI分析</h4>
-                        <button onclick="analyzeEmail()" id="analyzeButton" class="btn btn-primary">
-                            <i class="fas fa-brain"></i> AI分析を実行
-                        </button>
+                        <div class="ai-buttons">
+                            <button onclick="summarizeEmail()" id="summarizeButton" class="btn btn-primary">
+                                <i class="fas fa-file-alt"></i> メールを要約
+                            </button>
+                            <button onclick="analyzeEmail()" id="analyzeButton" class="btn btn-primary">
+                                <i class="fas fa-brain"></i> AI分析を実行
+                            </button>
+                        </div>
+                    </div>
+                    <div id="emailSummaryContent" class="email-summary-content" style="display: none;">
+                        <h5>メール要約</h5>
+                        <div class="summary-content"></div>
                     </div>
                     <div id="aiAnalysisContent" class="ai-analysis-content">
                         <div class="analysis-placeholder">AIによる分析を実行してください。</div>
@@ -648,10 +684,131 @@ function showEmailMenu(emailCard) {
 }
 
 // 各メールカードにタッチイベントを設定
+<script>
+// メール要約処理
+async function summarizeEmail() {
+    const emailId = document.getElementById('emailModal').getAttribute('data-email-id');
+    const summaryContent = document.getElementById('emailSummaryContent');
+    const summaryButton = document.getElementById('summarizeButton');
+    
+    try {
+        // ボタンを無効化し、ローディング状態を表示
+        summaryButton.disabled = true;
+        summaryButton.innerHTML = '<i class="fas fa-spinner fa-spin"></i> 要約中...';
+        
+        const response = await fetch(`/api/emails/${emailId}/summarize`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            }
+        });
+        
+        const data = await response.json();
+        
+        if (data.error) {
+            throw new Error(data.error);
+        }
+        
+        // 要約結果を表示
+        summaryContent.style.display = 'block';
+        summaryContent.querySelector('.summary-content').innerHTML = data.summary;
+        
+    } catch (error) {
+        // エラーメッセージを表示
+        summaryContent.style.display = 'block';
+        summaryContent.querySelector('.summary-content').innerHTML = 
+            `<p class="error-message">メールの要約中にエラーが発生しました: ${error.message}</p>`;
+    } finally {
+        // ボタンを元の状態に戻す
+        summaryButton.disabled = false;
+        summaryButton.innerHTML = '<i class="fas fa-file-alt"></i> メールを要約';
+    }
+}
+
+// 既存のemailModal関連の関数を更新
+function showEmailModal(emailId) {
+    const modal = document.getElementById('emailModal');
+    modal.setAttribute('data-email-id', emailId);
+    modal.style.display = 'block';
+    
+    // 要約とAI分析の結果をリセット
+    document.getElementById('emailSummaryContent').style.display = 'none';
+    document.getElementById('aiAnalysisContent').innerHTML = 
+        '<div class="analysis-placeholder">AIによる分析を実行してください。</div>';
+    
+    // メールの詳細を取得して表示
+    fetch(`/api/emails/${emailId}`)
+        .then(response => response.json())
+        .then(data => {
+            if (data.error) {
+                throw new Error(data.error);
+            }
+            
+            document.getElementById('modalEmailSubject').textContent = data.subject || '(件名なし)';
+            document.getElementById('modalEmailInfo').innerHTML = 
+                `送信者: ${data.sender}<br>
+                 日時: ${new Date(data.created_at).toLocaleString('ja-JP')}`;
+            document.getElementById('modalEmailContent').textContent = data.content;
+        })
+        .catch(error => {
+            console.error('Error fetching email details:', error);
+            document.getElementById('modalEmailContent').innerHTML = 
+                `<p class="error-message">メール詳細の取得中にエラーが発生しました: ${error.message}</p>`;
+        });
+}
+
+function closeEmailModal() {
+    document.getElementById('emailModal').style.display = 'none';
+}
+
+// モーダルの外側をクリックして閉じる
+window.onclick = function(event) {
+    const modal = document.getElementById('emailModal');
+    if (event.target == modal) {
+        closeEmailModal();
+    }
+}
+
 document.addEventListener('DOMContentLoaded', () => {
     const emailCards = document.querySelectorAll('.email-card');
     emailCards.forEach(card => {
         const emailId = card.querySelector('.email-card-body').id.replace('email-content-', '');
+
+async function summarizeEmail() {
+    const emailId = document.getElementById('emailModal').getAttribute('data-email-id');
+    const summaryButton = document.getElementById('summarizeButton');
+    const summaryContent = document.getElementById('emailSummaryContent');
+    const summaryDiv = summaryContent.querySelector('.summary-content');
+
+    try {
+        summaryButton.disabled = true;
+        summaryButton.innerHTML = '<i class="fas fa-spinner fa-spin"></i> 要約中...';
+        
+        const response = await fetch(`/api/emails/${emailId}/summarize`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            }
+        });
+
+        const data = await response.json();
+        
+        if (data.error) {
+            throw new Error(data.error);
+        }
+
+        summaryContent.style.display = 'block';
+        summaryDiv.innerHTML = data.summary;
+
+    } catch (error) {
+        console.error('Error:', error);
+        alert('メールの要約中にエラーが発生しました: ' + error.message);
+    } finally {
+        summaryButton.disabled = false;
+        summaryButton.innerHTML = '<i class="fas fa-file-alt"></i> メールを要約';
+    }
+}
+</script>
         
         card.addEventListener('touchstart', (e) => handleTouchStart(e, card));
         card.addEventListener('touchmove', (e) => handleTouchMove(e, card));

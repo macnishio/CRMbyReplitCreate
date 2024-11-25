@@ -1137,57 +1137,103 @@ def process_emails_for_user(settings, parent_session, app):
         user_id = current_settings.user_id
 
         with session_scope(app) as tracker_session:
-            tracker = tracker_session.query(EmailFetchTracker).filter_by(user_id=user_id).with_for_update().first()
+            # トラッカーの取得とロック
+            tracker = tracker_session.query(EmailFetchTracker)\
+                .filter_by(user_id=user_id)\
+                .with_for_update()\
+                .first()
+            
             last_fetch_time = get_fetch_window(tracker, app)
 
             if not tracker:
-                tracker = EmailFetchTracker(user_id=user_id, last_fetch_time=last_fetch_time)
+                tracker = EmailFetchTracker(
+                    user_id=user_id, 
+                    last_fetch_time=last_fetch_time
+                )
                 tracker_session.add(tracker)
                 tracker_session.commit()
                 app.logger.info(f"Created new fetch tracker for user {user_id}")
 
+            # メールサーバーへの接続
             mail = connect_to_email_server_with_retry(app, current_settings, max_retries)
             if not mail:
+                app.logger.error(f"Failed to connect to email server for user {user_id}")
                 return
 
-            message_numbers = search_emails(mail, last_fetch_time, app)
-            if not message_numbers:
+            # メール検索
+            try:
+                message_numbers = search_emails(mail, last_fetch_time, app)
+                if not message_numbers:
+                    app.logger.info(f"No new messages found for user {user_id}")
+                    return
+            except Exception as e:
+                app.logger.error(f"Error searching emails: {str(e)}")
                 return
 
-            for num_bytes in message_numbers:  # バイト文字列を反復処理します
+            # メール処理
+            for num_bytes in message_numbers:
                 try:
-                    num_str = num_bytes.decode('ascii')  # ログ記録や整数変換に必要な場合のみデコードします
-                    num = int(num_str)  # 整数表現が必要な場合
-                    msg = fetch_email_message(mail, num_bytes, app) # バイト文字列を直接渡します
-                    if not msg:
-                        continue
+                    # バイト文字列をデコードし、空白で分割
+                    num_str = num_bytes.decode('ascii', errors='ignore')
+                    # 空白で区切られた各メッセージ番号を処理
+                    for individual_num in num_str.split():
+                        try:
+                            num = int(individual_num)
+                            
+                            # メッセージの取得
+                            msg = fetch_email_message(mail, str(num).encode('ascii'), app)
+                            if not msg:
+                                error_count += 1
+                                app.logger.warning(f"Failed to fetch message {num}")
+                                continue
 
-                    with session_scope(app) as processing_session:
-                        result = process_email_message(
-                            msg=msg,
-                            user_id=user_id,
-                            session=processing_session,
-                            app=app,
-                            processed_ids=processed_messages
-                        )
+                            # メッセージの処理
+                            with session_scope(app) as processing_session:
+                                result = process_email_message(
+                                    msg=msg,
+                                    user_id=user_id,
+                                    session=processing_session,
+                                    app=app,
+                                    processed_ids=processed_messages
+                                )
 
-                        if not result:
-                            duplicate_count += 1
-                            continue
+                                if not result:
+                                    duplicate_count += 1
+                                    continue
 
-                        email_record, lead = result
+                                email_record, lead = result
 
-                        is_spam = process_email_analysis(msg, email_record, lead, processing_session, app)
-                        if is_spam:
-                           spam_count += 1
+                                # スパム分析
+                                is_spam = process_email_analysis(
+                                    msg, 
+                                    email_record, 
+                                    lead, 
+                                    processing_session, 
+                                    app
+                                )
+                                if is_spam:
+                                    spam_count += 1
+                                
+                                processed_count += 1
 
-                        processed_count += 1
+                        except ValueError as e:
+                            error_count += 1
+                            app.logger.error(f"Invalid message number: {individual_num}", exc_info=True)
+                        except Exception as e:
+                            error_count += 1
+                            app.logger.error(
+                                f"Error processing message {individual_num}: {str(e)}", 
+                                exc_info=True
+                            )
 
                 except Exception as e:
                     error_count += 1
-                    app.logger.error(f"Error processing email {num_bytes.decode()}: {str(e)}", exc_info=True) # Decode num_bytes for logging
+                    app.logger.error(
+                        f"Error processing message batch {num_bytes.decode('ascii', errors='ignore')}: {str(e)}", 
+                        exc_info=True
+                    )
 
-
+            # 最終フェッチ時刻の更新
             tracker.last_fetch_time = datetime.utcnow()
             tracker_session.commit()
 
@@ -1748,21 +1794,102 @@ def notify_admin_error(task_name, error_message):
         current_app.logger.error(f"Error in notify_admin_error: {str(e)}")
 
 
-def search_emails(mail, last_fetch_time, app):
-    """最後の取得時刻以降に受信したメールを検索します。"""
+def search_emails(mail, last_fetch_time, app, timeout=DEFAULT_TIMEOUT):
     try:
+        # Set socket timeout
+        mail.socket().settimeout(timeout)
+
+        # Create search criteria
         search_criteria = f'(SINCE "{last_fetch_time.strftime("%d-%b-%Y")}")'
-        app.logger.debug(f"Searching emails with criteria: {search_criteria}")
+
+        # Execute search with timeout handling
         _, data = mail.search(None, search_criteria)
+        return data
+    except TimeoutError:
+        app.logger.error("Search operation timed out")
+        return None
+    except Exception as e:
+        app.logger.error(f"Error searching emails: {str(e)}")
+        return None
 
-        if data and data[0]:
-            message_numbers_raw = data[0]
-            # Return list of bytestrings (each representing a message number)
-            return message_numbers_raw.split()  
-        else:
-            app.logger.debug("No new emails found.")
-            return []
+def retry_imap_operation(func):
+    def wrapper(*args, **kwargs):
+        for attempt in range(RETRY_MAX_ATTEMPTS):
+            try:
+                return func(*args, **kwargs)
+            except TimeoutError:
+                if attempt < RETRY_MAX_ATTEMPTS - 1:
+                    time.sleep(RETRY_BASE_DELAY * (attempt + 1))
+                    continue
+                raise
+    return wrapper
 
-    except imaplib.IMAP4.error as e:  # Catch specific IMAP errors
-        app.logger.error(f"Error searching emails: {str(e)}", exc_info=True)
-        return []
+@contextmanager
+def safe_session_scope(app):
+    session = db.session()
+    try:
+        yield session
+        session.commit()
+    except Exception as e:
+        session.rollback()
+        app.logger.error(f"Session rolled back due to error: {str(e)}")
+        raise
+    finally:
+        session.close()
+
+def cleanup_mail_connection(mail, app):
+    try:
+        if mail:
+            try:
+                mail.close()
+            except Exception:
+                pass
+            try:
+                mail.logout()
+            except Exception:
+                pass
+    except Exception as e:
+        app.logger.warning(f"Error during mail cleanup: {str(e)}")
+
+
+def initialize_mail_connection(settings):
+    """
+    Initialize IMAP connection with security settings
+    
+    Args:
+        settings: UserSettings object containing mail configuration
+        
+    Returns:
+        IMAP4_SSL connection object or None if connection fails
+    """
+    try:
+        # SSL context configuration
+        ssl_context = ssl.create_default_context()
+        ssl_context.verify_mode = ssl.CERT_REQUIRED
+        ssl_context.check_hostname = True
+        ssl_context.options |= ssl.OP_NO_SSLv2 | ssl.OP_NO_SSLv3
+        
+        # Initialize connection with timeout
+        mail = imaplib.IMAP4_SSL(
+            host=settings.mail_server,
+            ssl_context=ssl_context,
+            timeout=DEFAULT_TIMEOUT
+        )
+        
+        # Login attempt
+        mail.login(settings.mail_username, settings.mail_password)
+        
+        # Select inbox
+        mail.select('INBOX')
+        
+        return mail
+        
+    except imaplib.IMAP4.error as e:
+        current_app.logger.error(f"IMAP error during connection: {str(e)}")
+        return None
+    except ssl.SSLError as e:
+        current_app.logger.error(f"SSL error during connection: {str(e)}")
+        return None
+    except Exception as e:
+        current_app.logger.error(f"Unexpected error during connection: {str(e)}")
+        return None
