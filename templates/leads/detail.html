@@ -4,34 +4,6 @@
 
 {% block styles %}
 <style>
-/* CSS Styles */
-
-.ai-buttons {
-    display: flex;
-    gap: 10px;
-}
-
-.email-summary-content {
-    margin: 20px 0;
-    padding: 15px;
-    background: #f8fafc;
-    border-radius: 6px;
-}
-
-.email-summary-content h5 {
-    margin: 0 0 10px 0;
-    color: #2d3748;
-}
-
-.summary-content {
-    font-size: 0.95em;
-    line-height: 1.6;
-}
-
-.summary-content p {
-    margin-bottom: 10px;
-}
-
 .detail-container {
     max-width: 800px;
     margin: 2rem auto;
@@ -149,7 +121,7 @@
         user-select: none;
         -webkit-user-select: none;
     }
-
+    
     .email-menu {
         width: 200px;
     }
@@ -546,18 +518,9 @@
                 <div class="ai-analysis-section">
                     <div class="ai-analysis-header">
                         <h4>AI分析</h4>
-                        <div class="ai-buttons">
-                            <button onclick="summarizeEmail()" id="summarizeButton" class="btn btn-primary">
-                                <i class="fas fa-file-alt"></i> メールを要約
-                            </button>
-                            <button onclick="analyzeEmail()" id="analyzeButton" class="btn btn-primary">
-                                <i class="fas fa-brain"></i> AI分析を実行
-                            </button>
-                        </div>
-                    </div>
-                    <div id="emailSummaryContent" class="email-summary-content" style="display: none;">
-                        <h5>メール要約</h5>
-                        <div class="summary-content"></div>
+                        <button onclick="analyzeEmail()" id="analyzeButton" class="btn btn-primary">
+                            <i class="fas fa-brain"></i> AI分析を実行
+                        </button>
                     </div>
                     <div id="aiAnalysisContent" class="ai-analysis-content">
                         <div class="analysis-placeholder">AIによる分析を実行してください。</div>
@@ -595,29 +558,29 @@ function handleTouchStart(event, emailCard) {
     touchStartX = event.touches[0].clientX;
     touchStartY = event.touches[0].clientY;
     touchStartTime = new Date().getTime();
-
+    
     // 長押し検出用のタイマーを設定
     longPressTimer = setTimeout(() => {
         showEmailMenu(emailCard);
     }, 500);
-
+    
     isSwiping = false;
 }
 
 // タッチ移動時の処理
 function handleTouchMove(event, emailCard) {
     if (!touchStartX || !touchStartY) return;
-
+    
     const touchEndX = event.touches[0].clientX;
     const touchEndY = event.touches[0].clientY;
     const deltaX = touchEndX - touchStartX;
     const deltaY = touchEndY - touchStartY;
-
+    
     // 水平方向の移動が垂直方向より大きい場合のみスワイプと判定
     if (Math.abs(deltaX) > Math.abs(deltaY) && Math.abs(deltaX) > 30) {
         isSwiping = true;
         clearTimeout(longPressTimer);
-
+        
         // スワイプ中のアニメーション
         emailCard.style.transform = `translateX(${deltaX}px)`;
     }
@@ -627,25 +590,25 @@ function handleTouchMove(event, emailCard) {
 function handleTouchEnd(event, emailCard, emailId) {
     const touchEndTime = new Date().getTime();
     const touchDuration = touchEndTime - touchStartTime;
-
+    
     clearTimeout(longPressTimer);
-
+    
     if (isSwiping) {
         const touchEndX = event.changedTouches[0].clientX;
         const deltaX = touchEndX - touchStartX;
-
+        
         // スワイプ距離が十分な場合、アコーディオンを開閉
         if (Math.abs(deltaX) > 100) {
             toggleAccordion(emailId);
         }
-
+        
         // 位置をリセット
         emailCard.style.transform = '';
     } else if (touchDuration < 500) {
         // タップ（短押し）の場合、メール詳細を表示
         showEmailModal(emailId);
     }
-
+    
     // 状態をリセット
     touchStartX = 0;
     touchStartY = 0;
@@ -662,15 +625,15 @@ function showEmailMenu(emailCard) {
         <div class="menu-item">タスク作成</div>
         <div class="menu-item">スケジュール作成</div>
     `;
-
+    
     // メニューの位置を設定
     const rect = emailCard.getBoundingClientRect();
     menu.style.position = 'fixed';
     menu.style.top = `${rect.top}px`;
     menu.style.left = `${rect.left}px`;
-
+    
     document.body.appendChild(menu);
-
+    
     // メニュー以外をクリックしたら閉じる
     const closeMenu = (e) => {
         if (!menu.contains(e.target)) {
@@ -678,7 +641,7 @@ function showEmailMenu(emailCard) {
             document.removeEventListener('click', closeMenu);
         }
     };
-
+    
     setTimeout(() => {
         document.addEventListener('click', closeMenu);
     }, 0);
@@ -689,16 +652,15 @@ document.addEventListener('DOMContentLoaded', () => {
     const emailCards = document.querySelectorAll('.email-card');
     emailCards.forEach(card => {
         const emailId = card.querySelector('.email-card-body').id.replace('email-content-', '');
+        
         card.addEventListener('touchstart', (e) => handleTouchStart(e, card));
         card.addEventListener('touchmove', (e) => handleTouchMove(e, card));
         card.addEventListener('touchend', (e) => handleTouchEnd(e, card, emailId));
     });
 });
 </script>
-
 <!-- Font Awesome from cdnjs -->
 <script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/js/all.min.js" crossorigin="anonymous"></script>
-
 <script>
 // アコーディオンの開閉を制御する関数
 function toggleAccordion(emailId) {
@@ -713,7 +675,7 @@ function toggleAccordion(emailId) {
             item.classList.remove('active');
         }
     });
-
+    
     allIcons.forEach(item => {
         if (item !== icon && item.classList.contains('active')) {
             item.classList.remove('active');
@@ -725,135 +687,52 @@ function toggleAccordion(emailId) {
     icon.classList.toggle('active');
 }
 
-// メール要約処理
-async function summarizeEmail() {
-    const emailId = document.getElementById('emailModal').getAttribute('data-email-id');
-    const summaryButton = document.getElementById('summarizeButton');
-    const summaryContent = document.getElementById('emailSummaryContent');
-    const summaryDiv = summaryContent.querySelector('.summary-content');
-
-    try {
-        summaryButton.disabled = true;
-        summaryButton.innerHTML = '<i class="fas fa-spinner fa-spin"></i> 要約中...';
-
-        const response = await fetch(`/api/emails/${emailId}/summarize`, {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json'
-            }
-        });
-
-        const data = await response.json();
-
-        if (data.error) {
-            throw new Error(data.error);
-        }
-
-        summaryContent.style.display = 'block';
-        summaryDiv.innerHTML = data.summary;
-
-    } catch (error) {
-        console.error('Error:', error);
-        alert('メールの要約中にエラーが発生しました: ' + error.message);
-    } finally {
-        summaryButton.disabled = false;
-        summaryButton.innerHTML = '<i class="fas fa-file-alt"></i> メールを要約';
-    }
-}
-
-// AI分析の関数
-async function analyzeEmail() {
+// Define showEmailModal function first
+window.showEmailModal = async function(emailId) {
     try {
         const modal = document.getElementById('emailModal');
-        if (!modal || !modal.dataset.emailId) {
-            console.error('メールモーダルまたはメールIDが見つかりません');
+        const modalSubject = document.getElementById('modalEmailSubject');
+        const modalInfo = document.getElementById('modalEmailInfo');
+        const modalContent = document.getElementById('modalEmailContent');
+        const aiAnalysisContent = document.getElementById('aiAnalysisContent');
+
+        // Verify all required elements exist
+        if (!modal || !modalSubject || !modalInfo || !modalContent || !aiAnalysisContent) {
+            console.error('Required modal elements not found');
             return;
         }
 
-        const emailId = modal.dataset.emailId;
-        const analysisButton = document.getElementById('analyzeButton');
-        const analysisContent = document.getElementById('aiAnalysisContent');
+        // Reset modal content
+        modal.dataset.emailId = emailId;
+        modalSubject.textContent = '';
+        modalInfo.textContent = '';
+        modalContent.textContent = '';
+        aiAnalysisContent.innerHTML = '<div class="analysis-placeholder">AIによる分析を実行してください。</div>';
 
-        if (!analysisButton || !analysisContent) {
-            console.error('必要なDOM要素が見つかりません');
-            return;
-        }
-
-        // Update button state
-        analysisButton.disabled = true;
-        analysisButton.innerHTML = '<i class="fas fa-spinner fa-spin"></i> 分析中...';
-
-        // Show analysis section
-        analysisContent.innerHTML = '<div class="loading-spinner">AI分析を実行中...</div>';
-
-        // Call API endpoint
-        const response = await fetch(`/api/emails/${emailId}/analyze`, {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json'
-            }
-        });
-
+        // Fetch email data
+        const response = await fetch(`/api/emails/${emailId}`);
         if (!response.ok) {
-            throw new Error('AI分析中にエラーが発生しました');
+            throw new Error('メールデータの取得に失敗しました');
         }
 
         const data = await response.json();
 
-        // Parse and display analysis results
-        analysisContent.innerHTML = `<div>${escapeHtml(data.analysis)}</div>`;
+        // Safely update modal content
+        modalSubject.textContent = data.subject || '';
+        modalInfo.textContent = `${data.sender} - ${data.created_at}`;
+        modalContent.textContent = data.content || '';
+
+        // Load related items
+        await loadRelatedItems(emailId);
+
+        // Show modal
+        modal.style.display = 'block';
     } catch (error) {
-        console.error('AI分析エラー:', error);
-        const analysisContent = document.getElementById('aiAnalysisContent');
-        if (analysisContent) {
-            analysisContent.innerHTML = `<div class="alert alert-danger">${error.message || 'AI分析中にエラーが発生しました。'}</div>`;
-        }
-    } finally {
-        // Reset button state
-        const analysisButton = document.getElementById('analyzeButton');
-        if (analysisButton) {
-            analysisButton.disabled = false;
-            analysisButton.innerHTML = '<i class="fas fa-brain"></i> AI分析を実行';
-        }
+        console.error('メールモーダルの表示中にエラーが発生しました:', error);
     }
-}
+};
 
-// モーダル表示関数
-function showEmailModal(emailId) {
-    const modal = document.getElementById('emailModal');
-    modal.setAttribute('data-email-id', emailId);
-    modal.style.display = 'block';
-
-    // 要約とAI分析の結果をリセット
-    document.getElementById('emailSummaryContent').style.display = 'none';
-    document.getElementById('aiAnalysisContent').innerHTML = 
-        '<div class="analysis-placeholder">AIによる分析を実行してください。</div>';
-
-    // メールの詳細を取得して表示
-    fetch(`/api/emails/${emailId}`)
-        .then(response => response.json())
-        .then(data => {
-            if (data.error) {
-                throw new Error(data.error);
-            }
-
-            document.getElementById('modalEmailSubject').textContent = data.subject || '(件名なし)';
-            document.getElementById('modalEmailInfo').innerHTML = 
-                `送信者: ${data.sender}<br>
-                 日時: ${new Date(data.created_at).toLocaleString('ja-JP')}`;
-            document.getElementById('modalEmailContent').textContent = data.content;
-        })
-        .catch(error => {
-            console.error('Error fetching email details:', error);
-            document.getElementById('modalEmailContent').innerHTML = 
-                `<p class="error-message">メール詳細の取得中にエラーが発生しました: ${error.message}</p>`;
-        });
-
-    // 関連アイテムを読み込む
-    loadRelatedItems(emailId);
-}
-
-// 関連アイテムを読み込む関数
+// Define loadRelatedItems function
 async function loadRelatedItems(emailId) {
     const tasksContainer = document.getElementById('relatedTasks');
     const schedulesContainer = document.getElementById('relatedSchedules');
@@ -921,28 +800,86 @@ function escapeHtml(unsafe) {
         .replace(/'/g, "&#039;");
 }
 
-// モーダルを閉じる関数
-function closeEmailModal() {
+// Close modal function
+window.closeEmailModal = function() {
     const modal = document.getElementById('emailModal');
     if (modal) {
         modal.style.display = 'none';
     }
-}
+};
 
-// モーダルの外側をクリックして閉じる
+// Setup event listeners
 window.addEventListener('click', function(event) {
     const modal = document.getElementById('emailModal');
     if (event.target === modal) {
-        closeEmailModal();
+        modal.style.display = 'none';
     }
 });
 
-// ESCキーでモーダルを閉じる
 document.addEventListener('keydown', function(event) {
     const modal = document.getElementById('emailModal');
     if (event.key === 'Escape' && modal.style.display === 'block') {
-        closeEmailModal();
+        modal.style.display = 'none';
     }
 });
 </script>
+<script>
+// AI Analysis function
+async function analyzeEmail() {
+    try {
+        const modal = document.getElementById('emailModal');
+        if (!modal || !modal.dataset.emailId) {
+            console.error('メールモーダルまたはメールIDが見つかりません');
+            return;
+        }
+
+        const emailId = modal.dataset.emailId;
+        const analysisButton = document.getElementById('analyzeButton');
+        const analysisContent = document.getElementById('aiAnalysisContent');
+
+        if (!analysisButton || !analysisContent) {
+            console.error('必要なDOM要素が見つかりません');
+            return;
+        }
+
+        // Update button state
+        analysisButton.disabled = true;
+        analysisButton.innerHTML = '<i class="fas fa-spinner fa-spin"></i> 分析中...';
+
+        // Show analysis section
+        analysisContent.innerHTML = '<div class="loading-spinner">AI分析を実行中...</div>';
+
+        // Call API endpoint
+        const response = await fetch(`/api/emails/${emailId}/analyze`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            }
+        });
+
+        if (!response.ok) {
+            throw new Error('AI分析中にエラーが発生しました');
+        }
+
+        const data = await response.json();
+
+        // Parse and display analysis results
+        analysisContent.innerHTML = `<div>${escapeHtml(data.analysis)}</div>`;
+    } catch (error) {
+        console.error('AI分析エラー:', error);
+        const analysisContent = document.getElementById('aiAnalysisContent');
+        if (analysisContent) {
+            analysisContent.innerHTML = `<div class="alert alert-danger">${error.message || 'AI分析中にエラーが発生しました。'}</div>`;
+        }
+    } finally {
+        // Reset button state
+        const analysisButton = document.getElementById('analyzeButton');
+        if (analysisButton) {
+            analysisButton.disabled = false;
+            analysisButton.innerHTML = '<i class="fas fa-brain"></i> AI分析を実行';
+        }
+    }
+}
+</script>
+
 {% endblock %}
