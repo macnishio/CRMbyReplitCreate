@@ -1,12 +1,24 @@
 from flask import Blueprint, jsonify, request, current_app
-from flask_login import login_required
+from flask_login import login_required, current_user
 from models.system_changes import SystemChange, RollbackHistory
 from services.ai_rollback import AIRollbackService
+from models.user_settings import UserSettings
 from extensions import db
 from datetime import datetime
+from typing import Dict, Any, Optional
 
 bp = Blueprint('system_management', __name__)
-ai_rollback_service = AIRollbackService()
+
+def get_ai_rollback_service() -> Optional[AIRollbackService]:
+    """ユーザー設定に基づいてAIロールバックサービスのインスタンスを取得"""
+    try:
+        user_settings = UserSettings.query.filter_by(user_id=current_user.id).first()
+        if user_settings and user_settings.claude_api_key:
+            return AIRollbackService(user_settings)
+        return None
+    except Exception as e:
+        current_app.logger.error(f"AIロールバックサービスの初期化エラー: {str(e)}")
+        return None
 
 @bp.route('/api/system-changes', methods=['GET'])
 @login_required
@@ -26,16 +38,34 @@ def list_system_changes():
 @login_required
 def analyze_change(change_id):
     """特定の変更をAIで分析"""
-    change = SystemChange.query.get_or_404(change_id)
-    analysis = ai_rollback_service.analyze_system_change(change)
-    
-    change.ai_analysis = analysis
-    db.session.commit()
-    
-    return jsonify({
-        'success': True,
-        'analysis': analysis
-    })
+    ai_service = get_ai_rollback_service()
+    if not ai_service:
+        return jsonify({
+            'success': False,
+            'error': 'AIサービスの初期化に失敗しました。API設定を確認してください。'
+        }), 400
+
+    try:
+        change = SystemChange.query.get_or_404(change_id)
+        analysis = ai_service.analyze_system_change(change)
+        
+        if isinstance(analysis, dict):
+            change.ai_analysis = json.dumps(analysis, ensure_ascii=False)
+        else:
+            change.ai_analysis = analysis
+            
+        db.session.commit()
+        
+        return jsonify({
+            'success': True,
+            'analysis': analysis
+        })
+    except Exception as e:
+        current_app.logger.error(f"変更分析エラー: {str(e)}")
+        return jsonify({
+            'success': False,
+            'error': str(e)
+        }), 500
 
 @bp.route('/api/system-changes/<int:change_id>/rollback', methods=['POST'])
 @login_required

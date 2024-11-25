@@ -4,12 +4,18 @@ from cryptography.fernet import Fernet
 import base64
 from flask import current_app
 from extensions import db
-from sqlalchemy.orm import Mapped, mapped_column
+from sqlalchemy.orm import Mapped, mapped_column, relationship
 from sqlalchemy import Integer, String, DateTime, Boolean, Text, ForeignKey
-from typing import Optional
+from typing import Optional, TYPE_CHECKING
+
+if TYPE_CHECKING:
+    from .user import User
 
 class UserSettings(db.Model):
     __tablename__ = 'user_settings'
+    
+    # リレーションシップ
+    user: Mapped["User"] = relationship("User", back_populates="settings")
     id: Mapped[int] = mapped_column(Integer, primary_key=True)
     user_id: Mapped[int] = mapped_column(Integer, ForeignKey('users.id'), nullable=False, unique=True)
     mail_server: Mapped[str] = mapped_column(String(120))

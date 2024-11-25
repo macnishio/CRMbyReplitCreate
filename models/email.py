@@ -2,7 +2,14 @@ from datetime import datetime
 from extensions import db
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 from sqlalchemy import Integer, String, Text, DateTime, ForeignKey, Boolean
-from typing import Optional, List
+from typing import Optional, List, TYPE_CHECKING
+from sqlalchemy.orm import Mapped, mapped_column, relationship
+
+if TYPE_CHECKING:
+    from .lead import Lead
+    from .user import User
+    from .task import Task
+    from .schedule import Schedule
 
 class Email(db.Model):
     __tablename__ = 'emails'
@@ -21,8 +28,8 @@ class Email(db.Model):
     created_at: Mapped[datetime] = mapped_column(DateTime, nullable=False, default=datetime.utcnow)
 
     # リレーションシップ
-    lead: Mapped["Lead"] = relationship("Lead", back_populates="emails")
-    user: Mapped["User"] = relationship("User", back_populates="emails")
+    lead: Mapped["Lead"] = relationship("Lead", back_populates="emails", foreign_keys=[lead_id])
+    user: Mapped["User"] = relationship("User", back_populates="emails", foreign_keys=[user_id])
     tasks: Mapped[List["Task"]] = relationship("Task", back_populates="email", lazy="dynamic")
     schedules: Mapped[List["Schedule"]] = relationship("Schedule", back_populates="email", lazy="dynamic")
 

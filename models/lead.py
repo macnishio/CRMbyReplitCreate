@@ -27,7 +27,7 @@ class Lead(db.Model):
     last_email_opened: Mapped[Optional[datetime]] = mapped_column(DateTime, nullable=True)
 
     # Relationships
-    user: Mapped["User"] = relationship("User", back_populates="leads")
+    user: Mapped["User"] = relationship("User", back_populates="leads", foreign_keys=[user_id])
     opportunities: Mapped[List["Opportunity"]] = relationship("Opportunity", back_populates="lead", cascade="all, delete-orphan")
     schedules: Mapped[List["Schedule"]] = relationship("Schedule", back_populates="lead", cascade="all, delete-orphan")
     tasks: Mapped[List["Task"]] = relationship("Task", back_populates="lead", cascade="all, delete-orphan")

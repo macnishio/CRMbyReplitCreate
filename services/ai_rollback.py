@@ -1,20 +1,21 @@
 import os
 import json
 import logging
-from typing import Optional, Dict, Any
+from typing import Optional, Dict, Any, Union
 from datetime import datetime
-from anthropic import Anthropic
+from anthropic import Anthropic, HUMAN_PROMPT, AI_PROMPT
 from models.system_changes import SystemChange, RollbackHistory
 from extensions import db
 from flask import current_app
 import traceback
 from sqlalchemy import text
+from sqlalchemy.orm import Session
 
 class AIRollbackService:
     def __init__(self):
         self.anthropic = Anthropic(api_key=os.environ.get('CLAUDE_API_KEY'))
 
-    def analyze_system_change(self, change: SystemChange) -> Dict[str, Any]:
+    def analyze_system_change(self, change: SystemChange) -> Union[Dict[str, Any], str]:
         """AIを使用してシステム変更を分析し、リスク評価とロールバック推奨事項を提供"""
         try:
             prompt = f"""
