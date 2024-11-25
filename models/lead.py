@@ -2,7 +2,14 @@ from extensions import db
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 from sqlalchemy import Integer, String, Float, DateTime, ForeignKey
 from datetime import datetime
-from typing import Optional, List
+from typing import Optional, List, TYPE_CHECKING
+
+if TYPE_CHECKING:
+    from .opportunity import Opportunity
+    from .schedule import Schedule
+    from .task import Task
+    from .email import Email
+    from .user import User
 
 class Lead(db.Model):
     __tablename__ = 'leads'
@@ -20,6 +27,7 @@ class Lead(db.Model):
     last_email_opened: Mapped[Optional[datetime]] = mapped_column(DateTime, nullable=True)
 
     # Relationships
+    user: Mapped["User"] = relationship("User", back_populates="leads")
     opportunities: Mapped[List["Opportunity"]] = relationship("Opportunity", back_populates="lead", cascade="all, delete-orphan")
     schedules: Mapped[List["Schedule"]] = relationship("Schedule", back_populates="lead", cascade="all, delete-orphan")
     tasks: Mapped[List["Task"]] = relationship("Task", back_populates="lead", cascade="all, delete-orphan")

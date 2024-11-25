@@ -1,0 +1,125 @@
+2024-11-25 20:09:03,711 DEBUG: Stripe configuration loaded: True [in /home/runner/CRM/app.py:26]
+/home/runner/CRM/.pythonlibs/lib/python3.11/site-packages/flask_limiter/extension.py:336: UserWarning: Using the in-memory storage for tracking rate limits as no storage was explicitly specified. This is not recommended for production use. See: https://flask-limiter.readthedocs.io#configuring-a-storage-backend for documentation about configuring the storage backend.
+  warnings.warn(
+2024-11-25 20:09:07,593 INFO: Database connection successful [in /home/runner/CRM/db_utils.py:75]
+2024-11-25 20:09:10,079 INFO: Database tables already exist [in /home/runner/CRM/db_utils.py:87]
+2024-11-25 20:09:11,132 DEBUG: load_ssl_context verify=True cert=None trust_env=True http2=False [in /home/runner/CRM/.pythonlibs/lib/python3.11/site-packages/httpx/_config.py:82]
+2024-11-25 20:09:11,132 DEBUG: load_verify_locations cafile='/etc/ssl/certs/ca-certificates.crt' [in /home/runner/CRM/.pythonlibs/lib/python3.11/site-packages/httpx/_config.py:148]
+2024-11-25 20:09:11,175 DEBUG: No explicit setting existed. Use localtime [in /home/runner/CRM/.pythonlibs/lib/python3.11/site-packages/tzlocal/unix.py:183]
+2024-11-25 20:09:11,175 INFO: Adding job tentatively -- it will be properly scheduled when the scheduler starts [in /home/runner/CRM/.pythonlibs/lib/python3.11/site-packages/apscheduler/schedulers/base.py:454]
+2024-11-25 20:09:11,175 INFO: Adding job tentatively -- it will be properly scheduled when the scheduler starts [in /home/runner/CRM/.pythonlibs/lib/python3.11/site-packages/apscheduler/schedulers/base.py:454]
+2024-11-25 20:09:11,176 INFO: Added job "setup_email_scheduler.<locals>.email_check_wrapper" to job store "default" [in /home/runner/CRM/.pythonlibs/lib/python3.11/site-packages/apscheduler/schedulers/base.py:895]
+2024-11-25 20:09:11,176 INFO: Added job "setup_email_scheduler.<locals>.schedule_monitor" to job store "default" [in /home/runner/CRM/.pythonlibs/lib/python3.11/site-packages/apscheduler/schedulers/base.py:895]
+2024-11-25 20:09:11,176 INFO: Scheduler started [in /home/runner/CRM/.pythonlibs/lib/python3.11/site-packages/apscheduler/schedulers/base.py:181]
+2024-11-25 20:09:11,177 DEBUG: Looking for jobs to run [in /home/runner/CRM/.pythonlibs/lib/python3.11/site-packages/apscheduler/schedulers/base.py:954]
+2024-11-25 20:09:11,177 INFO: Email scheduler started successfully [in /home/runner/CRM/email_receiver.py:1657]
+2024-11-25 20:09:11,177 DEBUG: Next wakeup is due at 2024-11-25 20:14:11.175691+00:00 (in 299.998137 seconds) [in /home/runner/CRM/.pythonlibs/lib/python3.11/site-packages/apscheduler/schedulers/base.py:1034]
+2024-11-25 20:09:11,177 INFO: Running initial email check on startup [in /home/runner/CRM/email_receiver.py:1600]
+2024-11-25 20:09:11,188 ERROR: Session rolled back due to error: Mapper 'Mapper[Lead(leads)]' has no property 'opportunities'.  If this property was indicated from other mappers or configure events, ensure registry.configure() has been called. [in /home/runner/CRM/email_receiver.py:673]
+Traceback (most recent call last):
+  File "/home/runner/CRM/.pythonlibs/lib/python3.11/site-packages/sqlalchemy/orm/mapper.py", line 2509, in get_property
+    return self._props[key]
+           ~~~~~~~~~~~^^^^^
+KeyError: 'opportunities'
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "/home/runner/CRM/email_receiver.py", line 661, in session_scope
+    yield session
+  File "/home/runner/CRM/email_receiver.py", line 1684, in check_emails_task
+    settings_list = session.query(UserSettings).all()
+                    ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/runner/CRM/.pythonlibs/lib/python3.11/site-packages/sqlalchemy/orm/session.py", line 2952, in query
+    return self._query_cls(entities, self, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/runner/CRM/.pythonlibs/lib/python3.11/site-packages/sqlalchemy/orm/query.py", line 275, in __init__
+    self._set_entities(entities)
+  File "/home/runner/CRM/.pythonlibs/lib/python3.11/site-packages/sqlalchemy/orm/query.py", line 287, in _set_entities
+    self._raw_columns = [
+                        ^
+  File "/home/runner/CRM/.pythonlibs/lib/python3.11/site-packages/sqlalchemy/orm/query.py", line 288, in <listcomp>
+    coercions.expect(
+  File "/home/runner/CRM/.pythonlibs/lib/python3.11/site-packages/sqlalchemy/sql/coercions.py", line 389, in expect
+    insp._post_inspect
+  File "/home/runner/CRM/.pythonlibs/lib/python3.11/site-packages/sqlalchemy/util/langhelpers.py", line 1253, in __get__
+    obj.__dict__[self.__name__] = result = self.fget(obj)
+                                           ^^^^^^^^^^^^^^
+  File "/home/runner/CRM/.pythonlibs/lib/python3.11/site-packages/sqlalchemy/orm/mapper.py", line 2711, in _post_inspect
+    self._check_configure()
+  File "/home/runner/CRM/.pythonlibs/lib/python3.11/site-packages/sqlalchemy/orm/mapper.py", line 2388, in _check_configure
+    _configure_registries({self.registry}, cascade=True)
+  File "/home/runner/CRM/.pythonlibs/lib/python3.11/site-packages/sqlalchemy/orm/mapper.py", line 4204, in _configure_registries
+    _do_configure_registries(registries, cascade)
+  File "/home/runner/CRM/.pythonlibs/lib/python3.11/site-packages/sqlalchemy/orm/mapper.py", line 4245, in _do_configure_registries
+    mapper._post_configure_properties()
+  File "/home/runner/CRM/.pythonlibs/lib/python3.11/site-packages/sqlalchemy/orm/mapper.py", line 2405, in _post_configure_properties
+    prop.init()
+  File "/home/runner/CRM/.pythonlibs/lib/python3.11/site-packages/sqlalchemy/orm/interfaces.py", line 584, in init
+    self.do_init()
+  File "/home/runner/CRM/.pythonlibs/lib/python3.11/site-packages/sqlalchemy/orm/relationships.py", line 1647, in do_init
+    self._generate_backref()
+  File "/home/runner/CRM/.pythonlibs/lib/python3.11/site-packages/sqlalchemy/orm/relationships.py", line 2133, in _generate_backref
+    self._add_reverse_property(self.back_populates)
+  File "/home/runner/CRM/.pythonlibs/lib/python3.11/site-packages/sqlalchemy/orm/relationships.py", line 1578, in _add_reverse_property
+    other = self.mapper.get_property(key, _configure_mappers=False)
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/runner/CRM/.pythonlibs/lib/python3.11/site-packages/sqlalchemy/orm/mapper.py", line 2511, in get_property
+    raise sa_exc.InvalidRequestError(
+sqlalchemy.exc.InvalidRequestError: Mapper 'Mapper[Lead(leads)]' has no property 'opportunities'.  If this property was indicated from other mappers or configure events, ensure registry.configure() has been called.
+2024-11-25 20:09:11,194 DEBUG: Session closed. Total duration: 0.01s [in /home/runner/CRM/email_receiver.py:683]
+2024-11-25 20:09:11,194 ERROR: Critical error in check_emails_task: Mapper 'Mapper[Lead(leads)]' has no property 'opportunities'.  If this property was indicated from other mappers or configure events, ensure registry.configure() has been called. [in /home/runner/CRM/email_receiver.py:1721]
+Traceback (most recent call last):
+  File "/home/runner/CRM/.pythonlibs/lib/python3.11/site-packages/sqlalchemy/orm/mapper.py", line 2509, in get_property
+    return self._props[key]
+           ~~~~~~~~~~~^^^^^
+KeyError: 'opportunities'
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "/home/runner/CRM/email_receiver.py", line 1684, in check_emails_task
+    settings_list = session.query(UserSettings).all()
+                    ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/runner/CRM/.pythonlibs/lib/python3.11/site-packages/sqlalchemy/orm/session.py", line 2952, in query
+    return self._query_cls(entities, self, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/runner/CRM/.pythonlibs/lib/python3.11/site-packages/sqlalchemy/orm/query.py", line 275, in __init__
+    self._set_entities(entities)
+  File "/home/runner/CRM/.pythonlibs/lib/python3.11/site-packages/sqlalchemy/orm/query.py", line 287, in _set_entities
+    self._raw_columns = [
+                        ^
+  File "/home/runner/CRM/.pythonlibs/lib/python3.11/site-packages/sqlalchemy/orm/query.py", line 288, in <listcomp>
+    coercions.expect(
+  File "/home/runner/CRM/.pythonlibs/lib/python3.11/site-packages/sqlalchemy/sql/coercions.py", line 389, in expect
+    insp._post_inspect
+  File "/home/runner/CRM/.pythonlibs/lib/python3.11/site-packages/sqlalchemy/util/langhelpers.py", line 1253, in __get__
+    obj.__dict__[self.__name__] = result = self.fget(obj)
+                                           ^^^^^^^^^^^^^^
+  File "/home/runner/CRM/.pythonlibs/lib/python3.11/site-packages/sqlalchemy/orm/mapper.py", line 2711, in _post_inspect
+    self._check_configure()
+  File "/home/runner/CRM/.pythonlibs/lib/python3.11/site-packages/sqlalchemy/orm/mapper.py", line 2388, in _check_configure
+    _configure_registries({self.registry}, cascade=True)
+  File "/home/runner/CRM/.pythonlibs/lib/python3.11/site-packages/sqlalchemy/orm/mapper.py", line 4204, in _configure_registries
+    _do_configure_registries(registries, cascade)
+  File "/home/runner/CRM/.pythonlibs/lib/python3.11/site-packages/sqlalchemy/orm/mapper.py", line 4245, in _do_configure_registries
+    mapper._post_configure_properties()
+  File "/home/runner/CRM/.pythonlibs/lib/python3.11/site-packages/sqlalchemy/orm/mapper.py", line 2405, in _post_configure_properties
+    prop.init()
+  File "/home/runner/CRM/.pythonlibs/lib/python3.11/site-packages/sqlalchemy/orm/interfaces.py", line 584, in init
+    self.do_init()
+  File "/home/runner/CRM/.pythonlibs/lib/python3.11/site-packages/sqlalchemy/orm/relationships.py", line 1647, in do_init
+    self._generate_backref()
+  File "/home/runner/CRM/.pythonlibs/lib/python3.11/site-packages/sqlalchemy/orm/relationships.py", line 2133, in _generate_backref
+    self._add_reverse_property(self.back_populates)
+  File "/home/runner/CRM/.pythonlibs/lib/python3.11/site-packages/sqlalchemy/orm/relationships.py", line 1578, in _add_reverse_property
+    other = self.mapper.get_property(key, _configure_mappers=False)
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/runner/CRM/.pythonlibs/lib/python3.11/site-packages/sqlalchemy/orm/mapper.py", line 2511, in get_property
+    raise sa_exc.InvalidRequestError(
+sqlalchemy.exc.InvalidRequestError: Mapper 'Mapper[Lead(leads)]' has no property 'opportunities'.  If this property was indicated from other mappers or configure events, ensure registry.configure() has been called.
+ERROR [error_notifications] Critical error in check_emails_task: Mapper 'Mapper[Lead(leads)]' has no property 'opportunities'.  If this property was indicated from other mappers or configure events, ensure registry.configure() has been called.
+INFO  [alembic.runtime.migration] Context impl PostgresqlImpl.
+INFO  [alembic.runtime.migration] Will assume transactional DDL.
+INFO  [alembic.ddl.postgresql] Detected sequence named 'user_settings_id_seq' as owned by integer column 'user_settings(id)', assuming SERIAL and omitting
+INFO  [alembic.ddl.postgresql] Detected sequence named 'subscription_plans_id_seq' as owned by integer column 'subscription_plans(id)', assuming SERIAL and omitting

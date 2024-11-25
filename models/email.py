@@ -1,8 +1,8 @@
 from datetime import datetime
 from extensions import db
-from sqlalchemy.orm import Mapped, mapped_column
+from sqlalchemy.orm import Mapped, mapped_column, relationship
 from sqlalchemy import Integer, String, Text, DateTime, ForeignKey, Boolean
-from typing import Optional
+from typing import Optional, List
 
 class Email(db.Model):
     __tablename__ = 'emails'
@@ -21,5 +21,10 @@ class Email(db.Model):
     created_at: Mapped[datetime] = mapped_column(DateTime, nullable=False, default=datetime.utcnow)
 
     # リレーションシップ
-    tasks = db.relationship('Task', back_populates='email', lazy='dynamic')
-    schedules = db.relationship('Schedule', back_populates='email', lazy='dynamic')
+    lead: Mapped["Lead"] = relationship("Lead", back_populates="emails")
+    user: Mapped["User"] = relationship("User", back_populates="emails")
+    tasks: Mapped[List["Task"]] = relationship("Task", back_populates="email", lazy="dynamic")
+    schedules: Mapped[List["Schedule"]] = relationship("Schedule", back_populates="email", lazy="dynamic")
+
+    def __repr__(self):
+        return f'<Email {self.subject}>'

@@ -3,6 +3,12 @@ from extensions import db
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 from sqlalchemy import Integer, String, Float, DateTime, ForeignKey, Boolean
 from typing import Optional
+from typing import TYPE_CHECKING
+
+if TYPE_CHECKING:
+    from .lead import Lead
+    from .account import Account
+    from .user import User
 
 class Opportunity(db.Model):
     __tablename__ = 'opportunities'
@@ -20,7 +26,7 @@ class Opportunity(db.Model):
 
     # リレーションシップ
     lead: Mapped["Lead"] = relationship("Lead", back_populates="opportunities")
-    account: Mapped["Account"] = relationship("Account", back_populates="opportunities")
+    account: Mapped[Optional["Account"]] = relationship("Account", back_populates="opportunities")
     user: Mapped["User"] = relationship("User", back_populates="opportunities")
 
     def __repr__(self):
