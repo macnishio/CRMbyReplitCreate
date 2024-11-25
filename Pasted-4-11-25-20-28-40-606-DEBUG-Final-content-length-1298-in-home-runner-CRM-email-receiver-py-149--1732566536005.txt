@@ -1,0 +1,24 @@
+4-11-25 20:28:40,606 DEBUG: Final content length: 1298 [in /home/runner/CRM/email_receiver.py:149]
+2024-11-25 20:28:41,229 ERROR: Database error in dashboard: (psycopg2.errors.UndefinedColumn) column leads.last_followup_tracking_id does not exist
+LINE 1: ...last_followup_email AS leads_last_followup_email, leads.last...
+                                                             ^
+
+[SQL: SELECT leads.id AS leads_id, leads.name AS leads_name, leads.email AS leads_email, leads.phone AS leads_phone, leads.status AS leads_status, leads.score AS leads_score, leads.user_id AS leads_user_id, leads.created_at AS leads_created_at, leads.last_contact AS leads_last_contact, leads.last_followup_email AS leads_last_followup_email, leads.last_followup_tracking_id AS leads_last_followup_tracking_id, leads.last_email_opened AS leads_last_email_opened 
+FROM leads 
+WHERE leads.user_id = %(user_id_1)s ORDER BY leads.created_at DESC 
+ LIMIT %(param_1)s OFFSET %(param_2)s]
+[parameters: {'user_id_1': 2, 'param_1': 5, 'param_2': 0}]
+(Background on this error at: https://sqlalche.me/e/20/f405) [in /home/runner/CRM/routes/main.py:95]
+2024-11-25 20:28:41,497 INFO: 127.0.0.1 - - [25/Nov/2024 20:28:41] "GET / HTTP/1.1" 200 - [in /home/runner/CRM/.pythonlibs/lib/python3.11/site-packages/werkzeug/_internal.py:224]
+2024-11-25 20:28:41,553 INFO: Found existing email with message_id: <kreisel.d.cookpad.184856.173024@krs.bz>, lead_id: 567 [in /home/runner/CRM/email_receiver.py:818]
+2024-11-25 20:28:41,553 INFO: Duplicate email detected from noreply@baby-calendar.jp [in /home/runner/CRM/email_receiver.py:1047]
+2024-11-25 20:28:41,693 INFO: 127.0.0.1 - - [25/Nov/2024 20:28:41] "GET /static/css/styles.css HTTP/1.1" 304 - [in /home/runner/CRM/.pythonlibs/lib/python3.11/site-packages/werkzeug/_internal.py:224]
+2024-11-25 20:28:41,701 INFO: 127.0.0.1 - - [25/Nov/2024 20:28:41] "GET /static/css/filter.css HTTP/1.1" 304 - [in /home/runner/CRM/.pythonlibs/lib/python3.11/site-packages/werkzeug/_internal.py:224]
+2024-11-25 20:28:41,867 INFO: 127.0.0.1 - - [25/Nov/2024 20:28:41] "GET /static/js/main.js HTTP/1.1" 304 - [in /home/runner/CRM/.pythonlibs/lib/python3.11/site-packages/werkzeug/_internal.py:224]
+2024-11-25 20:28:41,868 INFO: 127.0.0.1 - - [25/Nov/2024 20:28:41] "GET /static/js/filter.js HTTP/1.1" 304 - [in /home/runner/CRM/.pythonlibs/lib/python3.11/site-packages/werkzeug/_internal.py:224]
+2024-11-25 20:28:42,026 DEBUG: Session committed successfully. Duration: 1.42s [in /home/runner/CRM/email_receiver.py:667]
+2024-11-25 20:28:42,027 DEBUG: Session closed. Total duration: 1.42s [in /home/runner/CRM/email_receiver.py:683]
+2024-11-25 20:28:42,344 DEBUG: Starting email content processing [in /home/runner/CRM/email_receiver.py:60]
+2024-11-25 20:28:42,344 DEBUG: Processing multipart content of length 3452, charset: utf-8 [in /home/runner/CRM/email_receiver.py:117]
+2024-11-25 20:28:42,346 DEBUG: Detected utf_8 with confidence 0.99 [in /home/runner/CRM/email_receiver.py:202]
+2024-11-25 20:28:42,346 DEBUG: Successfully d
