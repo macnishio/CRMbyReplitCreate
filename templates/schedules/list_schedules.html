@@ -499,6 +499,7 @@
                             <span class="stat-label">今週の予定</span>
                             <span class="stat-value">{{ schedules|selectattr('start_time', 'le', now() + timedelta(days=7))|selectattr('start_time', 'ge', now())|list|length }}件</span>
                         </div>
+
 <script>
 let scheduleToDelete = null;
 

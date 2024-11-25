@@ -5,7 +5,7 @@ from extensions import db
 from datetime import datetime, timedelta
 from sqlalchemy import func, desc, and_
 from sqlalchemy.exc import SQLAlchemyError
-from ai_analysis import analyze_email, process_ai_response
+from ai_analysis import analyze_email, process_ai_response, summarize_email_content
 import html
 import re
 from email_encoding import convert_encoding, clean_email_content, analyze_iso2022jp_text
@@ -233,3 +233,33 @@ def analyze_email_endpoint(email_id):
             'error': 'メールの分析中にエラーが発生しました',
             'details': str(e)
         }), 500
+
+
+@bp.route('/api/emails/<int:email_id>/summarize', methods=['POST'])
+def summarize_email(email_id):
+    try:
+        email = Email.query.get_or_404(email_id)
+        # AI要約処理を実行
+        summary = summarize_email_content(email.subject, email.content)
+        if summary:
+            return jsonify({'success': True, 'summary': summary})
+        else:
+            return jsonify({
+                'success': False, 
+                'error': '要約の生成に失敗しました。'
+            }), 500
+    except Exception as e:
+        return jsonify({
+            'success': False, 
+            'error': f'エラーが発生しました: {str(e)}'
+        }), 500
+
+
+@bp.route('/api/emails/<int:email_id>/related-items', methods=['GET'])
+def get_related_items(email_id):
+    email = Email.query.get_or_404(email_id)
+    tasks = Task.query.filter_by(email_id=email_id).all()
+    schedules = Schedule.query.filter_by(email_id=email_id).all()
+    tasks_data = [{'title': t.title, 'description': t.description, 'due_date': t.due_date.strftime('%Y-%m-%d')} for t in tasks]
+    schedules_data = [{'title': s.title, 'description': s.description, 'datetime': s.start_time.strftime('%Y-%m-%d %H:%M')} for s in schedules]
+    return jsonify({'tasks': tasks_data, 'schedules': schedules_data})

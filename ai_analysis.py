@@ -31,6 +31,46 @@ def handle_ai_error(func_name, error):
         current_app.logger.error(f"{func_name}: Unexpected error - {str(error)}")
     return f'<p class="error-message">{error_msg}</p>'
 
+def summarize_email_content(subject: str, content: str, user_id=None):
+    """Summarize email content using Claude AI"""
+    try:
+        user_settings = UserSettings.query.filter_by(user_id=user_id if user_id else current_user.id).first()
+        if not user_settings or not user_settings.claude_api_key:
+            return '<p>要約を生成するにはAPIキーの設定が必要です。</p>'
+
+        client = Anthropic(api_key=user_settings.claude_api_key)
+        prompt = f"""今は日本時間の{formatted_date}です。以下のメールを要約してください。要点を簡潔にまとめ、重要な情報を漏らさないようにしてください。
+件名: {subject}
+本文:
+{content}
+以下の点に注意して要約してください：
+1. 主要なポイントを箇条書きでまとめる
+2. アクションアイテムがあれば明確に示す
+3. 締切や重要な日付があれば強調する
+4. 返信が必要かどうかを示す
+HTMLの段落タグ（<p>）を使用してフォーマットしてください。"""
+        message = client.messages.create(
+            model="claude-3-haiku-20240307",
+            max_tokens=2000,
+            messages=[{"role": "user", "content": prompt}]
+        )
+        if message and hasattr(message, 'content') and isinstance(message.content, list) and len(message.content) > 0:
+            try:
+                response_text = message.content[0].text
+                if not response_text.startswith('<p>'):
+                    response_text = '<p>' + response_text.replace('\n\n', '</p><p>') + '</p>'
+                return response_text
+            except AttributeError:
+                current_app.logger.error("Failed to access message content text")
+                return '<p>要約の生成中にエラーが発生しました。</p>'
+        return '<p>要約の生成に失敗しました。</p>'
+    except APIError as e:
+        current_app.logger.error(f"Claude API error: {str(e)}")
+        return '<p>API処理中にエラーが発生しました。</p>'
+    except Exception as e:
+        current_app.logger.error(f"Email summarization error: {str(e)}")
+        return '<p>要約の生成中にエラーが発生しました。</p>'
+
 def analyze_data(data_type, data):
     """Analyze data using Claude AI"""
     try:
