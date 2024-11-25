@@ -6,6 +6,7 @@ from models.user_settings import UserSettings
 from extensions import db
 from datetime import datetime
 from typing import Dict, Any, Optional
+import json
 
 bp = Blueprint('system_management', __name__)
 
@@ -73,13 +74,25 @@ def execute_rollback(change_id):
     """システム変更のロールバックを実行"""
     change = SystemChange.query.get_or_404(change_id)
     
+    ai_service = get_ai_rollback_service()
+    if not ai_service:
+        return jsonify({
+            'success': False,
+            'error': 'AIサービスの初期化に失敗しました。API設定を確認してください。'
+        }), 400
+
     # AIによる分析と推奨事項の取得
     if not change.ai_analysis:
-        change.ai_analysis = ai_rollback_service.analyze_system_change(change)
+        analysis = ai_service.analyze_system_change(change)
+        if isinstance(analysis, dict):
+            change.ai_analysis = json.dumps(analysis, ensure_ascii=False)
+        else:
+            change.ai_analysis = analysis
         db.session.commit()
     
     # ロールバックの実行
-    success = ai_rollback_service.execute_rollback(change)
+    result = ai_service.execute_rollback(change)
+    success = result.get('success', False)
     
     return jsonify({
         'success': success,
@@ -118,8 +131,14 @@ def track_system_change():
     
     # 必要に応じてAI分析を実行
     if data.get('analyze_immediately', False):
-        change.ai_analysis = ai_rollback_service.analyze_system_change(change)
-        db.session.commit()
+        ai_service = get_ai_rollback_service()
+        if ai_service:
+            analysis = ai_service.analyze_system_change(change)
+            if isinstance(analysis, dict):
+                change.ai_analysis = json.dumps(analysis, ensure_ascii=False)
+            else:
+                change.ai_analysis = analysis
+            db.session.commit()
     
     return jsonify({
         'success': True,

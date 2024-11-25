@@ -12,8 +12,9 @@ from sqlalchemy import text
 from sqlalchemy.orm import Session
 
 class AIRollbackService:
-    def __init__(self):
-        self.anthropic = Anthropic(api_key=os.environ.get('CLAUDE_API_KEY'))
+    def __init__(self, user_settings=None):
+        """Initialize AIRollbackService with user settings"""
+        self.anthropic = Anthropic(api_key=user_settings.claude_api_key if user_settings else os.environ.get('CLAUDE_API_KEY'))
 
     def analyze_system_change(self, change: SystemChange) -> Union[Dict[str, Any], str]:
         """AIを使用してシステム変更を分析し、リスク評価とロールバック推奨事項を提供"""
