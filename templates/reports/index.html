@@ -80,10 +80,6 @@ document.addEventListener('DOMContentLoaded', function() {
             month: '月',
             week: '週',
             day: '日'
-        },
-        eventDidMount: function(info) {
-            // イベントの完全な情報をツールチップとして設定
-            info.el.title = `${info.event.title}\n開始: ${info.event.start ? new Date(info.event.start).toLocaleString() : '未定'}\n終了: ${info.event.end ? new Date(info.event.end).toLocaleString() : '未定'}`;
         }
     });
     scheduleCalendar.render();
@@ -106,10 +102,6 @@ document.addEventListener('DOMContentLoaded', function() {
             month: '月',
             week: '週',
             day: '日'
-        },
-        eventDidMount: function(info) {
-            // タスクの完全な情報をツールチップとして設定
-            info.el.title = `${info.event.title}\n期限: ${info.event.start ? new Date(info.event.start).toLocaleString() : '未定'}`;
         }
     });
     taskCalendar.render();
@@ -238,14 +230,12 @@ document.addEventListener('DOMContentLoaded', function() {
 </script>
 
 <style>
-/* メインコンテナ */
 .reports-container {
     padding: 1.25rem;
     max-width: 1440px;
     margin: 0 auto;
 }
 
-/* メトリクスグリッド */
 .metrics-grid {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
@@ -253,7 +243,6 @@ document.addEventListener('DOMContentLoaded', function() {
     margin-bottom: 2rem;
 }
 
-/* メトリクスカード */
 .metric-card {
     background: white;
     padding: 1.5rem;
@@ -281,7 +270,6 @@ document.addEventListener('DOMContentLoaded', function() {
     color: #2d3748;
 }
 
-/* カレンダーセクション */
 .calendar-section {
     margin-bottom: 2rem;
 }
@@ -313,7 +301,7 @@ document.addEventListener('DOMContentLoaded', function() {
     letter-spacing: -0.025em;
 }
 
-/* FullCalendarカスタマイズ */
+/* FullCalendar カスタマイズ */
 .calendar-container .fc {
     font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
 }
@@ -332,31 +320,16 @@ document.addEventListener('DOMContentLoaded', function() {
     transition: all 0.2s ease;
 }
 
-/* カレンダーイベントのツールチップ */
 .calendar-container .fc-event {
-    position: relative;
-    cursor: pointer;
-}
-
-.calendar-container .fc-event[title] {
-    position: relative;
-}
-
-.calendar-container .fc-event:hover::after {
-    content: attr(title);
-    position: absolute;
-    bottom: 100%;
-    left: 50%;
-    transform: translateX(-50%);
-    padding: 0.5rem;
-    background: rgba(0, 0, 0, 0.8);
-    color: white;
     border-radius: 4px;
+    padding: 0.25rem 0.5rem;
     font-size: 0.875rem;
-    white-space: pre-wrap;
-    z-index: 1000;
-    max-width: 300px;
-    pointer-events: none;
+    font-weight: 500;
+    transition: transform 0.2s ease;
+}
+
+.calendar-container .fc-event:hover {
+    transform: translateY(-1px);
 }
 
 .calendar-container .fc-daygrid-day-number,
@@ -370,7 +343,6 @@ document.addEventListener('DOMContentLoaded', function() {
     margin-top: 0.25rem;
 }
 
-/* チャートグリッド */
 .charts-grid {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(480px, 1fr));
@@ -398,31 +370,30 @@ document.addEventListener('DOMContentLoaded', function() {
     letter-spacing: -0.025em;
 }
 
-/* レスポンシブデザイン */
 @media (max-width: 768px) {
     .reports-container {
         padding: 1rem;
     }
-
+    
     .calendar-grid,
     .charts-grid {
         grid-template-columns: 1fr;
     }
-
+    
     .calendar-container .fc-toolbar {
         flex-direction: column;
         gap: 0.75rem;
     }
-
+    
     .calendar-container .fc-toolbar-title {
         font-size: 1.125rem !important;
     }
-
+    
     .calendar-container .fc-button {
         padding: 0.375rem 0.75rem;
         font-size: 0.813rem;
     }
-
+    
     .calendar-container .fc-event {
         padding: 0.188rem 0.375rem;
         font-size: 0.813rem;
@@ -433,17 +404,16 @@ document.addEventListener('DOMContentLoaded', function() {
     .metrics-grid {
         grid-template-columns: 1fr;
     }
-
+    
     .calendar-grid {
         grid-template-columns: 1fr;
         margin: 0 -1rem;
     }
-
+    
     .calendar-container {
         border-radius: 0;
         padding: 1rem;
     }
 }
 </style>
-
 {% endblock %}

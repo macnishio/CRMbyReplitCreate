@@ -185,32 +185,6 @@ def get_email_content(email_id):
         }), 500
 
 @bp.route('/api/emails/<int:email_id>/analyze', methods=['POST'])
-@bp.route('/api/emails/<int:email_id>/summarize', methods=['POST'])
-@login_required
-def summarize_email_endpoint(email_id):
-    try:
-        email = Email.query.filter_by(
-            id=email_id,
-            user_id=current_user.id
-        ).first_or_404()
-
-        summary = summarize_email_content(
-            email.subject,
-            email.content,
-            current_user.id
-        )
-
-        return jsonify({
-            'success': True,
-            'summary': summary
-        })
-
-    except Exception as e:
-        current_app.logger.error(f"Error summarizing email: {str(e)}", exc_info=True)
-        return jsonify({
-            'error': 'メールの要約中にエラーが発生しました',
-            'details': str(e)
-        }), 500
 @login_required
 def analyze_email_endpoint(email_id):
     try:

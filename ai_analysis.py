@@ -31,66 +31,7 @@ def handle_ai_error(func_name, error):
         current_app.logger.error(f"{func_name}: Unexpected error - {str(error)}")
     return f'<p class="error-message">{error_msg}</p>'
 
-def summarize_email_content(subject: str, content: str, user_id=None) -> str:
-    """Summarize email content using Claude AI"""
-    try:
-        user_settings = UserSettings.query.filter_by(user_id=user_id if user_id else current_user.id).first()
-        if not user_settings or not user_settings.claude_api_key:
-            return '<p>要約を生成するにはAPIキーの設定が必要です。</p>'
-
-        client = Anthropic(api_key=user_settings.claude_api_key)
-        prompt = f"""今は日本時間の{formatted_date}です。以下のメールを要約してください。要点を簡潔にまとめ、重要な情報を漏らさないようにしてください。
-
-        件名: {subject}
-        本文:
-        {content}
-
-        以下の点に注意して要約してください：
-        1. 主要なポイントを箇条書きでまとめる
-        2. アクションアイテムがあれば明確に示す
-        3. 締切や重要な日付があれば強調する
-        4. 返信が必要かどうかを示す
-
-        HTMLの段落タグ（<p>）を使用してフォーマットしてください。"""
-
-        try:
-            message = client.messages.create(
-                model="claude-3-haiku-20240307",
-                max_tokens=4000,
-                temperature=0.7,
-                messages=[{"role": "user", "content": prompt}]
-            )
-
-            if not message or not hasattr(message, 'content'):
-                current_app.logger.error("Invalid response from Claude API")
-                return '<p>要約の生成に失敗しました。</p>'
-
-            if not isinstance(message.content, list) or not message.content:
-                current_app.logger.error("Invalid content structure in Claude API response")
-                return '<p>要約の生成に失敗しました。</p>'
-
-            content = message.content[0]
-            response_text = content.text if hasattr(content, 'text') else ''
-
-            if not response_text or not response_text.strip():
-                return '<p>要約を生成できませんでした。</p>'
-
-            if not response_text.startswith('<p>'):
-                response_text = '<p>' + response_text.replace('\n\n', '</p><p>') + '</p>'
-            return response_text
-
-        except (AttributeError, KeyError, IndexError) as e:
-            current_app.logger.error(f"Error processing Claude API response: {str(e)}")
-            return '<p>要約の生成中にエラーが発生しました。</p>'
-
-    except APIError as e:
-        current_app.logger.error(f"Claude API error: {str(e)}")
-        return '<p>API処理中にエラーが発生しました。</p>'
-    except Exception as e:
-        current_app.logger.error(f"Email summarization error: {str(e)}")
-        return '<p>要約の生成中にエラーが発生しました。</p>'
-
-def analyze_data(data_type: str, data: str) -> str:
+def analyze_data(data_type, data):
     """Analyze data using Claude AI"""
     try:
         user_settings = UserSettings.query.filter_by(user_id=current_user.id).first()
@@ -101,10 +42,10 @@ def analyze_data(data_type: str, data: str) -> str:
 
         prompt = f"""今は日本時間の{formatted_date}です。以下の{data_type}データを分析してください:\n{data}\n
         以下の項目について簡潔に分析してください:
-        1. 進捗状況と全体的な傾向
-        2. 重要なポイントの特定
-        3. 改善点や提案
-        4. 次のステップへの推奨事項
+        1. {data_type}の全体的な状況
+        2. 重要な要素の特定
+        3. {data_type}管理の改善点
+        4. 次のステップへの提案
         回答は日本語でお願いします。HTMLの段落タグ（<p>）を使用してフォーマットしてください。"""
 
         message = client.messages.create(
@@ -113,16 +54,13 @@ def analyze_data(data_type: str, data: str) -> str:
             messages=[{"role": "user", "content": prompt}]
         )
 
-        if message and message.content and len(message.content) > 0:
+        if message and hasattr(message.content[0], 'text'):
             content = message.content[0].text
             if not content.startswith('<p>'):
                 content = '<p>' + content.replace('\n\n', '</p><p>') + '</p>'
             return content
         return '<p>AI分析の結果を取得できませんでした。</p>'
 
-    except APIError as e:
-        current_app.logger.error(f"Claude API error: {str(e)}")
-        return '<p>API処理中にエラーが発生しました。</p>'
     except Exception as e:
         return handle_ai_error(f"analyze_{data_type}", e)
 
@@ -160,16 +98,14 @@ def analyze_leads(leads):
 
 def analyze_email(subject, content, user_id=None):
     """Analyze email content using Claude AI"""
-    empty_response = json.dumps({
-        "Opportunities": [],
-        "Schedules": [],
-        "Tasks": []
-    })
-    
     try:
         user_settings = UserSettings.query.filter_by(user_id=user_id if user_id else current_user.id).first()
         if not user_settings or not user_settings.claude_api_key:
-            return empty_response
+            return json.dumps({
+                "Opportunities": [],
+                "Schedules": [],
+                "Tasks": []
+            })
 
         client = Anthropic(api_key=user_settings.claude_api_key)
 
@@ -203,45 +139,36 @@ def analyze_email(subject, content, user_id=None):
         }}
         """
 
-        try:
-            message = client.messages.create(
-                model="claude-3-haiku-20240307",
-                max_tokens=4000,
-                temperature=0.7,
-                messages=[
-                    {"role": "system", "content": system_message},
-                    {"role": "user", "content": prompt}
-                ]
-            )
+        message = client.messages.create(
+            model="claude-3-haiku-20240307",
+            max_tokens=4000,
+            temperature=0.7,
+            system=system_message,
+            messages=[{"role": "user", "content": prompt}]
+        )
 
-            if not message or not hasattr(message, 'content'):
-                current_app.logger.error("Invalid response from Claude API")
-                return empty_response
+        if message and hasattr(message.content[0], 'text'):
+            content = message.content[0].text
+            if content.startswith('{'):
+                return content
+            return json.dumps({
+                "Opportunities": [],
+                "Schedules": [],
+                "Tasks": []
+            })
+        return json.dumps({
+            "Opportunities": [],
+            "Schedules": [],
+            "Tasks": []
+        })
 
-            if not isinstance(message.content, list) or not message.content:
-                current_app.logger.error("Invalid content structure in Claude API response")
-                return empty_response
-
-            content = message.content[0]
-            response_text = content.text if hasattr(content, 'text') else ''
-
-            if response_text and response_text.strip():
-                normalized_response = normalize_json_response(response_text)
-                if normalized_response:
-                    return normalized_response
-
-            return empty_response
-
-        except (AttributeError, KeyError, IndexError) as e:
-            current_app.logger.error(f"Error processing Claude API response: {str(e)}")
-            return empty_response
-
-    except APIError as e:
-        current_app.logger.error(f"Claude API error in analyze_email: {str(e)}")
-        return empty_response
     except Exception as e:
-        current_app.logger.error(f"Error in analyze_email: {str(e)}")
-        return empty_response
+        current_app.logger.error(f"AI analysis error: {str(e)}")
+        return json.dumps({
+            "Opportunities": [],
+            "Schedules": [],
+            "Tasks": []
+        })
 
 def create_or_get_lead(email_data, user_id):
     """Create a new lead if it doesn't exist or get existing lead"""
