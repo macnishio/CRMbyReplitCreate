@@ -148,13 +148,16 @@ author = "agent"
 agentRequireRestartOnSave = false
 
 [[workflows.workflow.tasks]]
+task = "packager.installForAll"
+
+[[workflows.workflow.tasks]]
 task = "shell.exec"
 args = """
 
-    current_date=$(date +%Y%m%d)
-    pg_dump $DATABASE_URL > crm_backup_$current_date.sql
-    echo \"Database backup created: crm_backup_$current_date.sql\"
-    """
+current_date=$(date +%Y%m%d)
+pg_dump $DATABASE_URL > crm_backup_$current_date.sql
+echo \"Database backup created: crm_backup_$current_date.sql\"
+"""
 
 [[workflows.workflow]]
 name = "Check Pending Migrations"
