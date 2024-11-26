@@ -44,6 +44,11 @@ def show_history(lead_id):
 @login_required
 def get_history(lead_id):
     try:
+        # リードの存在確認を追加
+        lead = Lead.query.filter_by(id=lead_id, user_id=current_user.id).first()
+        if not lead:
+            return jsonify({'error': 'リードが見つかりません'}), 404
+
         page = request.args.get('page', 1, type=int)
         per_page = 20
 
@@ -61,34 +66,46 @@ def get_history(lead_id):
                 date_from = request.args.get('date_from')
                 date_to = request.args.get('date_to')
                 if date_from and date_to:
-                    query = query.filter(Email.received_date.between(date_from, date_to))
+                    try:
+                        query = query.filter(Email.received_date.between(date_from, date_to))
+                    except Exception as date_error:
+                        current_app.logger.error(f"Date filter error: {str(date_error)}")
+                        return jsonify({'error': '日付フィルターが無効です'}), 400
             elif search_type == 'sender':
                 query = query.filter(Email.sender.ilike(f'%{search_query}%'))
 
-        # ページネーション
-        pagination = query.order_by(Email.received_date.desc()).paginate(
-            page=page, per_page=per_page, error_out=False)
+        try:
+            # ページネーション
+            pagination = query.order_by(Email.received_date.desc()).paginate(
+                page=page, per_page=per_page, error_out=False)
 
-        messages = []
-        for email in pagination.items:
-            messages.append({
-                'id': email.id,
-                'content': email.content,
-                'sender': email.sender,
-                'received_date': email.received_date.isoformat() if email.received_date else None,
-                'is_from_lead': True if email.sender == lead.email else False
+            if not pagination.items and page > 1:
+                return jsonify({'error': '指定されたページは存在しません'}), 404
+
+            messages = []
+            for email in pagination.items:
+                messages.append({
+                    'id': email.id,
+                    'content': email.content,
+                    'sender': email.sender,
+                    'received_date': email.received_date.isoformat() if email.received_date else None,
+                    'is_from_lead': True if email.sender == lead.email else False
+                })
+
+            return jsonify({
+                'messages': messages,
+                'has_next': pagination.has_next,
+                'has_prev': pagination.has_prev,
+                'total_pages': pagination.pages,
+                'current_page': pagination.page
             })
 
-        return jsonify({
-            'messages': messages,
-            'has_next': pagination.has_next,
-            'has_prev': pagination.has_prev,
-            'total_pages': pagination.pages,
-            'current_page': pagination.page
-        })
+        except Exception as query_error:
+            current_app.logger.error(f"Query execution error: {str(query_error)}")
+            return jsonify({'error': 'データの取得中にエラーが発生しました'}), 500
 
     except Exception as e:
-        current_app.logger.error(f"Error in get_history: {str(e)}")
+        current_app.logger.error(f"Error in get_history: {str(e)}\n{traceback.format_exc()}")
         return jsonify({'error': 'データの取得中にエラーが発生しました'}), 500
 
 @bp.route('/leads/<int:lead_id>/export')
