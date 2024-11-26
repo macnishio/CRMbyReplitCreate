@@ -2,7 +2,6 @@
   deps = [
     pkgs.yakut
     pkgs.lsof
-    pkgs.postgresql
     pkgs.rustc
     pkgs.openssl
     pkgs.libiconv
@@ -14,4 +13,7 @@
     pkgs.glibcLocales
     pkgs.postgresql_16
   ];
+  env = {
+    PGVERSION = "16.4";  # PostgreSQLのバージョンを明示
+  };
 }

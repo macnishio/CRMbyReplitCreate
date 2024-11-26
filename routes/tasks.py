@@ -207,7 +207,8 @@ def bulk_action():
         message = '操作中にエラーが発生しました。'
         current_app.logger.error(f"Bulk action error: {str(e)}")
         
-        if request.is_xhr:
+                # Check if the request was made using XMLHttpRequest
+        if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
             response_data['message'] = message
             return jsonify(response_data), 500
         flash(message, 'error')
@@ -411,4 +412,37 @@ def analyze_tasks_endpoint():
         return jsonify({
             'success': False,
             'error': 'タスクの分析中にエラーが発生しました'
+        }), 500
+
+@tasks_bp.route('/<int:id>/toggle-completion', methods=['POST'])
+@login_required
+def toggle_task_completion(id):
+    try:
+        task = Task.query.get_or_404(id)
+        
+        # 権限チェック
+        if task.user_id != current_user.id:
+            return jsonify({
+                'success': False,
+                'message': '権限がありません'
+            }), 403
+
+        # 完了状態を切り替え
+        task.completed = not task.completed
+        task.status = 'Completed' if task.completed else 'In Progress'
+        
+        db.session.commit()
+        
+        return jsonify({
+            'success': True,
+            'completed': task.completed,
+            'status': task.status
+        })
+        
+    except Exception as e:
+        db.session.rollback()
+        current_app.logger.error(f"Task completion toggle error: {str(e)}")
+        return jsonify({
+            'success': False,
+            'message': 'エラーが発生しました'
         }), 500

@@ -201,9 +201,14 @@ class Opportunity(db.Model):
     account_id: Mapped[Optional[int]] = mapped_column(Integer, ForeignKey('accounts.id'), nullable=True)
     is_ai_generated: Mapped[bool] = mapped_column(Boolean, default=False, nullable=False)
 
+    # 新しくcreated_atカラムを追加
+    created_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow, nullable=False)
+
+    updated_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
     # リレーションシップ
-    lead = db.relationship('Lead', back_populates='opportunities')
-    account = db.relationship('Account', back_populates='opportunities')
+    lead: Mapped["Lead"] = relationship("Lead", back_populates="opportunities")
+    account: Mapped[Optional["Account"]] = relationship("Account", back_populates="opportunities")
+    user: Mapped["User"] = relationship("User", back_populates="opportunities")
 
 class Account(db.Model):
     __tablename__ = 'accounts'

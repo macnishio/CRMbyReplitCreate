@@ -12,7 +12,8 @@ from extensions import db, mail, scheduler, cache, init_app
 from email_receiver import setup_email_scheduler
 from routes.auth import bp as auth_bp
 
-logging.basicConfig(level=logging.DEBUG)
+#logging.basicConfig(level=logging.DEBUG)
+logging.basicConfig(level=logging.WARNING)
 load_dotenv()
 
 

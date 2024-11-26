@@ -1,217 +1,134 @@
-/* Reset and base styles */
-* {
-    margin: 0;
-    padding: 0;
-    box-sizing: border-box;
+/* グローバル変数定義 */
+:root {
+    /* フォントサイズ */
+    --font-size-xs: 0.75rem;    /* 12px */
+    --font-size-sm: 0.875rem;   /* 14px */
+    --font-size-base: 1rem;     /* 16px */
+    --font-size-lg: 1.125rem;   /* 18px */
+    --font-size-xl: 1.25rem;    /* 20px */
+    --font-size-2xl: 1.5rem;    /* 24px */
+    --font-size-3xl: 2rem;      /* 32px */
+
+    /* カラー */
+    --color-primary: #0d6efd;
+    --color-secondary: #6c757d;
+    --color-success: #198754;
+    --color-danger: #dc3545;
+    --color-warning: #ffc107;
+    --color-info: #0dcaf0;
+    --color-light: #f8f9fa;
+    --color-dark: #212529;
+
+    /* 背景色 */
+    --bg-main: #f4f4f4;
+    --bg-card: #ffffff;
+
+    /* ボーダー */
+    --border-radius-sm: 0.25rem;
+    --border-radius: 0.5rem;
+    --border-radius-lg: 1rem;
+    --border-color: #e2e8f0;
+
+    /* スペーシング */
+    --spacing-xs: 0.25rem;
+    --spacing-sm: 0.5rem;
+    --spacing-md: 1rem;
+    --spacing-lg: 1.5rem;
+    --spacing-xl: 2rem;
+}
+
+/* ベーススタイル */
+html {
+    font-size: 16px;
 }
 
 body {
     margin: 0;
     padding: 0;
     font-family: 'Hiragino Kaku Gothic Pro', 'メイリオ', Arial, sans-serif;
-    background-color: #f4f4f4;
+    background-color: var(--bg-main);
+    font-size: var(--font-size-base);
+    line-height: 1.5;
+    color: var(--color-dark);
 }
 
-/* Layout */
-.dashboard-container {
-    display: flex;
-    min-height: 100vh;
-}
+/* 見出し */
+h1 { font-size: var(--font-size-3xl); }
+h2 { font-size: var(--font-size-2xl); }
+h3 { font-size: var(--font-size-xl); }
+h4 { font-size: var(--font-size-lg); }
+h5 { font-size: var(--font-size-base); }
+h6 { font-size: var(--font-size-sm); }
 
-/* Sidebar styles */
-.sidebar {
-    background-color: #333;
-    color: white;
-    width: 250px;
-    transition: all 0.3s ease;
-    position: relative;
-    z-index: 1000;
-}
-
-.sidebar.collapsed {
-    width: 60px;
-}
-
-/* Top menu styles */
-.top-menu {
-    padding: 15px 10px;
-    border-bottom: 1px solid #444;
-    display: flex;
-    align-items: center;
-}
-
-.menu-items {
-    display: flex;
-    align-items: center;
-    gap: 15px;
-    width: 100%;
-}
-
-.sidebar-brand {
-    font-size: 1.2em;
-    font-weight: bold;
-    color: white;
-    text-decoration: none;
-    white-space: nowrap;
-    overflow: hidden;
-}
-
-.toggle-button {
-    background: none;
-    border: none;
-    color: white;
-    cursor: pointer;
-    padding: 5px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    min-width: 30px;
-    margin-left: 0;
-}
-
-/* Main content area */
-.main-content {
-    flex-grow: 1;
-    padding: 20px;
-    margin-left: 50px;
-}
-
-/* Header styles */
-.header {
-    background-color: #2c3e50;
-    color: white;
-    padding: 10px 20px;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-}
-
-/* Button Styles */
+/* ボタン基本スタイル */
 .btn {
-    padding: 8px 15px;
-    border-radius: 4px;
-    text-decoration: none;
-    font-weight: bold;
-    cursor: pointer;
-    border: none;
-    transition: all 0.3s ease;
     display: inline-flex;
     align-items: center;
-    gap: 0.5rem;
+    justify-content: center;
+    padding: var(--spacing-sm) var(--spacing-md);
+    font-size: var(--font-size-base);
+    border-radius: var(--border-radius);
+    border: 1px solid transparent;
+    cursor: pointer;
+    transition: all 0.2s ease;
 }
 
 .btn-primary {
-    background: #3182ce;
+    background-color: var(--color-primary);
     color: white;
-    border: none;
-}
-
-.btn-primary:hover {
-    background: #2c5282;
 }
 
 .btn-secondary {
-    background: #edf2f7;
-    color: #4a5568;
-    border: 1px solid #e2e8f0;
-}
-
-.btn-secondary:hover {
-    background: #e2e8f0;
-}
-
-.btn-logout, .btn-login, .btn-register {
-    padding: 8px 16px;
-    border-radius: 4px;
-    text-decoration: none;
-    transition: all 0.3s ease;
-}
-
-.btn-logout {
-    background-color: #dc3545;
+    background-color: var(--color-secondary);
     color: white;
 }
 
-.btn-login {
-    background-color: #007bff;
-    color: white;
+/* フォーム要素 */
+input, select, textarea {
+    font-size: var(--font-size-base);
+    padding: var(--spacing-sm);
+    border: 1px solid var(--border-color);
+    border-radius: var(--border-radius);
+    width: 100%;
 }
 
-.btn-register {
-    background-color: #28a745;
-    color: white;
+/* カード */
+.card {
+    background-color: var(--bg-card);
+    border-radius: var(--border-radius);
+    padding: var(--spacing-md);
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
 }
 
-/* Mobile styles */
+/* ユーティリティクラス */
+.text-sm { font-size: var(--font-size-sm); }
+.text-base { font-size: var(--font-size-base); }
+.text-lg { font-size: var(--font-size-lg); }
+.text-xl { font-size: var(--font-size-xl); }
+
+.mt-1 { margin-top: var(--spacing-xs); }
+.mt-2 { margin-top: var(--spacing-sm); }
+.mt-3 { margin-top: var(--spacing-md); }
+.mt-4 { margin-top: var(--spacing-lg); }
+.mt-5 { margin-top: var(--spacing-xl); }
+
+/* レスポンシブ設定 */
 @media (max-width: 768px) {
-    .mobile-toggle {
-        display: block;
-        position: fixed;
-        top: 10px;
-        left: 0;  /* ここを0に変更 */
-        z-index: 1001;
-        background: none;
-        border: none;
-        color: #333;
-        font-size: 1.5em;
-        cursor: pointer;
-        padding: 10px;
-        background-color: white;
-        border-radius: 4px;
-        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    html {
+        font-size: 14px;
     }
 
-    .sidebar {
-        position: fixed;
-        left: -250px;
-        height: 100vh;
-        width: 250px;
-    }
-
-    .sidebar.active {
-        left: 0;
-    }
-
-    .sidebar.collapsed {
-        left: -60px;
-        width: 60px;
-    }
-
-    .sidebar.collapsed.active {
-        left: 0;
-    }
-
-    .dashboard-container {
-        flex-direction: column;
-    }
-
-    .header {
-        padding-left: 60px;
-    }
-
-    .main-content {
-        margin-left: 0;
-        width: 100%;
-    }
-
-    /* サイドバーが閉じている時のモバイルトグルボタン */
-    .sidebar.collapsed ~ .mobile-toggle {
-        left: 0;  /* ここも0に変更 */
+    .btn {
+        padding: var(--spacing-xs) var(--spacing-sm);
     }
 }
 
-/* Dark mode */
+/* ダークモード対応 */
 @media (prefers-color-scheme: dark) {
-    body {
-        background-color: #1a1a1a;
-        color: #ffffff;
-    }
-    
-    .sidebar {
-        background-color: #2d2d2d;
-    }
-    
-    .header {
-        background-color: #2d2d2d;
+    :root {
+        --bg-main: #1a1a1a;
+        --bg-card: #2d2d2d;
+        --color-dark: #ffffff;
+        --border-color: #404040;
     }
 }

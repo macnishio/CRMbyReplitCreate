@@ -33,7 +33,7 @@ class Config:
     LEAD_SCORE_THRESHOLD = float(os.environ.get('LEAD_SCORE_THRESHOLD', 50))
     
     # Logging configuration
-    LOG_LEVEL = os.environ.get('LOG_LEVEL', 'INFO')
+    LOG_LEVEL = os.environ.get('LOG_LEVEL', 'ERROR')
     
     # Session configuration
     PERMANENT_SESSION_LIFETIME = timedelta(days=int(os.environ.get('SESSION_LIFETIME_DAYS', 30)))

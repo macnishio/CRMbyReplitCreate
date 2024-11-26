@@ -18,7 +18,7 @@ def create_app(config_name='default'):
 
     # Set up logging with more detailed configuration
     logging.basicConfig(
-        level=logging.DEBUG,
+        level=logging.WARNING,
         format='%(asctime)s %(levelname)s: %(message)s [in %(pathname)s:%(lineno)d]'
     )
     
@@ -109,4 +109,4 @@ if __name__ == '__main__':
     app = create_app()
     port = int(os.environ.get('PORT', 5000))
     print(f"Starting Flask server on port {port}...")
-    app.run(host='0.0.0.0', port=port, debug=True)
+    app.run(host='0.0.0.0', port=port, debug=False)
