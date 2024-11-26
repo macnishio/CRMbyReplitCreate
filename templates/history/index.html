@@ -282,8 +282,60 @@
 .timeline-event.behavior_analysis {
     border-left-color: #9c27b0;
 }
+    /* Lead Grid Layout */
+    .lead-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+        gap: 1.5rem;
+        margin-top: 2rem;
+    }
+
+    .lead-card-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 1rem;
+    }
+
+    .lead-status-badge {
+        padding: 0.25rem 0.75rem;
+        border-radius: 9999px;
+        font-size: 0.875rem;
+        font-weight: 500;
+        background: #e5e7eb;
+        color: #374151;
+    }
+
+    .lead-status-badge.active {
+        background: #dcfce7;
+        color: #166534;
+    }
+
+    .lead-status-badge.inactive {
+        background: #fee2e2;
+        color: #991b1b;
+    }
+
+    .lead-status-badge.pending {
+        background: #fef3c7;
+        color: #92400e;
+    }
+
+    /* Grid Responsive Adjustments */
+    @media (max-width: 1024px) {
+        .lead-grid {
+            grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+        }
+    }
+
+    @media (max-width: 640px) {
+        .lead-grid {
+            grid-template-columns: 1fr;
+        }
+    }
 </style>
 {% endblock %}
+
 {% block content %}
 <div class="leads-container">
     <div class="page-header">
@@ -294,95 +346,74 @@
                     <input type="search" id="leadSearch" placeholder="名前やメールで検索...">
                     <i class="fas fa-search"></i>
                 </div>
-                <div class="search-results" id="searchResults">
-                    <!-- 検索結果がここに動的に追加されます -->
-                </div>
+                <div class="search-results" id="searchResults"></div>
             </div>
-        </div>
-    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- Timeline Section -->
-    <div class="timeline-section">
-        <h2>タイムライン</h2>
-        <div id="timeline-container">
-            <div class="timeline-loading">
-                <i class="fas fa-spinner fa-spin"></i> 読み込み中...
-            </div>
-            <div id="timeline-events"></div>
         </div>
     </div>
 
     {% if leads %}
-        <div class="lead-grid">
-            {% for lead in leads %}
-                <a href="{{ url_for('history.show_history', lead_id=lead.id) }}" class="lead-card">
-                    <div class="lead-card-header">
-                        <div class="lead-avatar" style="background-color: {{ '#%02x%02x%02x' | format(((lead.id * 123) % 256), ((lead.id * 45) % 256), ((lead.id * 67) % 256)) }}">
-                            {{ lead.name[0].upper() if lead.name else '?' }}
-                        </div>
-                        <div class="lead-status-badge {{ lead.status.lower() }}">
-                            {{ lead.status }}
-                        </div>
+    <div class="lead-grid">
+        {% for lead in leads %}
+        <a href="{{ url_for('history.show_history', lead_id=lead.id) }}" class="lead-card">
+            <div class="lead-card-header">
+                <div class="lead-avatar" style="background-color: {{ '#%02x%02x%02x' | format(((lead.id * 123) % 256), ((lead.id * 45) % 256), ((lead.id * 67) % 256)) }}">
+                    {{ lead.name[0].upper() if lead.name else '?' }}
+                </div>
+                <div class="lead-status-badge {{ lead.status.lower() }}">
+                    {{ lead.status }}
+                </div>
+            </div>
+
+            <div class="lead-card-content">
+                <h2 class="lead-name">{{ lead.name or '名前なし' }}</h2>
+                <div class="lead-recipients">
+                    <div class="recipient-type">
+                        <span class="recipient-label">To:</span>
+                        <span class="recipient-emails">{{ lead.email }}</span>
                     </div>
-
-                    <div class="lead-card-content">
-                        <h2 class="lead-name">{{ lead.name or '名前なし' }}</h2>
-
-                        <div class="lead-recipients">
-                            <div class="recipient-type">
-                                <span class="recipient-label">To:</span>
-                                <span class="recipient-emails">{{ lead.email }}</span>
-                            </div>
-                            {% if lead.cc %}
-                            <div class="recipient-type">
-                                <span class="recipient-label">Cc:</span>
-                                <span class="recipient-emails">{{ lead.cc }}</span>
-                            </div>
-                            {% endif %}
-                            {% if lead.bcc %}
-                            <div class="recipient-type">
-                                <span class="recipient-label">Bcc:</span>
-                                <span class="recipient-emails">{{ lead.bcc }}</span>
-                            </div>
-                            {% endif %}
-                        </div>
-
-                        {% if lead.phone %}
-                        <div class="lead-contact-info">
-                            <i class="fas fa-phone"></i>
-                            <span>{{ lead.phone }}</span>
-                        </div>
-                        {% endif %}
-
-                        {% if lead.last_contact %}
-                        <div class="lead-last-contact">
-                            <i class="fas fa-clock"></i>
-                            <span>最終接触: {{ lead.last_contact.strftime('%Y年%m月%d日 %H:%M') }}</span>
-                        </div>
-                        {% endif %}
+                    {% if lead.cc %}
+                    <div class="recipient-type">
+                        <span class="recipient-label">Cc:</span>
+                        <span class="recipient-emails">{{ lead.cc }}</span>
                     </div>
-                </a>
-            {% endfor %}
-        </div>
+                    {% endif %}
+                    {% if lead.bcc %}
+                    <div class="recipient-type">
+                        <span class="recipient-label">Bcc:</span>
+                        <span class="recipient-emails">{{ lead.bcc }}</span>
+                    </div>
+                    {% endif %}
+                </div>
+                {% if lead.phone %}
+                <div class="lead-contact-info">
+                    <i class="fas fa-phone"></i>
+                    <span>{{ lead.phone }}</span>
+                </div>
+                {% endif %}
+                {% if lead.last_contact %}
+                <div class="lead-last-contact">
+                    <i class="fas fa-clock"></i>
+                    <span>最終接触: {{ lead.last_contact.strftime('%Y年%m月%d日 %H:%M') }}</span>
+                </div>
+                {% endif %}
+            </div>
+        </a>
+        {% endfor %}
+    </div>
     {% else %}
-        <div class="no-leads">
-            <i class="fas fa-user-slash"></i>
-            <p>リードが見つかりませんでした。</p>
-        </div>
+    <div class="no-leads">
+        <i class="fas fa-user-slash"></i>
+        <p>リードが見つかりませんでした。</p>
+    </div>
     {% endif %}
 </div>
 {% endblock %}
+
 {% block scripts %}
-<script src="{{ url_for('static', filename='js/history.js') }}"></script>
 <script>
 document.addEventListener('DOMContentLoaded', function() {
     const searchInput = document.getElementById('leadSearch');
     const searchResults = document.getElementById('searchResults');
-    // leads_jsonを使用
     const leads = {{ leads_json|tojson|safe }};
 
     let searchTimeout;
@@ -444,7 +475,6 @@ document.addEventListener('DOMContentLoaded', function() {
         searchResults.classList.add('active');
     }
 
-    // 検索結果以外をクリックしたら結果を非表示
     document.addEventListener('click', function(e) {
         if (!searchResults.contains(e.target) && e.target !== searchInput) {
             searchResults.classList.remove('active');

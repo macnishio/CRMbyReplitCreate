@@ -225,3 +225,162 @@
         grid-template-columns: 1fr;
     }
 }
+/* Timeline styles */
+.timeline {
+    padding: 20px;
+    position: relative;
+}
+
+.timeline-item {
+    display: flex;
+    margin-bottom: 20px;
+    position: relative;
+    padding-left: 30px;
+}
+
+.timeline-item::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 0;
+    bottom: -20px;
+    width: 2px;
+    background-color: #e0e0e0;
+}
+
+.timeline-item:last-child::before {
+    bottom: 0;
+}
+
+.timeline-icon {
+    position: absolute;
+    left: -14px;
+    width: 30px;
+    height: 30px;
+    background: #fff;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border: 2px solid #007bff;
+    z-index: 1;
+}
+
+.timeline-content {
+    flex: 1;
+    background: #fff;
+    padding: 15px;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.timeline-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 10px;
+}
+
+.timeline-title {
+    font-weight: 600;
+    color: #333;
+    margin: 0;
+}
+
+.timeline-date {
+    font-size: 0.875rem;
+    color: #666;
+}
+
+.timeline-description {
+    color: #444;
+    font-size: 0.9375rem;
+    line-height: 1.5;
+}
+
+.timeline-metadata {
+    margin-top: 10px;
+    font-size: 0.875rem;
+    color: #666;
+}
+
+.timeline-error {
+    text-align: center;
+    padding: 20px;
+    background: #fff;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    margin: 20px;
+}
+
+.timeline-error i {
+    font-size: 2rem;
+    color: #dc3545;
+    margin-bottom: 10px;
+}
+
+.error-message {
+    color: #dc3545;
+    font-weight: 500;
+    margin-bottom: 5px;
+}
+
+.error-code {
+    font-size: 0.875rem;
+    color: #666;
+}
+
+/* Loading styles */
+.loading {
+    text-align: center;
+    padding: 20px;
+    color: #666;
+}
+
+.loading i {
+    margin-right: 8px;
+}
+
+/* Dark mode */
+@media (prefers-color-scheme: dark) {
+    .timeline-item::before {
+        background-color: #444;
+    }
+
+    .timeline-icon {
+        background: #222;
+        border-color: #007bff;
+    }
+
+    .timeline-content {
+        background: #333;
+    }
+
+    .timeline-title {
+        color: #fff;
+    }
+
+    .timeline-date {
+        color: #aaa;
+    }
+
+    .timeline-description {
+        color: #ddd;
+    }
+
+    .timeline-metadata {
+        color: #aaa;
+    }
+
+    .timeline-error {
+        background: #333;
+    }
+
+    .error-code {
+        color: #aaa;
+    }
+
+    .loading {
+        color: #aaa;
+    }
+}

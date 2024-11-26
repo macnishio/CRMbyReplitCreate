@@ -456,6 +456,74 @@ function showError(container, message, code) {
 }
 
 function showLoading(show = true) {
+const loadingIndicator = document.querySelector('.timeline .loading');
+const timelineContainer = document.getElementById('timeline');
+
+async function loadTimeline(leadId) {
+    showLoading(true);
+    try {
+        const response = await fetch(`/history/api/leads/${leadId}/timeline`);
+        const data = await response.json();
+
+        if (!data.success) {
+            throw new Error(data.error || 'タイムラインの読み込みに失敗しました');
+        }
+
+        renderTimeline(data.timeline);
+    } catch (error) {
+        console.error('Timeline error:', error);
+        showError(timelineContainer, error.message, error.code);
+    } finally {
+        showLoading(false);
+    }
+}
+
+function renderTimeline(events) {
+    if (!events || events.length === 0) {
+        timelineContainer.innerHTML = `
+            <div class="timeline-empty">
+                <i class="fas fa-info-circle"></i>
+                <p>イベントがありません</p>
+            </div>
+        `;
+        return;
+    }
+
+    timelineContainer.innerHTML = events.map(event => `
+        <div class="timeline-item">
+            <div class="timeline-icon">
+                <i class="fas ${event.icon || 'fa-circle'}"></i>
+            </div>
+            <div class="timeline-content">
+                <div class="timeline-header">
+                    <h4 class="timeline-title">${event.title}</h4>
+                    <span class="timeline-date">${formatDate(event.date)}</span>
+                </div>
+                <div class="timeline-description">${event.description}</div>
+                ${event.metadata ? `
+                    <div class="timeline-metadata">
+                        ${Object.entries(event.metadata)
+                            .filter(([_, value]) => value !== null)
+                            .map(([key, value]) => `
+                                <div class="metadata-item">
+                                    <span class="metadata-label">${key}:</span>
+                                    <span class="metadata-value">${value}</span>
+                                </div>
+                            `).join('')}
+                    </div>
+                ` : ''}
+            </div>
+        </div>
+    `).join('');
+}
+
+// Initialize timeline when the page loads
+document.addEventListener('DOMContentLoaded', () => {
+    const leadId = window.location.pathname.split('/').pop();
+    if (leadId) {
+        loadTimeline(leadId);
+    }
+});
     const loadingElement = document.querySelector('.timeline-loading');
     if (loadingElement) {
         loadingElement.style.display = show ? 'block' : 'none';
@@ -612,3 +680,106 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     }
 });
+
+// history.js に追加
+async function loadTimeline(leadId) {
+    const timelineContainer = document.getElementById('timeline-events');
+    const loadingElement = document.querySelector('.timeline-loading');
+
+    try {
+        const response = await fetch(`/history/api/leads/${leadId}/timeline`);
+        if (!response.ok) throw new Error('Failed to load timeline');
+
+        const data = await response.json();
+        if (!data.success) throw new Error(data.error || 'Failed to load timeline');
+
+        loadingElement.style.display = 'none';
+
+        // タイムラインイベントを表示
+        if (data.timeline && data.timeline.length > 0) {
+            const eventsHtml = data.timeline.map(event => `
+                <div class="timeline-event ${event.type}">
+                    <div class="event-icon">
+                        <i class="fas ${getEventIcon(event.type)}"></i>
+                    </div>
+                    <div class="event-content">
+                        <div class="event-title">${event.title}</div>
+                        <div class="event-description">${event.description}</div>
+                        <div class="event-date">${formatDate(event.date)}</div>
+                        ${getEventMetadata(event)}
+                    </div>
+                </div>
+            `).join('');
+
+            timelineContainer.innerHTML = eventsHtml;
+        } else {
+            timelineContainer.innerHTML = '<div class="no-events">タイムラインイベントがありません</div>';
+        }
+
+    } catch (error) {
+        console.error('Timeline loading error:', error);
+        loadingElement.style.display = 'none';
+        timelineContainer.innerHTML = `
+            <div class="error-message">
+                <i class="fas fa-exclamation-circle"></i>
+                タイムラインの読み込み中にエラーが発生しました
+            </div>
+        `;
+    }
+}
+
+function getEventIcon(type) {
+    const icons = {
+        email: 'fa-envelope',
+        status_change: 'fa-exchange-alt',
+        score_update: 'fa-chart-line',
+        behavior_analysis: 'fa-brain'
+    };
+    return icons[type] || 'fa-circle';
+}
+
+function formatDate(dateStr) {
+    const date = new Date(dateStr);
+    return date.toLocaleString('ja-JP', {
+        year: 'numeric',
+        month: '2-digit',
+        day: '2-digit',
+        hour: '2-digit',
+        minute: '2-digit'
+    });
+}
+
+function getEventMetadata(event) {
+    if (!event.metadata) return '';
+
+    let metadataHtml = '';
+    switch (event.type) {
+        case 'status_change':
+            metadataHtml = `
+                <div class="event-metadata">
+                    <span class="old-status">${event.metadata.old_status}</span>
+                    <i class="fas fa-arrow-right"></i>
+                    <span class="new-status">${event.metadata.new_status}</span>
+                </div>
+            `;
+            break;
+        case 'score_update':
+            metadataHtml = `
+                <div class="event-metadata">
+                    <span class="score-change">スコア: ${event.metadata.old_score || '?'} → ${event.metadata.new_score}</span>
+                </div>
+            `;
+            break;
+    }
+    return metadataHtml;
+}
+
+// 初期化関数を更新
+function initializeHistory(leadId) {
+    // 既存のコード...
+
+    // タイムラインの読み込みを追加
+    if (document.getElementById('timeline-events')) {
+        loadTimeline(leadId);
+    }
+}

@@ -25,8 +25,16 @@ bp = Blueprint('history', __name__)
 def index():
     """履歴一覧ページを表示"""
     try:
+        current_app.logger.debug(f"Fetching leads for user {current_user.id}")
+        
         # ユーザーのリードを取得し、last_contactで降順ソート
         leads = Lead.query.filter_by(user_id=current_user.id).order_by(Lead.last_contact.desc()).all()
+        
+        if not leads:
+            current_app.logger.debug(f"No leads found for user {current_user.id}")
+            return render_template('history/index.html', 
+                               leads=[],
+                               leads_json=[])
         
         # テンプレート用のJSONデータを準備
         leads_json = [{
@@ -40,15 +48,17 @@ def index():
             'bcc': lead.bcc
         } for lead in leads]
 
-        current_app.logger.debug(f"Found {len(leads)} leads for user {current_user.id}")
+        current_app.logger.debug(f"Successfully found {len(leads)} leads for user {current_user.id}")
         return render_template('history/index.html', 
-                            leads=leads,
-                            leads_json=leads_json)
+                           leads=leads,
+                           leads_json=leads_json)
+                           
     except Exception as e:
-        current_app.logger.error(f"Error in history index: {str(e)}")
+        current_app.logger.error(f"Error in history index: {str(e)}\n{traceback.format_exc()}")
+        db.session.rollback()
         return render_template('history/index.html', 
-                            leads=[],
-                            leads_json=[])
+                           leads=[],
+                           leads_json=[])
 
 @bp.route('/leads/<int:lead_id>')
 @login_required
