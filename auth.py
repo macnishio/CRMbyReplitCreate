@@ -56,7 +56,7 @@ def create_app():
     def load_user(user_id):
         return db.session.get(User, int(user_id))
 
-    from routes import main, leads, opportunities, accounts, reports, tracking, mobile, schedules, tasks
+    from routes import main, leads, opportunities, accounts, reports, tracking, mobile, schedules, tasks, history
 
     app.register_blueprint(main.bp)
     app.register_blueprint(auth_bp)
@@ -68,6 +68,7 @@ def create_app():
     app.register_blueprint(mobile.bp)
     app.register_blueprint(schedules.bp)
     app.register_blueprint(tasks.bp)
+    app.register_blueprint(history.bp)
 
     migrate = Migrate(app, db)  # 必要に応じてextensions.py内で初期化
 

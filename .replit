@@ -583,8 +583,8 @@ task = "packager.installForAll"
 
 [[workflows.workflow.tasks]]
 task = "shell.exec"
-args = "python3 app.py"
-waitForPort = 80
+args = "python app.py"
+waitForPort = 5000
 
 [[workflows.workflow]]
 name = "Create Checkpoint"
@@ -614,7 +614,6 @@ externalPort = 3002
 [[ports]]
 localPort = 5000
 externalPort = 80
-exposeLocalhost = true
 
 [[ports]]
 localPort = 5001

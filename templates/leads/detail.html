@@ -491,6 +491,9 @@
     </div>
     <div class="actions">
         <a href="{{ url_for('leads.list_leads') }}" class="btn btn-primary">一覧に戻る</a>
+        <a href="{{ url_for('history.show_history', lead_id=lead.id) }}" class="btn btn-primary">
+            <i class="fas fa-history"></i> コミュニケーション履歴
+        </a>
         <a href="{{ url_for('leads.edit_lead', id=lead.id) }}" class="btn btn-edit">編集</a>
         <form action="{{ url_for('leads.delete_lead', id=lead.id) }}" method="POST" style="display: inline;">
             <button type="submit" class="btn btn-delete" onclick="return confirm('このリードを削除してもよろしいですか？');">
