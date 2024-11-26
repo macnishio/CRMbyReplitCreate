@@ -1,0 +1,50 @@
+~/CRM$ flask run
+2024-11-26 10:37:11,145 DEBUG: Stripe configuration loaded: True [in /home/runner/CRM/app.py:30]
+/home/runner/CRM/.pythonlibs/lib/python3.11/site-packages/flask_limiter/extension.py:336: UserWarning: Using the in-memory storage for tracking rate limits as no storage was explicitly specified. This is not recommended for production use. See: https://flask-limiter.readthedocs.io#configuring-a-storage-backend for documentation about configuring the storage backend.
+  warnings.warn(
+2024-11-26 10:37:15,119 INFO: Database connection successful [in /home/runner/CRM/db_utils.py:75]
+2024-11-26 10:37:17,488 INFO: Database tables already exist [in /home/runner/CRM/db_utils.py:87]
+Traceback (most recent call last):
+  File "/home/runner/CRM/.pythonlibs/bin/flask", line 8, in <module>
+    sys.exit(main())
+             ^^^^^^
+  File "/home/runner/CRM/.pythonlibs/lib/python3.11/site-packages/flask/cli.py", line 1050, in main
+    cli.main()
+  File "/home/runner/CRM/.pythonlibs/lib/python3.11/site-packages/click/core.py", line 1078, in main
+    rv = self.invoke(ctx)
+         ^^^^^^^^^^^^^^^^
+  File "/home/runner/CRM/.pythonlibs/lib/python3.11/site-packages/click/core.py", line 1688, in invoke
+    return _process_result(sub_ctx.command.invoke(sub_ctx))
+                           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/runner/CRM/.pythonlibs/lib/python3.11/site-packages/click/core.py", line 1434, in invoke
+    return ctx.invoke(self.callback, **ctx.params)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/runner/CRM/.pythonlibs/lib/python3.11/site-packages/click/core.py", line 783, in invoke
+    return __callback(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/runner/CRM/.pythonlibs/lib/python3.11/site-packages/click/decorators.py", line 92, in new_func
+    return ctx.invoke(f, obj, *args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/runner/CRM/.pythonlibs/lib/python3.11/site-packages/click/core.py", line 783, in invoke
+    return __callback(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/runner/CRM/.pythonlibs/lib/python3.11/site-packages/flask/cli.py", line 911, in run_command
+    raise e from None
+  File "/home/runner/CRM/.pythonlibs/lib/python3.11/site-packages/flask/cli.py", line 897, in run_command
+    app = info.load_app()
+          ^^^^^^^^^^^^^^^
+  File "/home/runner/CRM/.pythonlibs/lib/python3.11/site-packages/flask/cli.py", line 312, in load_app
+    app = locate_app(import_name, None, raise_if_not_found=False)
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/runner/CRM/.pythonlibs/lib/python3.11/site-packages/flask/cli.py", line 235, in locate_app
+    return find_best_app(module)
+           ^^^^^^^^^^^^^^^^^^^^^
+  File "/home/runner/CRM/.pythonlibs/lib/python3.11/site-packages/flask/cli.py", line 63, in find_best_app
+    app = app_factory()
+          ^^^^^^^^^^^^^
+  File "/home/runner/CRM/app.py", line 64, in create_app
+    from routes.history import bp as history_bp
+  File "/home/runner/CRM/routes/history.py", line 123
+    @bp.route('/leads/<int:lead_id>/export')
+SyntaxError: expected 'except' or 'finally' block
+ Environment updated. Reloading shell...
