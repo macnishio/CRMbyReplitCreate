@@ -280,3 +280,150 @@ async function analyzeCustomerBehavior() {
         alert(error.message);
     }
 }
+
+// AI分析関連の処理を追加
+function displayAnalysisResult(data) {
+    const analysisResult = document.getElementById('analysisResult');
+
+    let html = `
+    <div class="analysis-grid">
+        <!-- コミュニケーションパターン -->
+        <div class="analysis-card wide">
+            <div class="card-header">
+                <i class="fas fa-comments text-primary"></i>
+                <h4>コミュニケーションパターン</h4>
+            </div>
+            <div class="card-content">
+                <div class="metrics-grid">
+                    ${createMetricCard('頻度', data.communication_patterns.frequency, 'fa-clock')}
+                    ${createMetricCard('好みの時間帯', data.communication_patterns.preferred_time, 'fa-sun')}
+                    ${createMetricCard('応答時間', data.communication_patterns.response_time, 'fa-hourglass-half')}
+                    ${createMetricCard('エンゲージメント', data.communication_patterns.engagement_level, 'fa-chart-line', true)}
+                </div>
+            </div>
+        </div>
+
+        <!-- 興味・関心事項 -->
+        <div class="analysis-card">
+            <div class="card-header">
+                <i class="fas fa-star text-primary"></i>
+                <h4>興味・関心事項</h4>
+            </div>
+            <div class="card-content scroll-area">
+                <div class="tag-cloud">
+                    ${data.interests.map(interest => `
+                        <span class="badge">${interest}</span>
+                    `).join('')}
+                </div>
+            </div>
+        </div>
+
+        <!-- 重要ポイント -->
+        <div class="analysis-card">
+            <div class="card-header">
+                <i class="fas fa-key text-primary"></i>
+                <h4>重要ポイント</h4>
+            </div>
+            <div class="card-content scroll-area">
+                <ul class="point-list">
+                    ${data.key_points.map(point => `
+                        <li>
+                            <span class="bullet"></span>
+                            <span>${point}</span>
+                        </li>
+                    `).join('')}
+                </ul>
+            </div>
+        </div>
+
+        <!-- リスクファクター -->
+        <div class="analysis-card">
+            <div class="card-header">
+                <i class="fas fa-exclamation-triangle text-destructive"></i>
+                <h4>リスクファクター</h4>
+            </div>
+            <div class="card-content scroll-area">
+                <ul class="risk-list">
+                    ${data.risk_factors.map(risk => `
+                        <li>
+                            <i class="fas fa-exclamation-circle text-destructive"></i>
+                            <span>${risk}</span>
+                        </li>
+                    `).join('')}
+                </ul>
+            </div>
+        </div>
+
+        <!-- 推奨アクション -->
+        <div class="analysis-card wide">
+            <div class="card-header">
+                <i class="fas fa-lightbulb text-primary"></i>
+                <h4>推奨アクション</h4>
+            </div>
+            <div class="card-content">
+                <div class="action-grid">
+                    ${data.recommended_actions.map(action => `
+                        <div class="action-item">
+                            <span class="bullet"></span>
+                            <span>${action}</span>
+                        </div>
+                    `).join('')}
+                </div>
+            </div>
+        </div>
+
+        <!-- 分析サマリー -->
+        <div class="analysis-card wide">
+            <div class="card-header">
+                <i class="fas fa-chart-bar text-primary"></i>
+                <h4>分析サマリー</h4>
+            </div>
+            <div class="card-content">
+                <p class="summary-text">${data.analysis_summary.replace(/\n/g, '<br>')}</p>
+            </div>
+        </div>
+    </div>`;
+
+    analysisResult.innerHTML = html;
+    analysisResult.style.display = 'block';
+    document.getElementById('analysisPlaceholder').style.display = 'none';
+}
+
+function createMetricCard(label, value, iconClass, highlight = false) {
+    return `
+        <div class="metric-card ${highlight ? 'highlight' : ''}">
+            <div class="metric-header">
+                <i class="fas ${iconClass}"></i>
+                <span class="metric-label">${label}</span>
+            </div>
+            <div class="metric-value">${value || 'N/A'}</div>
+        </div>
+    `;
+}
+
+// AI分析ボタンのイベントハンドラー内で使用
+runAnalysisBtn.addEventListener('click', async () => {
+    try {
+        runAnalysisBtn.disabled = true;
+        analysisPlaceholder.textContent = '分析中...';
+
+        const response = await fetch(`/history/leads/${leadId}/analyze`, {
+            method: 'POST',
+        });
+
+        if (!response.ok) throw new Error('分析に失敗しました');
+
+        const data = await response.json();
+
+        if (data.error) {
+            throw new Error(data.error);
+        }
+
+        displayAnalysisResult(data.data);
+    } catch (error) {
+        console.error('Analysis Error:', error);
+        analysisPlaceholder.textContent = `エラーが発生しました: ${error.message}`;
+    } finally {
+        runAnalysisBtn.disabled = false;
+    }
+});

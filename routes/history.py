@@ -1,13 +1,13 @@
 from flask import Blueprint, render_template, jsonify, request, current_app, abort, send_file
 from flask_login import login_required, current_user
+from models import Lead, Email, UserSettings  # UserSettingsをインポート
+from services.ai_analysis import AIAnalysisService  # AIAnalysisServiceをインポート
 from models import Lead, Email
+from io import BytesIO, StringIO  # 両方のIOクラスをインポート
 import traceback
 from datetime import datetime
-from io import StringIO
 import csv
-
 bp = Blueprint('history', __name__)
-
 @bp.route('/')
 @login_required
 def list_history():
@@ -115,14 +115,15 @@ def export_history(lead_id):
         # リードの存在確認
         lead = Lead.query.filter_by(id=lead_id, user_id=current_user.id).first()
         if not lead:
+            current_app.logger.warning(f"Lead {lead_id} not found for user {current_user.id}")
             abort(404)
 
         # メールデータの取得
         emails = Email.query.filter_by(lead_id=lead_id).order_by(Email.received_date.desc()).all()
-
-        # CSVの作成
-        output = StringIO()
-        writer = csv.writer(output)
+        
+        # 一時的なStringIOを使用してUTF-8でCSVを作成
+        string_output = StringIO()
+        writer = csv.writer(string_output)
         writer.writerow(['日付', '送信者', '内容'])
 
         for email in emails:
@@ -132,38 +133,53 @@ def export_history(lead_id):
                 email.content
             ])
 
-        # レスポンスの作成
+        # StringIOの内容をBytesIOに変換（BOM付きUTF-8）
+        output = BytesIO()
+        output.write(u'\ufeff'.encode('utf-8'))  # BOMを追加
+        output.write(string_output.getvalue().encode('utf-8'))
         output.seek(0)
+        
+        filename = f'communication_history_{lead.name}_{datetime.now().strftime("%Y%m%d_%H%M%S")}.csv'
+        
         return send_file(
             output,
             mimetype='text/csv',
             as_attachment=True,
-            download_name=f'communication_history_{lead.name}_{datetime.now().strftime("%Y%m%d_%H%M%S")}.csv'
+            download_name=filename,
+            max_age=0
         )
 
     except Exception as e:
-        current_app.logger.error(f"Error in export_history: {str(e)}")
-        return jsonify({'error': 'エクスポート中にエラーが発生しました'}), 500
+        current_app.logger.error(f"Error in export_history: {str(e)}\n{traceback.format_exc()}")
+        return jsonify({
+            'error': 'エクスポート中にエラーが発生しました',
+            'details': str(e) if current_app.debug else None
+        }), 500
 
 @bp.route('/api/leads/<int:lead_id>/analyze', methods=['POST'])
 @login_required
-def analyze_lead(lead_id):
+def analyze_lead_behavior(lead_id):
+    """リードの行動パターンをAIで分析"""
     try:
-        # AIRollbackServiceのインスタンス化
-        from services.ai_rollback import AIRollbackService
-        from models import UserSettings
-        
+        # ユーザー設定を取得
         user_settings = UserSettings.query.filter_by(user_id=current_user.id).first()
-        ai_service = AIRollbackService(user_settings)
-        
-        # 行動パターン分析の実行
-        result = ai_service.analyze_customer_behavior(lead_id)
-        
-        if result.get('success'):
-            return jsonify(result), 200
-        else:
-            return jsonify(result), 400
+        if not user_settings or not user_settings.claude_api_key:
+            return jsonify({'error': 'Claude APIキーが設定されていません'}), 400
+
+        # リードの存在確認
+        lead = Lead.query.filter_by(id=lead_id, user_id=current_user.id).first()
+        if not lead:
+            return jsonify({'error': 'リードが見つかりません'}), 404
             
+        # AI分析を実行
+        ai_service = AIAnalysisService(user_settings)
+        analysis_result = ai_service.analyze_lead_behavior(lead_id)
+        
+        if 'error' in analysis_result:
+            return jsonify(analysis_result), 400
+            
+        return jsonify(analysis_result)
+        
     except Exception as e:
-        current_app.logger.error(f"リード分析中にエラーが発生: {str(e)}")
+        current_app.logger.error(f"Lead behavior analysis error: {str(e)}\n{traceback.format_exc()}")
         return jsonify({'error': '分析中にエラーが発生しました'}), 500
