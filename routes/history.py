@@ -45,24 +45,17 @@ def show_history(lead_id):
 def get_messages(lead_id):
     """リードとのメッセージ履歴を取得"""
     try:
-        # リードの存在確認
+        page = request.args.get('page', 1, type=int)
+        per_page = 20
+
         lead = Lead.query.filter_by(id=lead_id, user_id=current_user.id).first()
         if not lead:
             return jsonify({'error': 'リードが見つかりません'}), 404
 
-        # ページネーションパラメータ
-        page = request.args.get('page', 1, type=int)
-        per_page = min(int(request.args.get('per_page', 20)), 50)  # 最大50件まで
-
         # メールを日付の降順で取得
-        query = Email.query.filter_by(lead_id=lead_id)\
-            .order_by(Email.received_date.desc())
-        
-        # 総件数を取得
-        total = query.count()
-        
-        # ページネーション適用
-        emails = query.paginate(page=page, per_page=per_page, error_out=False)
+        emails = Email.query.filter_by(lead_id=lead_id)\
+            .order_by(Email.received_date.desc())\
+            .paginate(page=page, per_page=per_page, error_out=False)
 
         messages = []
         for email in emails.items:
@@ -71,24 +64,18 @@ def get_messages(lead_id):
                 'content': email.content,
                 'sender': email.sender,
                 'subject': email.subject,
-                'received_date': email.received_date.strftime('%Y-%m-%d %H:%M:%S'),
+                'received_date': email.received_date.isoformat(),
                 'is_from_lead': email.sender == lead.email
             })
 
         return jsonify({
             'messages': messages,
-            'pagination': {
-                'current_page': page,
-                'per_page': per_page,
-                'total_pages': emails.pages,
-                'total_items': total,
-                'has_next': emails.has_next,
-                'has_prev': emails.has_prev
-            }
+            'has_next': emails.has_next,
+            'total': emails.total
         })
 
     except Exception as e:
-        current_app.logger.error(f"Error in get_messages: {str(e)}\n{traceback.format_exc()}")
+        current_app.logger.error(f"Error in get_messages: {str(e)}")
         return jsonify({'error': 'メッセージの取得中にエラーが発生しました'}), 500
 
 @bp.route('/leads/<int:lead_id>/search')
@@ -126,14 +113,14 @@ def search_history(lead_id):
             'content': email.content,
             'sender': email.sender,
             'subject': email.subject,
-            'received_date': email.received_date.strftime('%Y-%m-%d %H:%M:%S'),
+            'received_date': email.received_date.isoformat(),
             'is_from_lead': email.sender == lead.email
         } for email in emails]
 
         return jsonify({'results': results})
 
     except Exception as e:
-        current_app.logger.error(f"Error in search_history: {str(e)}\n{traceback.format_exc()}")
+        current_app.logger.error(f"Error in search_history: {str(e)}")
         return jsonify({'error': '検索中にエラーが発生しました'}), 500
 
 @bp.route('/leads/<int:lead_id>/export')
@@ -174,7 +161,7 @@ def export_history(lead_id):
         return response
 
     except Exception as e:
-        current_app.logger.error(f"Error in export_history: {str(e)}\n{traceback.format_exc()}")
+        current_app.logger.error(f"Error in export_history: {str(e)}")
         return jsonify({'error': 'エクスポート中にエラーが発生しました'}), 500
 
 @bp.route('/leads/<int:lead_id>/analyze', methods=['POST'])
