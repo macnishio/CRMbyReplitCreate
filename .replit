@@ -105,10 +105,6 @@ args = "Init DB"
 
 [[workflows.workflow.tasks]]
 task = "workflow.run"
-args = "Flask Server"
-
-[[workflows.workflow.tasks]]
-task = "workflow.run"
 args = "Create Rollback Tables"
 
 [[workflows.workflow.tasks]]
@@ -130,6 +126,14 @@ args = "Database Migration Status"
 [[workflows.workflow.tasks]]
 task = "workflow.run"
 args = "Documentation Server"
+
+[[workflows.workflow.tasks]]
+task = "workflow.run"
+args = "Flask Server"
+
+[[workflows.workflow.tasks]]
+task = "workflow.run"
+args = "Create Checkpoint"
 
 [[workflows.workflow]]
 name = "Check Migrations"
@@ -469,21 +473,6 @@ task = "shell.exec"
 args = "flask db init && flask db migrate -m 'Add created_at to Email model' && flask db upgrade"
 
 [[workflows.workflow]]
-name = "Flask Server"
-author = "agent"
-
-[workflows.workflow.metadata]
-agentRequireRestartOnSave = false
-
-[[workflows.workflow.tasks]]
-task = "packager.installForAll"
-
-[[workflows.workflow.tasks]]
-task = "shell.exec"
-args = "python3 app.py"
-waitForPort = 5000
-
-[[workflows.workflow]]
 name = "Create Rollback Tables"
 author = "agent"
 
@@ -582,8 +571,41 @@ task = "shell.exec"
 args = "python docs_server.py"
 waitForPort = 5001
 
+[[workflows.workflow]]
+name = "Flask Server"
+author = "agent"
+
+[workflows.workflow.metadata]
+agentRequireRestartOnSave = false
+
+[[workflows.workflow.tasks]]
+task = "packager.installForAll"
+
+[[workflows.workflow.tasks]]
+task = "shell.exec"
+args = "python3 app.py"
+waitForPort = 80
+
+[[workflows.workflow]]
+name = "Create Checkpoint"
+author = "agent"
+
+[workflows.workflow.metadata]
+agentRequireRestartOnSave = false
+
+[[workflows.workflow.tasks]]
+task = "packager.installForAll"
+
+[[workflows.workflow.tasks]]
+task = "shell.exec"
+args = "echo 'タスクリストの左寄せ対応' > .checkpoint_message && touch .checkpoint"
+
 [deployment]
 run = ["sh", "-c", "python app.py"]
+
+[[ports]]
+localPort = 80
+externalPort = 3003
 
 [[ports]]
 localPort = 3000

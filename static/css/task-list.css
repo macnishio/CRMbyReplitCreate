@@ -1,5 +1,4 @@
 /* タスク一覧ページ専用のスタイル */
-
 /* フィルターセクション */
 .filter-section {
     background: var(--bg-card);
@@ -12,8 +11,11 @@
 .filter-grid {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-    gap: var(--spacing-md);
-    margin-bottom: var(--spacing-md);
+    gap: var(--spacing-lg);
+    margin-bottom: var(--spacing-lg);
+    padding: var(--spacing-md);
+    background-color: #f8f9fa;
+    border-radius: var(--border-radius);
 }
 
 .filter-group {
@@ -25,9 +27,11 @@
 .filter-actions {
     display: flex;
     flex-wrap: wrap;
-    gap: var(--spacing-sm);
+    gap: var(--spacing-md);
     align-items: center;
+    justify-content: flex-start;
     margin-top: var(--spacing-md);
+    padding: var(--spacing-sm);
 }
 
 /* タスクグリッド */
@@ -48,7 +52,13 @@
     gap: var(--spacing-sm);
 }
 
-.task-main h2 {
+.task-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+}
+
+.task-title {
     margin: 0;
     color: var(--color-primary);
     font-size: var(--font-size-lg);
@@ -59,8 +69,24 @@
     font-size: var(--font-size-sm);
 }
 
-/* 分析セクション */
-.analysis-section {
+/* AI生成バッジ */
+.ai-generated {
+    border-left: 4px solid var(--color-info);
+}
+
+.ai-badge {
+    background-color: var(--color-info);
+    color: white;
+    padding: var(--spacing-xs) var(--spacing-sm);
+    border-radius: var(--border-radius-sm);
+    display: inline-flex;
+    align-items: left;
+    gap: var(--spacing-xs);
+    font-size: var(--font-size-sm);
+}
+
+/* タスク分析セクション */
+.task-analysis {
     background: var(--bg-card);
     border-radius: var(--border-radius);
     margin: var(--spacing-lg) 0;
@@ -71,7 +97,7 @@
     cursor: pointer;
     display: flex;
     justify-content: space-between;
-    align-items: center;
+    align-items: left;
 }
 
 .analysis-grid {
@@ -87,18 +113,15 @@
     border-radius: var(--border-radius);
 }
 
-/* プログレスバー */
-.progress-bar {
-    background: var(--color-light);
-    border-radius: var(--border-radius-sm);
-    height: 8px;
-    overflow: hidden;
-}
-
-.progress {
-    background: var(--color-primary);
-    height: 100%;
-    transition: width 0.3s ease;
+/* フィルター結果表示 */
+.filter-results {
+    background: var(--bg-card);
+    padding: var(--spacing-sm) var(--spacing-md);
+    border-radius: var(--border-radius);
+    margin: var(--spacing-md) 0;
+    display: flex;
+    justify-content: space-between;
+    align-items: left;
 }
 
 /* 一括操作セクション */
@@ -108,17 +131,29 @@
     border-radius: var(--border-radius);
     margin: var(--spacing-md) 0;
     display: flex;
-    align-items: center;
+    align-items: left;
     gap: var(--spacing-md);
 }
 
-/* ステータスバッジ */
-.status-badge {
-    display: inline-flex;
-    align-items: center;
-    padding: var(--spacing-xs) var(--spacing-sm);
-    border-radius: var(--border-radius-sm);
-    font-size: var(--font-size-sm);
+/* 新規タスク追加ボタン */
+.add-task-button {
+    position: fixed;
+    right: var(--spacing-lg);
+    bottom: var(--spacing-lg);
+    padding: var(--spacing-sm) var(--spacing-lg);
+    background: var(--color-primary);
+    color: white;
+    border-radius: var(--border-radius);
+    box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+}
+
+/* ページネーション */
+.pagination-controls {
+    margin-top: var(--spacing-xl);
+    display: flex;
+    justify-content: flex-end;
+    align-items: left;
+    gap: var(--spacing-md);
 }
 
 /* レスポンシブ対応 */
@@ -128,48 +163,488 @@
         align-items: stretch;
     }
 
-    /* タスクグリッド */
-.task-grid {
-    display: grid;
-    gap: var(--spacing-md);
-    margin: var(--spacing-lg) 0;
-    /* 5列グリッドの設定 */
-    grid-template-columns: repeat(5, 1fr);
-    justify-content: start; /* 左寄せ */
-}
-
-/* レスポンシブ対応 */
-@media (max-width: 1920px) {
-    .task-grid {
-        grid-template-columns: repeat(4, 1fr);
-    }
-}
-
-@media (max-width: 1536px) {
-    .task-grid {
-        grid-template-columns: repeat(3, 1fr);
-    }
-}
-
-@media (max-width: 1280px) {
-    .task-grid {
-        grid-template-columns: repeat(2, 1fr);
-    }
-}
-
-@media (max-width: 768px) {
     .task-grid {
         grid-template-columns: 1fr;
     }
-}
-
-/* タスクカードの最小幅を設定して一貫性を保つ */
-.task-card {
-    min-width: 280px; /* カードの最小幅を設定 */
-    max-width: 100%;  /* コンテナ幅を超えないように */
-}
 
     .analysis-grid {
         grid-template-columns: 1fr;
     }
+
+    .bulk-actions {
+        flex-direction: column;
+    }
+
+    .add-task-button {
+        right: var(--spacing-md);
+        bottom: var(--spacing-md);
+    }
 }
+
+/* メインコンテンツエリアの調整 */
+.main-content {
+    margin-left: 0px;
+    padding: var(--spacing-md);
+    width: calc(100% - 60px);
+    box-sizing: border-box;
+}
+
+/* サイドバー */
+.sidebar {
+    width: 60px;
+    background-color: var(--color-dark);
+    position: fixed;
+    height: 100vh;
+    left: 0;
+    top: 0;
+}
+
+.summary-content {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    color: #333;
+    flex-wrap: wrap;
+}
+
+.summary-content i {
+    color: #007bff;
+    font-size: 1.4em;
+}
+
+.total-count {
+    font-size: 1.2em;
+    font-weight: 500;
+    color: #2c3e50;
+    display: flex;
+    align-items: center;
+    gap: 5px;
+}
+
+.page-info {
+    font-size: 1em;
+    color: #666;
+    margin-left: auto;
+    padding-left: 15px;
+    border-left: 2px solid #eee;
+}
+.status-in-progress { background-color: #fff3e0; color: #f57c00; }
+.status-completed { background-color: #e8f5e9; color: #388e3c; }
+
+/* Analysis section styles */
+.analysis-section {
+    margin-bottom: 30px;
+    background: white;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    overflow: hidden;
+}
+
+.analysis-header {
+    padding: 15px 20px;
+    cursor: pointer;
+    background-color: #f8f9fa;
+    border-bottom: 1px solid #eee;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    transition: background-color 0.3s ease;
+}
+
+.analysis-header:hover {
+    background-color: #e9ecef;
+}
+
+.analysis-content {
+    display: none;
+    max-height: 0;
+    overflow: hidden;
+    transition: max-height 0.3s ease-out;
+}
+
+.analysis-content.active {
+    display: block;
+    max-height: none;
+}
+
+.analysis-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 20px;
+    padding: 20px;
+    background-color: #fff;
+}
+
+.analysis-card {
+    background: white;
+    padding: 20px;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.toggle-icon {
+    display: inline-block;
+    transition: transform 0.3s ease;
+    margin-left: 10px;
+    font-size: 1.2em;
+    color: #666;
+}
+
+.toggle-icon.active {
+    transform: rotate(180deg);
+}
+
+/* Task card styles */
+.task-card {
+    position: relative;
+    padding: var(--spacing-lg);
+    background: white;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    margin-bottom: var(--spacing-md);
+    border-left: 4px solid #007bff;
+    transition: all 0.3s ease;
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-md);
+}
+
+.task-card.completed {
+    border-left-color: #28a745;
+    background-color: #f8f9fa;
+}
+
+.task-card.ai-generated {
+    border-left-color: #6c5ce7;
+}
+
+.task-main {
+    margin-bottom: 15px;
+}
+
+.task-metadata {
+    display: flex;
+    gap: 15px;
+    margin: 10px 0;
+    flex-wrap: wrap;
+}
+
+/* Status badges */
+.status-badge {
+    padding: 0.25rem 0.5rem;
+    font-size: 0.75rem; /* Reduce slightly if needed */
+    white-space: nowrap; /* Ensures the text doesn't wrap */
+    overflow: visible; /* Ensures full visibility */
+    border-radius: 12px;
+    font-weight: 500;
+}
+.status-new { background-color: #e3f2fd; color: #1976d2; }
+
+/* フィルター結果サマリーのスタイル */
+.filter-summary {
+    background: #fff;
+    padding: 15px 20px;
+    margin: 20px 0;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    transition: all 0.3s ease;
+}
+
+.filter-summary:hover {
+    box-shadow: 0 4px 8px rgba(0,0,0,0.15);
+}
+
+.summary-content {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    color: #333;
+    flex-wrap: wrap;
+}
+
+.summary-content i {
+    color: #007bff;
+    font-size: 1.4em;
+}
+
+.total-count {
+    font-size: 1.2em;
+    font-weight: 500;
+    color: #2c3e50;
+    display: flex;
+    align-items: center;
+    gap: 5px;
+}
+
+.page-info {
+    font-size: 1em;
+    color: #666;
+    margin-left: auto;
+    padding-left: 15px;
+    border-left: 2px solid #eee;
+}
+.status-in-progress { background-color: #fff3e0; color: #f57c00; }
+.status-completed { background-color: #e8f5e9; color: #388e3c; }
+
+.ai-badge {
+    background-color: #6c5ce7;
+    color: white;
+    padding: 4px 8px;
+    border-radius: 12px;
+    font-size: 0.8em;
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    margin-left: 10px;
+}
+
+/* Related content styles */
+.related-content {
+    margin-top: 15px;
+    padding: 15px;
+    background: #f8f9fa;
+    border-radius: 8px;
+    display: grid;
+    gap: 15px;
+}
+
+.email-preview {
+    cursor: pointer;
+    padding: 12px;
+    background: white;
+    border-radius: 6px;
+    border: 1px solid #dee2e6;
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.email-preview:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+/* Action buttons */
+.bulk-actions {
+    margin-bottom: 20px;
+    padding: 15px;
+    background: white;
+    border-radius: 8px;
+    display: flex;
+    gap: 15px;
+    align-items: center;
+}
+
+.card-actions {
+    margin-top: 15px;
+    display: flex;
+    gap: 8px;
+    justify-content: flex-end;
+}
+
+.btn {
+    padding: 8px 16px;
+    border-radius: 4px;
+    border: none;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 0.9em;
+    transition: all 0.2s ease;
+    color: white;
+}
+
+.btn-add {
+    background: #007bff;
+    position: fixed;
+    bottom: 30px;
+    right: 30px;
+    padding: 12px 24px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+}
+
+.btn-add:hover {
+    background: #0056b3;
+    transform: translateY(-2px);
+}
+
+.btn-complete { background: #28a745; }
+.btn-edit { background: #17a2b8; }
+.btn-delete { background: #dc3545; }
+
+.overdue {
+    color: #dc3545;
+    font-weight: bold;
+}
+
+/* Modal styles */
+.modal {
+    display: none;
+    position: fixed;
+    z-index: 1000;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0,0,0,0.5);
+}
+
+.modal-content {
+    position: relative;
+    background-color: #fff;
+    margin: 5% auto;
+    padding: 20px;
+    width: 80%;
+    max-width: 800px;
+    border-radius: 8px;
+    box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+}
+
+.close-modal {
+    position: absolute;
+    right: 20px;
+    top: 10px;
+    font-size: 28px;
+    font-weight: bold;
+    color: #666;
+    cursor: pointer;
+}
+
+/* Loading indicator */
+.loading-indicator {
+    text-align: center;
+    padding: 20px;
+    font-size: 1.2em;
+    color: #666;
+}
+
+.loading-indicator i {
+    margin-right: 10px;
+    color: #007bff;
+}
+
+/* Error message */
+.error-message {
+    color: #dc3545;
+    padding: 10px;
+    border-left: 3px solid #dc3545;
+    background-color: #f8d7da;
+}
+
+/* Dark mode */
+@media (prefers-color-scheme: dark) {
+    .analysis-section {
+        background: #2d2d2d;
+    }
+
+    .analysis-header {
+        background-color: #333;
+        border-bottom-color: #444;
+    }
+
+    .analysis-header:hover {
+        background-color: #404040;
+    }
+
+    .analysis-card {
+        background: #333;
+        color: #fff;
+    }
+
+    .analysis-content {
+        background-color: #2d2d2d;
+    }
+}
+
+<!-- ページネーション用のスタイルを追加 -->
+.pagination-container {
+    margin: 20px 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 10px;
+}
+
+.pagination {
+    display: flex;
+    gap: 5px;
+    align-items: center;
+    justify-content: center;
+    margin-top: 20px;
+}
+
+.page-link {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 8px 12px;
+    background-color: #fff;
+    border: 1px solid #dee2e6;
+    border-radius: 4px;
+    text-decoration: none;
+    color: #007bff;
+    min-width: 40px;
+    height: 40px;
+    transition: all 0.2s ease;
+}
+
+.page-link:hover {
+    background-color: #e9ecef;
+    color: #0056b3;
+    text-decoration: none;
+}
+
+.page-link.active {
+    background-color: #007bff;
+    color: #fff;
+    border-color: #007bff;
+}
+
+.pagination-info {
+    color: #6c757d;
+    font-size: 0.9em;
+    text-align: center;
+}
+
+@media (max-width: 768px) {
+    .pagination {
+        flex-wrap: wrap;
+    }
+
+    .page-link {
+        padding: 6px 10px;
+        min-width: 35px;
+        height: 35px;
+    }
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    .task-metadata,
+    .bulk-actions {
+        flex-direction: column;
+    }
+
+    .btn-add {
+        bottom: 20px;
+        right: 20px;
+        padding: 10px 20px;
+    }
+
+    .analysis-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .analysis-header {
+        padding: 12px 15px;
+    }
+
+    .analysis-card {
+        margin: 0 5px;
+    }
+
+    .modal-content {
+        width: 95%;
+        margin: 10% auto;
+    }
+}
+
