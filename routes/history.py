@@ -7,6 +7,10 @@ from datetime import datetime
 import traceback
 
 bp = Blueprint('history', __name__)
+from flask import send_file
+import csv
+from io import StringIO
+from datetime import datetime
 @bp.route('/')
 @login_required
 def list_history():
@@ -115,6 +119,51 @@ def get_history(lead_id):
                 'last_contact': lead.last_contact.isoformat() if lead.last_contact else None
             }
         })
+
+@bp.route('/leads/<int:lead_id>/export')
+@login_required
+def export_history(lead_id):
+    try:
+        lead = Lead.query.filter_by(id=lead_id, user_id=current_user.id).first()
+        if not lead:
+            abort(404)
+
+        # Get all emails for the lead
+        emails = Email.query.filter_by(lead_id=lead_id).order_by(Email.received_date.desc()).all()
+
+        # Create CSV in memory
+        si = StringIO()
+        writer = csv.writer(si)
+        writer.writerow(['日付', '送信者', '内容'])
+
+        for email in emails:
+            writer.writerow([
+                email.received_date.strftime('%Y-%m-%d %H:%M:%S') if email.received_date else '',
+                email.sender_name or email.sender,
+                email.content
+            ])
+
+        output = si.getvalue()
+        si.close()
+
+        # Create in-memory file-like object
+        mem = StringIO()
+        mem.write(output)
+        mem.seek(0)
+
+        timestamp = datetime.now().strftime('%Y%m%d_%H%M%S')
+        filename = f"communication_history_{lead.name}_{timestamp}.csv"
+        
+        return send_file(
+            mem,
+            mimetype='text/csv',
+            as_attachment=True,
+            download_name=filename
+        )
+
+    except Exception as e:
+        current_app.logger.error(f"Error in export_history: {str(e)}")
+        return jsonify({'error': 'エクスポート中にエラーが発生しました'}), 500
 
     except Exception as e:
         current_app.logger.error(f"Error in get_history: {str(e)}")
