@@ -237,6 +237,57 @@
         color: #aaa;
     }
 }
+    .analysis-results {
+        margin-top: 20px;
+        background: white;
+        border-radius: 8px;
+        padding: 20px;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    }
+
+    .analysis-section {
+        margin-bottom: 20px;
+    }
+
+    .analysis-section h4 {
+        color: #2c3e50;
+        margin-bottom: 10px;
+        font-size: 1.1rem;
+    }
+
+    .analysis-section ul {
+        list-style-type: none;
+        padding: 0;
+    }
+
+    .analysis-section li {
+        margin-bottom: 5px;
+        padding: 5px 0;
+        border-bottom: 1px solid #eee;
+    }
+
+    .analysis-section p {
+        margin: 5px 0;
+        color: #666;
+    }
+
+    @media (prefers-color-scheme: dark) {
+        .analysis-results {
+            background: #2d2d2d;
+        }
+        
+        .analysis-section h4 {
+            color: #e0e0e0;
+        }
+        
+        .analysis-section li {
+            border-bottom-color: #444;
+        }
+        
+        .analysis-section p {
+            color: #aaa;
+        }
+    }
 
 @media (max-width: 768px) {
     .history-container {
@@ -271,6 +322,15 @@
                 <a href="{{ url_for('history.export_history', lead_id=lead.id) }}" class="btn btn-primary">
                     <i class="fas fa-download"></i> 履歴をエクスポート
                 </a>
+                <button onclick="analyzeCustomerBehavior()" class="btn btn-primary">
+                    <i class="fas fa-brain"></i> AI分析
+                </button>
+            </div>
+            <div id="analysisResults" class="analysis-results" style="display: none;">
+                <div class="analysis-content">
+                    <h3>AI分析結果</h3>
+                    <div id="analysisData"></div>
+                </div>
             </div>
         </div>
         <div class="search-container">

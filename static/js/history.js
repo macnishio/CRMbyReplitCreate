@@ -204,3 +204,79 @@ function initializeHistory(leadId) {
         localStorage.removeItem(`scroll_position_${leadId}`);
     });
 }
+
+
+async function analyzeCustomerBehavior() {
+    const leadId = window.location.pathname.split('/').pop();
+    const analysisResults = document.getElementById('analysisResults');
+    const analysisData = document.getElementById('analysisData');
+    
+    try {
+        const response = await fetch(`/history/api/leads/${leadId}/analyze`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            }
+        });
+        
+        if (!response.ok) {
+            throw new Error('分析中にエラーが発生しました');
+        }
+        
+        const result = await response.json();
+        
+        if (result.success) {
+            const data = result.data;
+            analysisData.innerHTML = `
+                <div class="analysis-section">
+                    <h4>コミュニケーションパターン</h4>
+                    <p>頻度: ${data.communication_patterns.frequency}</p>
+                    <p>好みの時間帯: ${data.communication_patterns.preferred_time}</p>
+                    <p>応答時間: ${data.communication_patterns.response_time}</p>
+                    <p>エンゲージメントレベル: ${data.communication_patterns.engagement_level}</p>
+                </div>
+                
+                <div class="analysis-section">
+                    <h4>興味・関心事項</h4>
+                    <ul>
+                        ${data.interests.map(interest => `<li>${interest}</li>`).join('')}
+                    </ul>
+                </div>
+                
+                <div class="analysis-section">
+                    <h4>重要ポイント</h4>
+                    <ul>
+                        ${data.key_points.map(point => `<li>${point}</li>`).join('')}
+                    </ul>
+                </div>
+                
+                <div class="analysis-section">
+                    <h4>リスクファクター</h4>
+                    <ul>
+                        ${data.risk_factors.map(risk => `<li>${risk}</li>`).join('')}
+                    </ul>
+                </div>
+                
+                <div class="analysis-section">
+                    <h4>推奨アクション</h4>
+                    <ul>
+                        ${data.recommended_actions.map(action => `<li>${action}</li>`).join('')}
+                    </ul>
+                </div>
+                
+                <div class="analysis-section">
+                    <h4>分析サマリー</h4>
+                    <p>${data.analysis_summary}</p>
+                </div>
+            `;
+            
+            analysisResults.style.display = 'block';
+        } else {
+            throw new Error(result.error || '分析に失敗しました');
+        }
+        
+    } catch (error) {
+        console.error('Analysis error:', error);
+        alert(error.message);
+    }
+}

@@ -260,7 +260,7 @@ task = "packager.installForAll"
 
 [[workflows.workflow.tasks]]
 task = "shell.exec"
-args = "flask db migrate -m 'Update Lead and Opportunity models relationships'"
+args = "flask db migrate -m 'Add behavior_patterns field to Lead model'"
 
 #[[workflows.workflow]]
 #name = "Clean Migration"

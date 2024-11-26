@@ -112,16 +112,17 @@ def get_history(lead_id):
 @login_required
 def export_history(lead_id):
     try:
+        # リードの存在確認
         lead = Lead.query.filter_by(id=lead_id, user_id=current_user.id).first()
         if not lead:
             abort(404)
 
-        # Get all emails for the lead
+        # メールデータの取得
         emails = Email.query.filter_by(lead_id=lead_id).order_by(Email.received_date.desc()).all()
 
-        # Create CSV in memory
-        si = StringIO()
-        writer = csv.writer(si)
+        # CSVの作成
+        output = StringIO()
+        writer = csv.writer(output)
         writer.writerow(['日付', '送信者', '内容'])
 
         for email in emails:
@@ -131,21 +132,38 @@ def export_history(lead_id):
                 email.content
             ])
 
-        # Get the CSV data and close the StringIO object
-        output = si.getvalue()
-        si.close()
-
-        # Create response
-        response = current_app.response_class(
+        # レスポンスの作成
+        output.seek(0)
+        return send_file(
             output,
             mimetype='text/csv',
-            headers={
-                "Content-Disposition": f"attachment;filename=communication_history_{lead.name}_{datetime.now().strftime('%Y%m%d_%H%M%S')}.csv"
-            }
+            as_attachment=True,
+            download_name=f'communication_history_{lead.name}_{datetime.now().strftime("%Y%m%d_%H%M%S")}.csv'
         )
-        
-        return response
 
     except Exception as e:
         current_app.logger.error(f"Error in export_history: {str(e)}")
         return jsonify({'error': 'エクスポート中にエラーが発生しました'}), 500
+
+@bp.route('/api/leads/<int:lead_id>/analyze', methods=['POST'])
+@login_required
+def analyze_lead(lead_id):
+    try:
+        # AIRollbackServiceのインスタンス化
+        from services.ai_rollback import AIRollbackService
+        from models import UserSettings
+        
+        user_settings = UserSettings.query.filter_by(user_id=current_user.id).first()
+        ai_service = AIRollbackService(user_settings)
+        
+        # 行動パターン分析の実行
+        result = ai_service.analyze_customer_behavior(lead_id)
+        
+        if result.get('success'):
+            return jsonify(result), 200
+        else:
+            return jsonify(result), 400
+            
+    except Exception as e:
+        current_app.logger.error(f"リード分析中にエラーが発生: {str(e)}")
+        return jsonify({'error': '分析中にエラーが発生しました'}), 500

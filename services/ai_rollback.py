@@ -343,3 +343,85 @@ class AIRollbackService:
                 "generated_at": datetime.utcnow().isoformat(),
                 "is_automated": False
             }
+
+
+    def analyze_customer_behavior(self, lead_id: int) -> Dict[str, Any]:
+        """顧客の行動パターンを分析し、インサイトを提供する"""
+        try:
+            # リードとメールデータの取得
+            lead = Lead.query.get(lead_id)
+            if not lead:
+                return {
+                    "error": "指定されたリードが見つかりません",
+                    "success": False
+                }
+
+            emails = Email.query.filter_by(lead_id=lead_id).order_by(Email.received_date.desc()).all()
+            
+            # プロンプトの構築
+            prompt = f"""
+            以下の顧客とのコミュニケーション履歴を分析し、行動パターンとインサイトを提供してください。
+            JSONフォーマットで応答してください。
+
+            顧客情報:
+            - 名前: {lead.name}
+            - メール: {lead.email}
+            - ステータス: {lead.status}
+            - スコア: {lead.score}
+            - 最終接触: {lead.last_contact.strftime('%Y-%m-%d %H:%M:%S') if lead.last_contact else 'なし'}
+
+            コミュニケーション履歴:
+            {[{
+                'date': email.received_date.strftime('%Y-%m-%d %H:%M:%S'),
+                'content': email.content[:200] + '...' if len(email.content) > 200 else email.content,
+                'is_from_lead': email.sender == lead.email
+            } for email in emails[:10]]}
+
+            以下の観点から分析を行ってください：
+            1. コミュニケーションパターン（頻度、時間帯、返信速度など）
+            2. 興味・関心事項
+            3. 商談進捗における重要なポイント
+            4. リスクファクター
+            5. 推奨アクション
+
+            応答は以下のJSON構造で提供してください：
+            {
+                "communication_patterns": {
+                    "frequency": "高/中/低",
+                    "preferred_time": "時間帯の傾向",
+                    "response_time": "平均応答時間",
+                    "engagement_level": "高/中/低"
+                },
+                "interests": ["興味・関心事項1", "興味・関心事項2"],
+                "key_points": ["重要ポイント1", "重要ポイント2"],
+                "risk_factors": ["リスク1", "リスク2"],
+                "recommended_actions": ["推奨アクション1", "推奨アクション2"],
+                "analysis_summary": "全体的な分析まとめ"
+            }
+            """
+
+            response = self.anthropic.messages.create(
+                model="claude-3-opus-20240229",
+                max_tokens=2000,
+                temperature=0,
+                messages=[{"role": "user", "content": prompt}]
+            )
+
+            content = response.content[0].text if hasattr(response.content[0], 'text') else str(response.content[0])
+            analysis_result = json.loads(content)
+
+            # 分析結果をデータベースに保存
+            lead.behavior_patterns = analysis_result
+            db.session.commit()
+
+            return {
+                "success": True,
+                "data": analysis_result
+            }
+
+        except Exception as e:
+            current_app.logger.error(f"顧客行動パターン分析中にエラーが発生: {str(e)}\n{traceback.format_exc()}")
+            return {
+                "success": False,
+                "error": str(e)
+            }
