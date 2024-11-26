@@ -127,27 +127,24 @@ def export_history(lead_id):
         for email in emails:
             writer.writerow([
                 email.received_date.strftime('%Y-%m-%d %H:%M:%S') if email.received_date else '',
-                email.sender_name or email.sender,
+                email.sender,
                 email.content
             ])
 
+        # Get the CSV data and close the StringIO object
         output = si.getvalue()
         si.close()
 
-        # Create in-memory file-like object
-        mem = StringIO()
-        mem.write(output)
-        mem.seek(0)
-
-        timestamp = datetime.now().strftime('%Y%m%d_%H%M%S')
-        filename = f"communication_history_{lead.name}_{timestamp}.csv"
-        
-        return send_file(
-            mem,
+        # Create response
+        response = current_app.response_class(
+            output,
             mimetype='text/csv',
-            as_attachment=True,
-            download_name=filename
+            headers={
+                "Content-Disposition": f"attachment;filename=communication_history_{lead.name}_{datetime.now().strftime('%Y%m%d_%H%M%S')}.csv"
+            }
         )
+        
+        return response
 
     except Exception as e:
         current_app.logger.error(f"Error in export_history: {str(e)}")
