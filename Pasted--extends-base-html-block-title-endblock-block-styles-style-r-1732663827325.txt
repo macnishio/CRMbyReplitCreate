@@ -1,0 +1,360 @@
+{% extends "base.html" %}
+
+{% block title %}コミュニケーション履歴{% endblock %}
+
+{% block styles %}
+<style>
+:root {
+    --color-primary: #00a884;
+    --color-secondary: #666666;
+    --color-info: #3498db;
+    --color-warning: #f1c40f;
+    --color-success: #2ecc71;
+    --bg-card: #ffffff;
+    --border-radius: 12px;
+    --border-radius-sm: 8px;
+    --spacing-xs: 4px;
+    --spacing-sm: 8px;
+    --spacing-md: 16px;
+    --spacing-lg: 24px;
+    --spacing-xl: 32px;
+    --font-size-sm: 0.875rem;
+    --font-size-base: 1rem;
+    --font-size-lg: 1.125rem;
+    --shadow-sm: 0 2px 4px rgba(0,0,0,0.1);
+    --shadow-md: 0 4px 8px rgba(0,0,0,0.15);
+}
+
+.leads-container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: var(--spacing-lg);
+}
+
+.lead-card {
+    background: var(--bg-card);
+    border-radius: var(--border-radius);
+    padding: var(--spacing-md);
+    box-shadow: var(--shadow-sm);
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+    text-decoration: none;
+    color: inherit;
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-md);
+}
+
+.lead-card:hover {
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-md);
+}
+
+.lead-avatar {
+    width: 48px;
+    height: 48px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-size: var(--font-size-lg);
+    font-weight: bold;
+}
+
+.lead-recipients {
+    background-color: #f8f9fa;
+    border-radius: var(--border-radius-sm);
+    padding: var(--spacing-sm);
+    margin: var(--spacing-sm) 0;
+}
+
+.recipient-type {
+    display: flex;
+    gap: var(--spacing-sm);
+    margin-bottom: var(--spacing-xs);
+}
+
+.recipient-label {
+    color: var(--color-secondary);
+    min-width: 35px;
+    font-weight: 500;
+}
+
+.recipient-emails {
+    color: var(--color-primary);
+    word-break: break-all;
+}
+
+@media (max-width: 768px) {
+    .leads-container {
+        padding: var(--spacing-md);
+    }
+
+    .lead-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .recipient-emails {
+        -webkit-line-clamp: 2;
+        -webkit-box-orient: vertical;
+        overflow: hidden;
+        display: -webkit-box;
+    }
+}
+
+.search-container {
+    position: relative;
+    width: 300px;
+}
+
+.search-box {
+    position: relative;
+    width: 100%;
+}
+
+.search-box input {
+    width: 100%;
+    padding: var(--spacing-sm) var(--spacing-md);
+    padding-right: 40px;
+    border: 1px solid #ddd;
+    border-radius: var(--border-radius-sm);
+    font-size: var(--font-size-base);
+    background: var(--bg-card);
+    transition: border-color 0.2s, box-shadow 0.2s;
+}
+
+.search-box input:focus {
+    outline: none;
+    border-color: var(--color-primary);
+    box-shadow: 0 0 0 2px rgba(0, 168, 132, 0.1);
+}
+
+.search-box i {
+    position: absolute;
+    right: var(--spacing-md);
+    top: 50%;
+    transform: translateY(-50%);
+    color: var(--color-secondary);
+}
+
+/* ドロップダウン結果のスタイル */
+.search-results {
+    position: absolute;
+    top: 100%;
+    left: 0;
+    right: 0;
+    background: var(--bg-card);
+    border: 1px solid #ddd;
+    border-radius: var(--border-radius-sm);
+    margin-top: var(--spacing-xs);
+    box-shadow: var(--shadow-md);
+    max-height: 300px;
+    overflow-y: auto;
+    z-index: 1000;
+    display: none;
+}
+
+.search-results.active {
+    display: block;
+}
+
+.search-result-item {
+    padding: var(--spacing-sm) var(--spacing-md);
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-sm);
+    transition: background-color 0.2s;
+}
+
+.search-result-item:hover {
+    background-color: rgba(0, 168, 132, 0.1);
+}
+
+.search-result-item .lead-mini-avatar {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-size: var(--font-size-sm);
+    font-weight: bold;
+}
+
+.search-result-item .lead-info {
+    flex: 1;
+}
+
+.search-result-item .lead-name {
+    font-weight: 500;
+    color: #333;
+}
+
+.search-result-item .lead-email {
+    font-size: var(--font-size-sm);
+    color: var(--color-secondary);
+}
+
+.no-results {
+    padding: var(--spacing-md);
+    text-align: center;
+    color: var(--color-secondary);
+}
+</style>
+{% endblock %}
+{% block content %}
+<div class="leads-container">
+    <div class="page-header">
+        <h1>コミュニケーション履歴</h1>
+        <div class="header-actions">
+            <div class="search-container">
+                <div class="search-box">
+                    <input type="search" id="leadSearch" placeholder="名前やメールで検索...">
+                    <i class="fas fa-search"></i>
+                </div>
+                <div class="search-results" id="searchResults">
+                    <!-- 検索結果がここに動的に追加されます -->
+                </div>
+            </div>
+        </div>
+    </div>
+
+    {% if leads %}
+        <div class="lead-grid">
+            {% for lead in leads %}
+                <a href="{{ url_for('history.show_history', lead_id=lead.id) }}" class="lead-card">
+                    <div class="lead-card-header">
+                        <div class="lead-avatar" style="background-color: {{ '#%02x%02x%02x' | format(((lead.id * 123) % 256), ((lead.id * 45) % 256), ((lead.id * 67) % 256)) }}">
+                            {{ lead.name[0].upper() if lead.name else '?' }}
+                        </div>
+                        <div class="lead-status-badge {{ lead.status.lower() }}">
+                            {{ lead.status }}
+                        </div>
+                    </div>
+
+                    <div class="lead-card-content">
+                        <h2 class="lead-name">{{ lead.name or '名前なし' }}</h2>
+
+                        <div class="lead-recipients">
+                            <div class="recipient-type">
+                                <span class="recipient-label">To:</span>
+                                <span class="recipient-emails">{{ lead.email }}</span>
+                            </div>
+                            {% if lead.cc %}
+                            <div class="recipient-type">
+                                <span class="recipient-label">Cc:</span>
+                                <span class="recipient-emails">{{ lead.cc }}</span>
+                            </div>
+                            {% endif %}
+                            {% if lead.bcc %}
+                            <div class="recipient-type">
+                                <span class="recipient-label">Bcc:</span>
+                                <span class="recipient-emails">{{ lead.bcc }}</span>
+                            </div>
+                            {% endif %}
+                        </div>
+
+                        {% if lead.phone %}
+                        <div class="lead-contact-info">
+                            <i class="fas fa-phone"></i>
+                            <span>{{ lead.phone }}</span>
+                        </div>
+                        {% endif %}
+
+                        {% if lead.last_contact %}
+                        <div class="lead-last-contact">
+                            <i class="fas fa-clock"></i>
+                            <span>最終接触: {{ lead.last_contact.strftime('%Y年%m月%d日 %H:%M') }}</span>
+                        </div>
+                        {% endif %}
+                    </div>
+                </a>
+            {% endfor %}
+        </div>
+    {% else %}
+        <div class="no-leads">
+            <i class="fas fa-user-slash"></i>
+            <p>リードが見つかりませんでした。</p>
+        </div>
+    {% endif %}
+</div>
+{% endblock %}
+{% block scripts %}
+<script src="{{ url_for('static', filename='js/history.js') }}"></script>
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const searchInput = document.getElementById('leadSearch');
+    const searchResults = document.getElementById('searchResults');
+    // leads_jsonを使用
+    const leads = {{ leads_json|tojson|safe }};
+
+    let searchTimeout;
+
+    searchInput.addEventListener('input', function(e) {
+        clearTimeout(searchTimeout);
+        const query = e.target.value.toLowerCase();
+
+        searchTimeout = setTimeout(() => {
+            if (query.length < 1) {
+                searchResults.classList.remove('active');
+                return;
+            }
+
+            const filteredLeads = leads.filter(lead => {
+                return (
+                    (lead.name && lead.name.toLowerCase().includes(query)) ||
+                    (lead.email && lead.email.toLowerCase().includes(query))
+                );
+            });
+
+            displaySearchResults(filteredLeads);
+        }, 300);
+    });
+
+    function displaySearchResults(results) {
+        searchResults.innerHTML = '';
+
+        if (results.length === 0) {
+            searchResults.innerHTML = `
+                <div class="no-results">
+                    <i class="fas fa-search"></i>
+                    <p>該当するリードが見つかりませんでした</p>
+                </div>
+            `;
+        } else {
+            results.forEach(lead => {
+                const backgroundColor = `#${((lead.id * 123) % 256).toString(16).padStart(2, '0')}${((lead.id * 45) % 256).toString(16).padStart(2, '0')}${((lead.id * 67) % 256).toString(16).padStart(2, '0')}`;
+                const resultItem = document.createElement('div');
+                resultItem.className = 'search-result-item';
+                resultItem.innerHTML = `
+                    <div class="lead-mini-avatar" style="background-color: ${backgroundColor}">
+                        ${lead.name ? lead.name[0].toUpperCase() : '?'}
+                    </div>
+                    <div class="lead-info">
+                        <div class="lead-name">${lead.name || '名前なし'}</div>
+                        <div class="lead-email">${lead.email || ''}</div>
+                    </div>
+                `;
+
+                resultItem.addEventListener('click', () => {
+                    window.location.href = `/history/leads/${lead.id}`;
+                });
+
+                searchResults.appendChild(resultItem);
+            });
+        }
+
+        searchResults.classList.add('active');
+    }
+
+    // 検索結果以外をクリックしたら結果を非表示
+    document.addEventListener('click', function(e) {
+        if (!searchResults.contains(e.target) && e.target !== searchInput) {
+            searchResults.classList.remove('active');
+        }
+    });
+});
+</script>
+{% endblock %}

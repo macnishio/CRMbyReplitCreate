@@ -1,3 +1,42 @@
+from flask import Blueprint, render_template, jsonify, request
+from flask_login import login_required, current_user
+from models import Lead, Email
+from extensions import db
+from datetime import datetime
+import traceback
+import json
+
+bp = Blueprint('history', __name__)
+
+@bp.route('/')
+@login_required
+def index():
+    """履歴一覧ページを表示"""
+    try:
+        # ユーザーのリードを取得
+        leads = Lead.query.filter_by(user_id=current_user.id).order_by(Lead.last_contact.desc()).all()
+        
+        # テンプレート用のJSONデータを準備
+        leads_json = [{
+            'id': lead.id,
+            'name': lead.name,
+            'email': lead.email,
+            'status': lead.status,
+            'last_contact': lead.last_contact.isoformat() if lead.last_contact else None,
+            'phone': lead.phone,
+            'cc': lead.cc,
+            'bcc': lead.bcc
+        } for lead in leads]
+
+        return render_template('history/index.html', 
+                            leads=leads,
+                            leads_json=leads_json)
+    except Exception as e:
+        current_app.logger.error(f"Error in history index: {str(e)}")
+        return render_template('history/index.html', 
+                            leads=[],
+                            leads_json=[])
+
 from flask import Blueprint, render_template, jsonify, request, current_app, abort, send_file
 from flask_login import login_required, current_user
 from models import Lead, Email, UserSettings  # UserSettingsをインポート
