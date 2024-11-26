@@ -61,6 +61,37 @@
     white-space: nowrap;
 }
 
+.header-actions {
+    margin-top: 12px;
+    display: flex;
+    gap: 10px;
+}
+
+.header-actions .btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 8px 16px;
+    font-size: 0.9rem;
+    border-radius: 6px;
+    transition: all 0.3s ease;
+}
+
+.header-actions .btn i {
+    font-size: 1rem;
+}
+
+@media (max-width: 768px) {
+    .header-actions {
+        margin-top: 8px;
+    }
+    
+    .header-actions .btn {
+        padding: 6px 12px;
+        font-size: 0.85rem;
+    }
+}
+
 .messages-container {
     flex-grow: 1;
     overflow-y: auto;
@@ -236,6 +267,11 @@
             {% if lead.email %}
                 <p>{{ lead.email }}</p>
             {% endif %}
+            <div class="header-actions">
+                <a href="{{ url_for('history.export_history', lead_id=lead.id) }}" class="btn btn-primary">
+                    <i class="fas fa-download"></i> 履歴をエクスポート
+                </a>
+            </div>
         </div>
         <div class="search-container">
             <div class="search-box">
