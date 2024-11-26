@@ -128,9 +128,46 @@
         align-items: stretch;
     }
 
+    /* タスクグリッド */
+.task-grid {
+    display: grid;
+    gap: var(--spacing-md);
+    margin: var(--spacing-lg) 0;
+    /* 5列グリッドの設定 */
+    grid-template-columns: repeat(5, 1fr);
+    justify-content: start; /* 左寄せ */
+}
+
+/* レスポンシブ対応 */
+@media (max-width: 1920px) {
+    .task-grid {
+        grid-template-columns: repeat(4, 1fr);
+    }
+}
+
+@media (max-width: 1536px) {
+    .task-grid {
+        grid-template-columns: repeat(3, 1fr);
+    }
+}
+
+@media (max-width: 1280px) {
+    .task-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+}
+
+@media (max-width: 768px) {
     .task-grid {
         grid-template-columns: 1fr;
     }
+}
+
+/* タスクカードの最小幅を設定して一貫性を保つ */
+.task-card {
+    min-width: 280px; /* カードの最小幅を設定 */
+    max-width: 100%;  /* コンテナ幅を超えないように */
+}
 
     .analysis-grid {
         grid-template-columns: 1fr;
