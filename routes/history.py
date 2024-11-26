@@ -8,12 +8,24 @@ import json
 
 bp = Blueprint('history', __name__)
 
+from flask import Blueprint, render_template, jsonify, request, current_app, abort, send_file
+from flask_login import login_required, current_user
+from models import Lead, Email, UserSettings
+from services.ai_analysis import AIAnalysisService
+from io import BytesIO, StringIO
+import traceback
+from datetime import datetime
+import csv
+import json
+
+bp = Blueprint('history', __name__)
+
 @bp.route('/')
 @login_required
 def index():
     """履歴一覧ページを表示"""
     try:
-        # ユーザーのリードを取得
+        # ユーザーのリードを取得し、last_contactで降順ソート
         leads = Lead.query.filter_by(user_id=current_user.id).order_by(Lead.last_contact.desc()).all()
         
         # テンプレート用のJSONデータを準備
@@ -28,6 +40,7 @@ def index():
             'bcc': lead.bcc
         } for lead in leads]
 
+        current_app.logger.debug(f"Found {len(leads)} leads for user {current_user.id}")
         return render_template('history/index.html', 
                             leads=leads,
                             leads_json=leads_json)
@@ -36,36 +49,6 @@ def index():
         return render_template('history/index.html', 
                             leads=[],
                             leads_json=[])
-
-from flask import Blueprint, render_template, jsonify, request, current_app, abort, send_file
-from flask_login import login_required, current_user
-from models import Lead, Email, UserSettings  # UserSettingsをインポート
-from services.ai_analysis import AIAnalysisService  # AIAnalysisServiceをインポート
-from models import Lead, Email
-from io import BytesIO, StringIO  # 両方のIOクラスをインポート
-import traceback
-from datetime import datetime
-import csv
-bp = Blueprint('history', __name__)
-@bp.route('/')
-@login_required
-def list_history():
-    try:
-        leads = Lead.query.filter_by(user_id=current_user.id).all()
-        leads_json = []
-        for lead in leads:
-            leads_json.append({
-                'id': lead.id,
-                'name': lead.name,
-                'email': lead.email,
-                'status': lead.status,
-                'phone': lead.phone,
-                'last_contact': lead.last_contact.isoformat() if lead.last_contact else None,
-            })
-        return render_template('history/index.html', leads=leads, leads_json=leads_json)
-    except Exception as e:
-        current_app.logger.error(f"Error in list_history: {str(e)}")
-        return jsonify({'error': 'データの取得中にエラーが発生しました'}), 500
 
 @bp.route('/leads/<int:lead_id>')
 @login_required

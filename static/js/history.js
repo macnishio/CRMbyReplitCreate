@@ -584,7 +584,21 @@ function updateLeadInfo(lead) {
     }
 }
 
-// Call loadTimeline when the page loads
+// Initialize page functionality
 document.addEventListener('DOMContentLoaded', function() {
-    loadTimeline();
+    const pathParts = window.location.pathname.split('/');
+    const isLeadDetailPage = pathParts.includes('leads') && !isNaN(pathParts[pathParts.length - 1]);
+    
+    if (isLeadDetailPage) {
+        loadTimeline();
+        
+        // 分析ボタンの初期化（リード詳細ページの場合のみ）
+        const runAnalysisBtn = document.getElementById('runAnalysisBtn');
+        if (runAnalysisBtn) {
+            runAnalysisBtn.addEventListener('click', function() {
+                const leadId = pathParts[pathParts.length - 1];
+                analyzeLeadBehavior(leadId);
+            });
+        }
+    }
 });
