@@ -428,50 +428,160 @@ runAnalysisBtn.addEventListener('click', async () => {
     }
 });
 // Timeline functionality
-function loadTimeline() {
-    const leadId = window.location.pathname.split('/').pop();
+function formatDate(dateStr) {
+    try {
+        const date = new Date(dateStr);
+        return new Intl.DateTimeFormat('ja-JP', {
+            year: 'numeric',
+            month: '2-digit',
+            day: '2-digit',
+            hour: '2-digit',
+            minute: '2-digit',
+            hour12: false
+        }).format(date);
+    } catch (e) {
+        console.error('Date formatting error:', e);
+        return dateStr;
+    }
+}
+
+function showError(container, message, code) {
+    container.innerHTML = `
+        <div class="timeline-error">
+            <i class="fas fa-exclamation-circle"></i>
+            <div class="error-message">${message}</div>
+            ${code ? `<div class="error-code">${code}</div>` : ''}
+        </div>
+    `;
+}
+
+function showLoading(show = true) {
+    const loadingElement = document.querySelector('.timeline-loading');
+    if (loadingElement) {
+        loadingElement.style.display = show ? 'block' : 'none';
+    }
+}
+
+async function loadTimeline() {
     const timelineContainer = document.getElementById('timeline-events');
     const loadingElement = document.querySelector('.timeline-loading');
 
-    if (!timelineContainer || !loadingElement) return;
+    if (!timelineContainer || !loadingElement) {
+        console.error('Required DOM elements not found');
+        return;
+    }
 
-    fetch(`/history/api/leads/${leadId}/timeline`)
-        .then(response => response.json())
-        .then(data => {
-            if (data.success) {
-                loadingElement.style.display = 'none';
-                displayTimelineEvents(data.timeline);
-            } else {
-                throw new Error(data.error || 'タイムラインの読み込みに失敗しました');
+    try {
+        const leadId = window.location.pathname.split('/').pop();
+        showLoading(true);
+
+        const response = await fetch(`/history/api/leads/${leadId}/timeline`);
+        const data = await response.json();
+
+        if (!response.ok) {
+            throw new Error(data.error || 'タイムラインの読み込みに失敗しました');
+        }
+
+        if (data.success) {
+            showLoading(false);
+            displayTimelineEvents(data.timeline);
+            
+            // リードの情報を表示
+            if (data.lead) {
+                updateLeadInfo(data.lead);
             }
-        })
-        .catch(error => {
-            console.error('Timeline error:', error);
-            loadingElement.innerHTML = `<div class="error-message">
-                <i class="fas fa-exclamation-circle"></i>
-                タイムラインの読み込み中にエラーが発生しました
-            </div>`;
-        });
+        } else {
+            throw new Error(data.error);
+        }
+    } catch (error) {
+        console.error('Timeline error:', error);
+        showLoading(false);
+        showError(timelineContainer, 
+            error.message || 'タイムラインの読み込み中にエラーが発生しました',
+            error.code);
+    }
+}
+
+function getEventTypeStyle(type) {
+    const styles = {
+        email: {
+            icon: 'fa-envelope',
+            color: 'var(--color-info)'
+        },
+        status_change: {
+            icon: 'fa-exchange-alt',
+            color: 'var(--color-warning)'
+        },
+        score_update: {
+            icon: 'fa-chart-line',
+            color: 'var(--color-success)'
+        },
+        behavior_analysis: {
+            icon: 'fa-brain',
+            color: '#9c27b0'
+        }
+    };
+    return styles[type] || { icon: 'fa-circle', color: 'var(--color-primary)' };
 }
 
 function displayTimelineEvents(events) {
     const timelineContainer = document.getElementById('timeline-events');
     if (!events || !timelineContainer) return;
 
-    const eventsHtml = events.map(event => `
-        <div class="timeline-event ${event.type}">
-            <div class="event-icon">
-                <i class="fas ${event.icon}"></i>
+    if (events.length === 0) {
+        timelineContainer.innerHTML = `
+            <div class="timeline-empty">
+                <i class="fas fa-info-circle"></i>
+                <p>タイムラインに表示するイベントがありません</p>
             </div>
-            <div class="event-content">
-                <div class="event-title">${event.title}</div>
-                <div class="event-description">${event.description}</div>
-                <div class="event-date">${new Date(event.date).toLocaleString('ja-JP')}</div>
+        `;
+        return;
+    }
+
+    const eventsHtml = events.map(event => {
+        const style = getEventTypeStyle(event.type);
+        return `
+            <div class="timeline-event ${event.type}" style="border-left-color: ${style.color}">
+                <div class="event-icon" style="background-color: ${style.color}">
+                    <i class="fas ${event.icon || style.icon}"></i>
+                </div>
+                <div class="event-content">
+                    <div class="event-title">${event.title}</div>
+                    <div class="event-description">${event.description}</div>
+                    <div class="event-date">
+                        <i class="fas fa-clock"></i>
+                        ${formatDate(event.date)}
+                    </div>
+                    ${event.metadata ? `
+                        <div class="event-metadata">
+                            ${Object.entries(event.metadata)
+                                .filter(([_, value]) => value !== null)
+                                .map(([key, value]) => `
+                                    <span class="metadata-item">
+                                        <strong>${key}:</strong> ${value}
+                                    </span>
+                                `).join('')}
+                        </div>
+                    ` : ''}
+                </div>
             </div>
-        </div>
-    `).join('');
+        `;
+    }).join('');
 
     timelineContainer.innerHTML = eventsHtml;
+}
+
+function updateLeadInfo(lead) {
+    const leadInfoContainer = document.querySelector('.lead-info');
+    if (leadInfoContainer && lead) {
+        leadInfoContainer.innerHTML = `
+            <h2>${lead.name || '名前なし'}</h2>
+            <div class="lead-details">
+                <div><i class="fas fa-envelope"></i> ${lead.email}</div>
+                <div><i class="fas fa-info-circle"></i> ${lead.status}</div>
+            </div>
+        `;
+    }
 }
 
 // Call loadTimeline when the page loads

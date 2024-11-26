@@ -192,66 +192,115 @@ def get_lead_timeline(lead_id):
         # リードの存在確認
         lead = Lead.query.filter_by(id=lead_id, user_id=current_user.id).first()
         if not lead:
-            return jsonify({'error': 'リードが見つかりません'}), 404
+            return jsonify({
+                'success': False,
+                'error': 'リードが見つかりません',
+                'code': 'LEAD_NOT_FOUND'
+            }), 404
 
-        # メールとその他の重要なイベントを時系列で取得
-        emails = Email.query.filter_by(lead_id=lead_id).order_by(Email.received_date.desc()).all()
-        
         timeline_events = []
         
-        # メールイベントの追加
-        for email in emails:
-            timeline_events.append({
-                'type': 'email',
-                'date': email.received_date.isoformat() if email.received_date else None,
-                'title': 'メールのやり取り',
-                'description': email.content[:100] + '...' if len(email.content) > 100 else email.content,
-                'is_from_lead': email.sender == lead.email,
-                'icon': 'fa-envelope'
-            })
+        try:
+            # メールイベントの取得と追加
+            emails = Email.query.filter_by(lead_id=lead_id).order_by(Email.received_date.desc()).all()
+            for email in emails:
+                if email.received_date:
+                    timeline_events.append({
+                        'type': 'email',
+                        'date': email.received_date.strftime('%Y-%m-%d %H:%M:%S'),
+                        'timestamp': email.received_date.timestamp(),
+                        'title': 'メールのやり取り',
+                        'description': email.content[:100] + ('...' if len(email.content) > 100 else ''),
+                        'is_from_lead': email.sender == lead.email,
+                        'icon': 'fa-envelope',
+                        'metadata': {
+                            'sender': email.sender,
+                            'subject': email.subject
+                        }
+                    })
+        except Exception as e:
+            current_app.logger.error(f"メールデータの取得エラー: {str(e)}")
             
-        # ステータス変更イベントの追加（もし記録があれば）
-        if lead.status_changes:
-            for change in lead.status_changes:
-                timeline_events.append({
-                    'type': 'status_change',
-                    'date': change.timestamp.isoformat(),
-                    'title': 'ステータス変更',
-                    'description': f'{change.old_status} → {change.new_status}',
-                    'icon': 'fa-exchange-alt'
-                })
+        try:
+            # ステータス変更イベントの追加
+            if hasattr(lead, 'status_changes') and lead.status_changes:
+                for change in lead.status_changes:
+                    timeline_events.append({
+                        'type': 'status_change',
+                        'date': change.timestamp.strftime('%Y-%m-%d %H:%M:%S'),
+                        'timestamp': change.timestamp.timestamp(),
+                        'title': 'ステータス変更',
+                        'description': f'{change.old_status} → {change.new_status}',
+                        'icon': 'fa-exchange-alt',
+                        'metadata': {
+                            'old_status': change.old_status,
+                            'new_status': change.new_status
+                        }
+                    })
+        except Exception as e:
+            current_app.logger.error(f"ステータス変更データの取得エラー: {str(e)}")
                 
-        # スコア更新イベントの追加（もし記録があれば）
-        if lead.score_history:
-            for score_update in lead.score_history:
-                timeline_events.append({
-                    'type': 'score_update',
-                    'date': score_update.timestamp.isoformat(),
-                    'title': 'スコア更新',
-                    'description': f'新しいスコア: {score_update.new_score}',
-                    'icon': 'fa-chart-line'
-                })
+        try:
+            # スコア更新イベントの追加
+            if hasattr(lead, 'score_history') and lead.score_history:
+                for score_update in lead.score_history:
+                    timeline_events.append({
+                        'type': 'score_update',
+                        'date': score_update.timestamp.strftime('%Y-%m-%d %H:%M:%S'),
+                        'timestamp': score_update.timestamp.timestamp(),
+                        'title': 'スコア更新',
+                        'description': f'新しいスコア: {score_update.new_score}',
+                        'icon': 'fa-chart-line',
+                        'metadata': {
+                            'old_score': score_update.old_score if hasattr(score_update, 'old_score') else None,
+                            'new_score': score_update.new_score
+                        }
+                    })
+        except Exception as e:
+            current_app.logger.error(f"スコア履歴データの取得エラー: {str(e)}")
 
-        # 行動パターン分析イベントの追加
-        if lead.behavior_patterns:
-            patterns = lead.behavior_patterns
-            for pattern in patterns:
-                timeline_events.append({
-                    'type': 'behavior_analysis',
-                    'date': pattern.get('timestamp'),
-                    'title': '行動パターン分析',
-                    'description': pattern.get('summary', '行動パターンの更新'),
-                    'icon': 'fa-brain'
-                })
+        try:
+            # 行動パターン分析イベントの追加
+            if lead.behavior_patterns:
+                for pattern in lead.behavior_patterns:
+                    if isinstance(pattern, dict) and pattern.get('timestamp'):
+                        try:
+                            pattern_date = datetime.fromisoformat(pattern['timestamp'].replace('Z', '+00:00'))
+                            timeline_events.append({
+                                'type': 'behavior_analysis',
+                                'date': pattern_date.strftime('%Y-%m-%d %H:%M:%S'),
+                                'timestamp': pattern_date.timestamp(),
+                                'title': '行動パターン分析',
+                                'description': pattern.get('summary', '行動パターンの更新'),
+                                'icon': 'fa-brain',
+                                'metadata': {
+                                    'analysis_type': pattern.get('type'),
+                                    'confidence': pattern.get('confidence')
+                                }
+                            })
+                        except ValueError as e:
+                            current_app.logger.error(f"日付パース時エラー: {str(e)}")
+        except Exception as e:
+            current_app.logger.error(f"行動パターンデータの取得エラー: {str(e)}")
 
-        # 日付でソート
-        timeline_events.sort(key=lambda x: x['date'], reverse=True)
+        # 日付でソート（timestampを使用）
+        timeline_events.sort(key=lambda x: x.get('timestamp', 0), reverse=True)
 
         return jsonify({
             'success': True,
-            'timeline': timeline_events
+            'timeline': timeline_events,
+            'lead': {
+                'id': lead.id,
+                'name': lead.name,
+                'email': lead.email,
+                'status': lead.status
+            }
         })
 
     except Exception as e:
         current_app.logger.error(f"Timeline generation error: {str(e)}\n{traceback.format_exc()}")
-        return jsonify({'error': 'タイムラインの生成中にエラーが発生しました'}), 500
+        return jsonify({
+            'success': False,
+            'error': 'タイムラインの生成中にエラーが発生しました',
+            'code': 'TIMELINE_GENERATION_ERROR'
+        }), 500
