@@ -472,33 +472,43 @@ async function loadTimeline() {
     }
 
     try {
-        const leadId = window.location.pathname.split('/').pop();
+        const pathParts = window.location.pathname.split('/');
+        const leadId = pathParts[pathParts.indexOf('leads') + 1];
+        
+        if (!leadId) {
+            throw new Error('リードIDが見つかりません');
+        }
+
         showLoading(true);
 
         const response = await fetch(`/history/api/leads/${leadId}/timeline`);
-        const data = await response.json();
-
         if (!response.ok) {
-            throw new Error(data.error || 'タイムラインの読み込みに失敗しました');
+            const data = await response.json();
+            throw new Error(data.error || `サーバーエラー: ${response.status}`);
         }
 
+        const data = await response.json();
         if (data.success) {
             showLoading(false);
-            displayTimelineEvents(data.timeline);
+            if (Array.isArray(data.timeline)) {
+                displayTimelineEvents(data.timeline);
+            } else {
+                console.error('Invalid timeline data format:', data);
+                throw new Error('タイムラインデータの形式が不正です');
+            }
             
-            // リードの情報を表示
             if (data.lead) {
                 updateLeadInfo(data.lead);
             }
         } else {
-            throw new Error(data.error);
+            throw new Error(data.error || 'データの取得に失敗しました');
         }
     } catch (error) {
         console.error('Timeline error:', error);
         showLoading(false);
         showError(timelineContainer, 
             error.message || 'タイムラインの読み込み中にエラーが発生しました',
-            error.code);
+            error.code || 'UNKNOWN_ERROR');
     }
 }
 

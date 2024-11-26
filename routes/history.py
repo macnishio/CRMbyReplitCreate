@@ -224,22 +224,30 @@ def get_lead_timeline(lead_id):
         
         try:
             # メールイベントの取得と追加
-            emails = Email.query.filter_by(lead_id=lead_id).order_by(Email.received_date.desc()).all()
-            for email in emails:
-                if email.received_date:
-                    timeline_events.append({
-                        'type': 'email',
-                        'date': email.received_date.strftime('%Y-%m-%d %H:%M:%S'),
-                        'timestamp': email.received_date.timestamp(),
-                        'title': 'メールのやり取り',
-                        'description': email.content[:100] + ('...' if len(email.content) > 100 else ''),
-                        'is_from_lead': email.sender == lead.email,
-                        'icon': 'fa-envelope',
-                        'metadata': {
-                            'sender': email.sender,
-                            'subject': email.subject
-                        }
-                    })
+            try:
+                emails = Email.query.filter_by(lead_id=lead_id).order_by(Email.received_date.desc()).all()
+                for email in emails:
+                    if email.received_date:
+                        timeline_events.append({
+                            'type': 'email',
+                            'date': email.received_date.strftime('%Y-%m-%d %H:%M:%S'),
+                            'timestamp': email.received_date.timestamp(),
+                            'title': 'メールのやり取り',
+                            'description': email.content[:100] + ('...' if len(email.content) > 100 else ''),
+                            'is_from_lead': email.sender == lead.email,
+                            'icon': 'fa-envelope',
+                            'metadata': {
+                                'sender': email.sender,
+                                'subject': email.subject if hasattr(email, 'subject') else None
+                            }
+                        })
+            except Exception as e:
+                current_app.logger.error(f"メールデータの取得中にエラーが発生: {str(e)}\n{traceback.format_exc()}")
+                return jsonify({
+                    'success': False,
+                    'error': 'メールデータの取得中にエラーが発生しました',
+                    'code': 'EMAIL_FETCH_ERROR'
+                }), 500
         except Exception as e:
             current_app.logger.error(f"メールデータの取得エラー: {str(e)}")
             
