@@ -202,6 +202,86 @@
     text-align: center;
     color: var(--color-secondary);
 }
+/* Timeline Styles */
+.timeline-section {
+    margin-top: var(--spacing-xl);
+    padding: var(--spacing-lg);
+    background: var(--bg-card);
+    border-radius: var(--border-radius);
+    box-shadow: var(--shadow-sm);
+}
+
+.timeline-loading {
+    text-align: center;
+    padding: var(--spacing-lg);
+    color: var(--color-secondary);
+}
+
+.timeline-event {
+    display: flex;
+    align-items: flex-start;
+    padding: var(--spacing-md);
+    margin-bottom: var(--spacing-md);
+    border-left: 3px solid var(--color-primary);
+    background: rgba(0, 168, 132, 0.05);
+    border-radius: 0 var(--border-radius-sm) var(--border-radius-sm) 0;
+    transition: all 0.3s ease;
+}
+
+.timeline-event:hover {
+    background: rgba(0, 168, 132, 0.1);
+    transform: translateX(4px);
+}
+
+.timeline-event .event-icon {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    background: var(--color-primary);
+    color: white;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-right: var(--spacing-md);
+    flex-shrink: 0;
+}
+
+.timeline-event .event-content {
+    flex: 1;
+}
+
+.timeline-event .event-title {
+    font-weight: 500;
+    margin-bottom: var(--spacing-xs);
+    color: var(--color-primary);
+}
+
+.timeline-event .event-description {
+    color: var(--color-secondary);
+    font-size: var(--font-size-sm);
+}
+
+.timeline-event .event-date {
+    font-size: var(--font-size-sm);
+    color: var(--color-secondary);
+    margin-top: var(--spacing-xs);
+}
+
+.timeline-event.email {
+    border-left-color: var(--color-info);
+}
+
+.timeline-event.status_change {
+    border-left-color: var(--color-warning);
+}
+
+.timeline-event.score_update {
+    border-left-color: var(--color-success);
+}
+
+.timeline-event.behavior_analysis {
+    border-left-color: #9c27b0;
+}
 </style>
 {% endblock %}
 {% block content %}
@@ -218,6 +298,21 @@
                     <!-- 検索結果がここに動的に追加されます -->
                 </div>
             </div>
+        </div>
+    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Timeline Section -->
+    <div class="timeline-section">
+        <h2>タイムライン</h2>
+        <div id="timeline-container">
+            <div class="timeline-loading">
+                <i class="fas fa-spinner fa-spin"></i> 読み込み中...
+            </div>
+            <div id="timeline-events"></div>
         </div>
     </div>
 

@@ -427,3 +427,54 @@ runAnalysisBtn.addEventListener('click', async () => {
         runAnalysisBtn.disabled = false;
     }
 });
+// Timeline functionality
+function loadTimeline() {
+    const leadId = window.location.pathname.split('/').pop();
+    const timelineContainer = document.getElementById('timeline-events');
+    const loadingElement = document.querySelector('.timeline-loading');
+
+    if (!timelineContainer || !loadingElement) return;
+
+    fetch(`/history/api/leads/${leadId}/timeline`)
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                loadingElement.style.display = 'none';
+                displayTimelineEvents(data.timeline);
+            } else {
+                throw new Error(data.error || 'タイムラインの読み込みに失敗しました');
+            }
+        })
+        .catch(error => {
+            console.error('Timeline error:', error);
+            loadingElement.innerHTML = `<div class="error-message">
+                <i class="fas fa-exclamation-circle"></i>
+                タイムラインの読み込み中にエラーが発生しました
+            </div>`;
+        });
+}
+
+function displayTimelineEvents(events) {
+    const timelineContainer = document.getElementById('timeline-events');
+    if (!events || !timelineContainer) return;
+
+    const eventsHtml = events.map(event => `
+        <div class="timeline-event ${event.type}">
+            <div class="event-icon">
+                <i class="fas ${event.icon}"></i>
+            </div>
+            <div class="event-content">
+                <div class="event-title">${event.title}</div>
+                <div class="event-description">${event.description}</div>
+                <div class="event-date">${new Date(event.date).toLocaleString('ja-JP')}</div>
+            </div>
+        </div>
+    `).join('');
+
+    timelineContainer.innerHTML = eventsHtml;
+}
+
+// Call loadTimeline when the page loads
+document.addEventListener('DOMContentLoaded', function() {
+    loadTimeline();
+});

@@ -183,3 +183,75 @@ def analyze_lead_behavior(lead_id):
     except Exception as e:
         current_app.logger.error(f"Lead behavior analysis error: {str(e)}\n{traceback.format_exc()}")
         return jsonify({'error': '分析中にエラーが発生しました'}), 500
+
+@bp.route('/api/leads/<int:lead_id>/timeline')
+@login_required
+def get_lead_timeline(lead_id):
+    """リードに関する重要なイベントのタイムラインを取得"""
+    try:
+        # リードの存在確認
+        lead = Lead.query.filter_by(id=lead_id, user_id=current_user.id).first()
+        if not lead:
+            return jsonify({'error': 'リードが見つかりません'}), 404
+
+        # メールとその他の重要なイベントを時系列で取得
+        emails = Email.query.filter_by(lead_id=lead_id).order_by(Email.received_date.desc()).all()
+        
+        timeline_events = []
+        
+        # メールイベントの追加
+        for email in emails:
+            timeline_events.append({
+                'type': 'email',
+                'date': email.received_date.isoformat() if email.received_date else None,
+                'title': 'メールのやり取り',
+                'description': email.content[:100] + '...' if len(email.content) > 100 else email.content,
+                'is_from_lead': email.sender == lead.email,
+                'icon': 'fa-envelope'
+            })
+            
+        # ステータス変更イベントの追加（もし記録があれば）
+        if lead.status_changes:
+            for change in lead.status_changes:
+                timeline_events.append({
+                    'type': 'status_change',
+                    'date': change.timestamp.isoformat(),
+                    'title': 'ステータス変更',
+                    'description': f'{change.old_status} → {change.new_status}',
+                    'icon': 'fa-exchange-alt'
+                })
+                
+        # スコア更新イベントの追加（もし記録があれば）
+        if lead.score_history:
+            for score_update in lead.score_history:
+                timeline_events.append({
+                    'type': 'score_update',
+                    'date': score_update.timestamp.isoformat(),
+                    'title': 'スコア更新',
+                    'description': f'新しいスコア: {score_update.new_score}',
+                    'icon': 'fa-chart-line'
+                })
+
+        # 行動パターン分析イベントの追加
+        if lead.behavior_patterns:
+            patterns = lead.behavior_patterns
+            for pattern in patterns:
+                timeline_events.append({
+                    'type': 'behavior_analysis',
+                    'date': pattern.get('timestamp'),
+                    'title': '行動パターン分析',
+                    'description': pattern.get('summary', '行動パターンの更新'),
+                    'icon': 'fa-brain'
+                })
+
+        # 日付でソート
+        timeline_events.sort(key=lambda x: x['date'], reverse=True)
+
+        return jsonify({
+            'success': True,
+            'timeline': timeline_events
+        })
+
+    except Exception as e:
+        current_app.logger.error(f"Timeline generation error: {str(e)}\n{traceback.format_exc()}")
+        return jsonify({'error': 'タイムラインの生成中にエラーが発生しました'}), 500
