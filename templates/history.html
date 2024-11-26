@@ -7,156 +7,184 @@
 .history-container {
     max-width: 800px;
     margin: 0 auto;
-    padding: 20px;
+    padding: 0;
     background: #f5f5f5;
-    min-height: calc(100vh - 64px);
+    height: calc(100vh - 64px);
+    display: flex;
+    flex-direction: column;
 }
 
 .header {
-    background: white;
-    border-radius: 8px;
-    padding: 20px;
-    margin-bottom: 20px;
+    background: #2c3e50;
+    color: white;
+    padding: 12px 16px;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    display: flex;
+    align-items: center;
+    gap: 12px;
     box-shadow: 0 2px 4px rgba(0,0,0,0.1);
 }
 
+
 .header-back {
-    color: #333;
+    font-size: 24px;
+    cursor: pointer;
+    color: black;
     text-decoration: none;
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    margin-bottom: 12px;
 }
 
 .header-info {
-    margin-bottom: 16px;
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
 }
 
 .header-info h2 {
+    color: black;  /* !importantを追加して確実に適用 */
     margin: 0;
-    color: #333;
-    font-size: 1.5rem;
+    font-size: 1.2rem;
+    font-weight: 600;
+    text-shadow: 1px 1px 2px rgba(0,0,0,0.2);
 }
 
 .header-info p {
+    color: black;  /* !importantを追加して確実に適用 */
     margin: 4px 0 0;
-    color: #666;
+    font-size: 0.9rem;
+    opacity: 0.9;
+    max-width: 100%;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
 }
 
 .header-actions {
+    margin-top: 12px;
     display: flex;
     gap: 10px;
 }
 
-/* 検索セクション */
-.search-container {
-    background: white;
-    border-radius: 8px;
-    padding: 16px;
-    margin-bottom: 20px;
-    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-}
-
-.search-box {
-    display: flex;
-    gap: 8px;
-    margin-bottom: 12px;
-}
-
-.search-box input {
-    flex: 1;
-    padding: 8px 12px;
-    border: 1px solid #ddd;
-    border-radius: 4px;
-}
-
-.search-box button {
-    padding: 8px 16px;
-    background: #007bff;
-    color: white;
-    border: none;
-    border-radius: 4px;
-    cursor: pointer;
-}
-
-.search-options {
-    display: flex;
-    gap: 8px;
-}
-
-.search-options select,
-.search-options input {
-    padding: 8px;
-    border: 1px solid #ddd;
-    border-radius: 4px;
-}
-
-/* AI分析セクション */
-.ai-analysis-section {
-    background: white;
-    border-radius: 8px;
-    padding: 20px;
-    margin-bottom: 20px;
-    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-}
-
-.ai-analysis-header {
-    display: flex;
-    justify-content: space-between;
+.header-actions .btn {
+    display: inline-flex;
     align-items: center;
-    margin-bottom: 16px;
-}
-
-.ai-analysis-content {
-    background: #f8f9fa;
+    gap: 6px;
+    padding: 8px 16px;
+    font-size: 0.9rem;
     border-radius: 6px;
-    padding: 16px;
+    transition: all 0.3s ease;
 }
 
-.analysis-placeholder {
-    text-align: center;
-    color: #666;
+.header-actions .btn i {
+    font-size: 1rem;
 }
 
-/* メッセージセクション */
+@media (max-width: 768px) {
+    .header-actions {
+        margin-top: 8px;
+    }
+    
+    .header-actions .btn {
+        padding: 6px 12px;
+        font-size: 0.85rem;
+    }
+}
+
 .messages-container {
-    background: white;
-    border-radius: 8px;
-    padding: 20px;
-    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-    margin-bottom: 20px;
+    flex-grow: 1;
+    overflow-y: auto;
+    padding: 16px;
+    display: flex;
+    flex-direction: column-reverse;
+    background: url("data:image/svg+xml,%3Csvg width='64' height='64' viewBox='0 0 64 64' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M8 16c4.418 0 8-3.582 8-8s-3.582-8-8-8-8 3.582-8 8 3.582 8 8 8zm0-2c3.314 0 6-2.686 6-6s-2.686-6-6-6-6 2.686-6 6 2.686 6 6 6zm33.414-6l5.95-5.95L45.95.636 40 6.586 34.05.636 32.636 2.05 38.586 8l-5.95 5.95 1.414 1.414L40 9.414l5.95 5.95 1.414-1.414L41.414 8zM40 48c4.418 0 8-3.582 8-8s-3.582-8-8-8-8 3.582-8 8 3.582 8 8 8zm0-2c3.314 0 6-2.686 6-6s-2.686-6-6-6-6 2.686-6 6 2.686 6 6 6z' fill='%23e5e5e5' fill-opacity='0.4' fill-rule='evenodd'/%3E%3C/svg%3E");
 }
 
 .message {
-    padding: 16px;
-    border-bottom: 1px solid #eee;
+    max-width: 70%;
+    margin: 8px 0;
+    position: relative;
     animation: fadeIn 0.3s ease-out;
 }
 
-.message:last-child {
-    border-bottom: none;
+.message-bubble {
+    padding: 12px 16px;
+    border-radius: 12px;
+    position: relative;
+    box-shadow: 0 1px 2px rgba(0,0,0,0.1);
+    word-break: break-word;
 }
 
 .message.from-lead {
-    background-color: #f8f9fa;
+    margin-left: auto;
 }
 
-.message-header {
+.message.from-lead .message-bubble {
+    background: #dcf8c6;
+    border-top-right-radius: 4px;
+}
+
+.message.from-system {
+    margin-right: auto;
+}
+
+.message.from-system .message-bubble {
+    background: white;
+    border-top-left-radius: 4px;
+}
+
+.message-time {
+    font-size: 0.75rem;
+    color: #667781;
+    margin-top: 4px;
+    text-align: right;
+}
+
+.message-metadata {
     display: flex;
-    justify-content: space-between;
-    margin-bottom: 8px;
+    align-items: center;
+    justify-content: flex-end;
+    gap: 4px;
+    margin-top: 2px;
+}
+
+.message-status {
+    color: #667781;
+    font-size: 0.7rem;
+}
+
+.load-more {
+    text-align: center;
+    padding: 12px;
+    background: rgba(255,255,255,0.9);
+    cursor: pointer;
+    margin: 8px auto;
+    border-radius: 24px;
     font-size: 0.9rem;
-    color: #666;
+    color: #00a884;
+    width: fit-content;
+    transition: background-color 0.2s;
+    border: none;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.1);
 }
 
-.message-content {
-    white-space: pre-wrap;
+.load-more:hover {
+    background: white;
 }
 
-.message-content .subject {
-    font-weight: bold;
-    margin-bottom: 8px;
+.date-separator {
+    text-align: center;
+    margin: 16px 0;
+    position: relative;
+}
+
+.date-separator span {
+    background: rgba(255,255,255,0.9);
+    padding: 6px 12px;
+    border-radius: 8px;
+    font-size: 0.8rem;
+    color: #667781;
 }
 
 .loading {
@@ -165,78 +193,65 @@
     color: #666;
 }
 
-.load-more {
-    display: block;
-    width: 100%;
-    padding: 12px;
-    background: #f8f9fa;
-    border: none;
+.loading i {
+    margin-right: 8px;
+}
+
+.error-message {
+    text-align: center;
+    padding: 20px;
+    color: #dc3545;
+    background: #f8d7da;
     border-radius: 4px;
-    cursor: pointer;
-    color: #666;
-    margin-top: 16px;
+    margin: 10px;
 }
 
-.load-more:hover {
-    background: #e9ecef;
-}
-
-/* ダークモードサポート */
 @media (prefers-color-scheme: dark) {
-    .history-container {
-        background: #1a1a1a;
-    }
-
-    .header,
-    .search-container,
-    .ai-analysis-section,
     .messages-container {
         background: #2d2d2d;
+        color: #e0e0e0;
     }
-
-    .header-back,
-    .header-info h2 {
-        color: #fff;
-    }
-
-    .header-info p,
-    .message-header {
-        color: #aaa;
-    }
-
-    .search-box input,
-    .search-options select,
-    .search-options input {
-        background: #1a1a1a;
-        border-color: #444;
-        color: #fff;
-    }
-
-    .ai-analysis-content {
-        background: #1a1a1a;
-    }
-
-    .message.from-lead {
-        background-color: #363636;
-    }
-
     .message {
         border-bottom-color: #444;
     }
-
-    .load-more {
-        background: #363636;
+    .message-subject {
+        color: #e0e0e0;
+    }
+    .action-button {
+        background: rgba(45,45,45,0.9);
         color: #aaa;
     }
-
+    .action-button:hover {
+        background: #3d3d3d;
+        color: #00a884;
+    }
+    .load-more {
+        background: rgba(45,45,45,0.9);
+        color: #00a884;
+    }
     .load-more:hover {
-        background: #404040;
+        background: #3d3d3d;
+    }
+    .date-separator span {
+        background: rgba(45,45,45,0.9);
+        color: #aaa;
     }
 }
 
-@keyframes fadeIn {
-    from { opacity: 0; transform: translateY(10px); }
-    to { opacity: 1; transform: translateY(0); }
+@media (max-width: 768px) {
+    .history-container {
+        height: 100vh;
+        max-width: 100%;
+    }
+    .header {
+        padding: 8px 12px;
+    }
+    .message {
+        max-width: 85%;
+    }
+    .messages-container {
+        padding: 12px;
+    }
 }
 </style>
 {% endblock %}
@@ -246,7 +261,6 @@
     <div class="header">
         <a href="{{ url_for('leads.lead_detail', id=lead.id) }}" class="header-back">
             <i class="fas fa-arrow-left"></i>
-            <span>リード詳細に戻る</span>
         </a>
         <div class="header-info">
             <h2>{{ lead.name }}</h2>
@@ -259,40 +273,22 @@
                 </a>
             </div>
         </div>
-    </div>
-
-    <div class="ai-analysis-section">
-        <div class="ai-analysis-header">
-            <h4>AI分析</h4>
-            <button id="runAnalysisBtn" class="btn btn-primary">
-                <i class="fas fa-brain"></i> 行動パターン分析を実行
-            </button>
-        </div>
-        <div id="analysisContent" class="ai-analysis-content">
-            <div id="analysisPlaceholder" class="analysis-placeholder">
-                AIによる行動パターン分析を実行してください。
+        <div class="search-container">
+            <div class="search-box">
+                <input type="search" id="messageSearch" placeholder="メッセージを検索...">
+                <button id="searchButton">
+                    <i class="fas fa-search"></i>
+                </button>
             </div>
-            <div id="analysisResult" style="display: none;">
-                <!-- Analysis results will be inserted here -->
+            <div class="search-options">
+                <select id="searchType">
+                    <option value="content">内容</option>
+                    <option value="date">日付</option>
+                    <option value="sender">送信者</option>
+                </select>
+                <input type="date" id="dateFrom" class="date-input" style="display: none;">
+                <input type="date" id="dateTo" class="date-input" style="display: none;">
             </div>
-        </div>
-    </div>
-
-    <div class="search-container">
-        <div class="search-box">
-            <input type="search" id="messageSearch" placeholder="メッセージを検索...">
-            <button id="searchButton">
-                <i class="fas fa-search"></i>
-            </button>
-        </div>
-        <div class="search-options">
-            <select id="searchType">
-                <option value="content">内容</option>
-                <option value="date">日付</option>
-                <option value="sender">送信者</option>
-            </select>
-            <input type="date" id="dateFrom" class="date-input" style="display: none;">
-            <input type="date" id="dateTo" class="date-input" style="display: none;">
         </div>
     </div>
 
