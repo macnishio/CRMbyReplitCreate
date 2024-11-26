@@ -53,14 +53,34 @@ def get_history(lead_id):
     try:
         page = request.args.get('page', 1, type=int)
         per_page = 20
+        search_query = request.args.get('query', '')
+        search_type = request.args.get('type', 'content')
+        date_from = request.args.get('date_from')
+        date_to = request.args.get('date_to')
 
         lead = Lead.query.filter_by(id=lead_id, user_id=current_user.id).first()
         if not lead:
             return jsonify({'error': '指定されたリードは存在しないか、アクセス権限がありません'}), 404
 
-        emails = Email.query.filter_by(
-            lead_id=lead_id
-        ).order_by(
+        query = Email.query.filter_by(lead_id=lead_id)
+
+        # 検索条件の適用
+        if search_query:
+            if search_type == 'content':
+                query = query.filter(Email.content.ilike(f'%{search_query}%'))
+            elif search_type == 'sender':
+                query = query.filter(
+                    (Email.sender_name.ilike(f'%{search_query}%')) |
+                    (Email.sender.ilike(f'%{search_query}%'))
+                )
+
+        # 日付範囲検索
+        if date_from:
+            query = query.filter(Email.received_date >= date_from)
+        if date_to:
+            query = query.filter(Email.received_date <= date_to)
+
+        emails = query.order_by(
             desc(Email.received_date)
         ).paginate(
             page=page, 

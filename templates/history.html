@@ -237,6 +237,23 @@
                 <p>{{ lead.email }}</p>
             {% endif %}
         </div>
+        <div class="search-container">
+            <div class="search-box">
+                <input type="search" id="messageSearch" placeholder="メッセージを検索...">
+                <button id="searchButton">
+                    <i class="fas fa-search"></i>
+                </button>
+            </div>
+            <div class="search-options">
+                <select id="searchType">
+                    <option value="content">内容</option>
+                    <option value="date">日付</option>
+                    <option value="sender">送信者</option>
+                </select>
+                <input type="date" id="dateFrom" class="date-input" style="display: none;">
+                <input type="date" id="dateTo" class="date-input" style="display: none;">
+            </div>
+        </div>
     </div>
 
     <div class="messages-container" id="messages">

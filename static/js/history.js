@@ -1,7 +1,13 @@
 const historyState = {
     currentPage: 1,
     hasMore: false,
-    isLoading: false
+    isLoading: false,
+    searchParams: {
+        query: '',
+        type: 'content',
+        dateFrom: '',
+        dateTo: ''
+    }
 };
 
 async function loadMessages(leadId, page = 1) {
@@ -14,8 +20,20 @@ async function loadMessages(leadId, page = 1) {
         loadingIndicator.innerHTML = '<i class="fas fa-spinner fa-spin"></i> メッセージを読み込み中...';
         document.getElementById('messages').appendChild(loadingIndicator);
 
-        // URLを更新
-        const response = await fetch(`/history/api/leads/${leadId}/messages?page=${page}`);
+        // 検索パラメータを含むURLを構築
+        let url = `/history/api/leads/${leadId}/messages?page=${page}`;
+        if (historyState.searchParams.query) {
+            url += `&query=${encodeURIComponent(historyState.searchParams.query)}`;
+            url += `&type=${encodeURIComponent(historyState.searchParams.type)}`;
+            if (historyState.searchParams.type === 'date' && 
+                historyState.searchParams.dateFrom && 
+                historyState.searchParams.dateTo) {
+                url += `&date_from=${encodeURIComponent(historyState.searchParams.dateFrom)}`;
+                url += `&date_to=${encodeURIComponent(historyState.searchParams.dateTo)}`;
+            }
+        }
+
+        const response = await fetch(url);
         if (!response.ok) {
             throw new Error(`HTTP error! status: ${response.status}`);
         }
@@ -115,9 +133,46 @@ function showError(message) {
     setTimeout(() => errorElement.remove(), 3000);
 }
 
+function setupSearch(leadId) {
+    const searchInput = document.getElementById('messageSearch');
+    const searchType = document.getElementById('searchType');
+    const dateFrom = document.getElementById('dateFrom');
+    const dateTo = document.getElementById('dateTo');
+    const searchButton = document.getElementById('searchButton');
+
+    // 検索タイプが変更された時の処理
+    searchType.addEventListener('change', () => {
+        const isDateSearch = searchType.value === 'date';
+        dateFrom.style.display = isDateSearch ? 'block' : 'none';
+        dateTo.style.display = isDateSearch ? 'block' : 'none';
+        searchInput.style.display = isDateSearch ? 'none' : 'block';
+    });
+
+    // 検索ボタンクリック時の処理
+    searchButton.addEventListener('click', () => {
+        historyState.searchParams = {
+            query: searchInput.value,
+            type: searchType.value,
+            dateFrom: dateFrom.value,
+            dateTo: dateTo.value
+        };
+        historyState.currentPage = 1;
+        loadMessages(leadId, 1);
+    });
+
+    // Enterキーでの検索実行
+    searchInput.addEventListener('keypress', (e) => {
+        if (e.key === 'Enter') {
+            searchButton.click();
+        }
+    });
+}
+
 function initializeHistory(leadId) {
     const loadMoreButton = document.getElementById('loadMore');
     const messagesContainer = document.getElementById('messages');
+
+    setupSearch(leadId);
 
     if (loadMoreButton) {
         loadMoreButton.addEventListener('click', () => {
