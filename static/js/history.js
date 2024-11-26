@@ -204,3 +204,121 @@ function initializeHistory(leadId) {
         localStorage.removeItem(`scroll_position_${leadId}`);
     });
 }
+
+// AI Analysis Functions
+function runBehaviorAnalysis(leadId) {
+    const analysisBtn = document.getElementById('runAnalysisBtn');
+    const analysisPlaceholder = document.getElementById('analysisPlaceholder');
+    const analysisResult = document.getElementById('analysisResult');
+
+    analysisBtn.disabled = true;
+    analysisBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> 分析中...';
+    analysisPlaceholder.style.display = 'block';
+    analysisResult.style.display = 'none';
+
+    fetch(`/history/leads/${leadId}/analyze`, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        }
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.error) {
+            throw new Error(data.error);
+        }
+
+        // Analysis results processing
+        analysisPlaceholder.style.display = 'none';
+        analysisResult.style.display = 'block';
+        
+        // Create analysis display
+        analysisResult.innerHTML = `
+            <div class="analysis-section">
+                <h5>コミュニケーションパターン</h5>
+                <div class="analysis-item">
+                    <span class="label">頻度:</span> ${data.communication_pattern.frequency}
+                </div>
+                <div class="analysis-item">
+                    <span class="label">平均応答時間:</span> ${data.communication_pattern.response_time}
+                </div>
+                <div class="analysis-item">
+                    <span class="label">好みの時間帯:</span> ${data.communication_pattern.preferred_time}
+                </div>
+                <div class="analysis-item">
+                    <span class="label">コミュニケーションスタイル:</span> ${data.communication_pattern.communication_style}
+                </div>
+            </div>
+
+            <div class="analysis-section">
+                <h5>エンゲージメントレベル</h5>
+                <div class="analysis-item">
+                    <span class="label">スコア:</span> ${data.engagement_level.score}/10
+                </div>
+                <div class="analysis-item">
+                    <span class="label">トレンド:</span> ${data.engagement_level.trend}
+                </div>
+                <div class="analysis-item">
+                    <span class="label">主要因:</span>
+                    <ul>${data.engagement_level.key_factors.map(factor => `<li>${factor}</li>`).join('')}</ul>
+                </div>
+            </div>
+
+            <div class="analysis-section">
+                <h5>興味・関心</h5>
+                <div class="analysis-item">
+                    <span class="label">主要:</span>
+                    <ul>${data.interests.primary.map(interest => `<li>${interest}</li>`).join('')}</ul>
+                </div>
+                <div class="analysis-item">
+                    <span class="label">副次的:</span>
+                    <ul>${data.interests.secondary.map(interest => `<li>${interest}</li>`).join('')}</ul>
+                </div>
+            </div>
+
+            <div class="analysis-section">
+                <h5>課題点</h5>
+                <div class="analysis-item">
+                    <span class="label">特定された課題:</span>
+                    <ul>${data.pain_points.identified.map(point => `<li>${point}</li>`).join('')}</ul>
+                </div>
+                <div class="analysis-item">
+                    <span class="label">潜在的な課題:</span>
+                    <ul>${data.pain_points.potential.map(point => `<li>${point}</li>`).join('')}</ul>
+                </div>
+            </div>
+
+            <div class="analysis-section">
+                <h5>推奨アクション</h5>
+                <div class="analysis-item">
+                    <span class="label">次のアクション:</span>
+                    <ul>${data.recommendations.next_actions.map(action => `<li>${action}</li>`).join('')}</ul>
+                </div>
+                <div class="analysis-item">
+                    <span class="label">最適なタイミング:</span> ${data.recommendations.timing}
+                </div>
+                <div class="analysis-item">
+                    <span class="label">推奨アプローチ:</span> ${data.recommendations.approach}
+                </div>
+            </div>
+        `;
+    })
+    .catch(error => {
+        analysisPlaceholder.innerHTML = `<div class="error-message"><i class="fas fa-exclamation-circle"></i> ${error.message}</div>`;
+    })
+    .finally(() => {
+        analysisBtn.disabled = false;
+        analysisBtn.innerHTML = '<i class="fas fa-brain"></i> 行動パターン分析を実行';
+    });
+}
+
+// Add event listener for analysis button
+document.addEventListener('DOMContentLoaded', function() {
+    const analysisBtn = document.getElementById('runAnalysisBtn');
+    if (analysisBtn) {
+        analysisBtn.addEventListener('click', () => {
+            const leadId = window.location.pathname.split('/').pop();
+            runBehaviorAnalysis(leadId);
+        });
+    }
+});
