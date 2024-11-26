@@ -1,0 +1,18 @@
+{% extends "base.html" %}
+
+{% block title %}エラーが発生しました{% endblock %}
+
+{% block content %}
+<div class="error-container">
+    <h1>エラーが発生しました</h1>
+    <p>{{ message }}</p>
+    {% if detail %}
+    <div class="error-detail">
+        <pre>{{ detail }}</pre>
+    </div>
+    {% endif %}
+    <a href="{{ url_for('history.list_history') }}" class="btn btn-primary">
+        履歴一覧に戻る
+    </a>
+</div>
+{% endblock %}

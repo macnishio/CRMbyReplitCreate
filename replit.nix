@@ -1,5 +1,6 @@
 {pkgs}: {
   deps = [
+    pkgs.imagemagick_light
     pkgs.yakut
     pkgs.lsof
     pkgs.rustc

@@ -11,8 +11,12 @@ from sqlalchemy.exc import SQLAlchemyError
 from commands import reset_db_command
 from datetime import datetime
 
+
 def create_app(config_name='default'):
-    app = Flask(__name__)
+    app = Flask(__name__, 
+        static_url_path='/static',
+        static_folder='static'
+    )
     app.config.from_object(config[config_name])
     config[config_name].init_app(app)
 
@@ -57,6 +61,7 @@ def create_app(config_name='default'):
     # Register blueprints
     from routes import main, auth, leads, opportunities, accounts, reports
     from routes import tracking, mobile, schedules, tasks, settings, system_management
+    from routes.history import bp as history_bp
 
     blueprints = {
         main.bp: '/',
@@ -70,7 +75,8 @@ def create_app(config_name='default'):
         schedules.bp: '/schedules',
         tasks.tasks_bp: '/tasks',
         settings.bp: '/settings',
-        system_management.bp: '/system'
+        system_management.bp: '/system',
+        history_bp: '/history'  # history_bpをblueprintsディクショナリに追加
     }
 
     for blueprint, url_prefix in blueprints.items():
@@ -78,6 +84,7 @@ def create_app(config_name='default'):
 
     # Set up email scheduler in a non-blocking way
     setup_email_scheduler(app)
+    
 
     # Error handlers
     @app.errorhandler(404)
