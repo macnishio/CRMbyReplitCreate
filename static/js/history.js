@@ -81,6 +81,20 @@ function toggleFilters() {
 // フィルタープリセットの管理
 let savedPresets = [];
 
+async function loadFilterPresets() {
+    try {
+        const response = await fetch('/history/api/filter-presets');
+        if (!response.ok) throw new Error('プリセットの読み込みに失敗しました');
+        
+        const data = await response.json();
+        savedPresets = data.presets || [];
+        updatePresetList();
+    } catch (error) {
+        console.error('Error loading presets:', error);
+        showNotification('プリセットの読み込みに失敗しました', 'error');
+    }
+}
+
 async function saveCurrentFilterAsPreset() {
     const presetName = prompt('プリセット名を入力してください:');
     if (!presetName) return;
@@ -102,12 +116,16 @@ async function saveCurrentFilterAsPreset() {
 
         if (!response.ok) throw new Error('プリセットの保存に失敗しました');
 
-        savedPresets.push(preset);
-        updatePresetList();
-        showNotification('フィルタープリセットを保存しました', 'success');
+        const result = await response.json();
+        if (result.success) {
+            await loadFilterPresets(); // リストを再読み込み
+            showNotification('フィルタープリセットを保存しました', 'success');
+        } else {
+            throw new Error(result.error || 'プリセットの保存に失敗しました');
+        }
     } catch (error) {
         console.error('Error saving preset:', error);
-        showNotification('プリセットの保存に失敗しました', 'error');
+        showNotification(error.message, 'error');
     }
 }
 
@@ -379,11 +397,15 @@ async function loadMessages(leadId, page = 1) {
 }
 
 function setupSearch(leadId) {
+    // プリセットの読み込み
+    loadFilterPresets();
+    
     // イベントリスナーの設定
     const periodFilter = document.getElementById('period-filter');
     const applyFiltersBtn = document.getElementById('applyFilters');
     const resetFiltersBtn = document.getElementById('resetFilters');
     const saveFiltersBtn = document.getElementById('saveFilters');
+    const savePresetBtn = document.getElementById('savePreset');
     const searchInput = document.getElementById('messageSearch');
     const searchButton = document.getElementById('searchButton');
 
