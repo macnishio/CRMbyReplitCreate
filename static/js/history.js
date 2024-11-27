@@ -4,187 +4,13 @@ const historyState = {
     currentPage: 1,
     hasMore: false,
     isLoading: false,
-    filters: {
-        messageTypes: ['email', 'system', 'note'],
-        period: 'all',
+    searchParams: {
+        query: '',
+        type: 'content',
         dateFrom: '',
-        dateTo: '',
-        importance: 'all',
-        query: ''
+        dateTo: ''
     }
 };
-
-// フィルタープリセットの管理
-let savedPresets = [];
-
-async function loadFilterPresets() {
-    try {
-        const response = await fetch('/history/api/filter-presets');
-        if (!response.ok) throw new Error('プリセットの読み込みに失敗しました');
-        
-        const data = await response.json();
-        if (data.success) {
-            savedPresets = data.presets || [];
-            updatePresetList();
-        } else {
-            throw new Error(data.error || 'プリセットの読み込みに失敗しました');
-        }
-    } catch (error) {
-        console.error('Error loading presets:', error);
-        showNotification('プリセットの読み込みに失敗しました', 'error');
-    }
-}
-
-async function saveCurrentFilterAsPreset() {
-    const presetName = prompt('プリセット名を入力してください:');
-    if (!presetName) return;
-
-    const currentFilters = getCurrentFilters();
-    const preset = {
-        name: presetName,
-        filters: currentFilters
-    };
-
-    try {
-        const response = await fetch('/history/api/save-filter-preset', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-            },
-            body: JSON.stringify(preset)
-        });
-
-        const result = await response.json();
-        if (result.success) {
-            await loadFilterPresets();
-            showNotification('フィルタープリセットを保存しました', 'success');
-        } else {
-            throw new Error(result.error || 'プリセットの保存に失敗しました');
-        }
-    } catch (error) {
-        console.error('Error saving preset:', error);
-        showNotification(error.message, 'error');
-    }
-}
-
-async function deletePreset(presetName) {
-    if (!confirm(`プリセット "${presetName}" を削除してもよろしいですか？`)) return;
-
-    try {
-        const response = await fetch('/history/api/delete-filter-preset', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({ name: presetName })
-        });
-
-        const result = await response.json();
-        if (result.success) {
-            await loadFilterPresets();
-            showNotification('プリセットを削除しました', 'success');
-        } else {
-            throw new Error(result.error || 'プリセットの削除に失敗しました');
-        }
-    } catch (error) {
-        console.error('Error deleting preset:', error);
-        showNotification(error.message, 'error');
-    }
-}
-
-function updatePresetList() {
-    const presetContainer = document.getElementById('filter-presets');
-    if (!presetContainer) return;
-
-    presetContainer.innerHTML = '';
-    savedPresets.forEach(preset => {
-        const presetButton = document.createElement('button');
-        presetButton.className = 'preset-button';
-        presetButton.innerHTML = `
-            <span>${preset.name}</span>
-            <button class="delete-preset" onclick="event.stopPropagation(); deletePreset('${preset.name}')">×</button>
-        `;
-        presetButton.onclick = () => applyPreset(preset);
-        presetContainer.appendChild(presetButton);
-    });
-}
-
-function applyPreset(preset) {
-    // フィルターの適用
-    const filters = preset.filters;
-    
-    // チェックボックスを設定
-    document.querySelectorAll('input[name="message_type"]').forEach(cb => {
-        cb.checked = filters.messageTypes.includes(cb.value);
-    });
-    
-    // セレクトボックスを設定
-    document.getElementById('period-filter').value = filters.period;
-    document.getElementById('importance-filter').value = filters.importance;
-    
-    // 日付入力を設定
-    document.getElementById('dateFrom').value = filters.dateFrom;
-    document.getElementById('dateTo').value = filters.dateTo;
-    
-    // 検索ボックスを設定
-    document.getElementById('messageSearch').value = filters.query;
-    
-    // カスタム日付範囲の表示を更新
-    updateCustomDateRange();
-    
-    // フィルターを適用
-    applyFilters();
-}
-
-function updateCustomDateRange() {
-    const periodFilter = document.getElementById('period-filter');
-    const customDateRange = document.getElementById('custom-date-range');
-    customDateRange.style.display = periodFilter.value === 'custom' ? 'block' : 'none';
-}
-
-function getCurrentFilters() {
-    return {
-        messageTypes: getSelectedMessageTypes(),
-        period: document.getElementById('period-filter').value,
-        dateFrom: document.getElementById('dateFrom').value,
-        dateTo: document.getElementById('dateTo').value,
-        importance: document.getElementById('importance-filter').value,
-        query: document.getElementById('messageSearch').value
-    };
-}
-
-function getSelectedMessageTypes() {
-    return Array.from(document.querySelectorAll('input[name="message_type"]:checked'))
-        .map(cb => cb.value);
-}
-
-function applyFilters() {
-    historyState.filters = getCurrentFilters();
-    historyState.currentPage = 1;
-    loadMessages(window.leadId);
-}
-
-function resetFilters() {
-    // チェックボックスをリセット
-    document.querySelectorAll('input[name="message_type"]').forEach(cb => cb.checked = true);
-    
-    // セレクトボックスをリセット
-    document.getElementById('period-filter').value = 'all';
-    document.getElementById('importance-filter').value = 'all';
-    
-    // 日付入力をリセット
-    document.getElementById('dateFrom').value = '';
-    document.getElementById('dateTo').value = '';
-    
-    // 検索ボックスをリセット
-    document.getElementById('messageSearch').value = '';
-    
-    // カスタム日付範囲を非表示
-    document.getElementById('custom-date-range').style.display = 'none';
-    
-    // フィルターを適用
-    applyFilters();
-}
 
 function formatDate(dateStr) {
     const date = new Date(dateStr);
@@ -243,27 +69,6 @@ function showError(container, message) {
     `;
 }
 
-// フィルター関連の関数
-function toggleFilters() {
-    const filterContent = document.getElementById('filter-content');
-    const filterIcon = document.getElementById('filter-toggle-icon');
-    filterContent.classList.toggle('collapsed');
-    filterIcon.textContent = filterContent.classList.contains('collapsed') ? '▼' : '▲';
-}
-
-
-function showNotification(message, type = 'info') {
-    const notification = document.createElement('div');
-    notification.className = `notification ${type}`;
-    notification.textContent = message;
-    
-    document.body.appendChild(notification);
-    
-    setTimeout(() => {
-        notification.remove();
-    }, 3000);
-}
-
 async function loadMessages(leadId, page = 1) {
     if (historyState.isLoading) return;
 
@@ -274,33 +79,19 @@ async function loadMessages(leadId, page = 1) {
         loadingIndicator.innerHTML = '<i class="fas fa-spinner fa-spin"></i> メッセージを読み込み中...';
         document.getElementById('messages').appendChild(loadingIndicator);
 
-        // フィルターパラメータを含むURLを構築
+        // 検索パラメータを含むURLを構築
         let url = `/history/api/leads/${leadId}/messages?page=${page}`;
-        const filters = historyState.filters;
-        
-        // メッセージタイプ
-        if (filters.messageTypes && filters.messageTypes.length > 0) {
-            url += `&message_types=${filters.messageTypes.join(',')}`;
-        }
-        
-        // 期間フィルター
-        if (filters.period !== 'all') {
-            if (filters.period === 'custom' && filters.dateFrom && filters.dateTo) {
-                url += `&date_from=${encodeURIComponent(filters.dateFrom)}`;
-                url += `&date_to=${encodeURIComponent(filters.dateTo)}`;
-            } else {
-                url += `&period=${filters.period}`;
+        if (historyState.searchParams.query) {
+            url += `&query=${encodeURIComponent(historyState.searchParams.query)}`;
+            url += `&type=${encodeURIComponent(historyState.searchParams.type)}`;
+            if (
+                historyState.searchParams.type === 'date' &&
+                historyState.searchParams.dateFrom &&
+                historyState.searchParams.dateTo
+            ) {
+                url += `&date_from=${encodeURIComponent(historyState.searchParams.dateFrom)}`;
+                url += `&date_to=${encodeURIComponent(historyState.searchParams.dateTo)}`;
             }
-        }
-        
-        // 重要度フィルター
-        if (filters.importance !== 'all') {
-            url += `&importance=${filters.importance}`;
-        }
-        
-        // 検索クエリ
-        if (filters.query) {
-            url += `&query=${encodeURIComponent(filters.query)}`;
         }
 
         const response = await fetch(url);
@@ -344,37 +135,33 @@ async function loadMessages(leadId, page = 1) {
 }
 
 function setupSearch(leadId) {
-    // プリセットの読み込み
-    loadFilterPresets();
-    
-    // イベントリスナーの設定
-    const periodFilter = document.getElementById('period-filter');
-    const applyFiltersBtn = document.getElementById('applyFilters');
-    const resetFiltersBtn = document.getElementById('resetFilters');
-    const saveFiltersBtn = document.getElementById('saveFilters');
-    const savePresetBtn = document.getElementById('savePreset');
     const searchInput = document.getElementById('messageSearch');
+    const searchType = document.getElementById('searchType');
+    const dateFrom = document.getElementById('dateFrom');
+    const dateTo = document.getElementById('dateTo');
     const searchButton = document.getElementById('searchButton');
 
-    // 期間フィルターの変更時
-    periodFilter.addEventListener('change', updateCustomDateRange);
+    searchType.addEventListener('change', () => {
+        const isDateSearch = searchType.value === 'date';
+        dateFrom.style.display = isDateSearch ? 'block' : 'none';
+        dateTo.style.display = isDateSearch ? 'block' : 'none';
+        searchInput.style.display = isDateSearch ? 'none' : 'block';
+    });
 
-    // フィルター適用ボタン
-    applyFiltersBtn.addEventListener('click', applyFilters);
+    searchButton.addEventListener('click', () => {
+        historyState.searchParams = {
+            query: searchInput.value,
+            type: searchType.value,
+            dateFrom: dateFrom.value,
+            dateTo: dateTo.value
+        };
+        historyState.currentPage = 1;
+        loadMessages(leadId, 1);
+    });
 
-    // フィルターリセットボタン
-    resetFiltersBtn.addEventListener('click', resetFilters);
-
-    // フィルター保存ボタン
-    saveFiltersBtn.addEventListener('click', saveFilters);
-
-    // 検索ボタンクリック時
-    searchButton.addEventListener('click', applyFilters);
-
-    // 検索ボックスでEnterキー押下時
     searchInput.addEventListener('keypress', e => {
         if (e.key === 'Enter') {
-            applyFilters();
+            searchButton.click();
         }
     });
 }

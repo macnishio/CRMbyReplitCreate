@@ -135,14 +135,6 @@ args = "Create Checkpoint"
 task = "workflow.run"
 args = "Flask Server"
 
-[[workflows.workflow.tasks]]
-task = "workflow.run"
-args = "Create Filter Preset Migration"
-
-[[workflows.workflow.tasks]]
-task = "workflow.run"
-args = "Create Filter Migration"
-
 [[workflows.workflow]]
 name = "Check Migrations"
 author = "agent"
@@ -608,34 +600,6 @@ task = "shell.exec"
 args = "python3 app.py"
 waitForPort = 5000
 
-[[workflows.workflow]]
-name = "Create Filter Preset Migration"
-author = "agent"
-
-[workflows.workflow.metadata]
-agentRequireRestartOnSave = false
-
-[[workflows.workflow.tasks]]
-task = "packager.installForAll"
-
-[[workflows.workflow.tasks]]
-task = "shell.exec"
-args = "flask db migrate -m 'Add filter presets table' && flask db upgrade"
-
-[[workflows.workflow]]
-name = "Create Filter Migration"
-author = "agent"
-
-[workflows.workflow.metadata]
-agentRequireRestartOnSave = false
-
-[[workflows.workflow.tasks]]
-task = "packager.installForAll"
-
-[[workflows.workflow.tasks]]
-task = "shell.exec"
-args = "flask db migrate -m 'Add filter presets table' && flask db upgrade"
-
 [deployment]
 run = ["sh", "-c", "python3 app.py"]
 
@@ -650,6 +614,7 @@ externalPort = 3002
 [[ports]]
 localPort = 5000
 externalPort = 80
+exposeLocalhost = true
 
 [[ports]]
 localPort = 5001
