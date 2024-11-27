@@ -1,0 +1,445 @@
+{% extends "base.html" %}
+
+{% block title %}包括的な顧客行動分析{% endblock %}
+
+{% block styles %}
+<style>
+.analysis-container {
+    max-width: 1200px;
+    margin: 2rem auto;
+    padding: 2rem;
+}
+
+.analysis-section {
+    background: #fff;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    margin-bottom: 2rem;
+    padding: 1.5rem;
+}
+
+.section-title {
+    color: #2c3e50;
+    border-bottom: 2px solid #3498db;
+    padding-bottom: 0.5rem;
+    margin-bottom: 1.5rem;
+}
+
+.data-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 1.5rem;
+    margin-bottom: 1.5rem;
+}
+
+.data-card {
+    background: #f8f9fa;
+    border-radius: 6px;
+    padding: 1rem;
+}
+
+.data-card h4 {
+    color: #2c3e50;
+    margin-bottom: 0.5rem;
+}
+
+.chart-container {
+    height: 300px;
+    margin: 1rem 0;
+}
+
+.loading {
+    text-align: center;
+    padding: 2rem;
+}
+
+.loading-spinner {
+    border: 4px solid #f3f3f3;
+    border-top: 4px solid #3498db;
+    border-radius: 50%;
+    width: 40px;
+    height: 40px;
+    animation: spin 1s linear infinite;
+    margin: 1rem auto;
+}
+
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+.error-message {
+    color: #e74c3c;
+    padding: 1rem;
+    background: #fdf0f0;
+    border-radius: 4px;
+    margin: 1rem 0;
+}
+
+.refresh-button {
+    background: #3498db;
+    color: white;
+    border: none;
+    padding: 0.5rem 1rem;
+    border-radius: 4px;
+    cursor: pointer;
+    float: right;
+}
+
+.refresh-button:hover {
+    background: #2980b9;
+}
+
+.insights-section {
+    background: #f8f9fa;
+    padding: 1.5rem;
+    border-radius: 6px;
+    margin-top: 1rem;
+}
+
+.insights-section h3 {
+    color: #2c3e50;
+    margin-bottom: 1rem;
+}
+
+.insight-item {
+    padding: 0.5rem 0;
+    border-bottom: 1px solid #dee2e6;
+}
+
+.insight-item:last-child {
+    border-bottom: none;
+}
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="analysis-container">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h1>包括的な顧客行動分析</h1>
+        <button id="refreshAnalysis" class="refresh-button">
+            <i class="fas fa-sync-alt"></i> 更新
+        </button>
+    </div>
+
+    <div id="loadingSection" class="loading" style="display: none;">
+        <div class="loading-spinner"></div>
+        <p>分析データを取得中...</p>
+    </div>
+
+    <div id="errorSection" class="error-message" style="display: none;"></div>
+
+    <div id="analysisContent">
+        <!-- タスク分析セクション -->
+        <div class="analysis-section">
+            <h2 class="section-title">タスク分析</h2>
+            <div class="data-grid">
+                <div class="data-card">
+                    <h4>タスク完了率</h4>
+                    <div id="taskCompletionRate"></div>
+                </div>
+                <div class="data-card">
+                    <h4>タスク種類別の傾向</h4>
+                    <div id="taskTypeDistribution"></div>
+                </div>
+                <div class="data-card">
+                    <h4>優先度分布</h4>
+                    <div id="taskPriorityDistribution"></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 商談分析セクション -->
+        <div class="analysis-section">
+            <h2 class="section-title">商談分析</h2>
+            <div class="data-grid">
+                <div class="data-card">
+                    <h4>商談ステージ分布</h4>
+                    <div id="opportunityStageDistribution"></div>
+                </div>
+                <div class="data-card">
+                    <h4>成約率推移</h4>
+                    <div id="opportunityWinRate"></div>
+                </div>
+                <div class="data-card">
+                    <h4>商談金額分析</h4>
+                    <div id="opportunityAmountAnalysis"></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- スケジュール分析セクション -->
+        <div class="analysis-section">
+            <h2 class="section-title">スケジュール分析</h2>
+            <div class="data-grid">
+                <div class="data-card">
+                    <h4>ミーティング頻度</h4>
+                    <div id="meetingFrequency"></div>
+                </div>
+                <div class="data-card">
+                    <h4>スケジュール種類別分布</h4>
+                    <div id="scheduleTypeDistribution"></div>
+                </div>
+                <div class="data-card">
+                    <h4>顧客コンタクト頻度</h4>
+                    <div id="customerContactFrequency"></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- メール分析セクション -->
+        <div class="analysis-section">
+            <h2 class="section-title">メールコミュニケーション分析</h2>
+            <div class="data-grid">
+                <div class="data-card">
+                    <h4>メール応答パターン</h4>
+                    <div id="emailResponsePattern"></div>
+                </div>
+                <div class="data-card">
+                    <h4>コミュニケーション頻度</h4>
+                    <div id="communicationFrequency"></div>
+                </div>
+                <div class="data-card">
+                    <h4>時間帯別分布</h4>
+                    <div id="hourlyDistribution"></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- AI分析インサイト -->
+        <div class="analysis-section">
+            <h2 class="section-title">AI分析インサイト</h2>
+            <div id="aiInsights" class="insights-section">
+                <!-- AIインサイトがここに表示されます -->
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js@3.7.0/dist/chart.min.js"></script>
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // チャートインスタンスを保持する配列
+    let charts = {};
+
+    // チャートの作成関数
+    function createChart(elementId, type, data, options = {}) {
+        const ctx = document.getElementById(elementId);
+        if (charts[elementId]) {
+            charts[elementId].destroy();
+        }
+        charts[elementId] = new Chart(ctx, {
+            type: type,
+            data: data,
+            options: options
+        });
+    }
+
+    // データの取得と表示
+    async function fetchAndDisplayAnalysis() {
+        const loadingSection = document.getElementById('loadingSection');
+        const errorSection = document.getElementById('errorSection');
+        const analysisContent = document.getElementById('analysisContent');
+
+        try {
+            loadingSection.style.display = 'block';
+            errorSection.style.display = 'none';
+            analysisContent.style.display = 'none';
+
+            const response = await fetch('/api/comprehensive-analysis');
+            const data = await response.json();
+
+            if (!data.success) {
+                throw new Error(data.error || '分析データの取得に失敗しました');
+            }
+
+            // 分析データの表示
+            displayAnalysisData(data.analysis);
+
+            loadingSection.style.display = 'none';
+            analysisContent.style.display = 'block';
+        } catch (error) {
+            loadingSection.style.display = 'none';
+            errorSection.textContent = error.message;
+            errorSection.style.display = 'block';
+        }
+    }
+
+    // 分析データの表示関数
+    function displayAnalysisData(analysis) {
+        const rawData = analysis.raw_data;
+        
+        // タスクデータの表示
+        if (rawData.tasks) {
+            // タスク完了率
+            createChart('taskCompletionRate', 'doughnut', {
+                labels: ['完了', '未完了'],
+                datasets: [{
+                    data: [rawData.tasks.completion_rate, 100 - rawData.tasks.completion_rate],
+                    backgroundColor: ['#2ecc71', '#e74c3c']
+                }]
+            });
+
+            // タスク種類別分布
+            const taskTypes = rawData.tasks.task_types;
+            createChart('taskTypeDistribution', 'pie', {
+                labels: Object.keys(taskTypes),
+                datasets: [{
+                    data: Object.values(taskTypes),
+                    backgroundColor: [
+                        '#3498db',
+                        '#e67e22',
+                        '#9b59b6',
+                        '#f1c40f'
+                    ]
+                }]
+            });
+
+            // 優先度分布
+            const priorityData = rawData.tasks.priority_distribution;
+            createChart('taskPriorityDistribution', 'bar', {
+                labels: Object.keys(priorityData),
+                datasets: [{
+                    label: 'タスク数',
+                    data: Object.values(priorityData),
+                    backgroundColor: '#3498db'
+                }]
+            });
+        }
+
+        // 商談データの表示
+        if (rawData.opportunities) {
+            // ステージ分布
+            const stageData = rawData.opportunities.stage_distribution;
+            createChart('opportunityStageDistribution', 'bar', {
+                labels: Object.keys(stageData),
+                datasets: [{
+                    label: '商談数',
+                    data: Object.values(stageData),
+                    backgroundColor: '#2ecc71'
+                }]
+            });
+
+            // 成約率
+            createChart('opportunityWinRate', 'doughnut', {
+                labels: ['成約', '未成約'],
+                datasets: [{
+                    data: [
+                        rawData.opportunities.win_rate,
+                        100 - rawData.opportunities.win_rate
+                    ],
+                    backgroundColor: ['#27ae60', '#e74c3c']
+                }]
+            });
+
+            // 金額分析
+            const amountData = rawData.opportunities.amount_by_stage;
+            createChart('opportunityAmountAnalysis', 'bar', {
+                labels: Object.keys(amountData),
+                datasets: [{
+                    label: '金額',
+                    data: Object.values(amountData),
+                    backgroundColor: '#f1c40f'
+                }]
+            });
+        }
+
+        // スケジュールデータの表示
+        if (rawData.schedules) {
+            // ミーティング頻度
+            const meetingData = rawData.schedules.meeting_frequency;
+            document.getElementById('meetingFrequency').innerHTML = `
+                <p>総ミーティング数: ${meetingData.total_meetings}</p>
+                <p>1日平均: ${meetingData.daily_average.toFixed(1)}件</p>
+            `;
+
+            // スケジュール種類別
+            const scheduleTypes = rawData.schedules.schedule_types;
+            createChart('scheduleTypeDistribution', 'pie', {
+                labels: Object.keys(scheduleTypes),
+                datasets: [{
+                    data: Object.values(scheduleTypes),
+                    backgroundColor: [
+                        '#3498db',
+                        '#e67e22',
+                        '#9b59b6'
+                    ]
+                }]
+            });
+
+            // コンタクト頻度
+            const contactData = rawData.schedules.contact_frequency;
+            createChart('customerContactFrequency', 'bar', {
+                labels: Object.keys(contactData),
+                datasets: [{
+                    label: 'コンタクト回数',
+                    data: Object.values(contactData),
+                    backgroundColor: '#3498db'
+                }]
+            });
+        }
+
+        // メールデータの表示
+        if (rawData.communication) {
+            const emailData = rawData.communication.email_patterns;
+            
+            // メール応答パターン
+            createChart('emailResponsePattern', 'bar', {
+                labels: ['送信済み', '受信済み'],
+                datasets: [{
+                    label: 'メール数',
+                    data: [emailData.sent_emails, emailData.received_emails],
+                    backgroundColor: ['#2ecc71', '#3498db']
+                }]
+            });
+
+            // 時間帯別分布
+            const hourlyData = rawData.communication.hour_distribution;
+            createChart('hourlyDistribution', 'line', {
+                labels: Object.keys(hourlyData),
+                datasets: [{
+                    label: 'メール数',
+                    data: Object.values(hourlyData),
+                    borderColor: '#3498db',
+                    fill: false
+                }]
+            });
+        }
+
+        // AIインサイトの表示
+        const aiInsightsElement = document.getElementById('aiInsights');
+        try {
+            const insights = JSON.parse(analysis.ai_insights);
+            aiInsightsElement.innerHTML = `
+                <div class="insight-item">
+                    <h4>全体的な顧客エンゲージメント状況</h4>
+                    <p>${insights.engagement_status || '分析中...'}</p>
+                </div>
+                <div class="insight-item">
+                    <h4>商談プロセスの効率性</h4>
+                    <p>${insights.process_efficiency || '分析中...'}</p>
+                </div>
+                <div class="insight-item">
+                    <h4>コミュニケーションパターンの特徴</h4>
+                    <p>${insights.communication_patterns || '分析中...'}</p>
+                </div>
+                <div class="insight-item">
+                    <h4>改善のための推奨事項</h4>
+                    <p>${insights.recommendations || '分析中...'}</p>
+                </div>
+            `;
+        } catch (e) {
+            aiInsightsElement.innerHTML = `<p>${analysis.ai_insights}</p>`;
+        }
+    }
+
+    // 更新ボタンのイベントリスナー
+    document.getElementById('refreshAnalysis').addEventListener('click', fetchAndDisplayAnalysis);
+
+    // 初回データ取得
+    fetchAndDisplayAnalysis();
+});
+</script>
+{% endblock %}

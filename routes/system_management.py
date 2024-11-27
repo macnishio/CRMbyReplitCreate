@@ -173,3 +173,9 @@ def comprehensive_analysis():
             'error': str(e)
         }), 500
 
+@bp.route('/analysis', methods=['GET'])
+@login_required
+def show_analysis():
+    """包括的な分析ページを表示"""
+    return render_template('analysis/comprehensive.html')
+
