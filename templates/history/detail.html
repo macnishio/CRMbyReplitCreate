@@ -1,13 +1,11 @@
 {% extends "base.html" %}
-
 {% block title %}{{ lead.name }}とのコミュニケーション履歴{% endblock %}
-
 {% block styles %}
 <link rel="stylesheet" href="{{ url_for('static', filename='css/history.css') }}">
 {% endblock %}
-
 {% block content %}
 <div class="history-container">
+    <!-- ヘッダー部分 -->
     <div class="header">
         <a href="{{ url_for('leads.lead_detail', id=lead.id) }}" class="header-back">
             <i class="fas fa-arrow-left"></i>
@@ -21,10 +19,12 @@
                 <a href="{{ url_for('history.export_history', lead_id=lead.id) }}" class="btn btn-primary">
                     <i class="fas fa-download"></i> 履歴をエクスポート
                 </a>
-                <button onclick="analyzeCustomerBehavior()" class="btn btn-primary">
+                <!-- onclick属性を削除 -->
+                <button id="analyzeBtn" class="btn btn-primary">
                     <i class="fas fa-brain"></i> AI分析
                 </button>
             </div>
+            <!-- AI分析結果表示エリア -->
             <div id="analysisResults" class="analysis-results" style="display: none;">
                 <div class="analysis-content">
                     <h3>AI分析結果</h3>
@@ -32,11 +32,15 @@
                 </div>
             </div>
         </div>
+
+        <!-- タイムラインエラー表示 -->
         <div id="timelineError" class="timeline-error" style="display: none;">
             <i class="fas fa-exclamation-circle"></i>
             <p class="error-message"></p>
             <p class="error-code"></p>
         </div>
+
+        <!-- 検索部分 -->
         <div class="search-container">
             <div class="search-box">
                 <input type="search" id="messageSearch" placeholder="メッセージを検索...">
@@ -56,6 +60,7 @@
         </div>
     </div>
 
+    <!-- タイムライン部分 -->
     <div class="timeline-container">
         <div id="timeline" class="timeline">
             <div class="loading">
@@ -64,7 +69,8 @@
             </div>
         </div>
     </div>
-    
+
+    <!-- メッセージ表示部分 -->
     <div class="messages-container" id="messages">
         <div class="loading">
             <i class="fas fa-spinner fa-spin"></i>
@@ -72,6 +78,7 @@
         </div>
     </div>
 
+    <!-- さらに読み込むボタン -->
     <button class="load-more" id="loadMore" style="display: none;">
         <i class="fas fa-sync-alt"></i>
         さらに読み込む
@@ -83,7 +90,11 @@
 <script src="{{ url_for('static', filename='js/history.js') }}"></script>
 <script>
     document.addEventListener('DOMContentLoaded', () => {
-        initializeHistory({{ lead.id }});
+        const leadId = {{ lead.id }};
+        initializeHistory(leadId);
+
+        // 分析ボタンのイベントリスナーを追加
+        document.getElementById('analyzeBtn').addEventListener('click', analyzeCustomerBehavior);
     });
 </script>
 {% endblock %}

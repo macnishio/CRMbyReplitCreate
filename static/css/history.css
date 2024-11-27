@@ -1,386 +1,624 @@
-/* Analysis Grid Layout */
-.analysis-grid {
+/* 既存のCSSの後に追加 */
+
+/* 基本変数 */
+:root {
+    --color-primary: #1A73E8; /* Googleブルー */
+    --color-secondary: #5F6368; /* ミディアムグレー */
+    --color-info: #4285F4;
+    --color-warning: #FBBC05;
+    --color-success: #34A853;
+    --color-danger: #EA4335;
+    --bg-card: #FFFFFF;
+    --bg-card-dark: #1E1E1E;
+    --text-color: #202124;
+    --text-color-light: #FFFFFF;
+    --border-radius: 12px;
+    --border-radius-sm: 8px;
+    --spacing-xs: 4px;
+    --spacing-sm: 8px;
+    --spacing-md: 16px;
+    --spacing-lg: 24px;
+    --spacing-xl: 32px;
+    --font-size-xs: 0.75rem;
+    --font-size-sm: 0.875rem;
+    --font-size-base: 1rem;
+    --font-size-lg: 1.125rem;
+    --font-size-xl: 1.25rem;
+    --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.1);
+    --shadow-md: 0 4px 6px rgba(0, 0, 0, 0.1);
+    --shadow-lg: 0 10px 15px rgba(0, 0, 0, 0.1);
+    --transition-duration: 0.2s;
+    --transition-ease: ease-in-out;
+}
+
+/* リード一覧のコンテナ */
+.leads-container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: var(--spacing-lg);
+}
+
+/* リードカードグリッド */
+.lead-grid {
     display: grid;
-    grid-template-columns: repeat(3, 1fr);
-    gap: 1rem;
-    padding: 1.5rem;
-    background: var(--background);
-    border-radius: 0.75rem;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: var(--spacing-lg);
+    margin-top: var(--spacing-lg);
 }
 
-.analysis-card {
-    background: white;
-    border-radius: 0.75rem;
-    border: 1px solid hsl(214.3 31.8% 91.4%);
-    overflow: hidden;
-    transition: all 0.2s ease;
+/* リードカード */
+.lead-card {
+    background: var(--bg-card);
+    border-radius: var(--border-radius);
+    padding: var(--spacing-md);
+    box-shadow: var(--shadow-sm);
+    transition: transform var(--transition-duration) var(--transition-ease), box-shadow var(--transition-duration) var(--transition-ease);
+    text-decoration: none;
+    color: var(--text-color);
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-md);
 }
 
-.analysis-card.wide {
-    grid-column: span 3;
+.lead-card:hover {
+    transform: translateY(-4px);
+    box-shadow: var(--shadow-lg);
 }
 
-.card-header {
+/* リードカードヘッダー */
+.lead-card-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: var(--spacing-sm);
+}
+
+/* リードアバター */
+.lead-avatar {
+    width: 56px;
+    height: 56px;
+    border-radius: 50%;
+    background-color: var(--color-primary);
     display: flex;
     align-items: center;
-    gap: 0.5rem;
-    padding: 1rem;
-    border-bottom: 1px solid hsl(214.3 31.8% 91.4%);
+    justify-content: center;
+    color: var(--text-color-light);
+    font-size: var(--font-size-lg);
+    font-weight: bold;
 }
 
-.card-header i {
-    font-size: 1.25rem;
-}
-
-.text-primary {
-    color: hsl(221.2 83.2% 53.3%);
-}
-
-.text-destructive {
-    color: hsl(0 84.2% 60.2%);
-}
-
-.card-header h4 {
-    margin: 0;
-    font-size: 1rem;
-    font-weight: 600;
-    color: hsl(222.2 47.4% 11.2%);
-}
-
-.card-content {
-    padding: 1rem;
-}
-
-/* Metrics Grid */
-.metrics-grid {
-    display: grid;
-    grid-template-columns: repeat(4, 1fr);
-    gap: 1rem;
-}
-
-.metric-card {
-    border: 1px solid hsl(214.3 31.8% 91.4%);
-    border-radius: 0.5rem;
-    padding: 0.75rem;
-}
-
-.metric-card.highlight {
-    background: hsl(221.2 83.2% 53.3% / 0.1);
-    border-color: hsl(221.2 83.2% 53.3%);
-}
-
-.metric-header {
-    display: flex;
-    align-items: center;
-    gap: 0.5rem;
-}
-
-.metric-label {
-    font-size: 0.875rem;
-    color: hsl(215.4 16.3% 46.9%);
-}
-
-.metric-value {
-    margin-top: 0.5rem;
-    font-size: 1.125rem;
-    font-weight: 600;
-    color: hsl(222.2 47.4% 11.2%);
-}
-
-/* Tag Cloud */
-.tag-cloud {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 0.5rem;
-}
-
-.badge {
-    background: hsl(214.3 31.8% 91.4%);
-    color: hsl(222.2 47.4% 11.2%);
+/* ステータスバッジ */
+.lead-status-badge {
     padding: 0.25rem 0.75rem;
-    border-radius: 1rem;
-    font-size: 0.875rem;
+    border-radius: var(--border-radius-sm);
+    font-size: var(--font-size-sm);
+    font-weight: 500;
+    background: var(--color-secondary);
+    color: var(--text-color-light);
+}
+
+.lead-status-badge.active {
+    background: var(--color-success);
+}
+
+.lead-status-badge.inactive {
+    background: var(--color-danger);
+}
+
+.lead-status-badge.pending {
+    background: var(--color-warning);
+    color: #000;
+}
+
+/* 連絡先情報 */
+.lead-recipients {
+    background-color: #f1f3f4;
+    border-radius: var(--border-radius-sm);
+    padding: var(--spacing-sm);
+    margin: var(--spacing-sm) 0;
+}
+
+.recipient-type {
+    display: flex;
+    gap: var(--spacing-sm);
+    margin-bottom: var(--spacing-xs);
+}
+
+.recipient-label {
+    color: var(--color-secondary);
+    min-width: 50px;
     font-weight: 500;
 }
 
-/* Lists */
-.scroll-area {
-    max-height: 200px;
-    overflow-y: auto;
+.recipient-emails {
+    color: var(--color-primary);
+    word-break: break-all;
 }
 
-.point-list, .risk-list {
-    list-style: none;
-    padding: 0;
-    margin: 0;
+.lead-contact-info,
+.lead-last-contact {
     display: flex;
-    flex-direction: column;
-    gap: 0.5rem;
+    align-items: center;
+    gap: var(--spacing-xs);
+    color: var(--color-secondary);
+    font-size: var(--font-size-sm);
 }
 
-.bullet {
-    display: block;
-    width: 0.375rem;
-    height: 0.375rem;
-    border-radius: 9999px;
-    background: hsl(221.2 83.2% 53.3%);
-    margin-top: 0.5rem;
+.lead-contact-info i,
+.lead-last-contact i {
+    color: var(--color-secondary);
 }
 
-.action-grid {
-    display: grid;
-    grid-template-columns: repeat(2, 1fr);
-    gap: 0.75rem;
+/* 検索機能 */
+.search-container {
+    position: relative;
+    width: 100%;
+    max-width: 400px;
+    margin-bottom: var(--spacing-md);
 }
 
-.action-item {
-    display: flex;
-    gap: 0.5rem;
-    padding: 0.75rem;
-    border: 1px solid hsl(214.3 31.8% 91.4%);
-    border-radius: 0.5rem;
+.search-box {
+    position: relative;
+    width: 100%;
 }
 
-.summary-text {
-    font-size: 0.875rem;
-    color: hsl(215.4 16.3% 46.9%);
-    line-height: 1.6;
+.search-box input {
+    width: 100%;
+    padding: var(--spacing-sm) var(--spacing-md);
+    padding-right: 48px;
+    border: 1px solid #ddd;
+    border-radius: var(--border-radius-sm);
+    font-size: var(--font-size-base);
+    background: var(--bg-card);
+    color: var(--text-color);
+    transition: border-color var(--transition-duration), box-shadow var(--transition-duration);
 }
 
-/* Dark mode */
+.search-box input:focus {
+    border-color: var(--color-primary);
+    box-shadow: 0 0 0 2px rgba(26, 115, 232, 0.2);
+    outline: none;
+}
+
+.search-box .search-icon {
+    position: absolute;
+    right: var(--spacing-md);
+    top: 50%;
+    transform: translateY(-50%);
+    color: var(--color-secondary);
+    font-size: var(--font-size-lg);
+}
+
+/* ダークモードのサポート */
 @media (prefers-color-scheme: dark) {
-    .analysis-card {
-        background: hsl(222.2 84% 4.9%);
-        border-color: hsl(217.2 32.6% 17.5%);
+    :root {
+        --bg-card: var(--bg-card-dark);
+        --text-color: var(--text-color-light);
     }
 
-    .card-header {
-        border-bottom-color: hsl(217.2 32.6% 17.5%);
+    .leads-container {
+        background-color: #121212;
     }
 
-    .card-header h4 {
-        color: hsl(210 40% 98%);
+    .lead-card {
+        background: var(--bg-card);
+        color: var(--text-color);
     }
 
-    .metric-card {
-        border-color: hsl(217.2 32.6% 17.5%);
+    .lead-recipients {
+        background-color: #2A2A2A;
     }
 
-    .metric-card.highlight {
-        background: hsl(217.2 32.6% 17.5%);
-        border-color: hsl(221.2 83.2% 53.3%);
+    .lead-status-badge {
+        background: var(--color-secondary);
     }
 
-    .metric-label {
-        color: hsl(215 20.2% 65.1%);
+    .lead-status-badge.active {
+        background: var(--color-success);
     }
 
-    .metric-value {
-        color: hsl(210 40% 98%);
+    .lead-status-badge.inactive {
+        background: var(--color-danger);
     }
 
-    .badge {
-        background: hsl(217.2 32.6% 17.5%);
-        color: hsl(210 40% 98%);
+    .lead-status-badge.pending {
+        background: var(--color-warning);
+        color: #000;
     }
 
-    .action-item {
-        border-color: hsl(217.2 32.6% 17.5%);
+    .search-box input {
+        background: #2A2A2A;
+        border-color: #555;
+        color: var(--text-color-light);
     }
 
-    .summary-text {
-        color: hsl(215 20.2% 65.1%);
-    }
-}
-
-/* Responsive Design */
-@media (max-width: 1024px) {
-    .analysis-grid {
-        grid-template-columns: repeat(2, 1fr);
+    .search-box input:focus {
+        border-color: var(--color-primary);
+        box-shadow: 0 0 0 2px rgba(26, 115, 232, 0.3);
     }
 
-    .analysis-card.wide {
-        grid-column: span 2;
-    }
-
-    .metrics-grid {
-        grid-template-columns: repeat(2, 1fr);
+    .search-box .search-icon {
+        color: var(--text-color-light);
     }
 }
 
-@media (max-width: 640px) {
-    .analysis-grid {
+/* レスポンシブデザイン */
+@media (max-width: 768px) {
+    .leads-container {
+        padding: var(--spacing-md);
+    }
+
+    .lead-grid {
         grid-template-columns: 1fr;
     }
 
-    .analysis-card.wide {
-        grid-column: span 1;
+    .lead-card {
+        padding: var(--spacing-sm);
     }
 
-    .metrics-grid {
-        grid-template-columns: 1fr;
+    .lead-avatar {
+        width: 48px;
+        height: 48px;
+        font-size: var(--font-size-base);
     }
 
-    .action-grid {
-        grid-template-columns: 1fr;
+    .recipient-emails {
+        -webkit-line-clamp: 2;
+        -webkit-box-orient: vertical;
+        overflow: hidden;
+        display: -webkit-box;
     }
 }
-/* Timeline styles */
-.timeline {
-    padding: 20px;
-    position: relative;
+/* メッセージ全体のスタイル */
+.messages-container {
+    padding: var(--spacing-md);
+    background-color: #e5ddd5; /* LINE風の背景色 */
+    overflow-y: auto;
+    max-height: 600px; /* 必要に応じて調整 */
+    border-radius: var(--border-radius);
 }
 
-.timeline-item {
+/* メッセージの基本スタイル */
+.message {
     display: flex;
-    margin-bottom: 20px;
-    position: relative;
-    padding-left: 30px;
+    margin-bottom: var(--spacing-sm);
 }
 
-.timeline-item::before {
+/* メッセージコンテンツ */
+.message-content {
+    max-width: 70%;
+}
+
+/* 相手からのメッセージ */
+.message.from-lead {
+    justify-content: flex-start;
+}
+
+.message.from-lead .message-bubble {
+    background-color: #ffffff;
+    color: #000000;
+    border-radius: var(--border-radius-sm);
+    padding: var(--spacing-sm) var(--spacing-md);
+    position: relative;
+    margin-left: var(--spacing-sm);
+    box-shadow: var(--shadow-sm);
+}
+
+.message.from-lead .message-bubble::before {
     content: '';
     position: absolute;
-    left: 0;
-    top: 0;
-    bottom: -20px;
-    width: 2px;
-    background-color: #e0e0e0;
+    top: 10px;
+    left: -10px;
+    width: 0;
+    height: 0;
+    border-top: 10px solid transparent;
+    border-right: 10px solid #ffffff;
+    border-bottom: 10px solid transparent;
 }
 
-.timeline-item:last-child::before {
-    bottom: 0;
+/* 自分からのメッセージ */
+.message.from-system {
+    justify-content: flex-end;
 }
 
-.timeline-icon {
+.message.from-system .message-bubble {
+    background-color: #dcf8c6;
+    color: #000000;
+    border-radius: var(--border-radius-sm);
+    padding: var(--spacing-sm) var(--spacing-md);
+    position: relative;
+    margin-right: var(--spacing-sm);
+    box-shadow: var(--shadow-sm);
+}
+
+.message.from-system .message-bubble::before {
+    content: '';
     position: absolute;
-    left: -14px;
-    width: 30px;
-    height: 30px;
-    background: #fff;
+    top: 10px;
+    right: -10px;
+    width: 0;
+    height: 0;
+    border-top: 10px solid transparent;
+    border-left: 10px solid #dcf8c6;
+    border-bottom: 10px solid transparent;
+}
+
+/* メッセージのメタデータ */
+.message-metadata {
+    display: flex;
+    align-items: center;
+    margin-top: var(--spacing-xs);
+    font-size: var(--font-size-xs);
+    color: #999999;
+}
+
+.message-time {
+    margin: 0 var(--spacing-xs);
+}
+
+.message-status i {
+    color: #4fc3f7; /* チェックマークの色 */
+}
+
+/* さらに読み込むボタン */
+.load-more {
+    display: block;
+    margin: var(--spacing-lg) auto;
+    padding: var(--spacing-sm) var(--spacing-md);
+    background-color: var(--color-primary);
+    color: var(--text-color-light);
+    border: none;
+    border-radius: var(--border-radius-sm);
+    cursor: pointer;
+    transition: background-color var(--transition-duration) var(--transition-ease);
+}
+
+.load-more:hover {
+    background-color: #0f5bb5; /* Hover時の色 */
+}
+
+/* ダークモードのサポート */
+@media (prefers-color-scheme: dark) {
+    .messages-container {
+        background-color: #2A2A2A; /* ダークモード背景色 */
+    }
+
+    .message.from-lead .message-bubble {
+        background-color: #444444;
+        color: #ffffff;
+    }
+
+    .message.from-lead .message-bubble::before {
+        border-right-color: #444444;
+    }
+
+    .message.from-system .message-bubble {
+        background-color: #357a38;
+        color: #ffffff;
+    }
+
+    .message.from-system .message-bubble::before {
+        border-left-color: #357a38;
+    }
+
+    .message-metadata {
+        color: #cccccc;
+    }
+
+    .load-more {
+        background-color: #357a38;
+    }
+
+    .load-more:hover {
+        background-color: #285a28;
+    }
+}
+
+/* レスポンシブ対応 */
+@media (max-width: 768px) {
+    .message-content {
+        max-width: 85%;
+    }
+
+    .messages-container {
+        padding: var(--spacing-sm);
+    }
+}
+
+/* カード表示スタイル */
+.lead-card {
+    background: var(--bg-card);
+    border-radius: var(--border-radius);
+    padding: var(--spacing-md);
+    box-shadow: var(--shadow-sm);
+    transition: transform var(--transition-duration) var(--transition-ease), box-shadow var(--transition-duration) var(--transition-ease);
+    text-decoration: none;
+    color: var(--text-color);
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-md);
+    cursor: pointer;
+}
+
+.lead-card:hover {
+    transform: translateY(-4px);
+    box-shadow: var(--shadow-lg);
+}
+
+/* リードカードのヘッダー部分 */
+.lead-card-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.lead-avatar {
+    width: 56px;
+    height: 56px;
+    border-radius: 50%;
+    background-color: var(--color-primary);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--text-color-light);
+    font-size: var(--font-size-lg);
+    font-weight: bold;
+}
+
+/* ステータスバッジ */
+.lead-status-badge {
+    padding: 0.25rem 0.75rem;
+    border-radius: var(--border-radius-sm);
+    font-size: var(--font-size-sm);
+    font-weight: 500;
+    background: var(--color-secondary);
+    color: var(--text-color-light);
+}
+
+.lead-status-badge.active {
+    background: var(--color-success);
+}
+
+.lead-status-badge.inactive {
+    background: var(--color-danger);
+}
+
+.lead-status-badge.pending {
+    background: var(--color-warning);
+    color: #000;
+}
+
+/* リードカードのコンテンツ部分 */
+.lead-card-content {
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-sm);
+}
+
+.lead-name {
+    font-size: var(--font-size-lg);
+    font-weight: bold;
+}
+
+.lead-recipients {
+    background-color: #f1f3f4;
+    border-radius: var(--border-radius-sm);
+    padding: var(--spacing-sm);
+}
+
+.recipient-type {
+    display: flex;
+    gap: var(--spacing-sm);
+    margin-bottom: var(--spacing-xs);
+}
+
+.recipient-label {
+    color: var(--color-secondary);
+    min-width: 50px;
+    font-weight: 500;
+}
+
+.recipient-emails {
+    color: var(--color-primary);
+    word-break: break-all;
+}
+
+.lead-contact-info,
+.lead-last-contact {
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-xs);
+    color: var(--color-secondary);
+    font-size: var(--font-size-sm);
+}
+
+.lead-contact-info i,
+.lead-last-contact i {
+    color: var(--color-secondary);
+}
+
+/* 検索結果アイテム */
+.search-result-item {
+    display: flex;
+    align-items: center;
+    padding: var(--spacing-sm);
+    border-radius: var(--border-radius-sm);
+    background: var(--bg-card);
+    box-shadow: var(--shadow-sm);
+    margin-bottom: var(--spacing-sm);
+    cursor: pointer;
+    transition: background-color var(--transition-duration), box-shadow var(--transition-duration);
+}
+
+.search-result-item:hover {
+    background-color: #f1f3f4;
+    box-shadow: var(--shadow-md);
+}
+
+.lead-mini-avatar {
+    width: 40px;
+    height: 40px;
     border-radius: 50%;
     display: flex;
     align-items: center;
     justify-content: center;
-    border: 2px solid #007bff;
-    z-index: 1;
+    color: var(--text-color-light);
+    font-weight: bold;
+    margin-right: var(--spacing-sm);
 }
 
-.timeline-content {
-    flex: 1;
-    background: #fff;
-    padding: 15px;
-    border-radius: 8px;
-    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-}
-
-.timeline-header {
+.lead-info {
     display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 10px;
+    flex-direction: column;
 }
 
-.timeline-title {
-    font-weight: 600;
-    color: #333;
-    margin: 0;
+.lead-name {
+    font-weight: bold;
+    font-size: var(--font-size-base);
 }
 
-.timeline-date {
-    font-size: 0.875rem;
-    color: #666;
+.lead-email {
+    color: var(--color-secondary);
+    font-size: var(--font-size-sm);
 }
 
-.timeline-description {
-    color: #444;
-    font-size: 0.9375rem;
-    line-height: 1.5;
-}
-
-.timeline-metadata {
-    margin-top: 10px;
-    font-size: 0.875rem;
-    color: #666;
-}
-
-.timeline-error {
-    text-align: center;
-    padding: 20px;
-    background: #fff;
-    border-radius: 8px;
-    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-    margin: 20px;
-}
-
-.timeline-error i {
-    font-size: 2rem;
-    color: #dc3545;
-    margin-bottom: 10px;
-}
-
-.error-message {
-    color: #dc3545;
-    font-weight: 500;
-    margin-bottom: 5px;
-}
-
-.error-code {
-    font-size: 0.875rem;
-    color: #666;
-}
-
-/* Loading styles */
-.loading {
-    text-align: center;
-    padding: 20px;
-    color: #666;
-}
-
-.loading i {
-    margin-right: 8px;
-}
-
-/* Dark mode */
+/* ダークモードのサポート */
 @media (prefers-color-scheme: dark) {
-    .timeline-item::before {
-        background-color: #444;
+    .lead-card {
+        background: var(--bg-card-dark);
+        color: var(--text-color-light);
     }
 
-    .timeline-icon {
-        background: #222;
-        border-color: #007bff;
+    .lead-recipients {
+        background-color: #2A2A2A;
     }
 
-    .timeline-content {
-        background: #333;
+    .search-result-item {
+        background: var(--bg-card-dark);
+        color: var(--text-color-light);
     }
 
-    .timeline-title {
-        color: #fff;
+    .lead-mini-avatar {
+        background-color: var(--color-secondary);
+    }
+}
+
+/* レスポンシブ対応 */
+@media (max-width: 768px) {
+    .lead-card {
+        padding: var(--spacing-sm);
     }
 
-    .timeline-date {
-        color: #aaa;
+    .lead-avatar {
+        width: 48px;
+        height: 48px;
     }
 
-    .timeline-description {
-        color: #ddd;
+    .lead-card-content {
+        gap: var(--spacing-xs);
     }
 
-    .timeline-metadata {
-        color: #aaa;
-    }
-
-    .timeline-error {
-        background: #333;
-    }
-
-    .error-code {
-        color: #aaa;
-    }
-
-    .loading {
-        color: #aaa;
+    .lead-name {
+        font-size: var(--font-size-base);
     }
 }

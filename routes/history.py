@@ -1,24 +1,15 @@
-from flask import Blueprint, render_template, jsonify, request
-from flask_login import login_required, current_user
-from models import Lead, Email
-from extensions import db
-from datetime import datetime
-import traceback
-import json
-
-bp = Blueprint('history', __name__)
-
 from flask import Blueprint, render_template, jsonify, request, current_app, abort, send_file
 from flask_login import login_required, current_user
 from models import Lead, Email, UserSettings
 from services.ai_analysis import AIAnalysisService
+from extensions import db
 from io import BytesIO, StringIO
 import traceback
 from datetime import datetime
 import csv
 import json
 
-bp = Blueprint('history', __name__)
+bp = Blueprint('history', __name__, url_prefix='/history')
 
 @bp.route('/')
 @login_required
@@ -26,55 +17,50 @@ def index():
     """履歴一覧ページを表示"""
     try:
         current_app.logger.debug(f"Fetching leads for user {current_user.id}")
-        
-        # ユーザーのリードを取得し、last_contactで降順ソート
-        leads = Lead.query.filter_by(user_id=current_user.id).order_by(Lead.last_contact.desc()).all()
-        
-        if not leads:
-            current_app.logger.debug(f"No leads found for user {current_user.id}")
-            return render_template('history/index.html', 
-                               leads=[],
-                               leads_json=[])
-        
-        # テンプレート用のJSONデータを準備
+
+        leads = Lead.query.filter_by(user_id=current_user.id)\
+            .order_by(Lead.last_contact.desc())\
+            .all()
+
+        current_app.logger.debug(f"Found {len(leads) if leads else 0} leads")
+
         leads_json = [{
             'id': lead.id,
             'name': lead.name,
             'email': lead.email,
             'status': lead.status,
             'last_contact': lead.last_contact.isoformat() if lead.last_contact else None,
-            'phone': lead.phone,
-            'cc': lead.cc,
-            'bcc': lead.bcc
-        } for lead in leads]
+            'phone': lead.phone if hasattr(lead, 'phone') else None
+        } for lead in leads] if leads else []
 
-        current_app.logger.debug(f"Successfully found {len(leads)} leads for user {current_user.id}")
         return render_template('history/index.html', 
                            leads=leads,
                            leads_json=leads_json)
-                           
+
     except Exception as e:
-        current_app.logger.error(f"Error in history index: {str(e)}\n{traceback.format_exc()}")
+        current_app.logger.error(f"Error in index: {str(e)}\n{traceback.format_exc()}")
         db.session.rollback()
         return render_template('history/index.html', 
                            leads=[],
-                           leads_json=[])
+                           leads_json=[],
+                           error="データの取得中にエラーが発生しました")
 
-@bp.route('/leads/<int:lead_id>')
+@bp.route('/leads/<int:lead_id>')  # URLパターンを修正
 @login_required
 def show_history(lead_id):
+    """個別の履歴詳細を表示"""
     try:
         lead = Lead.query.filter_by(id=lead_id, user_id=current_user.id).first()
         if not lead:
             abort(404)
-        return render_template('history.html', lead=lead)
+        return render_template('history/detail.html', lead=lead)  # テンプレートパスも修正
     except Exception as e:
         current_app.logger.error(f"Error in show_history: {str(e)}")
-        return jsonify({'error': 'データの取得中にエラーが発生しました'}), 500
+        return render_template('history/detail.html', error="データの取得中にエラーが発生しました")
 
 @bp.route('/api/leads/<int:lead_id>/messages')
 @login_required
-def get_history(lead_id):
+def get_messages(lead_id):
     try:
         # リードの存在確認を追加
         lead = Lead.query.filter_by(id=lead_id, user_id=current_user.id).first()
@@ -343,4 +329,89 @@ def get_lead_timeline(lead_id):
             'success': False,
             'error': 'タイムラインの生成中にエラーが発生しました',
             'code': 'TIMELINE_GENERATION_ERROR'
+        }), 500
+
+@bp.route('/api/leads/<int:lead_id>/search')
+@login_required
+def search_history(lead_id):
+    """履歴を検索"""
+    try:
+        # 検索パラメータの取得
+        query = request.args.get('q', '')
+        search_type = request.args.get('type', 'content')
+        date_from = request.args.get('date_from')
+        date_to = request.args.get('date_to')
+
+        # リードの存在確認
+        lead = Lead.query.filter_by(id=lead_id, user_id=current_user.id).first()
+        if not lead:
+            return jsonify({
+                'success': False,
+                'error': 'リードが見つかりません',
+                'code': 'LEAD_NOT_FOUND'
+            }), 404
+
+        # 検索クエリの構築
+        emails_query = Email.query.filter_by(lead_id=lead_id)
+
+        if search_type == 'content' and query:
+            emails_query = emails_query.filter(Email.content.ilike(f'%{query}%'))
+        elif search_type == 'sender' and query:
+            emails_query = emails_query.filter(Email.sender.ilike(f'%{query}%'))
+        elif search_type == 'date':
+            if date_from:
+                try:
+                    from_date = datetime.strptime(date_from, '%Y-%m-%d')
+                    emails_query = emails_query.filter(Email.received_date >= from_date)
+                except ValueError:
+                    return jsonify({
+                        'success': False,
+                        'error': '開始日の形式が不正です',
+                        'code': 'INVALID_DATE_FORMAT'
+                    }), 400
+            if date_to:
+                try:
+                    to_date = datetime.strptime(date_to, '%Y-%m-%d')
+                    # 終了日の場合は日付の最後（23:59:59）までを含める
+                    to_date = to_date.replace(hour=23, minute=59, second=59)
+                    emails_query = emails_query.filter(Email.received_date <= to_date)
+                except ValueError:
+                    return jsonify({
+                        'success': False,
+                        'error': '終了日の形式が不正です',
+                        'code': 'INVALID_DATE_FORMAT'
+                    }), 400
+
+        # 結果を取得
+        emails = emails_query.order_by(Email.received_date.desc()).all()
+
+        # 結果を整形
+        results = [{
+            'id': email.id,
+            'content': email.content,
+            'sender': email.sender,
+            'received_date': email.received_date.isoformat() if email.received_date else None,
+            'is_from_lead': email.sender == lead.email,
+            'subject': email.subject if hasattr(email, 'subject') else None
+        } for email in emails]
+
+        return jsonify({
+            'success': True,
+            'results': results,
+            'count': len(results),
+            'search_params': {
+                'type': search_type,
+                'query': query,
+                'date_from': date_from,
+                'date_to': date_to
+            }
+        })
+
+    except Exception as e:
+        current_app.logger.error(f"Search error: {str(e)}\n{traceback.format_exc()}")
+        return jsonify({
+            'success': False,
+            'error': '検索中にエラーが発生しました',
+            'code': 'SEARCH_ERROR',
+            'details': str(e) if current_app.debug else None
         }), 500
