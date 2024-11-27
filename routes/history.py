@@ -237,7 +237,8 @@ def get_lead_timeline(lead_id):
                             'icon': 'fa-envelope',
                             'metadata': {
                                 'sender': email.sender,
-                                'subject': email.subject if hasattr(email, 'subject') else None
+                                'subject': email.subject if hasattr(email, 'subject') else None,
+                                'email_id': email.id
                             }
                         })
             except Exception as e:
@@ -251,29 +252,49 @@ def get_lead_timeline(lead_id):
             # 案件（商談）の取得と追加
             try:
                 from models import Opportunity
-                opportunities = Opportunity.query.filter_by(lead_id=lead_id).order_by(Opportunity.created_at.desc()).all()
+                opportunities = Opportunity.query.filter_by(lead_id=lead_id).all()
                 for opportunity in opportunities:
+                    # 作成イベント
                     timeline_events.append({
                         'type': 'opportunity',
                         'date': opportunity.created_at.strftime('%Y-%m-%d %H:%M:%S'),
                         'timestamp': opportunity.created_at.timestamp(),
                         'title': '商談の作成',
-                        'description': f'商談「{opportunity.name}」が作成されました。金額: ¥{"{:,.0f}".format(opportunity.amount)}',
+                        'description': f'商談「{opportunity.name}」が作成されました\n金額: ¥{"{:,.0f}".format(opportunity.amount)}',
                         'icon': 'fa-handshake',
                         'metadata': {
                             'id': opportunity.id,
                             'stage': opportunity.stage,
-                            'amount': opportunity.amount
+                            'amount': opportunity.amount,
+                            'name': opportunity.name,
+                            'close_date': opportunity.close_date.strftime('%Y-%m-%d') if opportunity.close_date else None
                         }
                     })
+                    # ステージ変更イベント（もし存在する場合）
+                    if hasattr(opportunity, 'stage_changes') and opportunity.stage_changes:
+                        for change in opportunity.stage_changes:
+                            timeline_events.append({
+                                'type': 'opportunity_stage_change',
+                                'date': change.timestamp.strftime('%Y-%m-%d %H:%M:%S'),
+                                'timestamp': change.timestamp.timestamp(),
+                                'title': '商談ステージの変更',
+                                'description': f'商談「{opportunity.name}」のステージが\n{change.old_stage} → {change.new_stage}に変更されました',
+                                'icon': 'fa-exchange-alt',
+                                'metadata': {
+                                    'opportunity_id': opportunity.id,
+                                    'old_stage': change.old_stage,
+                                    'new_stage': change.new_stage
+                                }
+                            })
             except Exception as e:
                 current_app.logger.error(f"商談データの取得中にエラーが発生: {str(e)}")
 
             # タスクの取得と追加
             try:
                 from models import Task
-                tasks = Task.query.filter_by(lead_id=lead_id).order_by(Task.created_at.desc()).all()
+                tasks = Task.query.filter_by(lead_id=lead_id).all()
                 for task in tasks:
+                    # タスク作成イベント
                     timeline_events.append({
                         'type': 'task',
                         'date': task.created_at.strftime('%Y-%m-%d %H:%M:%S'),
@@ -284,30 +305,72 @@ def get_lead_timeline(lead_id):
                         'metadata': {
                             'id': task.id,
                             'status': task.status,
-                            'priority': task.priority if hasattr(task, 'priority') else None
+                            'priority': task.priority if hasattr(task, 'priority') else None,
+                            'due_date': task.due_date.strftime('%Y-%m-%d') if hasattr(task, 'due_date') and task.due_date else None
                         }
                     })
+                    # タスクステータス変更イベント（もし存在する場合）
+                    if hasattr(task, 'status_changes') and task.status_changes:
+                        for change in task.status_changes:
+                            timeline_events.append({
+                                'type': 'task_status_change',
+                                'date': change.timestamp.strftime('%Y-%m-%d %H:%M:%S'),
+                                'timestamp': change.timestamp.timestamp(),
+                                'title': 'タスクステータスの変更',
+                                'description': f'タスク「{task.description[:30]}...」のステータスが\n{change.old_status} → {change.new_status}に変更されました',
+                                'icon': 'fa-check-circle',
+                                'metadata': {
+                                    'task_id': task.id,
+                                    'old_status': change.old_status,
+                                    'new_status': change.new_status
+                                }
+                            })
             except Exception as e:
                 current_app.logger.error(f"タスクデータの取得中にエラーが発生: {str(e)}")
 
             # スケジュールの取得と追加
             try:
                 from models import Schedule
-                schedules = Schedule.query.filter_by(lead_id=lead_id).order_by(Schedule.start_time.desc()).all()
+                schedules = Schedule.query.filter_by(lead_id=lead_id).all()
                 for schedule in schedules:
+                    # スケジュール作成イベント
                     timeline_events.append({
                         'type': 'schedule',
                         'date': schedule.start_time.strftime('%Y-%m-%d %H:%M:%S'),
                         'timestamp': schedule.start_time.timestamp(),
                         'title': 'スケジュールの作成',
-                        'description': schedule.title + (f'\n{schedule.description[:100]}...' if schedule.description else ''),
+                        'description': (
+                            f'{schedule.title}\n'
+                            f'開始: {schedule.start_time.strftime("%Y-%m-%d %H:%M")}\n'
+                            f'終了: {schedule.end_time.strftime("%Y-%m-%d %H:%M") if schedule.end_time else "未設定"}'
+                            + (f'\n{schedule.description[:100]}...' if schedule.description else '')
+                        ),
                         'icon': 'fa-calendar',
                         'metadata': {
                             'id': schedule.id,
+                            'title': schedule.title,
+                            'start_time': schedule.start_time.strftime('%Y-%m-%d %H:%M:%S'),
                             'end_time': schedule.end_time.strftime('%Y-%m-%d %H:%M:%S') if schedule.end_time else None,
-                            'status': schedule.status if hasattr(schedule, 'status') else None
+                            'status': schedule.status if hasattr(schedule, 'status') else None,
+                            'location': schedule.location if hasattr(schedule, 'location') else None
                         }
                     })
+                    # スケジュールステータス変更イベント（もし存在する場合）
+                    if hasattr(schedule, 'status_changes') and schedule.status_changes:
+                        for change in schedule.status_changes:
+                            timeline_events.append({
+                                'type': 'schedule_status_change',
+                                'date': change.timestamp.strftime('%Y-%m-%d %H:%M:%S'),
+                                'timestamp': change.timestamp.timestamp(),
+                                'title': 'スケジュールステータスの変更',
+                                'description': f'スケジュール「{schedule.title}」のステータスが\n{change.old_status} → {change.new_status}に変更されました',
+                                'icon': 'fa-clock',
+                                'metadata': {
+                                    'schedule_id': schedule.id,
+                                    'old_status': change.old_status,
+                                    'new_status': change.new_status
+                                }
+                            })
             except Exception as e:
                 current_app.logger.error(f"スケジュールデータの取得中にエラーが発生: {str(e)}")
         except Exception as e:
