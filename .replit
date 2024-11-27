@@ -590,7 +590,7 @@ task = "packager.installForAll"
 
 [[workflows.workflow.tasks]]
 task = "shell.exec"
-args = "echo \"メール受信処理とデータベース更新の実装完了\" > .checkpoint_message && touch .checkpoint"
+args = "echo \"Replitの標準チェックポイント機能によるロールバック可能なチェックポイント - $(date +%Y-%m-%d_%H:%M:%S)\" > .checkpoint_message && touch .checkpoint"
 
 [[workflows.workflow]]
 name = "Flask Server"
