@@ -183,10 +183,67 @@ function initializeAnalysis() {
     }
 }
 
-// Added missing function definition for analyzeCustomerBehavior
-function analyzeCustomerBehavior() {
+async function analyzeCustomerBehavior() {
     debugLog('analyzeCustomerBehavior function called.');
-    // Placeholder for actual analysis logic
+    const analysisResults = document.getElementById('analysisResults');
+    const analysisData = document.getElementById('analysisData');
+    const analyzeBtn = document.getElementById('analyzeBtn');
+    
+    try {
+        // 分析開始前の状態を設定
+        analyzeBtn.disabled = true;
+        analyzeBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> 分析中...';
+        analysisResults.style.display = 'block';
+        analysisData.innerHTML = '<div class="loading-indicator"><i class="fas fa-spinner fa-spin"></i> AI分析を実行中...</div>';
+
+        // URLからリードIDを取得
+        const pathParts = window.location.pathname.split('/');
+        const leadId = pathParts[pathParts.length - 1];
+
+        // API呼び出し
+        const response = await fetch(`/history/api/leads/${leadId}/analyze`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            }
+        });
+
+        if (!response.ok) {
+            const errorData = await response.json();
+            throw new Error(errorData.error || 'AI分析中にエラーが発生しました');
+        }
+
+        const data = await response.json();
+        
+        // 分析結果の表示
+        analysisData.innerHTML = `
+            <div class="analysis-section">
+                <h4>コミュニケーションパターン分析</h4>
+                <p>${data.communication_pattern || '分析データがありません'}</p>
+            </div>
+            <div class="analysis-section">
+                <h4>行動予測</h4>
+                <p>${data.behavior_prediction || '予測データがありません'}</p>
+            </div>
+            <div class="analysis-section">
+                <h4>推奨アクション</h4>
+                <p>${data.recommended_actions || '推奨データがありません'}</p>
+            </div>
+        `;
+
+    } catch (error) {
+        console.error('AI分析エラー:', error);
+        analysisData.innerHTML = `
+            <div class="error-message">
+                <i class="fas fa-exclamation-circle"></i>
+                <p>${error.message || 'AI分析中にエラーが発生しました'}</p>
+            </div>
+        `;
+    } finally {
+        // ボタンを元の状態に戻す
+        analyzeBtn.disabled = false;
+        analyzeBtn.innerHTML = '<i class="fas fa-brain"></i> AI分析';
+    }
 }
 
 async function loadTimeline(leadId) {

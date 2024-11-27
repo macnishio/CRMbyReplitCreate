@@ -622,3 +622,169 @@
         font-size: var(--font-size-base);
     }
 }
+
+/* タイムラインコンテナ */
+.timeline {
+    position: relative;
+    padding: 20px 0;
+}
+
+/* タイムラインイベント */
+.timeline-event {
+    display: flex;
+    margin-bottom: 30px;
+    position: relative;
+}
+
+/* イベントアイコン */
+.event-icon {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    flex-shrink: 0;
+    margin-right: 15px;
+}
+
+/* イベントコンテンツ */
+.event-content {
+    background: white;
+    border-radius: 8px;
+    padding: 15px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    flex-grow: 1;
+}
+
+/* イベントヘッダー */
+.event-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 10px;
+}
+
+.event-title {
+    font-weight: bold;
+    color: #333;
+}
+
+.event-time {
+    color: #666;
+    font-size: 0.9em;
+}
+
+/* イベント説明 */
+.event-description {
+    color: #444;
+    margin-bottom: 10px;
+    white-space: pre-line;
+}
+
+/* イベントメタデータ */
+.event-metadata {
+    background: #f5f5f5;
+    padding: 10px;
+    border-radius: 6px;
+    font-size: 0.9em;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+}
+
+.event-metadata span {
+    background: white;
+    padding: 4px 8px;
+    border-radius: 4px;
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+}
+
+/* ステータス変更表示 */
+.status-change,
+.stage-change {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.old-status,
+.old-stage {
+    color: #666;
+}
+
+.new-status,
+.new-stage {
+    color: #2196f3;
+    font-weight: 500;
+}
+
+/* 日付ヘッダー */
+.timeline-date-header {
+    background: #f8f9fa;
+    padding: 8px 15px;
+    border-radius: 20px;
+    margin: 20px 0;
+    text-align: center;
+    font-weight: 500;
+    color: #555;
+}
+
+/* データなし表示 */
+.no-events {
+    text-align: center;
+    padding: 40px 20px;
+    color: #666;
+}
+
+.no-events i {
+    font-size: 2em;
+    margin-bottom: 10px;
+    color: #999;
+}
+
+/* ローディング表示 */
+.loading {
+    text-align: center;
+    padding: 20px;
+    color: #666;
+}
+
+.loading i {
+    margin-right: 8px;
+}
+
+/* エラー表示 */
+.error-message {
+    background: #fee;
+    color: #c00;
+    padding: 15px;
+    border-radius: 8px;
+    margin: 10px 0;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.error-message i {
+    font-size: 1.2em;
+}
+
+/* レスポンシブ対応 */
+@media (max-width: 768px) {
+    .event-metadata {
+        flex-direction: column;
+    }
+    
+    .event-header {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+    
+    .event-time {
+        margin-top: 5px;
+    }
+}
