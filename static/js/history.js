@@ -218,16 +218,41 @@ async function analyzeCustomerBehavior() {
         // 分析結果の表示
         analysisData.innerHTML = `
             <div class="analysis-section">
-                <h4>コミュニケーションパターン分析</h4>
-                <p>${data.communication_pattern || '分析データがありません'}</p>
+                <h4>コミュニケーションパターン</h4>
+                <ul class="analysis-list">
+                    <li><strong>頻度:</strong> ${data.data.communication_patterns.frequency}</li>
+                    <li><strong>好ましい時間帯:</strong> ${data.data.communication_patterns.preferred_time}</li>
+                    <li><strong>応答時間:</strong> ${data.data.communication_patterns.response_time}</li>
+                    <li><strong>エンゲージメント:</strong> ${data.data.communication_patterns.engagement_level}</li>
+                </ul>
             </div>
             <div class="analysis-section">
-                <h4>行動予測</h4>
-                <p>${data.behavior_prediction || '予測データがありません'}</p>
+                <h4>主要なポイント</h4>
+                <ul class="analysis-list">
+                    ${data.data.key_points.map(point => `<li>${point}</li>`).join('')}
+                </ul>
+            </div>
+            <div class="analysis-section">
+                <h4>興味・関心事項</h4>
+                <ul class="analysis-list">
+                    ${data.data.interests.map(interest => `<li>${interest}</li>`).join('')}
+                </ul>
+            </div>
+            <div class="analysis-section">
+                <h4>リスク要因</h4>
+                <ul class="analysis-list">
+                    ${data.data.risk_factors.map(risk => `<li>${risk}</li>`).join('')}
+                </ul>
             </div>
             <div class="analysis-section">
                 <h4>推奨アクション</h4>
-                <p>${data.recommended_actions || '推奨データがありません'}</p>
+                <ul class="analysis-list">
+                    ${data.data.recommended_actions.map(action => `<li>${action}</li>`).join('')}
+                </ul>
+            </div>
+            <div class="analysis-section">
+                <h4>分析サマリー</h4>
+                <p>${data.data.analysis_summary.replace('\n', '<br>')}</p>
             </div>
         `;
 
