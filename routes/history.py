@@ -45,18 +45,28 @@ def index():
                            leads_json=[],
                            error="データの取得中にエラーが発生しました")
 
-@bp.route('/leads/<int:lead_id>')  # URLパターンを修正
+@bp.route('/leads/<int:lead_id>')
 @login_required
 def show_history(lead_id):
     """個別の履歴詳細を表示"""
     try:
+        # リードの存在確認
         lead = Lead.query.filter_by(id=lead_id, user_id=current_user.id).first()
         if not lead:
-            abort(404)
-        return render_template('history/detail.html', lead=lead)  # テンプレートパスも修正
+            current_app.logger.warning(f"Lead {lead_id} not found for user {current_user.id}")
+            return render_template('history/error.html', 
+                                error="指定されたリードが見つかりません", 
+                                back_url=url_for('leads.list_leads'))
+
+        return render_template('history/detail.html', 
+                           lead=lead,
+                           page_title=f"{lead.name}とのコミュニケーション履歴")
+
     except Exception as e:
-        current_app.logger.error(f"Error in show_history: {str(e)}")
-        return render_template('history/detail.html', error="データの取得中にエラーが発生しました")
+        current_app.logger.error(f"Error in show_history: {str(e)}\n{traceback.format_exc()}")
+        return render_template('history/error.html', 
+                           error="データの取得中にエラーが発生しました",
+                           back_url=url_for('leads.list_leads'))
 
 @bp.route('/api/leads/<int:lead_id>/messages')
 @login_required

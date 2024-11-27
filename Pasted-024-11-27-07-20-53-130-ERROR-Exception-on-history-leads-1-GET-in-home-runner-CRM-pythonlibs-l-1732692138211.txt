@@ -1,0 +1,58 @@
+024-11-27 07:20:53,130 ERROR: Exception on /history/leads/1 [GET] [in /home/runner/CRM/.pythonlibs/lib/python3.11/site-packages/flask/app.py:1744]
+Traceback (most recent call last):
+  File "/home/runner/CRM/routes/history.py", line 55, in show_history
+    abort(404)
+  File "/home/runner/CRM/.pythonlibs/lib/python3.11/site-packages/flask/helpers.py", line 310, in abort
+    current_app.aborter(code, *args, **kwargs)
+  File "/home/runner/CRM/.pythonlibs/lib/python3.11/site-packages/werkzeug/exceptions.py", line 864, in __call__
+    raise self.mapping[code](*args, **kwargs)
+werkzeug.exceptions.NotFound: 404 Not Found: The requested URL was not found on the server. If you entered the URL manually please check your spelling and try again.
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/home/runner/CRM/.pythonlibs/lib/python3.11/site-packages/flask/app.py", line 2529, in wsgi_app
+    response = self.full_dispatch_request()
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/runner/CRM/.pythonlibs/lib/python3.11/site-packages/flask/app.py", line 1825, in full_dispatch_request
+    rv = self.handle_user_exception(e)
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/runner/CRM/.pythonlibs/lib/python3.11/site-packages/flask/app.py", line 1823, in full_dispatch_request
+    rv = self.dispatch_request()
+         ^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/runner/CRM/.pythonlibs/lib/python3.11/site-packages/flask/app.py", line 1799, in dispatch_request
+    return self.ensure_sync(self.view_functions[rule.endpoint])(**view_args)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/runner/CRM/.pythonlibs/lib/python3.11/site-packages/flask_login/utils.py", line 290, in decorated_view
+    return current_app.ensure_sync(func)(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/runner/CRM/routes/history.py", line 59, in show_history
+    return render_template('history/detail.html', error="データの取得中にエラーが発生しました")
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/runner/CRM/.pythonlibs/lib/python3.11/site-packages/flask/templating.py", line 147, in render_template
+    return _render(app, template, context)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/runner/CRM/.pythonlibs/lib/python3.11/site-packages/flask/templating.py", line 130, in _render
+    rv = template.render(context)
+         ^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/runner/CRM/.pythonlibs/lib/python3.11/site-packages/jinja2/environment.py", line 1304, in render
+    self.environment.handle_exception()
+  File "/home/runner/CRM/.pythonlibs/lib/python3.11/site-packages/jinja2/environment.py", line 939, in handle_exception
+    raise rewrite_traceback_stack(source=source)
+  File "/home/runner/CRM/templates/history/detail.html", line 1, in top-level template code
+    {% extends "base.html" %}
+  File "/home/runner/CRM/templates/base.html", line 6, in top-level template code
+    <title>{% block title %}CRM System{% endblock %}</title>
+    ^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/runner/CRM/templates/history/detail.html", line 2, in block 'title'
+    {% block title %}{{ lead.name }}とのコミュニケーション履歴{% endblock %}
+    ^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/runner/CRM/.pythonlibs/lib/python3.11/site-packages/jinja2/environment.py", line 487, in getattr
+    return getattr(obj, attribute)
+           ^^^^^^^^^^^^^^^^^^^^^^^
+jinja2.exceptions.UndefinedError: 'lead' is undefined
+2024-11-27 07:20:53,357 INFO: Found existing email with message_id: <010c019365e2f57e-774a63b9-3fdd-4662-9e83-546259bbc37b-000000@ap-northeast-2.amazonses.com>, lead_id: 796 [in /home/runner/CRM/email_receiver.py:818]
+2024-11-27 07:20:53,357 INFO: Duplicate email detected from noreply@mailmagazine.asoview.com [in /home/runner/CRM/email_receiver.py:1047]
+2024-11-27 07:20:53,817 DEBUG: Session committed successfully. Duration: 1.38s [in /home/runner/CRM/email_receiver.py:667]
+2024-11-27 07:20:53,817 DEBUG: Session closed. Total duration: 1.38s [in /home/runner/CRM/email_receiver.py:683]
+2024-11-27 07:20:54,269 INFO: 172.31.196.37 - - [27/Nov/2024 07:20:54] "GET /history/leads/1 HTTP/1.1" 500 - [in /home/runner/CRM/.pythonlibs/lib/python3.11/site-packages/werkzeug/_internal.py:224]

@@ -1,0 +1,60 @@
+{% extends "base.html" %}
+{% block title %}エラー{% endblock %}
+
+{% block content %}
+<div class="error-container">
+    <div class="error-content">
+        <i class="fas fa-exclamation-circle"></i>
+        <h2>エラーが発生しました</h2>
+        <p>{{ error }}</p>
+        <a href="{{ back_url }}" class="btn btn-primary">
+            <i class="fas fa-arrow-left"></i> 戻る
+        </a>
+    </div>
+</div>
+{% endblock %}
+
+{% block styles %}
+<style>
+.error-container {
+    max-width: 600px;
+    margin: 2rem auto;
+    padding: 2rem;
+    text-align: center;
+}
+
+.error-content {
+    background: white;
+    border-radius: 8px;
+    padding: 2rem;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.error-content i {
+    font-size: 3rem;
+    color: #dc3545;
+    margin-bottom: 1rem;
+}
+
+.error-content h2 {
+    color: #343a40;
+    margin-bottom: 1rem;
+}
+
+.error-content p {
+    color: #6c757d;
+    margin-bottom: 2rem;
+}
+
+.btn-primary {
+    padding: 0.5rem 1.5rem;
+    font-size: 1rem;
+}
+
+.btn-primary i {
+    font-size: 1rem;
+    color: white;
+    margin-right: 0.5rem;
+}
+</style>
+{% endblock %}

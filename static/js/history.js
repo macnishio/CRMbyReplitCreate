@@ -190,15 +190,19 @@ async function analyzeCustomerBehavior() {
     const analyzeBtn = document.getElementById('analyzeBtn');
     
     try {
+        // URLからリードIDを取得と検証
+        const pathParts = window.location.pathname.split('/');
+        const leadId = pathParts[pathParts.length - 1];
+        
+        if (!leadId || isNaN(leadId)) {
+            throw new Error('リードIDが無効です');
+        }
+
         // 分析開始前の状態を設定
         analyzeBtn.disabled = true;
         analyzeBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> 分析中...';
         analysisResults.style.display = 'block';
         analysisData.innerHTML = '<div class="loading-indicator"><i class="fas fa-spinner fa-spin"></i> AI分析を実行中...</div>';
-
-        // URLからリードIDを取得
-        const pathParts = window.location.pathname.split('/');
-        const leadId = pathParts[pathParts.length - 1];
 
         // API呼び出し
         const response = await fetch(`/history/api/leads/${leadId}/analyze`, {
@@ -210,10 +214,20 @@ async function analyzeCustomerBehavior() {
 
         if (!response.ok) {
             const errorData = await response.json();
-            throw new Error(errorData.error || 'AI分析中にエラーが発生しました');
+            if (response.status === 404) {
+                throw new Error('指定されたリードが見つかりません');
+            } else if (response.status === 400) {
+                throw new Error(errorData.error || 'リクエストが無効です');
+            } else {
+                throw new Error(errorData.error || 'AI分析中にエラーが発生しました');
+            }
         }
 
         const data = await response.json();
+        
+        if (!data || (!data.communication_pattern && !data.behavior_prediction && !data.recommended_actions)) {
+            throw new Error('分析結果が不完全です');
+        }
         
         // 分析結果の表示
         analysisData.innerHTML = `
@@ -237,6 +251,9 @@ async function analyzeCustomerBehavior() {
             <div class="error-message">
                 <i class="fas fa-exclamation-circle"></i>
                 <p>${error.message || 'AI分析中にエラーが発生しました'}</p>
+                <button onclick="retryAnalysis()" class="retry-button">
+                    <i class="fas fa-sync"></i> 再試行
+                </button>
             </div>
         `;
     } finally {
@@ -244,6 +261,15 @@ async function analyzeCustomerBehavior() {
         analyzeBtn.disabled = false;
         analyzeBtn.innerHTML = '<i class="fas fa-brain"></i> AI分析';
     }
+}
+
+// 分析の再試行関数
+function retryAnalysis() {
+    const analysisData = document.getElementById('analysisData');
+    if (analysisData) {
+        analysisData.innerHTML = '';
+    }
+    analyzeCustomerBehavior();
 }
 
 async function loadTimeline(leadId) {
