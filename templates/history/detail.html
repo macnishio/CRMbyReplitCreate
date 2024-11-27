@@ -40,22 +40,87 @@
             <p class="error-code"></p>
         </div>
 
-        <!-- 検索部分 -->
-        <div class="search-container">
-            <div class="search-box">
-                <input type="search" id="messageSearch" placeholder="メッセージを検索...">
-                <button id="searchButton">
-                    <i class="fas fa-search"></i>
-                </button>
+        <!-- フィルターと検索部分 -->
+        <div class="filter-section">
+            <div class="filter-header" onclick="toggleFilters()">
+                <span class="filter-icon" id="filter-toggle-icon">▼</span>
+                <h3>フィルターオプション</h3>
             </div>
-            <div class="search-options">
-                <select id="searchType">
-                    <option value="content">内容</option>
-                    <option value="date">日付</option>
-                    <option value="sender">送信者</option>
-                </select>
-                <input type="date" id="dateFrom" class="date-input" style="display: none;">
-                <input type="date" id="dateTo" class="date-input" style="display: none;">
+            
+            <div class="filter-content collapsed" id="filter-content">
+                <!-- フィルタープリセット -->
+                <div class="filter-presets-section">
+                    <h4>フィルタープリセット</h4>
+                    <div id="filter-presets" class="filter-presets"></div>
+                    <button type="button" class="btn btn-secondary" onclick="saveCurrentFilterAsPreset()">
+                        <i class="fas fa-save"></i> 現在のフィルターを保存
+                    </button>
+                </div>
+
+                <!-- メッセージタイプフィルター -->
+                <div class="filter-group">
+                    <label>メッセージタイプ:</label>
+                    <div class="type-checkboxes">
+                        <label>
+                            <input type="checkbox" name="message_type" value="email" checked> メール
+                        </label>
+                        <label>
+                            <input type="checkbox" name="message_type" value="system" checked> システム
+                        </label>
+                        <label>
+                            <input type="checkbox" name="message_type" value="note" checked> メモ
+                        </label>
+                    </div>
+                </div>
+
+                <!-- 期間フィルター -->
+                <div class="filter-group">
+                    <label>期間:</label>
+                    <select id="period-filter">
+                        <option value="all">すべて</option>
+                        <option value="today">今日</option>
+                        <option value="week">今週</option>
+                        <option value="month">今月</option>
+                        <option value="custom">カスタム期間</option>
+                    </select>
+                    <div id="custom-date-range" style="display: none;">
+                        <input type="date" id="dateFrom" class="date-input">
+                        <span>～</span>
+                        <input type="date" id="dateTo" class="date-input">
+                    </div>
+                </div>
+
+                <!-- 重要度フィルター -->
+                <div class="filter-group">
+                    <label>重要度:</label>
+                    <select id="importance-filter">
+                        <option value="all">すべて</option>
+                        <option value="high">高</option>
+                        <option value="medium">中</option>
+                        <option value="low">低</option>
+                    </select>
+                </div>
+
+                <!-- キーワード検索 -->
+                <div class="search-box">
+                    <input type="search" id="messageSearch" placeholder="メッセージを検索...">
+                    <button id="searchButton">
+                        <i class="fas fa-search"></i>
+                    </button>
+                </div>
+
+                <!-- フィルターアクション -->
+                <div class="filter-actions">
+                    <button type="button" id="applyFilters" class="btn btn-primary">
+                        <i class="fas fa-filter"></i> フィルター適用
+                    </button>
+                    <button type="button" id="resetFilters" class="btn btn-secondary">
+                        <i class="fas fa-undo"></i> リセット
+                    </button>
+                    <button type="button" id="saveFilters" class="btn btn-success">
+                        <i class="fas fa-save"></i> フィルター設定を保存
+                    </button>
+                </div>
             </div>
         </div>
     </div>

@@ -1,15 +1,15 @@
 from flask import Blueprint, render_template, jsonify, request, current_app, abort, send_file
 from flask_login import login_required, current_user
-from models import Lead, Email, UserSettings
+from models import Lead, Email, UserSettings, FilterPreset # Added FilterPreset import
 from services.ai_analysis import AIAnalysisService
 from extensions import db
 from io import BytesIO, StringIO
-import traceback
-from datetime import datetime
 import csv
 import json
+from datetime import datetime
+import traceback
 
-bp = Blueprint('history', __name__, url_prefix='/history')
+bp = Blueprint('history', __name__)
 
 @bp.route('/')
 @login_required
@@ -45,7 +45,7 @@ def index():
                            leads_json=[],
                            error="データの取得中にエラーが発生しました")
 
-@bp.route('/leads/<int:lead_id>')  # URLパターンを修正
+@bp.route('/leads/<int:lead_id>')  
 @login_required
 def show_history(lead_id):
     """個別の履歴詳細を表示"""
@@ -53,7 +53,7 @@ def show_history(lead_id):
         lead = Lead.query.filter_by(id=lead_id, user_id=current_user.id).first()
         if not lead:
             abort(404)
-        return render_template('history/detail.html', lead=lead)  # テンプレートパスも修正
+        return render_template('history/detail.html', lead=lead)  
     except Exception as e:
         current_app.logger.error(f"Error in show_history: {str(e)}")
         return render_template('history/detail.html', error="データの取得中にエラーが発生しました")
@@ -331,56 +331,154 @@ def get_lead_timeline(lead_id):
             'code': 'TIMELINE_GENERATION_ERROR'
         }), 500
 
-@bp.route('/api/leads/<int:lead_id>/search')
+@bp.route('/api/save-filter-preset', methods=['POST'])
 @login_required
-def search_history(lead_id):
-    """履歴を検索"""
+def save_filter_preset():
+    """フィルタープリセットを保存"""
     try:
-        # 検索パラメータの取得
-        query = request.args.get('q', '')
-        search_type = request.args.get('type', 'content')
-        date_from = request.args.get('date_from')
-        date_to = request.args.get('date_to')
+        data = request.get_json()
+        if not data or 'name' not in data or 'filters' not in data:
+            return jsonify({'error': '必要なデータが不足しています'}), 400
 
-        # リードの存在確認
-        lead = Lead.query.filter_by(id=lead_id, user_id=current_user.id).first()
-        if not lead:
+        # 既存のプリセットをチェック
+        existing_preset = FilterPreset.query.filter_by(
+            user_id=current_user.id,
+            name=data['name']
+        ).first()
+
+        if existing_preset:
+            # 既存のプリセットを更新
+            existing_preset.filters = data['filters']
+            existing_preset.updated_at = datetime.utcnow()
+            message = 'フィルタープリセットを更新しました'
+        else:
+            # 新しいプリセットを作成
+            preset = FilterPreset(
+                user_id=current_user.id,
+                name=data['name'],
+                filters=data['filters']
+            )
+            db.session.add(preset)
+            message = 'フィルタープリセットを保存しました'
+
+        db.session.commit()
+        return jsonify({'success': True, 'message': message})
+
+    except Exception as e:
+        current_app.logger.error(f"Error saving filter preset: {str(e)}")
+        db.session.rollback()
+        return jsonify({'error': 'プリセットの保存中にエラーが発生しました'}), 500
+
+@bp.route('/api/delete-filter-preset', methods=['POST'])
+@login_required
+def delete_filter_preset():
+    """フィルタープリセットを削除"""
+    try:
+        data = request.get_json()
+        if not data or 'name' not in data:
+            return jsonify({'error': 'プリセット名が指定されていません'}), 400
+
+        preset = FilterPreset.query.filter_by(
+            user_id=current_user.id,
+            name=data['name']
+        ).first()
+
+        if not preset:
+            return jsonify({'error': '指定されたプリセットが見つかりません'}), 404
+
+        db.session.delete(preset)
+        db.session.commit()
+
+        return jsonify({'success': True, 'message': 'プリセットを削除しました'})
+
+    except Exception as e:
+        current_app.logger.error(f"Error deleting filter preset: {str(e)}")
+        db.session.rollback()
+        return jsonify({'error': 'プリセットの削除中にエラーが発生しました'}), 500
+
+@bp.route('/api/filter-presets', methods=['GET'])
+@login_required
+def get_filter_presets():
+    """ユーザーのフィルタープリセットを取得"""
+    try:
+        presets = FilterPreset.query.filter_by(user_id=current_user.id).all()
+        return jsonify({
+            'success': True,
+            'presets': [preset.to_dict() for preset in presets]
+        })
+
+    except Exception as e:
+        current_app.logger.error(f"Error fetching filter presets: {str(e)}")
+        return jsonify({'error': 'プリセットの取得中にエラーが発生しました'}), 500
+
+@bp.route('/search', methods=['GET'])
+@login_required
+def search_history():
+    """履歴検索機能"""
+    try:
+        lead_id = request.args.get('lead_id', type=int)
+        if not lead_id:
             return jsonify({
                 'success': False,
-                'error': 'リードが見つかりません',
+                'error': 'リードIDが指定されていません',
+                'code': 'LEAD_ID_REQUIRED'
+            }), 400
+
+        lead = Lead.query.get(lead_id)
+        if not lead or lead.user_id != current_user.id:
+            return jsonify({
+                'success': False,
+                'error': '指定されたリードが見つかりません',
                 'code': 'LEAD_NOT_FOUND'
             }), 404
 
-        # 検索クエリの構築
+        # 検索パラメータの取得
+        search_type = request.args.get('type', 'all')
+        query = request.args.get('query', '').strip()
+        date_from = request.args.get('date_from')
+        date_to = request.args.get('date_to')
+
+        # メールのクエリ構築
         emails_query = Email.query.filter_by(lead_id=lead_id)
 
-        if search_type == 'content' and query:
-            emails_query = emails_query.filter(Email.content.ilike(f'%{query}%'))
-        elif search_type == 'sender' and query:
-            emails_query = emails_query.filter(Email.sender.ilike(f'%{query}%'))
-        elif search_type == 'date':
-            if date_from:
-                try:
-                    from_date = datetime.strptime(date_from, '%Y-%m-%d')
-                    emails_query = emails_query.filter(Email.received_date >= from_date)
-                except ValueError:
-                    return jsonify({
-                        'success': False,
-                        'error': '開始日の形式が不正です',
-                        'code': 'INVALID_DATE_FORMAT'
-                    }), 400
-            if date_to:
-                try:
-                    to_date = datetime.strptime(date_to, '%Y-%m-%d')
-                    # 終了日の場合は日付の最後（23:59:59）までを含める
-                    to_date = to_date.replace(hour=23, minute=59, second=59)
-                    emails_query = emails_query.filter(Email.received_date <= to_date)
-                except ValueError:
-                    return jsonify({
-                        'success': False,
-                        'error': '終了日の形式が不正です',
-                        'code': 'INVALID_DATE_FORMAT'
-                    }), 400
+        # 検索条件の適用
+        if query:
+            if search_type == 'subject':
+                emails_query = emails_query.filter(Email.subject.ilike(f'%{query}%'))
+            elif search_type == 'content':
+                emails_query = emails_query.filter(Email.content.ilike(f'%{query}%'))
+            elif search_type == 'all':
+                emails_query = emails_query.filter(
+                    db.or_(
+                        Email.subject.ilike(f'%{query}%'),
+                        Email.content.ilike(f'%{query}%')
+                    )
+                )
+
+        # 日付範囲の適用
+        if date_from:
+            try:
+                from_date = datetime.strptime(date_from, '%Y-%m-%d')
+                emails_query = emails_query.filter(Email.received_date >= from_date)
+            except ValueError:
+                return jsonify({
+                    'success': False,
+                    'error': '開始日の形式が不正です',
+                    'code': 'INVALID_DATE_FORMAT'
+                }), 400
+
+        if date_to:
+            try:
+                to_date = datetime.strptime(date_to, '%Y-%m-%d')
+                # 終了日の場合は日付の最後（23:59:59）までを含める
+                to_date = to_date.replace(hour=23, minute=59, second=59)
+                emails_query = emails_query.filter(Email.received_date <= to_date)
+            except ValueError:
+                return jsonify({
+                    'success': False,
+                    'error': '終了日の形式が不正です',
+                    'code': 'INVALID_DATE_FORMAT'
+                }), 400
 
         # 結果を取得
         emails = emails_query.order_by(Email.received_date.desc()).all()
