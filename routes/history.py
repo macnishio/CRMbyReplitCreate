@@ -208,6 +208,7 @@ def get_lead_timeline(lead_id):
     """リードに関する重要なイベントのタイムラインを取得"""
     try:
         # リードの存在確認
+        current_app.logger.info(f"リードID {lead_id} の存在確認を開始")
         lead = Lead.query.filter_by(id=lead_id, user_id=current_user.id).first()
         if not lead:
             return jsonify({
@@ -221,7 +222,9 @@ def get_lead_timeline(lead_id):
         try:
             # メールイベントの取得と追加
             try:
+                current_app.logger.info(f"リードID {lead_id} のメールデータ取得を開始")
                 emails = Email.query.filter_by(lead_id=lead_id).order_by(Email.received_date.desc()).all()
+                current_app.logger.info(f"メールデータ取得完了。件数: {len(emails)}")
                 for email in emails:
                     if email.received_date:
                         timeline_events.append({
@@ -249,6 +252,7 @@ def get_lead_timeline(lead_id):
             
         try:
             # ステータス変更イベントの追加
+            current_app.logger.info(f"リードID {lead_id} のステータス変更データ取得を開始")
             if hasattr(lead, 'status_changes') and lead.status_changes:
                 for change in lead.status_changes:
                     timeline_events.append({
@@ -268,6 +272,7 @@ def get_lead_timeline(lead_id):
                 
         try:
             # スコア更新イベントの追加
+            current_app.logger.info(f"リードID {lead_id} のスコア更新データ取得を開始")
             if hasattr(lead, 'score_history') and lead.score_history:
                 for score_update in lead.score_history:
                     timeline_events.append({
