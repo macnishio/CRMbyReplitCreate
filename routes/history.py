@@ -45,28 +45,18 @@ def index():
                            leads_json=[],
                            error="データの取得中にエラーが発生しました")
 
-@bp.route('/leads/<int:lead_id>')
+@bp.route('/leads/<int:lead_id>')  # URLパターンを修正
 @login_required
 def show_history(lead_id):
     """個別の履歴詳細を表示"""
     try:
-        # リードの存在確認
         lead = Lead.query.filter_by(id=lead_id, user_id=current_user.id).first()
         if not lead:
-            current_app.logger.warning(f"Lead {lead_id} not found for user {current_user.id}")
-            return render_template('history/error.html', 
-                                error="指定されたリードが見つかりません", 
-                                back_url=url_for('leads.list_leads'))
-
-        return render_template('history/detail.html', 
-                           lead=lead,
-                           page_title=f"{lead.name}とのコミュニケーション履歴")
-
+            abort(404)
+        return render_template('history/detail.html', lead=lead)  # テンプレートパスも修正
     except Exception as e:
-        current_app.logger.error(f"Error in show_history: {str(e)}\n{traceback.format_exc()}")
-        return render_template('history/error.html', 
-                           error="データの取得中にエラーが発生しました",
-                           back_url=url_for('leads.list_leads'))
+        current_app.logger.error(f"Error in show_history: {str(e)}")
+        return render_template('history/detail.html', error="データの取得中にエラーが発生しました")
 
 @bp.route('/api/leads/<int:lead_id>/messages')
 @login_required
@@ -301,7 +291,7 @@ def get_lead_timeline(lead_id):
 
             # タスクの取得と追加
             try:
-                from models import Task, TaskStatusChange
+                from models import Task
                 tasks = Task.query.filter_by(lead_id=lead_id).all()
                 for task in tasks:
                     # タスク作成イベント
@@ -314,34 +304,29 @@ def get_lead_timeline(lead_id):
                         'icon': 'fa-tasks',
                         'metadata': {
                             'id': task.id,
-                            'title': task.title,
                             'status': task.status,
                             'priority': task.priority if hasattr(task, 'priority') else None,
-                            'due_date': task.due_date.strftime('%Y-%m-%d %H:%M:%S') if task.due_date else None,
-                            'created_at': task.created_at.strftime('%Y-%m-%d %H:%M:%S')
+                            'due_date': task.due_date.strftime('%Y-%m-%d') if hasattr(task, 'due_date') and task.due_date else None
                         }
                     })
-                    
-                    # タスクステータス変更履歴の取得
-                    status_changes = TaskStatusChange.query.filter_by(task_id=task.id).order_by(TaskStatusChange.timestamp.desc()).all()
-                    for change in status_changes:
-                        timeline_events.append({
-                            'type': 'task_status_change',
-                            'date': change.timestamp.strftime('%Y-%m-%d %H:%M:%S'),
-                            'timestamp': change.timestamp.timestamp(),
-                            'title': 'タスクステータスの変更',
-                            'description': f'タスク「{task.title}」のステータスが\n{change.old_status} → {change.new_status}に変更されました',
-                            'icon': 'fa-check-circle',
-                            'metadata': {
-                                'task_id': task.id,
-                                'task_title': task.title,
-                                'old_status': change.old_status,
-                                'new_status': change.new_status,
-                                'timestamp': change.timestamp.strftime('%Y-%m-%d %H:%M:%S')
-                            }
-                        })
+                    # タスクステータス変更イベント（もし存在する場合）
+                    if hasattr(task, 'status_changes') and task.status_changes:
+                        for change in task.status_changes:
+                            timeline_events.append({
+                                'type': 'task_status_change',
+                                'date': change.timestamp.strftime('%Y-%m-%d %H:%M:%S'),
+                                'timestamp': change.timestamp.timestamp(),
+                                'title': 'タスクステータスの変更',
+                                'description': f'タスク「{task.description[:30]}...」のステータスが\n{change.old_status} → {change.new_status}に変更されました',
+                                'icon': 'fa-check-circle',
+                                'metadata': {
+                                    'task_id': task.id,
+                                    'old_status': change.old_status,
+                                    'new_status': change.new_status
+                                }
+                            })
             except Exception as e:
-                current_app.logger.error(f"タスクデータの取得中にエラーが発生: {str(e)}\n{traceback.format_exc()}")
+                current_app.logger.error(f"タスクデータの取得中にエラーが発生: {str(e)}")
 
             # スケジュールの取得と追加
             try:

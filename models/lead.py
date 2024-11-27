@@ -1,6 +1,6 @@
 from extensions import db
 from sqlalchemy.orm import Mapped, mapped_column, relationship
-from sqlalchemy import Integer, String, Float, DateTime, ForeignKey, Text
+from sqlalchemy import Integer, String, Float, DateTime, ForeignKey
 from datetime import datetime
 from typing import Optional, List, TYPE_CHECKING
 
@@ -23,7 +23,6 @@ class Lead(db.Model):
     created_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow)
     last_contact: Mapped[Optional[datetime]] = mapped_column(DateTime, nullable=True)
     last_followup_email: Mapped[Optional[datetime]] = mapped_column(DateTime, nullable=True)
-    behavior_patterns: Mapped[Optional[str]] = mapped_column(Text, nullable=True)
     last_followup_tracking_id: Mapped[Optional[str]] = mapped_column(String(100), nullable=True)
     last_email_opened: Mapped[Optional[datetime]] = mapped_column(DateTime, nullable=True)
 

@@ -87,24 +87,14 @@
 {% endblock %}
 
 {% block scripts %}
-<script type="module">
-    import { initializeHistory } from "{{ url_for('static', filename='js/history.js') }}";
-    
+<script src="{{ url_for('static', filename='js/history.js') }}"></script>
+<script>
     document.addEventListener('DOMContentLoaded', () => {
         const leadId = {{ lead.id }};
         initializeHistory(leadId);
-    });
-</script>
-<script>
-    // analyzeCustomerBehavior関数は非モジュールコンテキストで必要
-    document.addEventListener('DOMContentLoaded', () => {
+
         // 分析ボタンのイベントリスナーを追加
-        const analyzeBtn = document.getElementById('analyzeBtn');
-        if (analyzeBtn) {
-            analyzeBtn.addEventListener('click', () => {
-                analyzeCustomerBehavior();
-            });
-        }
+        document.getElementById('analyzeBtn').addEventListener('click', analyzeCustomerBehavior);
     });
 </script>
 {% endblock %}
