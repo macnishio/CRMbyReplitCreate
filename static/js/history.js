@@ -225,8 +225,17 @@ async function analyzeCustomerBehavior() {
 
         const data = await response.json();
         
-        if (!data || (!data.communication_pattern && !data.behavior_prediction && !data.recommended_actions)) {
-            throw new Error('分析結果が不完全です');
+        if (!data) {
+            throw new Error('分析データを取得できませんでした');
+        }
+
+        // 部分的なデータがある場合は表示
+        let hasAnyData = data.communication_pattern || 
+                        data.behavior_prediction || 
+                        data.recommended_actions;
+
+        if (!hasAnyData) {
+            throw new Error('分析データが見つかりませんでした');
         }
         
         // 分析結果の表示
@@ -444,6 +453,43 @@ function getEventMetadata(event) {
                 <div class="event-metadata">
                     <span class="status">ステータス: ${event.metadata.status}</span>
                     ${event.metadata.priority ? `<span class="priority">優先度: ${event.metadata.priority}</span>` : ''}
+                    ${event.metadata.due_date ? `<span class="due-date">期限: ${event.metadata.due_date}</span>` : ''}
+                    ${event.metadata.assignee ? `<span class="assignee">担当: ${event.metadata.assignee}</span>` : ''}
+                </div>
+            `;
+            break;
+        case 'task_status_change':
+            metadataHtml = `
+                <div class="event-metadata">
+                    <span class="status-change">
+                        <span class="old-status">${event.metadata.old_status}</span>
+                        <i class="fas fa-arrow-right"></i>
+                        <span class="new-status">${event.metadata.new_status}</span>
+                    </span>
+                </div>
+            `;
+            break;
+        case 'schedule':
+            metadataHtml = `
+                <div class="event-metadata">
+                    <span class="schedule-type">${event.metadata.type || '予定'}</span>
+                    ${event.metadata.start_date ? `<span class="start-date">開始: ${event.metadata.start_date}</span>` : ''}
+                    ${event.metadata.end_date ? `<span class="end-date">終了: ${event.metadata.end_date}</span>` : ''}
+                    ${event.metadata.location ? `<span class="location">場所: ${event.metadata.location}</span>` : ''}
+                </div>
+            `;
+            break;
+        case 'schedule_status_change':
+            metadataHtml = `
+                <div class="event-metadata">
+                    <span class="status-change">
+                        <span class="old-status">${event.metadata.old_status}</span>
+                        <i class="fas fa-arrow-right"></i>
+                        <span class="new-status">${event.metadata.new_status}</span>
+                    </span>
+                </div>
+            `;
+            break;
                     ${event.metadata.due_date ? `<span class="due-date">期限: ${event.metadata.due_date}</span>` : ''}
                 </div>
             `;
