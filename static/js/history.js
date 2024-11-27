@@ -76,6 +76,149 @@ function showError(container, message) {
     `;
 }
 
+function showLoading(isLoading, container) {
+    let loadingElement = container.querySelector('.loading');
+    if (!loadingElement) {
+        loadingElement = document.createElement('div');
+        loadingElement.className = 'loading';
+        loadingElement.innerHTML = '<i class="fas fa-spinner fa-spin"></i> 読み込み中...';
+        container.appendChild(loadingElement);
+    }
+    loadingElement.style.display = isLoading ? 'block' : 'none';
+}
+
+function getEventTypeStyle(type) {
+    const styles = {
+        email: {
+            icon: 'fa-envelope',
+            color: 'var(--color-info)'
+        },
+        status_change: {
+            icon: 'fa-exchange-alt',
+            color: 'var(--color-warning)'
+        },
+        score_update: {
+            icon: 'fa-chart-line',
+            color: 'var(--color-success)'
+        },
+        behavior_analysis: {
+            icon: 'fa-brain',
+            color: '#9c27b0'
+        },
+        opportunity: {
+            icon: 'fa-handshake',
+            color: '#ff9800'
+        },
+        opportunity_stage_change: {
+            icon: 'fa-exchange-alt',
+            color: '#ff9800'
+        },
+        task: {
+            icon: 'fa-tasks',
+            color: '#4caf50'
+        },
+        task_status_change: {
+            icon: 'fa-check-circle',
+            color: '#4caf50'
+        },
+        schedule: {
+            icon: 'fa-calendar',
+            color: '#2196f3'
+        },
+        schedule_status_change: {
+            icon: 'fa-clock',
+            color: '#2196f3'
+        }
+    };
+    return styles[type] || { icon: 'fa-circle', color: 'var(--color-primary)' };
+}
+
+function getEventMetadata(event) {
+    if (!event.metadata) return '';
+
+    let metadataHtml = '';
+    switch (event.type) {
+        case 'task':
+            metadataHtml = `
+                <div class="event-metadata">
+                    <span class="status">${event.metadata.status}</span>
+                    ${event.metadata.priority ? `<span class="priority">優先度: ${event.metadata.priority}</span>` : ''}
+                    ${event.metadata.due_date ? `<span class="due-date">期限: ${event.metadata.due_date}</span>` : ''}
+                </div>
+            `;
+            break;
+        case 'task_status_change':
+            metadataHtml = `
+                <div class="event-metadata">
+                    <span class="status-change">
+                        <span class="old-status">${event.metadata.old_status}</span>
+                        <i class="fas fa-arrow-right"></i>
+                        <span class="new-status">${event.metadata.new_status}</span>
+                    </span>
+                </div>
+            `;
+            break;
+        case 'opportunity':
+            metadataHtml = `
+                <div class="event-metadata">
+                    <span class="stage">ステージ: ${event.metadata.stage}</span>
+                    <span class="amount">金額: ¥${Number(event.metadata.amount).toLocaleString()}</span>
+                    ${event.metadata.close_date ? `<span class="close-date">完了予定日: ${event.metadata.close_date}</span>` : ''}
+                </div>
+            `;
+            break;
+        case 'opportunity_stage_change':
+            metadataHtml = `
+                <div class="event-metadata">
+                    <span class="stage-change">
+                        <span class="old-stage">${event.metadata.old_stage}</span>
+                        <i class="fas fa-arrow-right"></i>
+                        <span class="new-stage">${event.metadata.new_stage}</span>
+                    </span>
+                </div>
+            `;
+            break;
+        case 'schedule':
+            metadataHtml = `
+                <div class="event-metadata">
+                    <span class="schedule-type">${event.metadata.type || '予定'}</span>
+                    ${event.metadata.start_date ? `<span class="start-date">開始: ${event.metadata.start_date}</span>` : ''}
+                    ${event.metadata.end_date ? `<span class="end-date">終了: ${event.metadata.end_date}</span>` : ''}
+                    ${event.metadata.location ? `<span class="location">場所: ${event.metadata.location}</span>` : ''}
+                </div>
+            `;
+            break;
+        case 'schedule_status_change':
+            metadataHtml = `
+                <div class="event-metadata">
+                    <span class="status-change">
+                        <span class="old-status">${event.metadata.old_status}</span>
+                        <i class="fas fa-arrow-right"></i>
+                        <span class="new-status">${event.metadata.new_status}</span>
+                    </span>
+                </div>
+            `;
+            break;
+        case 'status_change':
+            metadataHtml = `
+                <div class="event-metadata">
+                    <span class="old-status">${event.metadata.old_status}</span>
+                    <i class="fas fa-arrow-right"></i>
+                    <span class="new-status">${event.metadata.new_status}</span>
+                </div>
+            `;
+            break;
+        case 'score_update':
+            metadataHtml = `
+                <div class="event-metadata">
+                    <span class="score-change">スコア: ${event.metadata.old_score || '?'} → ${event.metadata.new_score}</span>
+                </div>
+            `;
+            break;
+    }
+    return metadataHtml;
+}
+
 async function loadMessages(leadId, page = 1) {
     if (historyState.isLoading) return;
 
@@ -295,25 +438,12 @@ async function loadTimeline(leadId) {
 
         const data = await response.json();
         debugLog('Timeline data received:', data);
+        timelineContainer.innerHTML = '';
 
-        if (data.success) {
-            if (data.timeline && Array.isArray(data.timeline) && data.timeline.length > 0) {
-                displayTimelineEvents(data.timeline);
-            } else {
-                timelineContainer.innerHTML += `
-                    <div class="no-events">
-                        <i class="fas fa-info-circle"></i>
-                        <p>タイムラインに表示するイベントがありません</p>
-                    </div>
-                `;
-            }
-
-            if (data.lead) {
-                updateLeadInfo(data.lead);
-            }
+        if (Array.isArray(data)) {
+            displayTimelineEvents(data);
         } else {
-            console.error('Server error fetching timeline:', data.error);
-            throw new Error(data.error || 'データの取得に失敗しました');
+            throw new Error('無効なデータ形式です');
         }
     } catch (error) {
         console.error('Timeline error:', error);
@@ -323,20 +453,22 @@ async function loadTimeline(leadId) {
     }
 }
 
-function showLoading(isLoading, container) {
-    let loadingElement = container.querySelector('.loading');
-    if (!loadingElement) {
-        loadingElement = document.createElement('div');
-        loadingElement.className = 'loading';
-        loadingElement.innerHTML = '<i class="fas fa-spinner fa-spin"></i> 読み込み中...';
-        container.appendChild(loadingElement);
-    }
-    loadingElement.style.display = isLoading ? 'block' : 'none';
-}
-
 function displayTimelineEvents(events) {
     const timelineContainer = document.getElementById('timeline');
     timelineContainer.innerHTML = '';
+    
+    if (!events || events.length === 0) {
+        timelineContainer.innerHTML = `
+            <div class="no-events">
+                <i class="fas fa-info-circle"></i>
+                <p>タイムラインに表示するイベントがありません</p>
+            </div>
+        `;
+        return;
+    }
+
+    events.sort((a, b) => new Date(b.date) - new Date(a.date));
+
     events.forEach(event => {
         const eventStyle = getEventTypeStyle(event.type);
         const timelineItem = document.createElement('div');
@@ -361,227 +493,6 @@ function displayTimelineEvents(events) {
     });
 }
 
-function getEventTypeStyle(type) {
-    const styles = {
-        email: {
-            icon: 'fa-envelope',
-            color: 'var(--color-info)'
-        },
-        status_change: {
-            icon: 'fa-exchange-alt',
-            color: 'var(--color-warning)'
-        },
-        score_update: {
-            icon: 'fa-chart-line',
-            color: 'var(--color-success)'
-        },
-        behavior_analysis: {
-            icon: 'fa-brain',
-            color: '#9c27b0'
-        },
-        opportunity: {
-            icon: 'fa-handshake',
-            color: '#ff9800'
-        },
-        opportunity_stage_change: {
-            icon: 'fa-exchange-alt',
-            color: '#ff9800'
-        },
-        task: {
-            icon: 'fa-tasks',
-            color: '#4caf50'
-        },
-        task_status_change: {
-            icon: 'fa-check-circle',
-            color: '#4caf50'
-        },
-        schedule: {
-            icon: 'fa-calendar',
-            color: '#2196f3'
-        },
-        schedule_status_change: {
-            icon: 'fa-clock',
-            color: '#2196f3'
-        }
-    };
-    return styles[type] || { icon: 'fa-circle', color: 'var(--color-primary)' };
-}
-
-function getEventMetadata(event) {
-    if (!event.metadata) return '';
-
-    let metadataHtml = '';
-    switch (event.type) {
-        case 'status_change':
-            metadataHtml = `
-                <div class="event-metadata">
-                    <span class="old-status">${event.metadata.old_status}</span>
-                    <i class="fas fa-arrow-right"></i>
-                    <span class="new-status">${event.metadata.new_status}</span>
-                </div>
-            `;
-            break;
-        case 'score_update':
-            metadataHtml = `
-                <div class="event-metadata">
-                    <span class="score-change">スコア: ${event.metadata.old_score || '?'} → ${event.metadata.new_score}</span>
-                </div>
-            `;
-            break;
-        case 'opportunity':
-            metadataHtml = `
-                <div class="event-metadata">
-                    <span class="stage">ステージ: ${event.metadata.stage}</span>
-                    <span class="amount">金額: ¥${Number(event.metadata.amount).toLocaleString()}</span>
-                    ${event.metadata.close_date ? `<span class="close-date">完了予定日: ${event.metadata.close_date}</span>` : ''}
-                </div>
-            `;
-            break;
-        case 'opportunity_stage_change':
-            metadataHtml = `
-                <div class="event-metadata">
-                    <span class="stage-change">
-                        <span class="old-stage">${event.metadata.old_stage}</span>
-                        <i class="fas fa-arrow-right"></i>
-                        <span class="new-stage">${event.metadata.new_stage}</span>
-                    </span>
-                </div>
-            `;
-            break;
-        case 'task':
-            metadataHtml = `
-                <div class="event-metadata">
-                    <span class="status">ステータス: ${event.metadata.status}</span>
-                    ${event.metadata.priority ? `<span class="priority">優先度: ${event.metadata.priority}</span>` : ''}
-                    ${event.metadata.due_date ? `<span class="due-date">期限: ${event.metadata.due_date}</span>` : ''}
-                    ${event.metadata.assignee ? `<span class="assignee">担当: ${event.metadata.assignee}</span>` : ''}
-                </div>
-            `;
-            break;
-        case 'task_status_change':
-            metadataHtml = `
-                <div class="event-metadata">
-                    <span class="status-change">
-                        <span class="old-status">${event.metadata.old_status}</span>
-                        <i class="fas fa-arrow-right"></i>
-                        <span class="new-status">${event.metadata.new_status}</span>
-                    </span>
-                </div>
-            `;
-            break;
-        case 'schedule':
-            metadataHtml = `
-                <div class="event-metadata">
-                    <span class="schedule-type">${event.metadata.type || '予定'}</span>
-                    ${event.metadata.start_date ? `<span class="start-date">開始: ${event.metadata.start_date}</span>` : ''}
-                    ${event.metadata.end_date ? `<span class="end-date">終了: ${event.metadata.end_date}</span>` : ''}
-                    ${event.metadata.location ? `<span class="location">場所: ${event.metadata.location}</span>` : ''}
-                </div>
-            `;
-            break;
-        case 'schedule_status_change':
-            metadataHtml = `
-                <div class="event-metadata">
-                    <span class="status-change">
-                        <span class="old-status">${event.metadata.old_status}</span>
-                        <i class="fas fa-arrow-right"></i>
-                        <span class="new-status">${event.metadata.new_status}</span>
-                    </span>
-                </div>
-            `;
-            break;
-                    ${event.metadata.due_date ? `<span class="due-date">期限: ${event.metadata.due_date}</span>` : ''}
-                </div>
-            `;
-            break;
-        case 'task_status_change':
-            metadataHtml = `
-                <div class="event-metadata">
-                    <span class="status-change">
-                        <span class="old-status">${event.metadata.old_status}</span>
-                        <i class="fas fa-arrow-right"></i>
-                        <span class="new-status">${event.metadata.new_status}</span>
-                    </span>
-                </div>
-            `;
-            break;
-        case 'schedule':
-            metadataHtml = `
-                <div class="event-metadata">
-                    ${event.metadata.location ? `<span class="location"><i class="fas fa-map-marker-alt"></i> ${event.metadata.location}</span>` : ''}
-                    <span class="time">
-                        <i class="fas fa-clock"></i> 
-                        ${formatDate(event.metadata.start_time).time} - 
-                        ${event.metadata.end_time ? formatDate(event.metadata.end_time).time : '未設定'}
-                    </span>
-                    ${event.metadata.status ? `<span class="status">ステータス: ${event.metadata.status}</span>` : ''}
-                </div>
-            `;
-            break;
-        case 'schedule_status_change':
-            metadataHtml = `
-                <div class="event-metadata">
-                    <span class="status-change">
-                        <span class="old-status">${event.metadata.old_status}</span>
-                        <i class="fas fa-arrow-right"></i>
-                        <span class="new-status">${event.metadata.new_status}</span>
-                    </span>
-                </div>
-            `;
-            break;
-    }
-    return metadataHtml;
-}
-
-function displayTimelineEvents(events) {
-    const timelineContainer = document.getElementById('timeline');
-    timelineContainer.innerHTML = '';
-    
-    // Sort events by timestamp in descending order
-    events.sort((a, b) => b.timestamp - a.timestamp);
-    
-    let currentDate = null;
-    events.forEach(event => {
-        const eventDate = new Date(event.date).toLocaleDateString('ja-JP');
-        if (currentDate !== eventDate) {
-            const dateHeader = document.createElement('div');
-            dateHeader.className = 'timeline-date-header';
-            dateHeader.innerHTML = eventDate;
-            timelineContainer.appendChild(dateHeader);
-            currentDate = eventDate;
-        }
-
-        const eventStyle = getEventTypeStyle(event.type);
-        const timelineItem = document.createElement('div');
-        timelineItem.className = `timeline-event ${event.type}`;
-
-        timelineItem.innerHTML = `
-            <div class="event-icon" style="background-color: ${eventStyle.color}">
-                <i class="fas ${eventStyle.icon}"></i>
-            </div>
-            <div class="event-content">
-                <div class="event-header">
-                    <div class="event-title">${event.title}</div>
-                    <div class="event-time">${formatDate(event.date).time}</div>
-                </div>
-                <div class="event-description">${event.description.replace(/\n/g, '<br>')}</div>
-                ${getEventMetadata(event)}
-            </div>
-        `;
-
-        timelineContainer.appendChild(timelineItem);
-    });
-
-    if (events.length === 0) {
-        timelineContainer.innerHTML = `
-            <div class="no-events">
-                <i class="fas fa-info-circle"></i>
-                <p>タイムラインに表示するイベントがありません</p>
-            </div>
-        `;
-    }
-}
-
 function updateLeadInfo(lead) {
     const leadInfoContainer = document.querySelector('.lead-info');
     if (leadInfoContainer && lead) {
@@ -596,6 +507,7 @@ function updateLeadInfo(lead) {
 }
 
 function initializeHistory(leadId) {
+    debugLog('Initializing history view for lead:', leadId);
     loadMessages(leadId);
     setupSearch(leadId);
     loadTimeline(leadId);
@@ -637,3 +549,5 @@ document.addEventListener('DOMContentLoaded', () => {
         initializeHistory(leadId);
     }
 });
+
+export { initializeHistory };

@@ -135,6 +135,14 @@ args = "Create Checkpoint"
 task = "workflow.run"
 args = "Flask Server"
 
+[[workflows.workflow.tasks]]
+task = "workflow.run"
+args = "Create Task Migration"
+
+[[workflows.workflow.tasks]]
+task = "workflow.run"
+args = "Apply Task Migration"
+
 [[workflows.workflow]]
 name = "Check Migrations"
 author = "agent"
@@ -180,12 +188,7 @@ task = "packager.installForAll"
 
 [[workflows.workflow.tasks]]
 task = "shell.exec"
-args = """
-
-current_date=$(date +%Y%m%d)
-pg_dump $DATABASE_URL > crm_backup_$current_date.sql
-echo \"Database backup created: crm_backup_$current_date.sql\"
-"""
+args = "pg_dump $DATABASE_URL > backup_$(date +%Y%m%d_%H%M%S).sql"
 
 [[workflows.workflow]]
 name = "Check Pending Migrations"
@@ -260,7 +263,7 @@ task = "packager.installForAll"
 
 [[workflows.workflow.tasks]]
 task = "shell.exec"
-args = "flask db migrate -m 'Add behavior_patterns field to Lead model'"
+args = "flask db migrate -m 'Add created_at to Task model'"
 
 #[[workflows.workflow]]
 #name = "Clean Migration"
@@ -599,6 +602,34 @@ task = "packager.installForAll"
 task = "shell.exec"
 args = "python3 app.py"
 waitForPort = 5002
+
+[[workflows.workflow]]
+name = "Create Task Migration"
+author = "agent"
+
+[workflows.workflow.metadata]
+agentRequireRestartOnSave = false
+
+[[workflows.workflow.tasks]]
+task = "packager.installForAll"
+
+[[workflows.workflow.tasks]]
+task = "shell.exec"
+args = "flask db migrate -m 'Add created_at and status_changes to Task model'"
+
+[[workflows.workflow]]
+name = "Apply Task Migration"
+author = "agent"
+
+[workflows.workflow.metadata]
+agentRequireRestartOnSave = false
+
+[[workflows.workflow.tasks]]
+task = "packager.installForAll"
+
+[[workflows.workflow.tasks]]
+task = "shell.exec"
+args = "flask db upgrade"
 
 [deployment]
 run = ["sh", "-c", "python3 app.py"]
