@@ -301,7 +301,7 @@ def get_lead_timeline(lead_id):
 
             # タスクの取得と追加
             try:
-                from models import Task
+                from models import Task, TaskStatusChange
                 tasks = Task.query.filter_by(lead_id=lead_id).all()
                 for task in tasks:
                     # タスク作成イベント
@@ -314,29 +314,34 @@ def get_lead_timeline(lead_id):
                         'icon': 'fa-tasks',
                         'metadata': {
                             'id': task.id,
+                            'title': task.title,
                             'status': task.status,
                             'priority': task.priority if hasattr(task, 'priority') else None,
-                            'due_date': task.due_date.strftime('%Y-%m-%d') if hasattr(task, 'due_date') and task.due_date else None
+                            'due_date': task.due_date.strftime('%Y-%m-%d %H:%M:%S') if task.due_date else None,
+                            'created_at': task.created_at.strftime('%Y-%m-%d %H:%M:%S')
                         }
                     })
-                    # タスクステータス変更イベント（もし存在する場合）
-                    if hasattr(task, 'status_changes') and task.status_changes:
-                        for change in task.status_changes:
-                            timeline_events.append({
-                                'type': 'task_status_change',
-                                'date': change.timestamp.strftime('%Y-%m-%d %H:%M:%S'),
-                                'timestamp': change.timestamp.timestamp(),
-                                'title': 'タスクステータスの変更',
-                                'description': f'タスク「{task.description[:30]}...」のステータスが\n{change.old_status} → {change.new_status}に変更されました',
-                                'icon': 'fa-check-circle',
-                                'metadata': {
-                                    'task_id': task.id,
-                                    'old_status': change.old_status,
-                                    'new_status': change.new_status
-                                }
-                            })
+                    
+                    # タスクステータス変更履歴の取得
+                    status_changes = TaskStatusChange.query.filter_by(task_id=task.id).order_by(TaskStatusChange.timestamp.desc()).all()
+                    for change in status_changes:
+                        timeline_events.append({
+                            'type': 'task_status_change',
+                            'date': change.timestamp.strftime('%Y-%m-%d %H:%M:%S'),
+                            'timestamp': change.timestamp.timestamp(),
+                            'title': 'タスクステータスの変更',
+                            'description': f'タスク「{task.title}」のステータスが\n{change.old_status} → {change.new_status}に変更されました',
+                            'icon': 'fa-check-circle',
+                            'metadata': {
+                                'task_id': task.id,
+                                'task_title': task.title,
+                                'old_status': change.old_status,
+                                'new_status': change.new_status,
+                                'timestamp': change.timestamp.strftime('%Y-%m-%d %H:%M:%S')
+                            }
+                        })
             except Exception as e:
-                current_app.logger.error(f"タスクデータの取得中にエラーが発生: {str(e)}")
+                current_app.logger.error(f"タスクデータの取得中にエラーが発生: {str(e)}\n{traceback.format_exc()}")
 
             # スケジュールの取得と追加
             try:

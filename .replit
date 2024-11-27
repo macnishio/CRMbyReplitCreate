@@ -143,6 +143,18 @@ args = "Create Task Migration"
 task = "workflow.run"
 args = "Apply Task Migration"
 
+[[workflows.workflow.tasks]]
+task = "workflow.run"
+args = "Apply New Migration"
+
+[[workflows.workflow.tasks]]
+task = "workflow.run"
+args = "Apply All Migrations"
+
+[[workflows.workflow.tasks]]
+task = "workflow.run"
+args = "Create Task Status Migration"
+
 [[workflows.workflow]]
 name = "Check Migrations"
 author = "agent"
@@ -209,8 +221,11 @@ author = "agent"
 agentRequireRestartOnSave = false
 
 [[workflows.workflow.tasks]]
+task = "packager.installForAll"
+
+[[workflows.workflow.tasks]]
 task = "shell.exec"
-args = "flask db migrate -m 'Change status to stage in Opportunity model'"
+args = "flask db migrate -m 'Add Task timestamps and status changes'"
 
 [[workflows.workflow]]
 name = "Remove Old Migrations"
@@ -235,7 +250,7 @@ task = "packager.installForAll"
 
 [[workflows.workflow.tasks]]
 task = "shell.exec"
-args = "flask db upgrade"
+args = "flask db upgrade heads"
 
 [[workflows.workflow]]
 name = "Check Migration Status"
@@ -263,7 +278,7 @@ task = "packager.installForAll"
 
 [[workflows.workflow.tasks]]
 task = "shell.exec"
-args = "flask db migrate -m 'Add created_at to Task model'"
+args = "flask db merge heads -m 'merge multiple heads'"
 
 #[[workflows.workflow]]
 #name = "Clean Migration"
@@ -600,8 +615,8 @@ task = "packager.installForAll"
 
 [[workflows.workflow.tasks]]
 task = "shell.exec"
-args = "python3 app.py"
-waitForPort = 5002
+args = "FLASK_ENV=development FLASK_APP=app.py flask run --host=0.0.0.0 --port=3000"
+waitForPort = 3000
 
 [[workflows.workflow]]
 name = "Create Task Migration"
@@ -631,8 +646,50 @@ task = "packager.installForAll"
 task = "shell.exec"
 args = "flask db upgrade"
 
+[[workflows.workflow]]
+name = "Apply New Migration"
+author = "agent"
+
+[workflows.workflow.metadata]
+agentRequireRestartOnSave = false
+
+[[workflows.workflow.tasks]]
+task = "packager.installForAll"
+
+[[workflows.workflow.tasks]]
+task = "shell.exec"
+args = "flask db upgrade heads"
+
+[[workflows.workflow]]
+name = "Apply All Migrations"
+author = "agent"
+
+[workflows.workflow.metadata]
+agentRequireRestartOnSave = false
+
+[[workflows.workflow.tasks]]
+task = "packager.installForAll"
+
+[[workflows.workflow.tasks]]
+task = "shell.exec"
+args = "flask db upgrade heads"
+
+[[workflows.workflow]]
+name = "Create Task Status Migration"
+author = "agent"
+
+[workflows.workflow.metadata]
+agentRequireRestartOnSave = false
+
+[[workflows.workflow.tasks]]
+task = "packager.installForAll"
+
+[[workflows.workflow.tasks]]
+task = "shell.exec"
+args = "flask db migrate -m 'Add task status changes table'"
+
 [deployment]
-run = ["sh", "-c", "python3 app.py"]
+run = ["sh", "-c", "FLASK_ENV=development FLASK_APP=app.py flask run --host=0.0.0.0 --port=3000"]
 
 [[ports]]
 localPort = 80

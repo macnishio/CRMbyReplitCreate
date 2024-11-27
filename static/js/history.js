@@ -143,7 +143,8 @@ function getEventMetadata(event) {
                 <div class="event-metadata">
                     <span class="status">${event.metadata.status}</span>
                     ${event.metadata.priority ? `<span class="priority">優先度: ${event.metadata.priority}</span>` : ''}
-                    ${event.metadata.due_date ? `<span class="due-date">期限: ${event.metadata.due_date}</span>` : ''}
+                    ${event.metadata.due_date ? `<span class="due-date">期限: ${formatDate(event.metadata.due_date).full}</span>` : ''}
+                    <span class="created-at">作成日時: ${formatDate(event.metadata.created_at).full}</span>
                 </div>
             `;
             break;
@@ -155,6 +156,7 @@ function getEventMetadata(event) {
                         <i class="fas fa-arrow-right"></i>
                         <span class="new-status">${event.metadata.new_status}</span>
                     </span>
+                    <span class="change-date">変更日時: ${formatDate(event.metadata.timestamp).full}</span>
                 </div>
             `;
             break;

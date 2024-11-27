@@ -2,7 +2,7 @@ from datetime import datetime
 from extensions import db
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 from sqlalchemy import Integer, String, Text, DateTime, ForeignKey, Boolean
-from typing import Optional
+from typing import Optional, List
 
 class Task(db.Model):
     __tablename__ = 'tasks'
@@ -23,3 +23,6 @@ class Task(db.Model):
     lead = relationship('Lead', back_populates='tasks')
     email = relationship('Email', back_populates='tasks')
     status_changes = relationship('TaskStatusChange', back_populates='task', cascade='all, delete-orphan')
+
+    def __repr__(self):
+        return f'<Task {self.title}>'
