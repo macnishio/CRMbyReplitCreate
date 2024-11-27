@@ -144,3 +144,32 @@ def track_system_change():
         'success': True,
         'change_id': change.id
     })
+
+@bp.route('/api/comprehensive-analysis', methods=['GET'])
+@login_required
+def comprehensive_analysis():
+    """包括的な顧客行動分析を実行"""
+    try:
+        user_settings = UserSettings.query.filter_by(user_id=current_user.id).first()
+        analysis_service = ComprehensiveAnalysisService(user_settings)
+        
+        analysis_results = analysis_service.generate_comprehensive_analysis(current_user.id)
+        
+        if 'error' in analysis_results:
+            return jsonify({
+                'success': False,
+                'error': analysis_results['error']
+            }), 400
+            
+        return jsonify({
+            'success': True,
+            'analysis': analysis_results
+        })
+        
+    except Exception as e:
+        current_app.logger.error(f"包括的分析の実行中にエラーが発生: {str(e)}")
+        return jsonify({
+            'success': False,
+            'error': str(e)
+        }), 500
+
