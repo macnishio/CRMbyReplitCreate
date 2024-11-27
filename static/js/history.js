@@ -11,9 +11,180 @@ const historyState = {
         dateTo: '',
         importance: 'all',
         query: ''
-    },
-    savedFilters: null
+    }
 };
+
+// フィルタープリセットの管理
+let savedPresets = [];
+
+async function loadFilterPresets() {
+    try {
+        const response = await fetch('/history/api/filter-presets');
+        if (!response.ok) throw new Error('プリセットの読み込みに失敗しました');
+        
+        const data = await response.json();
+        if (data.success) {
+            savedPresets = data.presets || [];
+            updatePresetList();
+        } else {
+            throw new Error(data.error || 'プリセットの読み込みに失敗しました');
+        }
+    } catch (error) {
+        console.error('Error loading presets:', error);
+        showNotification('プリセットの読み込みに失敗しました', 'error');
+    }
+}
+
+async function saveCurrentFilterAsPreset() {
+    const presetName = prompt('プリセット名を入力してください:');
+    if (!presetName) return;
+
+    const currentFilters = getCurrentFilters();
+    const preset = {
+        name: presetName,
+        filters: currentFilters
+    };
+
+    try {
+        const response = await fetch('/history/api/save-filter-preset', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(preset)
+        });
+
+        const result = await response.json();
+        if (result.success) {
+            await loadFilterPresets();
+            showNotification('フィルタープリセットを保存しました', 'success');
+        } else {
+            throw new Error(result.error || 'プリセットの保存に失敗しました');
+        }
+    } catch (error) {
+        console.error('Error saving preset:', error);
+        showNotification(error.message, 'error');
+    }
+}
+
+async function deletePreset(presetName) {
+    if (!confirm(`プリセット "${presetName}" を削除してもよろしいですか？`)) return;
+
+    try {
+        const response = await fetch('/history/api/delete-filter-preset', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ name: presetName })
+        });
+
+        const result = await response.json();
+        if (result.success) {
+            await loadFilterPresets();
+            showNotification('プリセットを削除しました', 'success');
+        } else {
+            throw new Error(result.error || 'プリセットの削除に失敗しました');
+        }
+    } catch (error) {
+        console.error('Error deleting preset:', error);
+        showNotification(error.message, 'error');
+    }
+}
+
+function updatePresetList() {
+    const presetContainer = document.getElementById('filter-presets');
+    if (!presetContainer) return;
+
+    presetContainer.innerHTML = '';
+    savedPresets.forEach(preset => {
+        const presetButton = document.createElement('button');
+        presetButton.className = 'preset-button';
+        presetButton.innerHTML = `
+            <span>${preset.name}</span>
+            <button class="delete-preset" onclick="event.stopPropagation(); deletePreset('${preset.name}')">×</button>
+        `;
+        presetButton.onclick = () => applyPreset(preset);
+        presetContainer.appendChild(presetButton);
+    });
+}
+
+function applyPreset(preset) {
+    // フィルターの適用
+    const filters = preset.filters;
+    
+    // チェックボックスを設定
+    document.querySelectorAll('input[name="message_type"]').forEach(cb => {
+        cb.checked = filters.messageTypes.includes(cb.value);
+    });
+    
+    // セレクトボックスを設定
+    document.getElementById('period-filter').value = filters.period;
+    document.getElementById('importance-filter').value = filters.importance;
+    
+    // 日付入力を設定
+    document.getElementById('dateFrom').value = filters.dateFrom;
+    document.getElementById('dateTo').value = filters.dateTo;
+    
+    // 検索ボックスを設定
+    document.getElementById('messageSearch').value = filters.query;
+    
+    // カスタム日付範囲の表示を更新
+    updateCustomDateRange();
+    
+    // フィルターを適用
+    applyFilters();
+}
+
+function updateCustomDateRange() {
+    const periodFilter = document.getElementById('period-filter');
+    const customDateRange = document.getElementById('custom-date-range');
+    customDateRange.style.display = periodFilter.value === 'custom' ? 'block' : 'none';
+}
+
+function getCurrentFilters() {
+    return {
+        messageTypes: getSelectedMessageTypes(),
+        period: document.getElementById('period-filter').value,
+        dateFrom: document.getElementById('dateFrom').value,
+        dateTo: document.getElementById('dateTo').value,
+        importance: document.getElementById('importance-filter').value,
+        query: document.getElementById('messageSearch').value
+    };
+}
+
+function getSelectedMessageTypes() {
+    return Array.from(document.querySelectorAll('input[name="message_type"]:checked'))
+        .map(cb => cb.value);
+}
+
+function applyFilters() {
+    historyState.filters = getCurrentFilters();
+    historyState.currentPage = 1;
+    loadMessages(window.leadId);
+}
+
+function resetFilters() {
+    // チェックボックスをリセット
+    document.querySelectorAll('input[name="message_type"]').forEach(cb => cb.checked = true);
+    
+    // セレクトボックスをリセット
+    document.getElementById('period-filter').value = 'all';
+    document.getElementById('importance-filter').value = 'all';
+    
+    // 日付入力をリセット
+    document.getElementById('dateFrom').value = '';
+    document.getElementById('dateTo').value = '';
+    
+    // 検索ボックスをリセット
+    document.getElementById('messageSearch').value = '';
+    
+    // カスタム日付範囲を非表示
+    document.getElementById('custom-date-range').style.display = 'none';
+    
+    // フィルターを適用
+    applyFilters();
+}
 
 function formatDate(dateStr) {
     const date = new Date(dateStr);
@@ -70,6 +241,8 @@ function showError(container, message) {
             <span>${message}</span>
         </div>
     `;
+}
+
 // フィルター関連の関数
 function toggleFilters() {
     const filterContent = document.getElementById('filter-content');
@@ -78,231 +251,6 @@ function toggleFilters() {
     filterIcon.textContent = filterContent.classList.contains('collapsed') ? '▼' : '▲';
 }
 
-// フィルタープリセットの管理
-let savedPresets = [];
-
-async function loadFilterPresets() {
-    try {
-        const response = await fetch('/history/api/filter-presets');
-        if (!response.ok) throw new Error('プリセットの読み込みに失敗しました');
-        
-        const data = await response.json();
-        savedPresets = data.presets || [];
-        updatePresetList();
-    } catch (error) {
-        console.error('Error loading presets:', error);
-        showNotification('プリセットの読み込みに失敗しました', 'error');
-    }
-}
-
-async function saveCurrentFilterAsPreset() {
-    const presetName = prompt('プリセット名を入力してください:');
-    if (!presetName) return;
-
-    const currentFilters = getCurrentFilters();
-    const preset = {
-        name: presetName,
-        filters: currentFilters
-    };
-
-    try {
-        const response = await fetch('/history/api/save-filter-preset', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-            },
-            body: JSON.stringify(preset)
-        });
-
-        if (!response.ok) throw new Error('プリセットの保存に失敗しました');
-
-        const result = await response.json();
-        if (result.success) {
-            await loadFilterPresets(); // リストを再読み込み
-            showNotification('フィルタープリセットを保存しました', 'success');
-        } else {
-            throw new Error(result.error || 'プリセットの保存に失敗しました');
-        }
-    } catch (error) {
-        console.error('Error saving preset:', error);
-        showNotification(error.message, 'error');
-    }
-}
-
-function updatePresetList() {
-    const presetContainer = document.getElementById('filter-presets');
-    if (!presetContainer) return;
-
-    presetContainer.innerHTML = '';
-    savedPresets.forEach(preset => {
-        const presetButton = document.createElement('button');
-        presetButton.className = 'preset-button';
-        presetButton.innerHTML = `
-            <span>${preset.name}</span>
-            <button class="delete-preset" onclick="deletePreset('${preset.name}')">×</button>
-        `;
-        presetButton.onclick = () => applyPreset(preset);
-        presetContainer.appendChild(presetButton);
-    });
-}
-
-async function deletePreset(presetName) {
-    if (!confirm(`プリセット "${presetName}" を削除してもよろしいですか？`)) return;
-
-    try {
-        const response = await fetch('/history/api/delete-filter-preset', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({ name: presetName })
-        });
-
-        if (!response.ok) throw new Error('プリセットの削除に失敗しました');
-
-        savedPresets = savedPresets.filter(p => p.name !== presetName);
-        updatePresetList();
-        showNotification('プリセットを削除しました', 'success');
-    } catch (error) {
-        console.error('Error deleting preset:', error);
-        showNotification('プリセットの削除に失敗しました', 'error');
-    }
-}
-
-function applyPreset(preset) {
-    // チェックボックスを設定
-    document.querySelectorAll('input[name="message_type"]').forEach(cb => {
-        cb.checked = preset.filters.messageTypes.includes(cb.value);
-    });
-    
-    // セレクトボックスを設定
-    document.getElementById('period-filter').value = preset.filters.period;
-    document.getElementById('importance-filter').value = preset.filters.importance;
-    
-    // 日付入力を設定
-    document.getElementById('dateFrom').value = preset.filters.dateFrom;
-    document.getElementById('dateTo').value = preset.filters.dateTo;
-    
-    // 検索ボックスを設定
-    document.getElementById('messageSearch').value = preset.filters.query;
-    
-    // カスタム日付範囲の表示を更新
-    updateCustomDateRange();
-    
-    // フィルターを適用
-    applyFilters();
-}
-
-function updateCustomDateRange() {
-    const periodFilter = document.getElementById('period-filter');
-    const customDateRange = document.getElementById('custom-date-range');
-    customDateRange.style.display = periodFilter.value === 'custom' ? 'block' : 'none';
-}
-
-function getSelectedMessageTypes() {
-    const checkboxes = document.querySelectorAll('input[name="message_type"]');
-    return Array.from(checkboxes)
-        .filter(cb => cb.checked)
-        .map(cb => cb.value);
-}
-
-function getCurrentFilters() {
-    const messageTypes = getSelectedMessageTypes();
-    const period = document.getElementById('period-filter').value;
-    const importance = document.getElementById('importance-filter').value;
-    const query = document.getElementById('messageSearch').value;
-    const dateFrom = document.getElementById('dateFrom').value;
-    const dateTo = document.getElementById('dateTo').value;
-
-    return {
-        messageTypes,
-        period,
-        dateFrom: period === 'custom' ? dateFrom : '',
-        dateTo: period === 'custom' ? dateTo : '',
-        importance,
-        query
-    };
-}
-
-function applyFilters() {
-    historyState.filters = getCurrentFilters();
-    historyState.currentPage = 1;
-    loadMessages(window.leadId, 1);
-}
-
-function resetFilters() {
-    // チェックボックスをリセット
-    document.querySelectorAll('input[name="message_type"]').forEach(cb => cb.checked = true);
-    
-    // セレクトボックスをリセット
-    document.getElementById('period-filter').value = 'all';
-    document.getElementById('importance-filter').value = 'all';
-    
-    // 日付入力をリセット
-    document.getElementById('dateFrom').value = '';
-    document.getElementById('dateTo').value = '';
-    
-    // 検索ボックスをリセット
-    document.getElementById('messageSearch').value = '';
-    
-    // カスタム日付範囲を非表示
-    document.getElementById('custom-date-range').style.display = 'none';
-    
-    // フィルターを適用
-    applyFilters();
-}
-
-async function saveFilters() {
-    const filters = getCurrentFilters();
-    try {
-        const response = await fetch('/history/api/save-filters', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-            },
-            body: JSON.stringify(filters)
-        });
-        
-        if (!response.ok) throw new Error('フィルターの保存に失敗しました');
-        
-        const result = await response.json();
-        if (result.success) {
-            historyState.savedFilters = filters;
-            showNotification('フィルター設定を保存しました', 'success');
-        }
-    } catch (error) {
-        console.error('Error saving filters:', error);
-        showNotification('フィルターの保存に失敗しました', 'error');
-    }
-}
-
-function loadSavedFilters() {
-    if (!historyState.savedFilters) return;
-    
-    const filters = historyState.savedFilters;
-    
-    // チェックボックスを設定
-    document.querySelectorAll('input[name="message_type"]').forEach(cb => {
-        cb.checked = filters.messageTypes.includes(cb.value);
-    });
-    
-    // セレクトボックスを設定
-    document.getElementById('period-filter').value = filters.period;
-    document.getElementById('importance-filter').value = filters.importance;
-    
-    // 日付入力を設定
-    document.getElementById('dateFrom').value = filters.dateFrom;
-    document.getElementById('dateTo').value = filters.dateTo;
-    
-    // 検索ボックスを設定
-    document.getElementById('messageSearch').value = filters.query;
-    
-    // カスタム日付範囲の表示を更新
-    updateCustomDateRange();
-    
-    // フィルターを適用
-    applyFilters();
-}
 
 function showNotification(message, type = 'info') {
     const notification = document.createElement('div');
@@ -314,7 +262,6 @@ function showNotification(message, type = 'info') {
     setTimeout(() => {
         notification.remove();
     }, 3000);
-}
 }
 
 async function loadMessages(leadId, page = 1) {
