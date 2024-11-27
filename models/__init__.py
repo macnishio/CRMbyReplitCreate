@@ -1,36 +1,32 @@
-from typing import TYPE_CHECKING
-
-if TYPE_CHECKING:
-    from .user import User
-    from .lead import Lead
-    from .email import Email
-    from .unknown_email import UnknownEmail
-    from .opportunity import Opportunity
-    from .account import Account
-    from .schedule import Schedule
-    from .task import Task
-    from .user_settings import UserSettings
-    from .subscription import SubscriptionPlan, Subscription
-    from .email_fetch_tracker import EmailFetchTracker
-    from .system_changes import SystemChange, RollbackHistory
-
-from .system_changes import SystemChange, RollbackHistory
+# モデルの依存関係を考慮した順序でインポート
 from .user import User
+from .account import Account
+from .behavior_pattern import BehaviorPattern
 from .lead import Lead
 from .email import Email
-from .unknown_email import UnknownEmail
-from .opportunity import Opportunity
-from .account import Account
-from .schedule import Schedule
 from .task import Task
+from .schedule import Schedule
+from .opportunity import Opportunity
 from .user_settings import UserSettings
 from .subscription import SubscriptionPlan, Subscription
 from .email_fetch_tracker import EmailFetchTracker
+from .system_changes import SystemChange, RollbackHistory
+from .unknown_email import UnknownEmail
 
 __all__ = [
-    'SystemChange', 'RollbackHistory',
-    'User', 'Lead', 'Email', 'UnknownEmail',
-    'Opportunity', 'Account', 'Schedule', 'Task',
-    'UserSettings', 'SubscriptionPlan', 'Subscription',
-    'EmailFetchTracker'
+    'User',
+    'Account',
+    'Lead',
+    'BehaviorPattern',
+    'Email',
+    'Task',
+    'Schedule',
+    'Opportunity',
+    'UserSettings',
+    'SubscriptionPlan',
+    'Subscription',
+    'EmailFetchTracker',
+    'SystemChange',
+    'RollbackHistory',
+    'UnknownEmail'
 ]

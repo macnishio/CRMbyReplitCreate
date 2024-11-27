@@ -1,8 +1,12 @@
 from datetime import datetime
 from extensions import db
-from sqlalchemy.orm import Mapped, mapped_column
-from sqlalchemy import Integer, String, Text, DateTime, ForeignKey, Boolean
-from typing import Optional
+from sqlalchemy.orm import Mapped, mapped_column, relationship
+from sqlalchemy import Integer, String, Text, DateTime, ForeignKey, Boolean, text
+from typing import Optional, TYPE_CHECKING
+
+if TYPE_CHECKING:
+    from .lead import Lead
+    from .email import Email
 
 class Task(db.Model):
     __tablename__ = 'tasks'
@@ -16,9 +20,23 @@ class Task(db.Model):
     lead_id: Mapped[Optional[int]] = mapped_column(Integer, ForeignKey('leads.id'), nullable=True)
     email_id: Mapped[Optional[int]] = mapped_column(Integer, ForeignKey('emails.id'), nullable=True)
     is_ai_generated: Mapped[bool] = mapped_column(Boolean, default=False)
-    created_at: Mapped[datetime] = mapped_column(DateTime, nullable=False, default=datetime.utcnow)
-    updated_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+    created_at: Mapped[datetime] = mapped_column(
+        DateTime, 
+        nullable=False,
+        default=datetime.utcnow,
+        server_default=text('CURRENT_TIMESTAMP')
+    )
+    updated_at: Mapped[datetime] = mapped_column(
+        DateTime,
+        nullable=False,
+        default=datetime.utcnow,
+        onupdate=datetime.utcnow,
+        server_default=text('CURRENT_TIMESTAMP')
+    )
 
     # リレーションシップ
-    lead = db.relationship('Lead', back_populates='tasks')
-    email = db.relationship('Email', back_populates='tasks')
+    lead = relationship('Lead', back_populates='tasks')
+    email = relationship('Email', back_populates='tasks')
+
+    def __repr__(self):
+        return f'<Task {self.title}>'
