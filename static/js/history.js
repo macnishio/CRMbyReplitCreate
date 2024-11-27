@@ -286,6 +286,18 @@ function getEventTypeStyle(type) {
         behavior_analysis: {
             icon: 'fa-brain',
             color: '#9c27b0'
+        },
+        opportunity: {
+            icon: 'fa-handshake',
+            color: '#ff9800'
+        },
+        task: {
+            icon: 'fa-tasks',
+            color: '#4caf50'
+        },
+        schedule: {
+            icon: 'fa-calendar',
+            color: '#2196f3'
         }
     };
     return styles[type] || { icon: 'fa-circle', color: 'var(--color-primary)' };
@@ -309,6 +321,30 @@ function getEventMetadata(event) {
             metadataHtml = `
                 <div class="event-metadata">
                     <span class="score-change">スコア: ${event.metadata.old_score || '?'} → ${event.metadata.new_score}</span>
+                </div>
+            `;
+            break;
+        case 'opportunity':
+            metadataHtml = `
+                <div class="event-metadata">
+                    <span class="stage">ステージ: ${event.metadata.stage}</span>
+                    <span class="amount">金額: ¥${Number(event.metadata.amount).toLocaleString()}</span>
+                </div>
+            `;
+            break;
+        case 'task':
+            metadataHtml = `
+                <div class="event-metadata">
+                    <span class="status">ステータス: ${event.metadata.status}</span>
+                    ${event.metadata.priority ? `<span class="priority">優先度: ${event.metadata.priority}</span>` : ''}
+                </div>
+            `;
+            break;
+        case 'schedule':
+            metadataHtml = `
+                <div class="event-metadata">
+                    <span class="time">終了時刻: ${event.metadata.end_time || '未設定'}</span>
+                    ${event.metadata.status ? `<span class="status">ステータス: ${event.metadata.status}</span>` : ''}
                 </div>
             `;
             break;

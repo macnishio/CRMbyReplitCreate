@@ -247,6 +247,69 @@ def get_lead_timeline(lead_id):
                     'error': 'メールデータの取得中にエラーが発生しました',
                     'code': 'EMAIL_FETCH_ERROR'
                 }), 500
+
+            # 案件（商談）の取得と追加
+            try:
+                from models import Opportunity
+                opportunities = Opportunity.query.filter_by(lead_id=lead_id).order_by(Opportunity.created_at.desc()).all()
+                for opportunity in opportunities:
+                    timeline_events.append({
+                        'type': 'opportunity',
+                        'date': opportunity.created_at.strftime('%Y-%m-%d %H:%M:%S'),
+                        'timestamp': opportunity.created_at.timestamp(),
+                        'title': '商談の作成',
+                        'description': f'商談「{opportunity.name}」が作成されました。金額: ¥{"{:,.0f}".format(opportunity.amount)}',
+                        'icon': 'fa-handshake',
+                        'metadata': {
+                            'id': opportunity.id,
+                            'stage': opportunity.stage,
+                            'amount': opportunity.amount
+                        }
+                    })
+            except Exception as e:
+                current_app.logger.error(f"商談データの取得中にエラーが発生: {str(e)}")
+
+            # タスクの取得と追加
+            try:
+                from models import Task
+                tasks = Task.query.filter_by(lead_id=lead_id).order_by(Task.created_at.desc()).all()
+                for task in tasks:
+                    timeline_events.append({
+                        'type': 'task',
+                        'date': task.created_at.strftime('%Y-%m-%d %H:%M:%S'),
+                        'timestamp': task.created_at.timestamp(),
+                        'title': 'タスクの作成',
+                        'description': task.description[:100] + ('...' if len(task.description) > 100 else ''),
+                        'icon': 'fa-tasks',
+                        'metadata': {
+                            'id': task.id,
+                            'status': task.status,
+                            'priority': task.priority if hasattr(task, 'priority') else None
+                        }
+                    })
+            except Exception as e:
+                current_app.logger.error(f"タスクデータの取得中にエラーが発生: {str(e)}")
+
+            # スケジュールの取得と追加
+            try:
+                from models import Schedule
+                schedules = Schedule.query.filter_by(lead_id=lead_id).order_by(Schedule.start_time.desc()).all()
+                for schedule in schedules:
+                    timeline_events.append({
+                        'type': 'schedule',
+                        'date': schedule.start_time.strftime('%Y-%m-%d %H:%M:%S'),
+                        'timestamp': schedule.start_time.timestamp(),
+                        'title': 'スケジュールの作成',
+                        'description': schedule.title + (f'\n{schedule.description[:100]}...' if schedule.description else ''),
+                        'icon': 'fa-calendar',
+                        'metadata': {
+                            'id': schedule.id,
+                            'end_time': schedule.end_time.strftime('%Y-%m-%d %H:%M:%S') if schedule.end_time else None,
+                            'status': schedule.status if hasattr(schedule, 'status') else None
+                        }
+                    })
+            except Exception as e:
+                current_app.logger.error(f"スケジュールデータの取得中にエラーが発生: {str(e)}")
         except Exception as e:
             current_app.logger.error(f"メールデータの取得エラー: {str(e)}")
             
