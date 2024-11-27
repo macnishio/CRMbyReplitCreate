@@ -90,6 +90,9 @@
 <script src="{{ url_for('static', filename='js/history.js') }}"></script>
 <script>
     document.addEventListener('DOMContentLoaded', () => {
+        // デバッグモードを有効化
+        historyState.debug = true;
+        
         const leadId = {{ lead.id }};
         initializeHistory(leadId);
 

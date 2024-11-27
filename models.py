@@ -6,7 +6,7 @@ from datetime import datetime
 import base64
 from cryptography.fernet import Fernet
 from flask import current_app
-from sqlalchemy.orm import Mapped, mapped_column
+from sqlalchemy.orm import Mapped, mapped_column, relationship
 from sqlalchemy import Integer, String, DateTime, Float, ForeignKey, Text, Boolean, Numeric
 from typing import List, Optional
 
@@ -142,6 +142,36 @@ class UserSettings(db.Model):
     def clearbit_api_key(self, value):
         self._clearbit_api_key = self._encrypt(value) if value else None
 
+class Task(db.Model):
+    __tablename__ = 'tasks'
+    id: Mapped[int] = mapped_column(Integer, primary_key=True)
+    title: Mapped[str] = mapped_column(String(100), nullable=False)
+    description: Mapped[str] = mapped_column(Text)
+    due_date: Mapped[datetime] = mapped_column(DateTime)
+    status: Mapped[str] = mapped_column(String(20))
+    completed: Mapped[bool] = mapped_column(Boolean, default=False)
+    user_id: Mapped[int] = mapped_column(Integer, ForeignKey('users.id'), nullable=False)
+    lead_id: Mapped[Optional[int]] = mapped_column(Integer, ForeignKey('leads.id'), nullable=True)
+    email_id: Mapped[Optional[int]] = mapped_column(Integer, ForeignKey('emails.id'), nullable=True)
+    is_ai_generated: Mapped[bool] = mapped_column(Boolean, default=False)
+    created_at: Mapped[datetime] = mapped_column(
+        DateTime, 
+        nullable=False,
+        default=datetime.utcnow,
+        server_default=text('CURRENT_TIMESTAMP')
+    )
+    updated_at: Mapped[datetime] = mapped_column(
+        DateTime,
+        nullable=False,
+        default=datetime.utcnow,
+        onupdate=datetime.utcnow,
+        server_default=text('CURRENT_TIMESTAMP')
+    )
+
+    # リレーションシップ
+    lead: Mapped["Lead"] = relationship('Lead', back_populates='tasks')
+    email: Mapped["Email"] = relationship('Email', back_populates='tasks')
+
 class Lead(db.Model):
     __tablename__ = 'leads'
     id: Mapped[int] = mapped_column(Integer, primary_key=True)
@@ -151,15 +181,32 @@ class Lead(db.Model):
     status: Mapped[str] = mapped_column(String(20), nullable=False, default='New')
     score: Mapped[float] = mapped_column(Float, nullable=False, default=0.0)
     user_id: Mapped[int] = mapped_column(Integer, ForeignKey('users.id'), nullable=False)
-    created_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow)
+    created_at: Mapped[datetime] = mapped_column(
+        DateTime,
+        nullable=False,
+        default=datetime.utcnow,
+        server_default=text('CURRENT_TIMESTAMP')
+    )
+    updated_at: Mapped[datetime] = mapped_column(
+        DateTime,
+        nullable=False,
+        default=datetime.utcnow,
+        onupdate=datetime.utcnow,
+        server_default=text('CURRENT_TIMESTAMP')
+    )
+    behavior_patterns: Mapped[List["BehaviorPattern"]] = relationship(
+        "BehaviorPattern", 
+        back_populates="lead",
+        cascade="all, delete-orphan"
+    )
     last_contact: Mapped[Optional[datetime]] = mapped_column(DateTime, nullable=True)
     last_followup_email: Mapped[Optional[datetime]] = mapped_column(DateTime, nullable=True)
 
-    # Relationships
-    opportunities = db.relationship('Opportunity', back_populates='lead', cascade='all, delete-orphan')
-    schedules = db.relationship('Schedule', back_populates='lead', cascade='all, delete-orphan')
-    tasks = db.relationship('Task', back_populates='lead', cascade='all, delete-orphan')
-    emails = db.relationship('Email', backref='lead', lazy='dynamic')
+    # リレーションシップ
+    opportunities: Mapped[List["Opportunity"]] = relationship('Opportunity', back_populates='lead', cascade='all, delete-orphan')
+    schedules: Mapped[List["Schedule"]] = relationship('Schedule', back_populates='lead', cascade='all, delete-orphan')
+    tasks: Mapped[List["Task"]] = relationship('Task', back_populates='lead', cascade='all, delete-orphan')
+    emails: Mapped[List["Email"]] = relationship('Email', backref='lead', lazy='dynamic')
 
 class Email(db.Model):
     __tablename__ = 'emails'
@@ -238,23 +285,6 @@ class Schedule(db.Model):
     lead = db.relationship('Lead', back_populates='schedules')
     email = db.relationship('Email', back_populates='schedules')
 
-class Task(db.Model):
-    __tablename__ = 'tasks'
-    id: Mapped[int] = mapped_column(Integer, primary_key=True)
-    title: Mapped[str] = mapped_column(String(100), nullable=False)
-    description: Mapped[str] = mapped_column(Text)
-    due_date: Mapped[datetime] = mapped_column(DateTime)
-    status: Mapped[str] = mapped_column(String(20))
-    completed: Mapped[bool] = mapped_column(Boolean, default=False)
-    user_id: Mapped[int] = mapped_column(Integer, ForeignKey('users.id'), nullable=False)
-    lead_id: Mapped[Optional[int]] = mapped_column(Integer, ForeignKey('leads.id'), nullable=True)
-    email_id: Mapped[Optional[int]] = mapped_column(Integer, ForeignKey('emails.id'), nullable=True)
-    is_ai_generated: Mapped[bool] = mapped_column(Boolean, default=False)
-
-    # リレーションシップ
-    lead = db.relationship('Lead', back_populates='tasks')
-    email = db.relationship('Email', back_populates='tasks')
-
 class EmailFetchTracker(db.Model):
     __tablename__ = 'email_fetch_tracker'
     id: Mapped[int] = mapped_column(Integer, primary_key=True)
@@ -262,3 +292,19 @@ class EmailFetchTracker(db.Model):
     user_id: Mapped[int] = mapped_column(Integer, ForeignKey('users.id'), nullable=False)
     created_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow)
     updated_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+
+class BehaviorPattern(db.Model):
+    __tablename__ = 'behavior_patterns'
+    
+    id: Mapped[int] = mapped_column(Integer, primary_key=True)
+    lead_id: Mapped[int] = mapped_column(Integer, ForeignKey('leads.id'), nullable=False)
+    pattern_type: Mapped[str] = mapped_column(String(50), nullable=False)
+    created_at: Mapped[datetime] = mapped_column(
+        DateTime, 
+        nullable=False,
+        default=datetime.utcnow,
+        server_default=text('CURRENT_TIMESTAMP')
+    )
+    
+    # リレーションシップ
+    lead: Mapped["Lead"] = relationship("Lead", back_populates="behavior_patterns")
