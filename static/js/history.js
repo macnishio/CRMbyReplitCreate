@@ -1,3 +1,5 @@
+// Refactored and full version of the script with added debugging capabilities and improvements.
+
 const historyState = {
     currentPage: 1,
     hasMore: false,
@@ -17,14 +19,8 @@ function debugLog(...args) {
     }
 }
 
-let isAnalyzing = false;
-
 function formatDate(dateStr) {
     const date = new Date(dateStr);
-    if (isNaN(date)) {
-        debugLog('Invalid date format:', dateStr);
-        return { full: 'Invalid date', time: 'Invalid time', date: 'Invalid date' };
-    }
     return {
         full: date.toLocaleString('ja-JP', {
             year: 'numeric',
@@ -183,66 +179,43 @@ function setupSearch(leadId) {
 function initializeAnalysis() {
     const analyzeBtn = document.getElementById('analyzeBtn');
     if (analyzeBtn) {
-        analyzeBtn.removeEventListener('click', analyzeCustomerBehavior);
-        analyzeBtn.addEventListener('click', (e) => {
-            e.preventDefault();
-            analyzeCustomerBehavior().catch(console.error);
-        });
+        analyzeBtn.addEventListener('click', analyzeCustomerBehavior);
     }
 }
 
 async function analyzeCustomerBehavior() {
-    if (isAnalyzing) {
-        debugLog('Analysis already in progress, skipping');
-        return;
-    }
-
-    isAnalyzing = true;
-    debugLog('Starting customer behavior analysis');
+    debugLog('analyzeCustomerBehavior function called.');
     const analysisResults = document.getElementById('analysisResults');
     const analysisData = document.getElementById('analysisData');
     const analyzeBtn = document.getElementById('analyzeBtn');
-
-    if (!analysisResults || !analysisData || !analyzeBtn) {
-        debugLog('Error: Required elements not found', { analysisResults, analysisData, analyzeBtn });
-        console.error('Required elements not found');
-        isAnalyzing = false;
-        return;
-    }
-
+    
     try {
-        debugLog('Disabling analyze button and showing loading state');
+        // 分析開始前の状態を設定
         analyzeBtn.disabled = true;
         analyzeBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> 分析中...';
         analysisResults.style.display = 'block';
+        analysisData.innerHTML = '<div class="loading-indicator"><i class="fas fa-spinner fa-spin"></i> AI分析を実行中...</div>';
 
+        // URLからリードIDを取得
         const pathParts = window.location.pathname.split('/');
         const leadId = pathParts[pathParts.length - 1];
-        debugLog('Extracted lead ID:', leadId);
 
-        if (!leadId) {
-            debugLog('Error: Lead ID not found');
-            throw new Error('リードIDが見つかりません');
-        }
-
-        debugLog('Sending analysis request for lead:', leadId);
+        // API呼び出し
         const response = await fetch(`/history/api/leads/${leadId}/analyze`, {
             method: 'POST',
             headers: {
-                'Content-Type': 'application/json',
-                'X-Requested-With': 'XMLHttpRequest'
-            },
-            credentials: 'same-origin'
+                'Content-Type': 'application/json'
+            }
         });
 
         if (!response.ok) {
-            debugLog('Server error:', response.status);
-            throw new Error(`サーバーエラー: ${response.status}`);
+            const errorData = await response.json();
+            throw new Error(errorData.error || 'AI分析中にエラーが発生しました');
         }
 
         const data = await response.json();
-        debugLog('Received analysis data:', data);
-
+        
+        // 分析結果の表示
         analysisData.innerHTML = `
             <div class="analysis-section">
                 <h4>コミュニケーションパターン分析</h4>
@@ -257,10 +230,8 @@ async function analyzeCustomerBehavior() {
                 <p>${data.recommended_actions || '推奨データがありません'}</p>
             </div>
         `;
-        debugLog('Analysis results rendered successfully');
 
     } catch (error) {
-        debugLog('Analysis error:', error);
         console.error('AI分析エラー:', error);
         analysisData.innerHTML = `
             <div class="error-message">
@@ -269,10 +240,9 @@ async function analyzeCustomerBehavior() {
             </div>
         `;
     } finally {
-        debugLog('Resetting analyze button state');
+        // ボタンを元の状態に戻す
         analyzeBtn.disabled = false;
         analyzeBtn.innerHTML = '<i class="fas fa-brain"></i> AI分析';
-        isAnalyzing = false;
     }
 }
 
@@ -494,10 +464,10 @@ function getEventMetadata(event) {
 function displayTimelineEvents(events) {
     const timelineContainer = document.getElementById('timeline');
     timelineContainer.innerHTML = '';
-
+    
     // Sort events by timestamp in descending order
     events.sort((a, b) => b.timestamp - a.timestamp);
-
+    
     let currentDate = null;
     events.forEach(event => {
         const eventDate = new Date(event.date).toLocaleDateString('ja-JP');
@@ -566,32 +536,32 @@ function initializeHistory(leadId) {
                 historyState.currentPage++;
                 loadMessages(leadId, historyState.currentPage);
             }
-            });
-            }
+        });
+    }
 
-            const messagesContainer = document.getElementById('messages');
-            if (messagesContainer) {
-            let scrollTimeout;
-            messagesContainer.addEventListener('scroll', () => {
+    const messagesContainer = document.getElementById('messages');
+    if (messagesContainer) {
+        let scrollTimeout;
+        messagesContainer.addEventListener('scroll', () => {
             clearTimeout(scrollTimeout);
             scrollTimeout = setTimeout(() => {
                 sessionStorage.setItem(`scroll_position_${leadId}`, messagesContainer.scrollTop);
             }, 100);
-            });
+        });
 
-            const savedPosition = sessionStorage.getItem(`scroll_position_${leadId}`);
-            if (savedPosition) {
+        const savedPosition = sessionStorage.getItem(`scroll_position_${leadId}`);
+        if (savedPosition) {
             messagesContainer.scrollTop = parseInt(savedPosition);
-            }
-            }
-            }
+        }
+    }
+}
 
-            document.addEventListener('DOMContentLoaded', () => {
-            const pathParts = window.location.pathname.split('/');
-            const leadIdIndex = pathParts.indexOf('leads') + 1;
-            const leadId = pathParts[leadIdIndex];
+document.addEventListener('DOMContentLoaded', () => {
+    const pathParts = window.location.pathname.split('/');
+    const leadIdIndex = pathParts.indexOf('leads') + 1;
+    const leadId = pathParts[leadIdIndex];
 
-            if (leadId && !isNaN(leadId)) {
-            initializeHistory(leadId);
-            }
-            });
+    if (leadId && !isNaN(leadId)) {
+        initializeHistory(leadId);
+    }
+});

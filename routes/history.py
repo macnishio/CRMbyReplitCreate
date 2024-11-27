@@ -179,71 +179,28 @@ def export_history(lead_id):
 def analyze_lead_behavior(lead_id):
     """リードの行動パターンをAIで分析"""
     try:
-        # デバッグログ追加
-        current_app.logger.debug(f"Starting AI analysis for lead {lead_id}")
-        
         # ユーザー設定を取得
         user_settings = UserSettings.query.filter_by(user_id=current_user.id).first()
         if not user_settings or not user_settings.claude_api_key:
-            current_app.logger.error("Claude API key not found")
-            return jsonify({
-                'error': 'Claude APIキーが設定されていません',
-                'communication_pattern': None,
-                'behavior_prediction': None,
-                'recommended_actions': None
-            }), 400
+            return jsonify({'error': 'Claude APIキーが設定されていません'}), 400
 
         # リードの存在確認
         lead = Lead.query.filter_by(id=lead_id, user_id=current_user.id).first()
         if not lead:
-            current_app.logger.error(f"Lead {lead_id} not found")
-            return jsonify({
-                'error': 'リードが見つかりません',
-                'communication_pattern': None,
-                'behavior_prediction': None,
-                'recommended_actions': None
-            }), 404
+            return jsonify({'error': 'リードが見つかりません'}), 404
             
         # AI分析を実行
-        try:
-            current_app.logger.debug("Initializing AI analysis service")
-            ai_service = AIAnalysisService(user_settings)
-            analysis_result = ai_service.analyze_lead_behavior(lead_id)
+        ai_service = AIAnalysisService(user_settings)
+        analysis_result = ai_service.analyze_lead_behavior(lead_id)
+        
+        if 'error' in analysis_result:
+            return jsonify(analysis_result), 400
             
-            if 'error' in analysis_result:
-                current_app.logger.error(f"AI analysis error: {analysis_result['error']}")
-                return jsonify({
-                    'error': analysis_result['error'],
-                    'communication_pattern': None,
-                    'behavior_prediction': None,
-                    'recommended_actions': None
-                }), 400
-            
-            current_app.logger.debug("AI analysis completed successfully")
-            return jsonify({
-                'success': True,
-                'communication_pattern': analysis_result.get('communication_pattern', '分析データがありません'),
-                'behavior_prediction': analysis_result.get('behavior_prediction', '予測データがありません'),
-                'recommended_actions': analysis_result.get('recommended_actions', '推奨データがありません')
-            })
-            
-        except Exception as analysis_error:
-            current_app.logger.error(f"AI analysis service error: {str(analysis_error)}")
-            return jsonify({
-                'error': '分析中にエラーが発生しました',
-                'communication_pattern': None,
-                'behavior_prediction': None,
-                'recommended_actions': None
-            }), 500
+        return jsonify(analysis_result)
         
     except Exception as e:
         current_app.logger.error(f"Lead behavior analysis error: {str(e)}\n{traceback.format_exc()}")
-        return jsonify({
-            'error': '分析中にエラーが発生しました',
-            'communication_pattern': None,
-            'behavior_prediction': None,
-            'recommended_actions': None
-        }), 500
+        return jsonify({'error': '分析中にエラーが発生しました'}), 500
 
 @bp.route('/api/leads/<int:lead_id>/timeline')
 @login_required
