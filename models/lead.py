@@ -1,6 +1,6 @@
 from extensions import db
 from sqlalchemy.orm import Mapped, mapped_column, relationship
-from sqlalchemy import Integer, String, Float, DateTime, ForeignKey
+from sqlalchemy import Integer, String, Float, DateTime, ForeignKey, text
 from datetime import datetime
 from typing import Optional, List, TYPE_CHECKING
 
@@ -33,7 +33,12 @@ class Lead(db.Model):
     schedules: Mapped[List["Schedule"]] = relationship("Schedule", back_populates="lead", cascade="all, delete-orphan")
     tasks: Mapped[List["Task"]] = relationship("Task", back_populates="lead", cascade="all, delete-orphan")
     emails: Mapped[List["Email"]] = relationship("Email", back_populates="lead", lazy="dynamic")
-    behavior_patterns: Mapped[List["BehaviorPattern"]] = relationship("BehaviorPattern", back_populates="lead", cascade="all, delete-orphan")
+    behavior_patterns: Mapped[List["BehaviorPattern"]] = relationship(
+        "BehaviorPattern",
+        back_populates="lead",
+        cascade="all, delete-orphan",
+        lazy="select"
+    )
     
     def __repr__(self):
         return f'<Lead {self.name}>'
