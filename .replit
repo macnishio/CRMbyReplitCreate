@@ -583,7 +583,7 @@ task = "packager.installForAll"
 
 [[workflows.workflow.tasks]]
 task = "shell.exec"
-args = "echo 'タスクリストの左寄せ対応' > .checkpoint_message && touch .checkpoint"
+args = "echo \"メール受信処理とデータベース更新の実装完了\" > .checkpoint_message && touch .checkpoint"
 
 [[workflows.workflow]]
 name = "Flask Server"
