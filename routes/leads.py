@@ -1,7 +1,8 @@
-from flask import Blueprint, render_template, redirect, url_for, flash, request, current_app
+from flask import Blueprint, render_template, redirect, url_for, flash, request, current_app, jsonify
 from flask_login import login_required, current_user
 from models import Lead, Email, UserSettings
 from extensions import db
+from services.analysis import ComprehensiveAnalysisService
 import json
 from datetime import datetime
 from sqlalchemy import func
@@ -319,6 +320,51 @@ def lead_detail(id):
     # 関連メールを作成日時でソート
     emails = Email.query.filter_by(lead_id=lead.id).order_by(Email.created_at.desc()).all()
     return render_template('leads/detail.html', lead=lead, emails=emails)
+
+@bp.route('/<int:id>/analyze', methods=['POST'])
+@login_required
+def analyze_lead_behavior(id):
+    """リードのデータを分析し、AIインサイトを提供するエンドポイント"""
+    try:
+        lead = Lead.query.get_or_404(id)
+        if lead.user_id != current_user.id:
+            return jsonify({'error': '権限がありません'}), 403
+
+        # リクエストデータの取得
+        data = request.get_json()
+        custom_prompt = data.get('custom_prompt')
+        custom_params = data.get('custom_params', [])
+
+        # ユーザー設定の取得
+        user_settings = UserSettings.query.filter_by(user_id=current_user.id).first()
+        if not user_settings:
+            return jsonify({'error': 'ユーザー設定が見つかりません'}), 404
+
+        # 分析の実行
+        analysis_service = ComprehensiveAnalysisService(user_settings)
+        if custom_prompt:
+            analysis_results = analysis_service.analyze_lead_data_with_custom_prompt(id, custom_prompt)
+        else:
+            analysis_results = analysis_service.analyze_lead_data(id, custom_params)
+
+        if not analysis_results:
+            return jsonify({'error': '分析中にエラーが発生しました'}), 500
+
+        return jsonify({
+            'success': True,
+            'data': {
+                'raw_data': analysis_results,
+                'ai_insights': json.dumps({
+                    'engagement_status': analysis_results.get('engagement', {}).get('summary'),
+                    'process_efficiency': analysis_results.get('opportunities', {}).get('summary'),
+                    'communication_patterns': analysis_results.get('communication', {}).get('summary'),
+                    'recommendations': analysis_results.get('recommendations')
+                }, ensure_ascii=False)
+            }
+        })
+    except Exception as e:
+        current_app.logger.error(f"Analysis error: {str(e)}")
+        return jsonify({'error': '分析中にエラーが発生しました'}), 500
 
 @bp.route('/delete/<int:id>', methods=['POST'])
 @login_required

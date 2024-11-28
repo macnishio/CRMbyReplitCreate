@@ -222,6 +222,92 @@ document.addEventListener('DOMContentLoaded', function() {
     const leadId = {{ lead.id }};
     const charts = {};
 
+    // 分析実行ボタンのイベントリスナー
+    document.getElementById('runAnalysisBtn').addEventListener('click', async function() {
+        const loadingElement = document.getElementById('analysisLoading');
+        const errorElement = document.getElementById('analysisError');
+        const resultsElement = document.getElementById('analysisResults');
+
+        try {
+            loadingElement.style.display = 'block';
+            errorElement.style.display = 'none';
+            resultsElement.style.display = 'none';
+
+            // カスタム分析パラメータの収集
+            const customParams = [];
+            ['engagement', 'conversion', 'timing', 'channel'].forEach(param => {
+                const checkbox = document.getElementById(`${param}Check`);
+                if (checkbox && checkbox.checked) {
+                    customParams.push(param);
+                }
+            });
+
+            const response = await fetch(`/leads/${leadId}/analyze`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    custom_params: customParams
+                })
+            });
+
+            const data = await response.json();
+
+            if (!data.success) {
+                throw new Error(data.error || '分析中にエラーが発生しました');
+            }
+
+            displayAnalysisResults(data.data);
+        } catch (error) {
+            errorElement.textContent = error.message;
+            errorElement.style.display = 'block';
+        } finally {
+            loadingElement.style.display = 'none';
+        }
+    });
+
+    // カスタムプロンプト分析ボタンのイベントリスナー
+    document.getElementById('sendCustomPromptBtn').addEventListener('click', async function() {
+        const loadingElement = document.getElementById('analysisLoading');
+        const errorElement = document.getElementById('analysisError');
+        const resultsElement = document.getElementById('analysisResults');
+        const customPromptElement = document.getElementById('customPrompt');
+
+        try {
+            if (!customPromptElement.value.trim()) {
+                throw new Error('分析の観点や質問を入力してください');
+            }
+
+            loadingElement.style.display = 'block';
+            errorElement.style.display = 'none';
+            resultsElement.style.display = 'none';
+
+            const response = await fetch(`/leads/${leadId}/analyze`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    custom_prompt: customPromptElement.value.trim()
+                })
+            });
+
+            const data = await response.json();
+
+            if (!data.success) {
+                throw new Error(data.error || '分析中にエラーが発生しました');
+            }
+
+            displayAnalysisResults(data.data);
+        } catch (error) {
+            errorElement.textContent = error.message;
+            errorElement.style.display = 'block';
+        } finally {
+            loadingElement.style.display = 'none';
+        }
+    });
+
     function createChart(elementId, type, data, options = {}) {
         const ctx = document.getElementById(elementId);
         if (charts[elementId]) {
