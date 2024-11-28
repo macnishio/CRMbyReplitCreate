@@ -15,6 +15,54 @@
     margin-top: 1.5rem;
 }
 
+/* AI分析セクションのスタイル */
+.analysis-section {
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    border: none;
+    border-radius: 8px;
+    overflow: hidden;
+}
+
+.analysis-section .card-header {
+    padding: 1rem 1.5rem;
+}
+
+.analysis-options {
+    background-color: #f8f9fa;
+    border-radius: 8px;
+    padding: 1.5rem;
+    margin-bottom: 1.5rem;
+}
+
+.analysis-options h4 {
+    color: #495057;
+    font-size: 1.1rem;
+    margin-bottom: 1rem;
+}
+
+#runAnalysisBtn {
+    padding: 0.75rem 2rem;
+    font-size: 1.1rem;
+    transition: all 0.3s ease;
+}
+
+#runAnalysisBtn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+#analysisResults {
+    transition: all 0.3s ease;
+}
+
+.analysis-content {
+    background-color: #fff;
+    border-radius: 8px;
+    padding: 1.5rem;
+    margin-top: 1rem;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+}
+
 .detail-item {
     padding: 1rem;
     border-bottom: 1px solid #eee;
@@ -149,42 +197,51 @@
     </div>
 
     <!-- AI分析セクション -->
-    <div class="card mt-4">
-        <div class="card-header">
+    <div class="card mt-4 analysis-section">
+        <div class="card-header bg-primary text-white">
             <h3 class="mb-0">AI分析</h3>
         </div>
         <div class="card-body">
             <!-- カスタムプロンプト入力 -->
-            <div class="form-group mb-3">
-                <label for="customPrompt">カスタムプロンプト:</label>
+            <div class="form-group mb-4">
+                <label for="customPrompt" class="form-label fw-bold">カスタムプロンプト:</label>
                 <textarea class="form-control" id="customPrompt" rows="3" 
                         placeholder="分析の観点や質問を入力してください"></textarea>
+                <small class="form-text text-muted">例: リードの購買意欲や商談成約の可能性について分析してください</small>
             </div>
             
             <!-- 分析オプション -->
-            <div class="form-check mb-2">
-                <input class="form-check-input" type="checkbox" value="engagement" id="engagementCheck" checked>
-                <label class="form-check-label" for="engagementCheck">
-                    エンゲージメント分析
-                </label>
-            </div>
-            <div class="form-check mb-2">
-                <input class="form-check-input" type="checkbox" value="conversion" id="conversionCheck" checked>
-                <label class="form-check-label" for="conversionCheck">
-                    コンバージョン可能性
-                </label>
+            <div class="analysis-options">
+                <h4 class="mb-3">分析オプション</h4>
+                <div class="form-check mb-3">
+                    <input class="form-check-input" type="checkbox" value="engagement" id="engagementCheck" checked>
+                    <label class="form-check-label" for="engagementCheck">
+                        エンゲージメント分析
+                    </label>
+                    <small class="d-block text-muted ms-4">メール応答率、インタラクション頻度などを分析</small>
+                </div>
+                <div class="form-check mb-3">
+                    <input class="form-check-input" type="checkbox" value="conversion" id="conversionCheck" checked>
+                    <label class="form-check-label" for="conversionCheck">
+                        コンバージョン可能性
+                    </label>
+                    <small class="d-block text-muted ms-4">商談成約の可能性、購買意欲を予測</small>
+                </div>
             </div>
             
             <!-- 分析実行ボタン -->
-            <div class="mt-3">
-                <button id="runAnalysisBtn" class="btn btn-primary">
-                    <i class="fas fa-brain"></i> 分析を実行
+            <div class="mt-4 text-center">
+                <button id="runAnalysisBtn" class="btn btn-primary btn-lg">
+                    <i class="fas fa-brain me-2"></i> 分析を実行
                 </button>
             </div>
 
             <!-- 分析結果表示エリア -->
-            <div id="analysisResults" style="display: none;">
-                <!-- 結果がここに表示されます -->
+            <div id="analysisResults" class="mt-4" style="display: none;">
+                <div class="alert alert-info">
+                    <i class="fas fa-spinner fa-spin me-2"></i>
+                    分析を実行中です...
+                </div>
             </div>
         </div>
     </div>
