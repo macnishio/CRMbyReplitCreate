@@ -372,11 +372,29 @@ function runAnalysis(options) {
     .then(response => response.json())
     .then(data => {
         if (data.success) {
+            const insights = JSON.parse(data.data.ai_insights);
             document.getElementById('analysisResults').innerHTML = 
                 `<div class="mt-4">
-                    <h4>分析結果</h4>
+                    <h4 class="mb-3">分析結果</h4>
                     <div class="analysis-content">
-                        ${data.data.ai_insights}
+                        <div class="mb-4">
+                            <h5 class="text-primary mb-2">エンゲージメント状況</h5>
+                            <p>${insights.engagement_status}</p>
+                        </div>
+                        <div class="mb-4">
+                            <h5 class="text-primary mb-2">商談プロセス効率性</h5>
+                            <p>${insights.process_efficiency}</p>
+                        </div>
+                        <div class="mb-4">
+                            <h5 class="text-primary mb-2">コミュニケーションパターン</h5>
+                            <p>${insights.communication_patterns}</p>
+                        </div>
+                        <div class="mb-4">
+                            <h5 class="text-primary mb-2">推奨アクション</h5>
+                            <ul class="list-unstyled">
+                                ${insights.recommendations.map(rec => `<li class="mb-2"><i class="fas fa-check-circle text-success me-2"></i>${rec}</li>`).join('')}
+                            </ul>
+                        </div>
                     </div>
                 </div>`;
             document.getElementById('analysisResults').style.display = 'block';
