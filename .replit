@@ -344,7 +344,7 @@ task = "packager.installForAll"
 
 [[workflows.workflow.tasks]]
 task = "shell.exec"
-args = "flask db migrate -m 'Fix model relationships and add behavior patterns' && flask db upgrade"
+args = "flask db migrate -m 'Fix Email model created_at column' && flask db upgrade"
 
 [[workflows.workflow]]
 name = "Database Fix"

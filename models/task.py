@@ -1,7 +1,7 @@
 from datetime import datetime
 from extensions import db
 from sqlalchemy.orm import Mapped, mapped_column, relationship
-from sqlalchemy import Integer, String, Text, DateTime, ForeignKey, Boolean, text
+from sqlalchemy import Integer, String, Text, DateTime, ForeignKey, Boolean, text, text
 from typing import Optional, TYPE_CHECKING
 
 if TYPE_CHECKING:

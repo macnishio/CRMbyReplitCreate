@@ -208,23 +208,7 @@ class Lead(db.Model):
     tasks: Mapped[List["Task"]] = relationship('Task', back_populates='lead', cascade='all, delete-orphan')
     emails: Mapped[List["Email"]] = relationship('Email', backref='lead', lazy='dynamic')
 
-class Email(db.Model):
-    __tablename__ = 'emails'
-    id: Mapped[int] = mapped_column(Integer, primary_key=True)
-    message_id: Mapped[str] = mapped_column(String(255), unique=True, nullable=True)
-    sender: Mapped[str] = mapped_column(String(120), nullable=False)
-    sender_name: Mapped[str] = mapped_column(String(255))
-    subject: Mapped[str] = mapped_column(String(200))
-    content: Mapped[str] = mapped_column(Text)
-    received_date: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow)
-    lead_id: Mapped[int] = mapped_column(Integer, ForeignKey('leads.id'), nullable=False)
-    user_id: Mapped[int] = mapped_column(Integer, ForeignKey('users.id'), nullable=False)
-    ai_analysis: Mapped[Optional[str]] = mapped_column(Text, nullable=True)
-    ai_analysis_date: Mapped[Optional[datetime]] = mapped_column(DateTime, nullable=True)
-    ai_model_used: Mapped[Optional[str]] = mapped_column(String(50), nullable=True)
-    created_at: Mapped[datetime] = mapped_column(DateTime, nullable=False, default=datetime.utcnow)
-    tasks = db.relationship('Task', back_populates='email', lazy='dynamic')
-    schedules = db.relationship('Schedule', back_populates='email', lazy='dynamic')
+# Email model moved to models/email.py
 
 class UnknownEmail(db.Model):
     __tablename__ = 'unknown_emails'
