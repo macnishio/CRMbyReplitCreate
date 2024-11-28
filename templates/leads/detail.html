@@ -184,35 +184,7 @@
 
             <!-- 分析結果表示エリア -->
             <div id="analysisResults" style="display: none;">
-                <div class="results-container mt-4">
-                    <div class="row">
-                        <div class="col-md-6">
-                            <div class="card">
-                                <div class="card-header">
-                                    エンゲージメント分析
-                                </div>
-                                <div class="card-body">
-                                    <canvas id="engagementChart"></canvas>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="col-md-6">
-                            <div class="card">
-                                <div class="card-header">
-                                    コンバージョン予測
-                                </div>
-                                <div class="card-body">
-                                    <canvas id="conversionChart"></canvas>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                    
-                    <div class="insights-container mt-4">
-                        <h4>AIインサイト</h4>
-                        <div id="aiInsights"></div>
-                    </div>
-                </div>
+                <!-- 結果がここに表示されます -->
             </div>
         </div>
     </div>
@@ -333,9 +305,6 @@ document.addEventListener('DOMContentLoaded', function() {
 
 // AI分析実行関数
 function runAnalysis(options) {
-    const analysisResults = document.getElementById('analysisResults');
-    analysisResults.style.display = 'none';
-    
     fetch(`/leads/${leadId}/analyze`, {
         method: 'POST',
         headers: {
@@ -346,8 +315,14 @@ function runAnalysis(options) {
     .then(response => response.json())
     .then(data => {
         if (data.success) {
-            displayAnalysisResults(data.data);
-            analysisResults.style.display = 'block';
+            document.getElementById('analysisResults').innerHTML = 
+                `<div class="mt-4">
+                    <h4>分析結果</h4>
+                    <div class="analysis-content">
+                        ${data.data.ai_insights}
+                    </div>
+                </div>`;
+            document.getElementById('analysisResults').style.display = 'block';
         } else {
             throw new Error(data.error || '分析に失敗しました');
         }
