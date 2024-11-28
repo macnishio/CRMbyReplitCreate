@@ -1,6 +1,7 @@
 from flask import Blueprint, render_template, jsonify, request, current_app, abort, send_file
 from flask_login import login_required, current_user
 from models import Lead, Email, UserSettings
+from services.comprehensive_analysis_service import ComprehensiveAnalysisService
 from services.ai_analysis import AIAnalysisService
 from extensions import db
 from io import BytesIO, StringIO
@@ -8,6 +9,7 @@ import traceback
 from datetime import datetime
 import csv
 import json
+
 
 bp = Blueprint('history', __name__, url_prefix='/history')
 
@@ -177,30 +179,51 @@ def export_history(lead_id):
 @bp.route('/api/leads/<int:lead_id>/analyze', methods=['POST'])
 @login_required
 def analyze_lead_behavior(lead_id):
-    """リードの行動パターンをAIで分析"""
     try:
-        # ユーザー設定を取得
-        user_settings = UserSettings.query.filter_by(user_id=current_user.id).first()
-        if not user_settings or not user_settings.claude_api_key:
-            return jsonify({'error': 'Claude APIキーが設定されていません'}), 400
+        # リードの存在確認とアクセス権限の確認
+        lead = Lead.query.get_or_404(lead_id)
+        if lead.user_id != current_user.id:
+            return jsonify({
+                'success': False,
+                'error': 'アクセス権限がありません'
+            }), 403
 
-        # リードの存在確認
-        lead = Lead.query.filter_by(id=lead_id, user_id=current_user.id).first()
-        if not lead:
-            return jsonify({'error': 'リードが見つかりません'}), 404
-            
-        # AI分析を実行
-        ai_service = AIAnalysisService(user_settings)
-        analysis_result = ai_service.analyze_lead_behavior(lead_id)
-        
-        if 'error' in analysis_result:
-            return jsonify(analysis_result), 400
-            
-        return jsonify(analysis_result)
-        
+        # ユーザー設定の取得
+        user_settings = UserSettings.query.filter_by(user_id=current_user.id).first()
+        if not user_settings:
+            return jsonify({
+                'success': False,
+                'error': 'ユーザー設定が見つかりません'
+            }), 404
+
+        # 分析の実行
+        analysis_service = ComprehensiveAnalysisService(user_settings)
+        analysis_results = analysis_service.analyze_lead_data(lead_id)
+
+        if not analysis_results:
+            return jsonify({
+                'success': False,
+                'error': '分析データが取得できませんでした'
+            }), 404
+
+        return jsonify({
+            'success': True,
+            'data': analysis_results
+        })
+
+    except ValueError as ve:
+        current_app.logger.error(f"Validation error: {str(ve)}", exc_info=True)
+        return jsonify({
+            'success': False,
+            'error': str(ve)
+        }), 400
+
     except Exception as e:
-        current_app.logger.error(f"Lead behavior analysis error: {str(e)}\n{traceback.format_exc()}")
-        return jsonify({'error': '分析中にエラーが発生しました'}), 500
+        current_app.logger.error(f"Analysis error: {str(e)}", exc_info=True)
+        return jsonify({
+            'success': False,
+            'error': '分析中にエラーが発生しました'
+        }), 500
 
 @bp.route('/api/leads/<int:lead_id>/timeline')
 @login_required

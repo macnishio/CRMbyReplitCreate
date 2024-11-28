@@ -346,7 +346,7 @@ class AIRollbackService:
 
 
     def analyze_customer_behavior(self, lead_id: int) -> Dict[str, Any]:
-        """顧客の行動パターンを分析し、インサイトを提供する"""
+        """顧客の行動パターンを分析し、包括的なインサイトを提供する"""
         try:
             # リードとメールデータの取得
             lead = Lead.query.get(lead_id)
@@ -356,11 +356,15 @@ class AIRollbackService:
                     "success": False
                 }
 
+            # 各種データの取得
             emails = Email.query.filter_by(lead_id=lead_id).order_by(Email.received_date.desc()).all()
+            tasks = Task.query.filter_by(lead_id=lead_id).order_by(Task.created_at.desc()).all()
+            opportunities = Opportunity.query.filter_by(lead_id=lead_id).order_by(Opportunity.created_at.desc()).all()
+            schedules = Schedule.query.filter_by(lead_id=lead_id).order_by(Schedule.start_time.desc()).all()
             
             # プロンプトの構築
             prompt = f"""
-            以下の顧客とのコミュニケーション履歴を分析し、行動パターンとインサイトを提供してください。
+            以下の顧客データを分析し、包括的なインサイトを提供してください。
             JSONフォーマットで応答してください。
 
             顧客情報:
@@ -370,17 +374,44 @@ class AIRollbackService:
             - スコア: {lead.score}
             - 最終接触: {lead.last_contact.strftime('%Y-%m-%d %H:%M:%S') if lead.last_contact else 'なし'}
 
+            タスク履歴:
+            {[{
+                'title': task.title,
+                'status': task.status,
+                'priority': task.priority,
+                'completed': task.completed,
+                'created_at': task.created_at.strftime('%Y-%m-%d %H:%M:%S') if task.created_at else 'なし'
+            } for task in tasks[:5]]}
+
+            商談履歴:
+            {[{
+                'name': opp.name,
+                'stage': opp.stage,
+                'amount': opp.amount,
+                'close_date': opp.close_date.strftime('%Y-%m-%d') if opp.close_date else 'なし',
+                'created_at': opp.created_at.strftime('%Y-%m-%d %H:%M:%S') if opp.created_at else 'なし'
+            } for opp in opportunities[:5]]}
+
+            スケジュール履歴:
+            {[{
+                'title': schedule.title,
+                'start_time': schedule.start_time.strftime('%Y-%m-%d %H:%M:%S'),
+                'status': schedule.status
+            } for schedule in schedules[:5]]}
+
             コミュニケーション履歴:
             {[{
                 'date': email.received_date.strftime('%Y-%m-%d %H:%M:%S'),
                 'content': email.content[:200] + '...' if len(email.content) > 200 else email.content,
                 'is_from_lead': email.sender == lead.email
-            } for email in emails[:10]]}
+            } for email in emails[:5]]}
 
             以下の観点から分析を行ってください：
-            1. コミュニケーションパターン（頻度、時間帯、返信速度など）
-            2. 興味・関心事項
-            3. 商談進捗における重要なポイント
+            1. 全体的なエンゲージメント状況
+            2. タスクと商談の進捗状況
+            3. コミュニケーションパターン（頻度、時間帯、返信速度など）
+            4. 商談クロージングの可能性
+            5. リスクと改善点の特定
             4. リスクファクター
             5. 推奨アクション
 

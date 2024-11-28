@@ -80,6 +80,245 @@
     border-radius: 4px;
     cursor: pointer;
     text-decoration: none;
+<!-- AI分析セクション -->
+<div class="card mt-4">
+    <div class="card-header d-flex justify-content-between align-items-center">
+        <h3 class="mb-0">AI分析</h3>
+        <button id="runAnalysisBtn" class="btn btn-primary">
+            <i class="fas fa-sync-alt"></i> 分析を実行
+        </button>
+    </div>
+    <div class="card-body">
+        <div id="analysisLoading" style="display: none;">
+            <div class="d-flex justify-content-center">
+                <div class="spinner-border text-primary" role="status">
+                    <span class="visually-hidden">分析中...</span>
+                </div>
+            </div>
+            <p class="text-center mt-2">データを分析中...</p>
+        </div>
+
+        <div id="analysisError" class="alert alert-danger" style="display: none;"></div>
+
+        <div id="analysisResults" style="display: none;">
+            <div class="row">
+                <!-- タスク分析 -->
+                <div class="col-md-6 mb-4">
+                    <div class="card h-100">
+                        <div class="card-header">
+                            <h5 class="mb-0">タスク分析</h5>
+                        </div>
+                        <div class="card-body">
+                            <canvas id="taskAnalysisChart"></canvas>
+                            <div id="taskAnalysisText" class="mt-3"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 商談分析 -->
+                <div class="col-md-6 mb-4">
+                    <div class="card h-100">
+                        <div class="card-header">
+                            <h5 class="mb-0">商談分析</h5>
+                        </div>
+                        <div class="card-body">
+                            <canvas id="opportunityAnalysisChart"></canvas>
+                            <div id="opportunityAnalysisText" class="mt-3"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- スケジュール分析 -->
+                <div class="col-md-6 mb-4">
+                    <div class="card h-100">
+                        <div class="card-header">
+                            <h5 class="mb-0">スケジュール分析</h5>
+                        </div>
+                        <div class="card-body">
+                            <canvas id="scheduleAnalysisChart"></canvas>
+                            <div id="scheduleAnalysisText" class="mt-3"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- コミュニケーション分析 -->
+                <div class="col-md-6 mb-4">
+                    <div class="card h-100">
+                        <div class="card-header">
+                            <h5 class="mb-0">コミュニケーション分析</h5>
+                        </div>
+                        <div class="card-body">
+                            <canvas id="communicationAnalysisChart"></canvas>
+                            <div id="communicationAnalysisText" class="mt-3"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- AIインサイト -->
+            <div class="card mt-4">
+                <div class="card-header">
+                    <h5 class="mb-0">AIインサイト</h5>
+                </div>
+                <div class="card-body">
+                    <div id="aiInsights"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Chart.js -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js@3.7.0/dist/chart.min.js"></script>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const leadId = {{ lead.id }};
+    const charts = {};
+
+    function createChart(elementId, type, data, options = {}) {
+        const ctx = document.getElementById(elementId);
+        if (charts[elementId]) {
+            charts[elementId].destroy();
+        }
+        charts[elementId] = new Chart(ctx, {
+            type: type,
+            data: data,
+            options: options
+        });
+    }
+
+    function displayAnalysisResults(data) {
+        const analysisResults = document.getElementById('analysisResults');
+        const rawData = data.raw_data;
+
+        // タスク分析のチャート表示
+        if (rawData.tasks && !rawData.tasks.error) {
+            createChart('taskAnalysisChart', 'doughnut', {
+                labels: ['完了', '未完了'],
+                datasets: [{
+                    data: [rawData.tasks.completion_rate, 100 - rawData.tasks.completion_rate],
+                    backgroundColor: ['#2ecc71', '#e74c3c']
+                }]
+            });
+            document.getElementById('taskAnalysisText').innerHTML = `
+                <p>完了率: ${rawData.tasks.completion_rate.toFixed(1)}%</p>
+                <p>総タスク数: ${rawData.tasks.total_tasks}</p>
+            `;
+        }
+
+        // 商談分析のチャート表示
+        if (rawData.opportunities && !rawData.opportunities.error) {
+            createChart('opportunityAnalysisChart', 'bar', {
+                labels: Object.keys(rawData.opportunities.stage_distribution),
+                datasets: [{
+                    label: '商談数',
+                    data: Object.values(rawData.opportunities.stage_distribution),
+                    backgroundColor: '#3498db'
+                }]
+            });
+            document.getElementById('opportunityAnalysisText').innerHTML = `
+                <p>成約率: ${rawData.opportunities.win_rate.toFixed(1)}%</p>
+                <p>平均商談金額: ¥${rawData.opportunities.average_amount.toLocaleString()}</p>
+            `;
+        }
+
+        // スケジュール分析のチャート表示
+        if (rawData.schedules && !rawData.schedules.error) {
+            const meetingData = rawData.schedules.meeting_frequency;
+            createChart('scheduleAnalysisChart', 'pie', {
+                labels: Object.keys(rawData.schedules.schedule_types),
+                datasets: [{
+                    data: Object.values(rawData.schedules.schedule_types),
+                    backgroundColor: ['#2ecc71', '#e74c3c', '#f1c40f', '#9b59b6']
+                }]
+            });
+            document.getElementById('scheduleAnalysisText').innerHTML = `
+                <p>月間ミーティング数: ${meetingData.total_meetings}</p>
+                <p>1日平均: ${meetingData.daily_average.toFixed(1)}件</p>
+            `;
+        }
+
+        // コミュニケーション分析のチャート表示
+        if (rawData.communication && !rawData.communication.error) {
+            const emailData = rawData.communication.email_patterns;
+            createChart('communicationAnalysisChart', 'bar', {
+                labels: Object.keys(rawData.communication.hour_distribution),
+                datasets: [{
+                    label: 'メール数',
+                    data: Object.values(rawData.communication.hour_distribution),
+                    backgroundColor: '#3498db'
+                }]
+            });
+            document.getElementById('communicationAnalysisText').innerHTML = `
+                <p>総メール数: ${emailData.total_emails}</p>
+                <p>平均応答時間: ${emailData.average_response_time_hours.toFixed(1)}時間</p>
+            `;
+        }
+
+        // AIインサイトの表示
+        const aiInsightsElement = document.getElementById('aiInsights');
+        try {
+            const insights = JSON.parse(data.ai_insights);
+            aiInsightsElement.innerHTML = `
+                <div class="mb-3">
+                    <h6>全体的なエンゲージメント状況</h6>
+                    <p>${insights.engagement_status || '分析中...'}</p>
+                </div>
+                <div class="mb-3">
+                    <h6>商談プロセスの効率性</h6>
+                    <p>${insights.process_efficiency || '分析中...'}</p>
+                </div>
+                <div class="mb-3">
+                    <h6>コミュニケーションパターン</h6>
+                    <p>${insights.communication_patterns || '分析中...'}</p>
+                </div>
+                <div class="mb-3">
+                    <h6>推奨アクション</h6>
+                    <p>${insights.recommendations || '分析中...'}</p>
+                </div>
+            `;
+        } catch (e) {
+            aiInsightsElement.innerHTML = `<p>${data.ai_insights}</p>`;
+        }
+
+        analysisResults.style.display = 'block';
+    }
+
+    // 分析実行ボタンのイベントリスナー
+    document.getElementById('runAnalysisBtn').addEventListener('click', async function() {
+        const loadingElement = document.getElementById('analysisLoading');
+        const errorElement = document.getElementById('analysisError');
+        const resultsElement = document.getElementById('analysisResults');
+
+        try {
+            loadingElement.style.display = 'block';
+            errorElement.style.display = 'none';
+            resultsElement.style.display = 'none';
+
+            const response = await fetch(`/history/api/leads/${leadId}/analyze`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                }
+            });
+
+            const data = await response.json();
+
+            if (!data.success) {
+                throw new Error(data.error || '分析中にエラーが発生しました');
+            }
+
+            displayAnalysisResults(data.data);
+        } catch (error) {
+            errorElement.textContent = error.message;
+            errorElement.style.display = 'block';
+        } finally {
+            loadingElement.style.display = 'none';
+        }
+    });
+});
+</script>
     transition: background-color 0.3s;
 }
 

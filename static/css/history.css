@@ -788,3 +788,29 @@
         margin-top: 5px;
     }
 }
+.analysis-results {
+    margin-top: 1rem;
+    border-radius: 8px;
+    background: white;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.analysis-content {
+    padding: 1rem;
+}
+
+.card {
+    border: none;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.card-title {
+    color: #333;
+    font-size: 1.2rem;
+    margin-bottom: 1rem;
+}
+
+#aiInsights {
+    font-size: 0.9rem;
+    line-height: 1.5;
+}

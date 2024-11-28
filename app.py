@@ -62,7 +62,7 @@ def _initialize_components(app: Flask) -> None:
     _register_blueprints(app)
     
     # メールスケジューラーの設定
-    setup_email_scheduler(app)
+    ###setup_email_scheduler(app)
 
 def _initialize_database_components(app: Flask) -> None:
     """データベース関連コンポーネントの初期化"""

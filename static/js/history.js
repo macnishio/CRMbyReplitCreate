@@ -183,93 +183,32 @@ function initializeAnalysis() {
     }
 }
 
-async function analyzeCustomerBehavior() {
-    debugLog('analyzeCustomerBehavior function called.');
-    const analysisResults = document.getElementById('analysisResults');
-    const analysisData = document.getElementById('analysisData');
-    const analyzeBtn = document.getElementById('analyzeBtn');
-    
+// HTMLエスケープ関数
+const escapeHtml = (str) => {
+    if (!str) return '';
+    return String(str)
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#039;');
+};
+
+// 安全なデータアクセス関数
+const safeAccess = (obj, path, defaultValue = '') => {
     try {
-        // 分析開始前の状態を設定
-        analyzeBtn.disabled = true;
-        analyzeBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> 分析中...';
-        analysisResults.style.display = 'block';
-        analysisData.innerHTML = '<div class="loading-indicator"><i class="fas fa-spinner fa-spin"></i> AI分析を実行中...</div>';
-
-        // URLからリードIDを取得
-        const pathParts = window.location.pathname.split('/');
-        const leadId = pathParts[pathParts.length - 1];
-
-        // API呼び出し
-        const response = await fetch(`/history/api/leads/${leadId}/analyze`, {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json'
-            }
-        });
-
-        if (!response.ok) {
-            const errorData = await response.json();
-            throw new Error(errorData.error || 'AI分析中にエラーが発生しました');
-        }
-
-        const data = await response.json();
-        
-        // 分析結果の表示
-        analysisData.innerHTML = `
-            <div class="analysis-section">
-                <h4>コミュニケーションパターン</h4>
-                <ul class="analysis-list">
-                    <li><strong>頻度:</strong> ${data.data.communication_patterns.frequency}</li>
-                    <li><strong>好ましい時間帯:</strong> ${data.data.communication_patterns.preferred_time}</li>
-                    <li><strong>応答時間:</strong> ${data.data.communication_patterns.response_time}</li>
-                    <li><strong>エンゲージメント:</strong> ${data.data.communication_patterns.engagement_level}</li>
-                </ul>
-            </div>
-            <div class="analysis-section">
-                <h4>主要なポイント</h4>
-                <ul class="analysis-list">
-                    ${data.data.key_points.map(point => `<li>${point}</li>`).join('')}
-                </ul>
-            </div>
-            <div class="analysis-section">
-                <h4>興味・関心事項</h4>
-                <ul class="analysis-list">
-                    ${data.data.interests.map(interest => `<li>${interest}</li>`).join('')}
-                </ul>
-            </div>
-            <div class="analysis-section">
-                <h4>リスク要因</h4>
-                <ul class="analysis-list">
-                    ${data.data.risk_factors.map(risk => `<li>${risk}</li>`).join('')}
-                </ul>
-            </div>
-            <div class="analysis-section">
-                <h4>推奨アクション</h4>
-                <ul class="analysis-list">
-                    ${data.data.recommended_actions.map(action => `<li>${action}</li>`).join('')}
-                </ul>
-            </div>
-            <div class="analysis-section">
-                <h4>分析サマリー</h4>
-                <p>${data.data.analysis_summary.replace('\n', '<br>')}</p>
-            </div>
-        `;
-
-    } catch (error) {
-        console.error('AI分析エラー:', error);
-        analysisData.innerHTML = `
-            <div class="error-message">
-                <i class="fas fa-exclamation-circle"></i>
-                <p>${error.message || 'AI分析中にエラーが発生しました'}</p>
-            </div>
-        `;
-    } finally {
-        // ボタンを元の状態に戻す
-        analyzeBtn.disabled = false;
-        analyzeBtn.innerHTML = '<i class="fas fa-brain"></i> AI分析';
+        return path.split('.').reduce((acc, part) => acc[part], obj) || defaultValue;
+    } catch (e) {
+        return defaultValue;
     }
-}
+};
+
+// 配列を安全にレンダリングする関数
+const renderList = (items) => {
+    if (!Array.isArray(items)) return '';
+    return items.map(item => `<li>${escapeHtml(item)}</li>`).join('');
+};
+
 
 async function loadTimeline(leadId) {
     const timelineContainer = document.getElementById('timeline');
@@ -581,12 +520,169 @@ function initializeHistory(leadId) {
     }
 }
 
-document.addEventListener('DOMContentLoaded', () => {
+// グローバル変数の定義
+let currentLeadId = null;
+
+// 分析ボタンの初期化関数の定義
+function initializeAnalysisButton() {
+    const analyzeBtn = document.getElementById('analyzeBtn');
+    if (!analyzeBtn) return;
+
+    // URLからlead_idを取得
     const pathParts = window.location.pathname.split('/');
     const leadIdIndex = pathParts.indexOf('leads') + 1;
-    const leadId = pathParts[leadIdIndex];
-
-    if (leadId && !isNaN(leadId)) {
-        initializeHistory(leadId);
+    if (leadIdIndex > 0 && leadIdIndex < pathParts.length) {
+        currentLeadId = pathParts[leadIdIndex];
     }
+
+    // data属性からもlead_idを取得（優先）
+    if (analyzeBtn.dataset.leadId) {
+        currentLeadId = analyzeBtn.dataset.leadId;
+    }
+
+    analyzeBtn.addEventListener('click', () => {
+        if (currentLeadId) {
+            analyzeCustomerBehavior(currentLeadId);
+        } else {
+            console.error('Lead ID not found');
+            alert('リードIDが見つかりません。');
+        }
+    });
+}
+
+async function analyzeCustomerBehavior(leadId) {
+    const analyzeBtn = document.getElementById('analyzeBtn');
+    if (!analyzeBtn) {
+        console.error('Analyze button not found');
+        return;
+    }
+
+    // イベントオブジェクトが渡された場合の処理
+    if (leadId instanceof Event) {
+        leadId = currentLeadId;
+    }
+
+    // leadIdの検証
+    if (!leadId) {
+        console.error('No lead ID provided');
+        alert('リードIDが指定されていません。');
+        return;
+    }
+
+    try {
+        // ボタンの状態を更新
+        analyzeBtn.disabled = true;
+        analyzeBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> 分析中...';
+
+        // APIリクエスト
+        const response = await fetch(`/history/api/leads/${leadId}/analyze`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Accept': 'application/json',
+                'X-Requested-With': 'XMLHttpRequest'
+            },
+            credentials: 'same-origin'
+        });
+
+        if (!response.ok) {
+            throw new Error(`サーバーエラー: ${response.status}`);
+        }
+
+        const data = await response.json();
+        
+        if (!data) {
+            throw new Error('データの取得に失敗しました');
+        }
+
+        if (data.error) {
+            throw new Error(data.error);
+        }
+
+        // 分析結果の表示
+        displayAnalysisResults(data);
+
+    } catch (error) {
+        console.error('Analysis error:', error);
+        alert(`分析中にエラーが発生しました: ${error.message}`);
+    } finally {
+        // ボタンを元の状態に戻す
+        if (!analyzeBtn.isConnected) return; // ボタンが既にDOMから削除されている場合
+        analyzeBtn.disabled = false;
+        analyzeBtn.innerHTML = '<i class="fas fa-brain"></i> AI分析';
+    }
+}
+
+// 分析結果の表示関数
+function displayAnalysisResults(data) {
+    const analysisContainer = document.getElementById('analysisContainer');
+    const aiInsights = document.getElementById('aiInsights');
+    
+    if (!analysisContainer || !aiInsights) {
+        console.error('Analysis display elements not found');
+        return;
+    }
+
+    analysisContainer.style.display = 'block';
+    aiInsights.innerHTML = `
+        <div class="analysis-section">
+            <h4>タスク分析</h4>
+            <p>${data.data.tasks?.status === 'no_data' ? 
+                data.data.tasks.message : 
+                `完了率: ${data.data.tasks.completion_rate}%`}</p>
+        </div>
+        <div class="analysis-section">
+            <h4>商談分析</h4>
+            <p>${data.data.opportunities?.status === 'no_data' ? 
+                data.data.opportunities.message : 
+                `総額: ${data.data.opportunities.total_amount.toLocaleString()}円`}</p>
+        </div>
+        <div class="analysis-section">
+            <h4>コミュニケーション分析</h4>
+            <p>${data.data.communication?.status === 'no_data' ? 
+                data.data.communication.message : 
+                `メール数: ${data.data.communication.total_emails}件`}</p>
+        </div>
+    `;
+}
+
+// DOMの読み込み完了時の処理
+document.addEventListener('DOMContentLoaded', () => {
+    initializeAnalysisButton();
 });
+
+// 分析ボタンのクリックハンドラー
+function handleAnalyzeClick(event) {
+    event.preventDefault();
+    
+    if (!currentLeadId) {
+        console.error('Lead ID not found');
+        return;
+    }
+    
+    analyzeCustomerBehavior(currentLeadId);
+}
+
+// 分析結果のフォーマット関数
+function formatAnalysisResults(data) {
+    return `
+        <div class="analysis-section">
+            <h4>タスク分析</h4>
+            <p>${data.data.tasks?.status === 'no_data' ? 
+                data.data.tasks.message : 
+                `完了率: ${data.data.tasks.completion_rate}%`}</p>
+        </div>
+        <div class="analysis-section">
+            <h4>商談分析</h4>
+            <p>${data.data.opportunities?.status === 'no_data' ? 
+                data.data.opportunities.message : 
+                `総額: ${data.data.opportunities.total_amount}円`}</p>
+        </div>
+        <div class="analysis-section">
+            <h4>コミュニケーション分析</h4>
+            <p>${data.data.communication?.status === 'no_data' ? 
+                data.data.communication.message : 
+                `メール数: ${data.data.communication.total_emails}件`}</p>
+        </div>
+    `;
+}
