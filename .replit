@@ -625,5 +625,8 @@ args = "flask db migrate -m 'Add missing columns: created_at for Task and Email,
 run = ["sh", "-c", "python3 app.py"]
 
 [[ports]]
+localPort = 5000
+
+[[ports]]
 localPort = 5002
 externalPort = 80

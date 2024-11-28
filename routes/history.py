@@ -3,7 +3,6 @@ from flask_login import login_required, current_user
 from models import Lead, Email, UserSettings
 from services.comprehensive_analysis_service import ComprehensiveAnalysisService
 from services.ai_analysis import AIAnalysisService
-from ai_analysis import analyze_lead_custom
 from extensions import db
 from io import BytesIO, StringIO
 import traceback
@@ -226,56 +225,6 @@ def analyze_lead_behavior(lead_id):
             'error': '分析中にエラーが発生しました'
         }), 500
 
-@bp.route('/api/leads/<int:lead_id>/custom-analysis', methods=['POST'])
-@login_required
-def custom_analyze_lead(lead_id):
-    """カスタムAI分析を実行"""
-    try:
-        # リードの存在確認とアクセス権限の確認
-        lead = Lead.query.get_or_404(lead_id)
-        if lead.user_id != current_user.id:
-            return jsonify({
-                'success': False,
-                'error': 'アクセス権限がありません'
-            }), 403
-
-        # ユーザー設定の取得
-        user_settings = UserSettings.query.filter_by(user_id=current_user.id).first()
-        if not user_settings or not user_settings.claude_api_key:
-            return jsonify({
-                'success': False,
-                'error': 'AI分析を実行するにはAPIキーの設定が必要です'
-            }), 400
-
-        # リクエストボディからプロンプトを取得
-        data = request.get_json()
-        if not data or 'prompt' not in data:
-            return jsonify({
-                'success': False,
-                'error': '分析プロンプトが必要です'
-            }), 400
-
-        # カスタム分析の実行
-        analysis_result = analyze_lead_custom(lead_id, data['prompt'])
-        
-        if isinstance(analysis_result, str) and analysis_result.startswith('<p class="error-message">'):
-            return jsonify({
-                'success': False,
-                'error': analysis_result.replace('<p class="error-message">', '').replace('</p>', '')
-            }), 500
-
-        return jsonify({
-            'success': True,
-            'analysis': analysis_result
-        })
-
-    except Exception as e:
-        current_app.logger.error(f"カスタム分析中にエラーが発生: {str(e)}\n{traceback.format_exc()}")
-        return jsonify({
-            'success': False,
-            'error': '分析中にエラーが発生しました',
-            'details': str(e) if current_app.debug else None
-        }), 500
 @bp.route('/api/leads/<int:lead_id>/timeline')
 @login_required
 def get_lead_timeline(lead_id):
