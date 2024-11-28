@@ -82,12 +82,14 @@
     text-decoration: none;
 <!-- AI分析セクション -->
 <div class="card mt-4">
-    <div class="card-header d-flex justify-content-between align-items-center">
-        <h3 class="mb-0">AI分析</h3>
-        <div class="d-flex align-items-center gap-2">
+    <div class="card-header">
+        <h3 class="mb-0">標準AI分析</h3>
+    </div>
+    <div class="card-body">
+        <div class="d-flex align-items-center gap-2 mb-3">
             <div class="dropdown">
-                <button class="btn btn-secondary dropdown-toggle" type="button" id="customAnalysisBtn" data-bs-toggle="dropdown" aria-expanded="false">
-                    <i class="fas fa-cog"></i> カスタム分析設定
+                <button class="btn btn-secondary dropdown-toggle" type="button" id="standardAnalysisBtn" data-bs-toggle="dropdown" aria-expanded="false">
+                    <i class="fas fa-cog"></i> 分析設定
                 </button>
                 <div class="dropdown-menu p-3" style="width: 300px;">
                     <div class="form-check mb-2">
@@ -117,10 +119,63 @@
                 </div>
             </div>
             <button id="runAnalysisBtn" class="btn btn-primary">
-                <i class="fas fa-sync-alt"></i> 分析を実行
+                <i class="fas fa-sync-alt"></i> 標準分析を実行
             </button>
         </div>
+
+        <div id="analysisLoading" style="display: none;">
+            <div class="d-flex justify-content-center">
+                <div class="spinner-border text-primary" role="status">
+                    <span class="visually-hidden">分析中...</span>
+                </div>
+            </div>
+            <p class="text-center mt-2">データを分析中...</p>
+        </div>
+
+        <div id="analysisError" class="alert alert-danger" style="display: none;"></div>
+        <div id="analysisResults" style="display: none;"></div>
     </div>
+</div>
+
+<!-- カスタムAI分析セクション -->
+<div class="card mt-4">
+    <div class="card-header">
+        <h3 class="mb-0">カスタムAI分析</h3>
+    </div>
+    <div class="card-body">
+        <div class="form-group mb-3">
+            <label for="customPrompt" class="form-label">分析プロンプト</label>
+            <textarea id="customPrompt" class="form-control" rows="4" 
+                placeholder="分析の視点や観点を自由に入力してください。&#10;例：&#10;- 商談成立の可能性を過去の類似案件と比較して分析&#10;- コミュニケーションパターンから見る商談進捗の特徴&#10;- 業界特性を考慮した最適なアプローチ方法の提案"></textarea>
+        </div>
+
+        <div class="d-flex justify-content-end">
+            <button id="runCustomAnalysisBtn" class="btn btn-primary">
+                <i class="fas fa-brain"></i> カスタム分析を実行
+            </button>
+        </div>
+
+        <div id="customAnalysisLoading" style="display: none;" class="mt-3">
+            <div class="d-flex justify-content-center">
+                <div class="spinner-border text-primary" role="status">
+                    <span class="visually-hidden">分析中...</span>
+                </div>
+            </div>
+            <p class="text-center mt-2">カスタム分析を実行中...</p>
+        </div>
+
+        <div id="customAnalysisError" class="alert alert-danger mt-3" style="display: none;"></div>
+        
+        <div id="customAnalysisResults" class="mt-3" style="display: none;">
+            <div class="card">
+                <div class="card-header bg-light">
+                    <h5 class="mb-0">分析結果</h5>
+                </div>
+                <div class="card-body custom-analysis-content"></div>
+            </div>
+        </div>
+    </div>
+</div>
     <div class="card-body">
         <div id="analysisLoading" style="display: none;">
             <div class="d-flex justify-content-center">
@@ -208,6 +263,56 @@
 document.addEventListener('DOMContentLoaded', function() {
     const leadId = {{ lead.id }};
     const charts = {};
+
+    // カスタム分析の実行
+    const customAnalysisBtn = document.getElementById('runCustomAnalysisBtn');
+    const customPrompt = document.getElementById('customPrompt');
+    const customAnalysisLoading = document.getElementById('customAnalysisLoading');
+    const customAnalysisError = document.getElementById('customAnalysisError');
+    const customAnalysisResults = document.getElementById('customAnalysisResults');
+    const customAnalysisContent = document.querySelector('.custom-analysis-content');
+
+    customAnalysisBtn.addEventListener('click', async function() {
+        try {
+            // 入力チェック
+            if (!customPrompt.value.trim()) {
+                throw new Error('分析プロンプトを入力してください。');
+            }
+
+            // UI状態の更新
+            customAnalysisLoading.style.display = 'block';
+            customAnalysisError.style.display = 'none';
+            customAnalysisResults.style.display = 'none';
+            customAnalysisBtn.disabled = true;
+
+            // APIリクエスト
+            const response = await fetch(`/api/leads/${leadId}/custom-analysis`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    prompt: customPrompt.value.trim()
+                })
+            });
+
+            const data = await response.json();
+            if (!data.success) {
+                throw new Error(data.error || '分析中にエラーが発生しました');
+            }
+
+            // 結果の表示
+            customAnalysisContent.innerHTML = data.analysis;
+            customAnalysisResults.style.display = 'block';
+
+        } catch (error) {
+            customAnalysisError.textContent = error.message;
+            customAnalysisError.style.display = 'block';
+        } finally {
+            customAnalysisLoading.style.display = 'none';
+            customAnalysisBtn.disabled = false;
+        }
+    });
 
     function createChart(elementId, type, data, options = {}) {
         const ctx = document.getElementById(elementId);
