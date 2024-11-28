@@ -239,8 +239,15 @@
             <!-- 分析結果表示エリア -->
             <div id="analysisResults" class="mt-4" style="display: none;">
                 <div class="alert alert-info">
-                    <i class="fas fa-spinner fa-spin me-2"></i>
-                    分析を実行中です...
+                    <div class="d-flex align-items-center">
+                        <div class="spinner-border text-primary me-3" role="status">
+                            <span class="visually-hidden">分析中...</span>
+                        </div>
+                        <div>
+                            <h5 class="mb-1">分析を実行中です</h5>
+                            <p class="mb-0">しばらくお待ちください...</p>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>

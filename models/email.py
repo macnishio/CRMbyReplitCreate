@@ -3,7 +3,6 @@ from extensions import db
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 from sqlalchemy import Integer, String, Text, DateTime, ForeignKey, Boolean, text
 from typing import Optional, List, TYPE_CHECKING
-from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 if TYPE_CHECKING:
     from .lead import Lead
