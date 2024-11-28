@@ -5,7 +5,7 @@ from models import Task, Opportunity, Schedule, Email
 class ComprehensiveAnalysisService:
     def __init__(self, user_settings=None):
         self.user_settings = user_settings
-    def analyze_lead_data(self, lead_id: int) -> Dict[str, Any]:
+    def analyze_lead_data(self, lead_id: int, custom_params: List[str] = None) -> Dict[str, Any]:
         """リード固有のデータ分析"""
         # リードに関連するデータを取得
         tasks = Task.query.filter_by(lead_id=lead_id).all()
@@ -20,6 +20,115 @@ class ComprehensiveAnalysisService:
             "communication": self._analyze_lead_communication(emails)
         }
 
+        # カスタムパラメータがある場合は特定の分析を追加
+        if custom_params:
+            analysis_results["custom_analysis"] = self._analyze_with_custom_params(
+                tasks, opportunities, schedules, emails, custom_params
+            )
+
+        return analysis_results
+
+    def analyze_lead_data_with_custom_prompt(self, lead_id: int, custom_prompt: str) -> Dict[str, Any]:
+        """カスタムプロンプトを使用したリードデータの分析"""
+        # リードに関連するデータを取得
+        tasks = Task.query.filter_by(lead_id=lead_id).all()
+        opportunities = Opportunity.query.filter_by(lead_id=lead_id).all()
+        schedules = Schedule.query.filter_by(lead_id=lead_id).all()
+        emails = Email.query.filter_by(lead_id=lead_id).all()
+
+        # 基本的な分析結果を取得
+        analysis_results = {
+            "tasks": self._analyze_lead_tasks(tasks),
+            "opportunities": self._analyze_lead_opportunities(opportunities),
+            "schedules": self._analyze_lead_schedules(schedules),
+            "communication": self._analyze_lead_communication(emails)
+        }
+
+        # カスタムプロンプトを使用した分析を追加
+        try:
+            from anthropic import Anthropic
+            client = Anthropic(api_key=self.user_settings.claude_api_key)
+
+            # データを文字列に変換
+            data_str = f"""
+            タスク情報:
+            {', '.join(f'{t.title}（{t.status}）' for t in tasks)}
+            
+            商談情報:
+            {', '.join(f'{o.name}（{o.stage}、¥{o.amount}）' for o in opportunities)}
+            
+            スケジュール情報:
+            {', '.join(f'{s.title}（{s.start_time}～{s.end_time}）' for s in schedules)}
+            
+            コミュニケーション履歴:
+            最近のメール数: {len(emails)}件
+            """
+
+            # カスタムプロンプトを使用してAI分析を実行
+            message = client.messages.create(
+                model="claude-3-haiku-20240307",
+                max_tokens=2000,
+                messages=[{
+                    "role": "user", 
+                    "content": f"""以下のデータを分析し、{custom_prompt}について詳しく説明してください：\n\n{data_str}"""
+                }]
+            )
+
+            if message and hasattr(message.content[0], 'text'):
+                analysis_results["custom_analysis"] = message.content[0].text
+            else:
+                analysis_results["custom_analysis"] = "カスタム分析の実行中にエラーが発生しました。"
+
+        except Exception as e:
+            analysis_results["custom_analysis"] = f"分析中にエラーが発生しました: {str(e)}"
+
+        return analysis_results
+
+    def _analyze_with_custom_params(self, tasks, opportunities, schedules, emails, custom_params):
+        """カスタムパラメータを使用した特定の分析を実行"""
+        analysis_results = {}
+        
+        if "engagement" in custom_params:
+            # エンゲージメント分析
+            email_frequency = len(emails) / 30 if emails else 0  # 月平均
+            response_rate = len([e for e in emails if e.is_reply]) / len(emails) if emails else 0
+            analysis_results["engagement"] = {
+                "email_frequency": email_frequency,
+                "response_rate": response_rate
+            }
+            
+        if "conversion" in custom_params:
+            # コンバージョン可能性分析
+            won_opps = len([o for o in opportunities if o.stage == "Won"])
+            total_opps = len(opportunities)
+            conversion_rate = won_opps / total_opps if total_opps > 0 else 0
+            analysis_results["conversion"] = {
+                "conversion_rate": conversion_rate,
+                "total_opportunities": total_opps
+            }
+            
+        if "timing" in custom_params:
+            # 最適アプローチタイミング分析
+            if emails:
+                response_times = []
+                for i in range(1, len(emails)):
+                    if emails[i].is_reply and emails[i-1].received_date:
+                        time_diff = emails[i].received_date - emails[i-1].received_date
+                        response_times.append(time_diff.total_seconds() / 3600)  # 時間単位
+                avg_response_time = sum(response_times) / len(response_times) if response_times else 0
+                analysis_results["timing"] = {
+                    "average_response_time": avg_response_time
+                }
+                
+        if "channel" in custom_params:
+            # コミュニケーションチャネル分析
+            email_count = len(emails)
+            meeting_count = len([s for s in schedules if "meeting" in s.title.lower()])
+            analysis_results["channel"] = {
+                "email_count": email_count,
+                "meeting_count": meeting_count
+            }
+            
         return analysis_results
 
     def _analyze_lead_tasks(self, tasks: List[Task]) -> Dict[str, Any]:
