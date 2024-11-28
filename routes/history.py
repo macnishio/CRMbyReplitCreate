@@ -196,19 +196,9 @@ def analyze_lead_behavior(lead_id):
                 'error': 'ユーザー設定が見つかりません'
             }), 404
 
-        # リクエストデータの取得
-        data = request.get_json()
-        custom_prompt = data.get('custom_prompt')
-        custom_params = data.get('custom_params', [])
-
         # 分析の実行
         analysis_service = ComprehensiveAnalysisService(user_settings)
-        if custom_prompt:
-            # カスタムプロンプトを使用した分析
-            analysis_results = analysis_service.analyze_lead_data_with_custom_prompt(lead_id, custom_prompt)
-        else:
-            # 標準パラメータを使用した分析
-            analysis_results = analysis_service.analyze_lead_data(lead_id, custom_params)
+        analysis_results = analysis_service.analyze_lead_data(lead_id)
 
         if not analysis_results:
             return jsonify({
