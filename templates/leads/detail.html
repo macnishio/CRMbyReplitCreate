@@ -84,9 +84,42 @@
 <div class="card mt-4">
     <div class="card-header d-flex justify-content-between align-items-center">
         <h3 class="mb-0">AI分析</h3>
-        <button id="runAnalysisBtn" class="btn btn-primary">
-            <i class="fas fa-sync-alt"></i> 分析を実行
-        </button>
+        <div class="d-flex align-items-center gap-2">
+            <div class="dropdown">
+                <button class="btn btn-secondary dropdown-toggle" type="button" id="customAnalysisBtn" data-bs-toggle="dropdown" aria-expanded="false">
+                    <i class="fas fa-cog"></i> カスタム分析設定
+                </button>
+                <div class="dropdown-menu p-3" style="width: 300px;">
+                    <div class="form-check mb-2">
+                        <input class="form-check-input" type="checkbox" value="engagement" id="engagementCheck">
+                        <label class="form-check-label" for="engagementCheck">
+                            エンゲージメント分析
+                        </label>
+                    </div>
+                    <div class="form-check mb-2">
+                        <input class="form-check-input" type="checkbox" value="conversion" id="conversionCheck">
+                        <label class="form-check-label" for="conversionCheck">
+                            コンバージョン可能性
+                        </label>
+                    </div>
+                    <div class="form-check mb-2">
+                        <input class="form-check-input" type="checkbox" value="timing" id="timingCheck">
+                        <label class="form-check-label" for="timingCheck">
+                            最適アプローチタイミング
+                        </label>
+                    </div>
+                    <div class="form-check mb-2">
+                        <input class="form-check-input" type="checkbox" value="channel" id="channelCheck">
+                        <label class="form-check-label" for="channelCheck">
+                            コミュニケーションチャネル分析
+                        </label>
+                    </div>
+                </div>
+            </div>
+            <button id="runAnalysisBtn" class="btn btn-primary">
+                <i class="fas fa-sync-alt"></i> 分析を実行
+            </button>
+        </div>
     </div>
     <div class="card-body">
         <div id="analysisLoading" style="display: none;">
@@ -296,11 +329,23 @@ document.addEventListener('DOMContentLoaded', function() {
             errorElement.style.display = 'none';
             resultsElement.style.display = 'none';
 
+            // カスタム分析パラメータの収集
+            const customParams = [];
+            ['engagement', 'conversion', 'timing', 'channel'].forEach(param => {
+                const checkbox = document.getElementById(`${param}Check`);
+                if (checkbox && checkbox.checked) {
+                    customParams.push(param);
+                }
+            });
+
             const response = await fetch(`/history/api/leads/${leadId}/analyze`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json'
-                }
+                },
+                body: JSON.stringify({
+                    custom_params: customParams
+                })
             });
 
             const data = await response.json();

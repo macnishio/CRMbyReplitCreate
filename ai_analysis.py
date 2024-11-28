@@ -128,12 +128,49 @@ def analyze_opportunities(opportunities):
     ])
     return analyze_data("商談", opp_data)
 
-def analyze_leads(leads):
-    """Analyze leads using Claude AI"""
+def analyze_leads(leads, custom_params=None):
+    """Analyze leads using Claude AI with custom parameters"""
     lead_data = "\n".join([
         f"- 名前: {lead.name}, ステータス: {lead.status}, スコア: {lead.score}, 最終接触: {lead.last_contact}"
         for lead in leads
     ])
+    
+    if custom_params:
+        analysis_prompt = f"""今は日本時間の{formatted_date}です。以下のリードデータを分析してください:\n{lead_data}\n
+        以下の観点を重点的に分析してください:
+        """
+        for param in custom_params:
+            if param == "engagement":
+                analysis_prompt += "\n- エンゲージメント分析（接触頻度、反応率、コミュニケーションパターン）"
+            elif param == "conversion":
+                analysis_prompt += "\n- コンバージョン可能性（過去の行動パターン、類似リードとの比較）"
+            elif param == "timing":
+                analysis_prompt += "\n- 最適なアプローチタイミング（過去の反応時間、業界特性）"
+            elif param == "channel":
+                analysis_prompt += "\n- 効果的なコミュニケーションチャネル（メール反応率、ミーティング設定率）"
+        
+        try:
+            user_settings = UserSettings.query.filter_by(user_id=current_user.id).first()
+            if not user_settings or not user_settings.claude_api_key:
+                return '<p class="error-message">AI分析を実行するにはAPIキーの設定が必要です。</p>'
+
+            client = Anthropic(api_key=user_settings.claude_api_key)
+            message = client.messages.create(
+                model="claude-3-haiku-20240307",
+                max_tokens=4000,
+                messages=[{"role": "user", "content": analysis_prompt}]
+            )
+
+            if message and hasattr(message.content[0], 'text'):
+                content = message.content[0].text
+                if not content.startswith('<p>'):
+                    content = '<p>' + content.replace('\n\n', '</p><p>') + '</p>'
+                return content
+            return '<p>カスタムAI分析の結果を取得できませんでした。</p>'
+
+        except Exception as e:
+            return handle_ai_error("analyze_leads_custom", e)
+            
     return analyze_data("リード", lead_data)
 
 def analyze_email(subject, content, user_id=None):

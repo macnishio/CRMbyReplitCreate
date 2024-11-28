@@ -605,7 +605,7 @@ task = "packager.installForAll"
 [[workflows.workflow.tasks]]
 task = "shell.exec"
 args = "python3 app.py"
-waitForPort = 3001
+waitForPort = 5002
 
 [[workflows.workflow]]
 name = "Add Missing Columns Migration"
