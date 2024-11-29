@@ -139,6 +139,10 @@ args = "Flask Server"
 task = "workflow.run"
 args = "Add Missing Columns Migration"
 
+[[workflows.workflow.tasks]]
+task = "workflow.run"
+args = "Fix Database"
+
 [[workflows.workflow]]
 name = "Check Migrations"
 author = "agent"
@@ -621,9 +625,40 @@ task = "packager.installForAll"
 task = "shell.exec"
 args = "flask db migrate -m 'Add missing columns: created_at for Task and Email, behavior_patterns for Lead'"
 
+[[workflows.workflow]]
+name = "Fix Database"
+author = "agent"
+
+[workflows.workflow.metadata]
+agentRequireRestartOnSave = false
+
+[[workflows.workflow.tasks]]
+task = "packager.installForAll"
+
+[[workflows.workflow.tasks]]
+task = "shell.exec"
+args = "flask db migrate -m 'Add created_at to Email model' && flask db upgrade"
+
 [deployment]
 run = ["sh", "-c", "python3 app.py"]
 
 [[ports]]
-localPort = 5002
+localPort = 80
+externalPort = 3003
+
+[[ports]]
+localPort = 3000
+externalPort = 3002
+
+[[ports]]
+localPort = 5000
 externalPort = 80
+exposeLocalhost = true
+
+[[ports]]
+localPort = 5001
+externalPort = 3000
+
+[[ports]]
+localPort = 5002
+externalPort = 3001

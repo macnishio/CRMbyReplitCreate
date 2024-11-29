@@ -19,92 +19,239 @@
                 <a href="{{ url_for('history.export_history', lead_id=lead.id) }}" class="btn btn-primary">
                     <i class="fas fa-download"></i> 履歴をエクスポート
                 </a>
-                <!-- onclick属性を削除 -->
                 <!-- ボタン要素 -->
-                <button id="analyzeBtn" class="btn btn-primary" data-lead-id="{{ lead.id }}">
+                <button id="targetBtn" class="btn btn-primary" data-lead-id="{{ lead.id|safe }}">
                     <i class="fas fa-brain"></i> AI分析
                 </button>
-            </div>
-            <!-- 分析結果表示用のコンテナ -->
-            <div id="analysisContainer" style="display: none;" class="mt-4">
-                <div class="card">
-                    <div class="card-body">
-                        <h3 class="card-title">分析結果</h3>
-                        <div id="aiInsights"></div>
-                    </div>
+                <div id="customPromptSection">
+                    <label for="customPrompt">カスタムプロンプト:</label>
+                    <textarea id="customPrompt" placeholder="カスタムプロンプトを入力..." rows="4" cols="50"></textarea>
                 </div>
             </div>
         </div>
 
-        <!-- タイムラインエラー表示 -->
-        <div id="timelineError" class="timeline-error" style="display: none;">
-            <i class="fas fa-exclamation-circle"></i>
-            <p class="error-message"></p>
-            <p class="error-code"></p>
-        </div>
+        <!-- 分析結果表示用のコンテナ -->
+        <div id="analysisContainer" style="display: none;" class="mt-4">
+            <div class="card">
+                <div class="card-body">
+                    <h3 class="card-title">分析結果</h3>
 
-        <!-- 検索部分 -->
-        <div class="search-container">
-            <div class="search-box">
-                <input type="search" id="messageSearch" placeholder="メッセージを検索...">
-                <button id="searchButton">
-                    <i class="fas fa-search"></i>
-                </button>
-            </div>
-            <div class="search-options">
-                <select id="searchType">
-                    <option value="content">内容</option>
-                    <option value="date">日付</option>
-                    <option value="sender">送信者</option>
-                </select>
-                <input type="date" id="dateFrom" class="date-input" style="display: none;">
-                <input type="date" id="dateTo" class="date-input" style="display: none;">
-            </div>
-        </div>
-    </div>
+                    <!-- ローディング表示用 -->
+                    <div id="analysisLoading" style="display: none;">
+                        <i class="fas fa-spinner fa-spin"></i> 分析中...
+                    </div>
 
-    <!-- タイムライン部分 -->
-    <div class="timeline-container">
-        <div id="timeline" class="timeline">
-            <div class="loading">
-                <i class="fas fa-spinner fa-spin"></i>
-                タイムラインを読み込み中...
+                    <!-- エラー表示用 -->
+                    <div id="analysisError" style="display: none; color: red;">
+                        <!-- エラーメッセージがここに表示されます -->
+                    </div>
+
+                    <!-- 標準分析結果表示用 -->
+                    <div id="standardAnalysisResults" style="display: none;">
+                        <h4>標準分析</h4>
+                        <div id="standardInsights"></div>
+                    </div>
+
+                    <!-- カスタム分析結果表示用 -->
+                    <div id="customAnalysisResults" style="display: none;">
+                        <h4>カスタム分析</h4>
+                        <div id="customInsights"></div>
+                    </div>
+                </div>
             </div>
         </div>
     </div>
 
-    <!-- メッセージ表示部分 -->
-    <div class="messages-container" id="messages">
+    <!-- タイムラインエラー表示 -->
+    <div id="timelineError" class="timeline-error" style="display: none;">
+        <i class="fas fa-exclamation-circle"></i>
+        <p class="error-message"></p>
+        <p class="error-code"></p>
+    </div>
+
+    <!-- 検索部分 -->
+    <div class="search-container">
+        <div class="search-box">
+            <input type="search" id="messageSearch" placeholder="メッセージを検索...">
+            <button id="searchButton">
+                <i class="fas fa-search"></i>
+            </button>
+        </div>
+        <div class="search-options">
+            <select id="searchType">
+                <option value="content">内容</option>
+                <option value="date">日付</option>
+                <option value="sender">送信者</option>
+            </select>
+            <input type="date" id="dateFrom" class="date-input" style="display: none;">
+            <input type="date" id="dateTo" class="date-input" style="display: none;">
+        </div>
+    </div>
+</div>
+
+<!-- タイムライン部分 -->
+<div class="timeline-container">
+    <div id="timeline" class="timeline">
         <div class="loading">
             <i class="fas fa-spinner fa-spin"></i>
-            メッセージを読み込み中...
+            タイムラインを読み込み中...
         </div>
     </div>
-
-    <!-- さらに読み込むボタン -->
-    <button class="load-more" id="loadMore" style="display: none;">
-        <i class="fas fa-sync-alt"></i>
-        さらに読み込む
-    </button>
 </div>
+
+<!-- メッセージ表示部分 -->
+<div class="messages-container" id="messages">
+    <div class="loading">
+        <i class="fas fa-spinner fa-spin"></i>
+        メッセージを読み込み中...
+    </div>
+</div>
+
+<!-- さらに読み込むボタン -->
+<button class="load-more" id="loadMore" style="display: none;">
+    <i class="fas fa-sync-alt"></i>
+    さらに読み込む
+</button>
 {% endblock %}
 
 {% block scripts %}
 <script src="{{ url_for('static', filename='js/history.js') }}"></script>
 <script>
-    document.addEventListener('DOMContentLoaded', () => {
-        // デバッグモードを有効化
+    document.addEventListener('DOMContentLoaded', function() {
         historyState.debug = true;
 
-        const leadId = {{ lead.id }}; // サーバーサイドで埋め込まれたlead.id
-
-        // 分析ボタンのイベントリスナーを追加
-        const analyzeBtn = document.getElementById('analyzeBtn');
-        if (analyzeBtn) {
-            analyzeBtn.addEventListener('click', () => analyzeCustomerBehavior(leadId));
+        const leadId = {{ lead.id }};
+        if (!leadId) {
+            console.error('Lead IDが定義されていません。');
+            return;
         }
 
+        // 初期化関数の呼び出し
+        initializeAnalysisButton();
         initializeHistory(leadId);
     });
+
+    // 分析ボタンの初期化
+    function initializeAnalysisButton() {
+        const targetBtn = document.getElementById('targetBtn');
+        if (!targetBtn) {
+            console.error('分析ボタンが見つかりません。');
+            return;
+        }
+
+        const leadId = targetBtn.getAttribute('data-lead-id');
+        if (!leadId) {
+            console.error('Lead IDが取得できません。');
+            return;
+        }
+
+        console.log('Target Button:', targetBtn); // デバッグ用
+        console.log('Lead ID:', leadId); // デバッグ用
+
+        // イベントリスナーが重複して設定されないように、既存のリスナーを削除
+        if (targetBtn._handleClick) {
+            targetBtn.removeEventListener('click', targetBtn._handleClick);
+        }
+
+        // 新しいイベントリスナーを設定
+        targetBtn._handleClick = async function() {
+            console.log('Event Listener Triggered');
+            console.log('Lead ID (inside event listener):', leadId);
+
+            // カスタムプロンプトを取得
+            const customPromptElement = document.getElementById('customPrompt');
+            if (!customPromptElement) {
+                console.error('Custom Prompt Element not found');
+                return;
+            }
+
+            const customPrompt = customPromptElement.value.trim();
+            console.log('Custom Prompt:', customPrompt); // 値の確認用ログ
+            console.log('Custom Prompt Type:', typeof customPrompt); // 型の確認用ログ
+
+            // ボタンの状態を更新
+            targetBtn.disabled = true;
+            targetBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> 分析中...';
+
+            try {
+                // 分析の実行
+                console.log('Sending API Request with payload:', JSON.stringify({ custom_prompt: customPrompt }));
+
+                await analyzeCustomerBehavior(leadId, customPrompt);
+            } catch (error) {
+                console.error('分析中にエラーが発生しました:', error);
+                alert(`分析中にエラーが発生しました: ${error.message}`);
+            } finally {
+                // ボタンの状態を元に戻す
+                targetBtn.disabled = false;
+                targetBtn.innerHTML = '<i class="fas fa-brain"></i> AI分析';
+            }
+        };
+
+        targetBtn.addEventListener('click', targetBtn._handleClick);
+    }
+
+    // カスタムプロンプトを受け取るように修正した分析関数
+    async function analyzeCustomerBehavior(leadId, customPrompt) {
+        const analysisContainer = document.getElementById('analysisContainer');
+        const analysisLoading = document.getElementById('analysisLoading');
+        const analysisError = document.getElementById('analysisError');
+        const standardAnalysisResults = document.getElementById('standardAnalysisResults');
+
+        if (!analysisContainer || !standardAnalysisResults) {
+            console.error('Required elements not found');
+            return;
+        }
+
+        try {
+            analysisContainer.style.display = 'block';
+            analysisLoading.style.display = 'block';
+            analysisError.style.display = 'none';
+            standardAnalysisResults.style.display = 'none';
+
+            // APIリクエスト
+            const response = await fetch(`/history/api/leads/${leadId}/analyze`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Accept': 'application/json',
+                    'X-Requested-With': 'XMLHttpRequest'
+                },
+                credentials: 'same-origin',
+                body: JSON.stringify({
+                    custom_prompt: customPrompt
+                })
+            });
+
+            if (!response.ok) {
+                const errorData = await response.json();
+                throw new Error(errorData.error || `サーバーエラー: ${response.status}`);
+            }
+
+            const data = await response.json();
+            console.log('Received data from server:', data); // デバッグ用
+
+            if (!data || data.error) {
+                throw new Error(data.error || 'データの取得に失敗しました');
+            }
+
+            // 分析結果を表示
+            analysisLoading.style.display = 'none';
+            standardAnalysisResults.style.display = 'block';
+            if (!customPrompt) {
+                displayStandardAnalysisResults(data);
+            }
+            else
+            {
+                displayCustomAnalysisResults(data);
+            }
+        } catch (error) {
+            console.error('Analysis error:', error);
+            analysisError.style.display = 'block';
+            analysisError.innerHTML = `<p>${error.message}</p>`;
+        } finally {
+            if (analysisLoading) analysisLoading.style.display = 'none';
+        }
+    }
 </script>
 {% endblock %}

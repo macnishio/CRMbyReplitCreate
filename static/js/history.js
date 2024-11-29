@@ -176,13 +176,6 @@ function setupSearch(leadId) {
     });
 }
 
-function initializeAnalysis() {
-    const analyzeBtn = document.getElementById('analyzeBtn');
-    if (analyzeBtn) {
-        analyzeBtn.addEventListener('click', analyzeCustomerBehavior);
-    }
-}
-
 // HTMLエスケープ関数
 const escapeHtml = (str) => {
     if (!str) return '';
@@ -263,166 +256,37 @@ function showLoading(isLoading, container) {
     loadingElement.style.display = isLoading ? 'block' : 'none';
 }
 
-function displayTimelineEvents(events) {
-    const timelineContainer = document.getElementById('timeline');
-    timelineContainer.innerHTML = '';
-    events.forEach(event => {
-        const eventStyle = getEventTypeStyle(event.type);
-        const timelineItem = document.createElement('div');
-        timelineItem.className = 'timeline-event';
-
-        timelineItem.innerHTML = `
-            <div class="event-icon" style="background-color: ${eventStyle.color}">
-                <i class="fas ${eventStyle.icon}"></i>
-            </div>
-            <div class="event-content">
-                <div class="event-title">${event.title}</div>
-                <div class="event-description">${event.description}</div>
-                <div class="event-date">
-                    <i class="fas fa-clock"></i>
-                    ${formatDate(event.date).full}
-                </div>
-                ${getEventMetadata(event)}
-            </div>
-        `;
-
-        timelineContainer.appendChild(timelineItem);
-    });
-}
-
-function getEventTypeStyle(type) {
-    const styles = {
-        email: {
-            icon: 'fa-envelope',
-            color: 'var(--color-info)'
-        },
-        status_change: {
-            icon: 'fa-exchange-alt',
-            color: 'var(--color-warning)'
-        },
-        score_update: {
-            icon: 'fa-chart-line',
-            color: 'var(--color-success)'
-        },
-        behavior_analysis: {
-            icon: 'fa-brain',
-            color: '#9c27b0'
-        },
-        opportunity: {
-            icon: 'fa-handshake',
-            color: '#ff9800'
-        },
-        opportunity_stage_change: {
-            icon: 'fa-exchange-alt',
-            color: '#ff9800'
-        },
-        task: {
-            icon: 'fa-tasks',
-            color: '#4caf50'
-        },
-        task_status_change: {
-            icon: 'fa-check-circle',
-            color: '#4caf50'
-        },
-        schedule: {
-            icon: 'fa-calendar',
-            color: '#2196f3'
-        },
-        schedule_status_change: {
-            icon: 'fa-clock',
-            color: '#2196f3'
-        }
-    };
-    return styles[type] || { icon: 'fa-circle', color: 'var(--color-primary)' };
+function getEventTypeStyle(eventType) {
+    switch (eventType) {
+        case 'email':
+            return {
+                color: 'lightblue',
+                icon: 'fas fa-envelope'
+            };
+        case 'meeting':
+            return {
+                color: 'lightgreen',
+                icon: 'fas fa-user-friends'
+            };
+        case 'call':
+            return {
+                color: 'lightcoral',
+                icon: 'fas fa-phone'
+            };
+        default:
+            return {
+                color: 'lightgrey',
+                icon: 'fas fa-info-circle'
+            };
+    }
 }
 
 function getEventMetadata(event) {
-    if (!event.metadata) return '';
-
-    let metadataHtml = '';
-    switch (event.type) {
-        case 'status_change':
-            metadataHtml = `
-                <div class="event-metadata">
-                    <span class="old-status">${event.metadata.old_status}</span>
-                    <i class="fas fa-arrow-right"></i>
-                    <span class="new-status">${event.metadata.new_status}</span>
-                </div>
-            `;
-            break;
-        case 'score_update':
-            metadataHtml = `
-                <div class="event-metadata">
-                    <span class="score-change">スコア: ${event.metadata.old_score || '?'} → ${event.metadata.new_score}</span>
-                </div>
-            `;
-            break;
-        case 'opportunity':
-            metadataHtml = `
-                <div class="event-metadata">
-                    <span class="stage">ステージ: ${event.metadata.stage}</span>
-                    <span class="amount">金額: ¥${Number(event.metadata.amount).toLocaleString()}</span>
-                    ${event.metadata.close_date ? `<span class="close-date">完了予定日: ${event.metadata.close_date}</span>` : ''}
-                </div>
-            `;
-            break;
-        case 'opportunity_stage_change':
-            metadataHtml = `
-                <div class="event-metadata">
-                    <span class="stage-change">
-                        <span class="old-stage">${event.metadata.old_stage}</span>
-                        <i class="fas fa-arrow-right"></i>
-                        <span class="new-stage">${event.metadata.new_stage}</span>
-                    </span>
-                </div>
-            `;
-            break;
-        case 'task':
-            metadataHtml = `
-                <div class="event-metadata">
-                    <span class="status">ステータス: ${event.metadata.status}</span>
-                    ${event.metadata.priority ? `<span class="priority">優先度: ${event.metadata.priority}</span>` : ''}
-                    ${event.metadata.due_date ? `<span class="due-date">期限: ${event.metadata.due_date}</span>` : ''}
-                </div>
-            `;
-            break;
-        case 'task_status_change':
-            metadataHtml = `
-                <div class="event-metadata">
-                    <span class="status-change">
-                        <span class="old-status">${event.metadata.old_status}</span>
-                        <i class="fas fa-arrow-right"></i>
-                        <span class="new-status">${event.metadata.new_status}</span>
-                    </span>
-                </div>
-            `;
-            break;
-        case 'schedule':
-            metadataHtml = `
-                <div class="event-metadata">
-                    ${event.metadata.location ? `<span class="location"><i class="fas fa-map-marker-alt"></i> ${event.metadata.location}</span>` : ''}
-                    <span class="time">
-                        <i class="fas fa-clock"></i> 
-                        ${formatDate(event.metadata.start_time).time} - 
-                        ${event.metadata.end_time ? formatDate(event.metadata.end_time).time : '未設定'}
-                    </span>
-                    ${event.metadata.status ? `<span class="status">ステータス: ${event.metadata.status}</span>` : ''}
-                </div>
-            `;
-            break;
-        case 'schedule_status_change':
-            metadataHtml = `
-                <div class="event-metadata">
-                    <span class="status-change">
-                        <span class="old-status">${event.metadata.old_status}</span>
-                        <i class="fas fa-arrow-right"></i>
-                        <span class="new-status">${event.metadata.new_status}</span>
-                    </span>
-                </div>
-            `;
-            break;
-    }
-    return metadataHtml;
+    // ここでイベントに基づいてメタデータを構築します
+    return {
+        timestamp: new Date(event.timestamp).toLocaleString(),
+        description: event.description || '詳細がありません',
+    };
 }
 
 function displayTimelineEvents(events) {
@@ -491,7 +355,6 @@ function initializeHistory(leadId) {
     loadMessages(leadId);
     setupSearch(leadId);
     loadTimeline(leadId);
-    initializeAnalysis();
 
     const loadMoreButton = document.getElementById('loadMore');
     if (loadMoreButton) {
@@ -520,169 +383,99 @@ function initializeHistory(leadId) {
     }
 }
 
-// グローバル変数の定義
-let currentLeadId = null;
 
-// 分析ボタンの初期化関数の定義
-function initializeAnalysisButton() {
-    const analyzeBtn = document.getElementById('analyzeBtn');
-    if (!analyzeBtn) return;
+// 修正されたカスタム分析結果の表示関数
+function displayCustomAnalysisResults(data) {
+    console.log('displayCustomAnalysisResults called with data:', data);
 
-    // URLからlead_idを取得
-    const pathParts = window.location.pathname.split('/');
-    const leadIdIndex = pathParts.indexOf('leads') + 1;
-    if (leadIdIndex > 0 && leadIdIndex < pathParts.length) {
-        currentLeadId = pathParts[leadIdIndex];
-    }
-
-    // data属性からもlead_idを取得（優先）
-    if (analyzeBtn.dataset.leadId) {
-        currentLeadId = analyzeBtn.dataset.leadId;
-    }
-
-    analyzeBtn.addEventListener('click', () => {
-        if (currentLeadId) {
-            analyzeCustomerBehavior(currentLeadId);
-        } else {
-            console.error('Lead ID not found');
-            alert('リードIDが見つかりません。');
-        }
-    });
-}
-
-async function analyzeCustomerBehavior(leadId) {
-    const analyzeBtn = document.getElementById('analyzeBtn');
-    if (!analyzeBtn) {
-        console.error('Analyze button not found');
-        return;
-    }
-
-    // イベントオブジェクトが渡された場合の処理
-    if (leadId instanceof Event) {
-        leadId = currentLeadId;
-    }
-
-    // leadIdの検証
-    if (!leadId) {
-        console.error('No lead ID provided');
-        alert('リードIDが指定されていません。');
-        return;
-    }
-
-    try {
-        // ボタンの状態を更新
-        analyzeBtn.disabled = true;
-        analyzeBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> 分析中...';
-
-        // APIリクエスト
-        const response = await fetch(`/history/api/leads/${leadId}/analyze`, {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                'Accept': 'application/json',
-                'X-Requested-With': 'XMLHttpRequest'
-            },
-            credentials: 'same-origin'
-        });
-
-        if (!response.ok) {
-            throw new Error(`サーバーエラー: ${response.status}`);
-        }
-
-        const data = await response.json();
-        
-        if (!data) {
-            throw new Error('データの取得に失敗しました');
-        }
-
-        if (data.error) {
-            throw new Error(data.error);
-        }
-
-        // 分析結果の表示
-        displayAnalysisResults(data);
-
-    } catch (error) {
-        console.error('Analysis error:', error);
-        alert(`分析中にエラーが発生しました: ${error.message}`);
-    } finally {
-        // ボタンを元の状態に戻す
-        if (!analyzeBtn.isConnected) return; // ボタンが既にDOMから削除されている場合
-        analyzeBtn.disabled = false;
-        analyzeBtn.innerHTML = '<i class="fas fa-brain"></i> AI分析';
-    }
-}
-
-// 分析結果の表示関数
-function displayAnalysisResults(data) {
     const analysisContainer = document.getElementById('analysisContainer');
-    const aiInsights = document.getElementById('aiInsights');
-    
-    if (!analysisContainer || !aiInsights) {
-        console.error('Analysis display elements not found');
+    const customAnalysisResults = document.getElementById('customAnalysisResults');
+    const customInsightsElement = document.getElementById('customInsights');
+    const analysisLoading = document.getElementById('analysisLoading');
+    const analysisError = document.getElementById('analysisError');
+
+    if (!analysisContainer || !customInsightsElement || !customAnalysisResults) {
+        console.error('分析結果表示用の要素が見つかりません');
         return;
     }
 
-    analysisContainer.style.display = 'block';
-    aiInsights.innerHTML = `
+    // ローディングやエラー表示を隠す
+    if (analysisLoading) analysisLoading.style.display = 'none';
+    if (analysisError) analysisError.style.display = 'none';
+
+    // カスタム分析結果を表示
+    customAnalysisResults.style.display = 'block';
+
+    const customAnalysis = data.data ? data.data.custom_analysis : null;
+    if (!customAnalysis) {
+        console.error('Analysis property is missing in the response');
+        customInsightsElement.innerHTML += '<p>カスタム分析結果の取得に失敗しました。</p>';
+        return;
+    }
+
+    customInsightsElement.innerHTML += `
         <div class="analysis-section">
-            <h4>タスク分析</h4>
-            <p>${data.data.tasks?.status === 'no_data' ? 
-                data.data.tasks.message : 
-                `完了率: ${data.data.tasks.completion_rate}%`}</p>
-        </div>
-        <div class="analysis-section">
-            <h4>商談分析</h4>
-            <p>${data.data.opportunities?.status === 'no_data' ? 
-                data.data.opportunities.message : 
-                `総額: ${data.data.opportunities.total_amount.toLocaleString()}円`}</p>
-        </div>
-        <div class="analysis-section">
-            <h4>コミュニケーション分析</h4>
-            <p>${data.data.communication?.status === 'no_data' ? 
-                data.data.communication.message : 
-                `メール数: ${data.data.communication.total_emails}件`}</p>
+            <h4>カスタム分析結果</h4>
+            <pre>${customAnalysis}</pre>
         </div>
     `;
 }
 
-// DOMの読み込み完了時の処理
-document.addEventListener('DOMContentLoaded', () => {
-    initializeAnalysisButton();
-});
+// 修正された標準分析結果の表示関数
+function displayStandardAnalysisResults(data) {
+    console.log('displayStandardAnalysisResults called with data:', data);
 
-// 分析ボタンのクリックハンドラー
-function handleAnalyzeClick(event) {
-    event.preventDefault();
-    
-    if (!currentLeadId) {
-        console.error('Lead ID not found');
+    const analysisContainer = document.getElementById('analysisContainer');
+    const standardAnalysisResults = document.getElementById('standardAnalysisResults');
+    const standardInsights = document.getElementById('standardInsights');
+    const analysisLoading = document.getElementById('analysisLoading');
+    const analysisError = document.getElementById('analysisError');
+
+    if (!analysisContainer || !standardInsights || !standardAnalysisResults) {
+        console.error('Analysis display elements not found');
         return;
     }
-    
-    analyzeCustomerBehavior(currentLeadId);
-}
 
-// 分析結果のフォーマット関数
-function formatAnalysisResults(data) {
-    return `
+    // ローディングやエラー表示を隠す
+    if (analysisLoading) analysisLoading.style.display = 'none';
+    if (analysisError) analysisError.style.display = 'none';
+
+    // 標準分析結果を表示
+    standardAnalysisResults.style.display = 'block';
+
+    if (!data.data) {
+        console.error('Data object is missing "data" property');
+        standardInsights.innerHTML = '<p>分析結果の取得に失敗しました。</p>';
+        return;
+    }
+
+    const { tasks, opportunities, communication, schedules } = data.data;
+
+    standardInsights.innerHTML = `
         <div class="analysis-section">
             <h4>タスク分析</h4>
-            <p>${data.data.tasks?.status === 'no_data' ? 
-                data.data.tasks.message : 
-                `完了率: ${data.data.tasks.completion_rate}%`}</p>
+            <p>完了タスク数: ${tasks && tasks.completed_tasks ? tasks.completed_tasks : '不明'}</p>
+            <p>完了率: ${tasks && tasks.completion_rate ? tasks.completion_rate : '不明'}%</p>
+            <p>総タスク数: ${tasks && tasks.total_tasks ? tasks.total_tasks : '不明'}</p>
         </div>
         <div class="analysis-section">
             <h4>商談分析</h4>
-            <p>${data.data.opportunities?.status === 'no_data' ? 
-                data.data.opportunities.message : 
-                `総額: ${data.data.opportunities.total_amount}円`}</p>
+            <p>総商談数: ${opportunities && opportunities.total_opportunities ? opportunities.total_opportunities : '不明'}</p>
+            <p>総額: ${opportunities && opportunities.total_amount ? opportunities.total_amount.toLocaleString() : '不明'}円</p>
+            <p>平均額: ${opportunities && opportunities.average_amount ? opportunities.average_amount.toLocaleString() : '不明'}円</p>
         </div>
         <div class="analysis-section">
             <h4>コミュニケーション分析</h4>
-            <p>${data.data.communication?.status === 'no_data' ? 
-                data.data.communication.message : 
-                `メール数: ${data.data.communication.total_emails}件`}</p>
+            <p>メール送信数: ${communication && communication.sent_emails ? communication.sent_emails : '不明'}件</p>
+            <p>メール受信数: ${communication && communication.received_emails ? communication.received_emails : '不明'}件</p>
+            <p>総メール数: ${communication && communication.total_emails ? communication.total_emails : '不明'}件</p>
+            <p>最終連絡日: ${communication && communication.last_contact ? new Date(communication.last_contact).toLocaleDateString('ja-JP') : '不明'}</p>
+        </div>
+        <div class="analysis-section">
+            <h4>スケジュール分析</h4>
+            <p>総スケジュール数: ${schedules && schedules.total_schedules ? schedules.total_schedules : '不明'}</p>
+            <p>最近のスケジュール数: ${schedules && schedules.recent_schedules ? schedules.recent_schedules : '不明'}</p>
+            <p>今後のスケジュール数: ${schedules && schedules.upcoming_schedules ? schedules.upcoming_schedules : '不明'}</p>
         </div>
     `;
 }

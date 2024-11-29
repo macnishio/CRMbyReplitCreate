@@ -5,40 +5,10 @@
 {% block styles %}
 <style>
 /* CSS Styles */
-
-.ai-buttons {
-    display: flex;
-    gap: 10px;
-}
-
-.email-summary-content {
-    margin: 20px 0;
-    padding: 15px;
-    background: #f8fafc;
-    border-radius: 6px;
-}
-
-.email-summary-content h5 {
-    margin: 0 0 10px 0;
-    color: #2d3748;
-}
-
-.summary-content {
-    font-size: 0.95em;
-    line-height: 1.6;
-}
-
-.summary-content p {
-    margin-bottom: 10px;
-}
-
 .detail-container {
-    max-width: 800px;
+    max-width: 1200px;
     margin: 2rem auto;
     padding: 2rem;
-    background: #fff;
-    border-radius: 8px;
-    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
 }
 
 .lead-details {
@@ -51,10 +21,6 @@
     display: flex;
     justify-content: space-between;
     align-items: center;
-}
-
-.detail-item:last-child {
-    border-bottom: none;
 }
 
 .detail-label {
@@ -75,809 +41,150 @@
     justify-content: flex-end;
 }
 
-.btn {
-    padding: 0.5rem 1.5rem;
-    border-radius: 4px;
-    cursor: pointer;
-    text-decoration: none;
-<!-- AI分析セクション -->
-<div class="card mt-4">
-    <div class="card-header">
-        <h3 class="mb-0">標準AI分析</h3>
-    </div>
-    <div class="card-body">
-        <div class="d-flex align-items-center gap-2 mb-3">
-            <div class="dropdown">
-                <button class="btn btn-secondary dropdown-toggle" type="button" id="standardAnalysisBtn" data-bs-toggle="dropdown" aria-expanded="false">
-                    <i class="fas fa-cog"></i> 分析設定
-                </button>
-                <div class="dropdown-menu p-3" style="width: 300px;">
-                    <div class="form-check mb-2">
-                        <input class="form-check-input" type="checkbox" value="engagement" id="engagementCheck">
-                        <label class="form-check-label" for="engagementCheck">
-                            エンゲージメント分析
-                        </label>
-                    </div>
-                    <div class="form-check mb-2">
-                        <input class="form-check-input" type="checkbox" value="conversion" id="conversionCheck">
-                        <label class="form-check-label" for="conversionCheck">
-                            コンバージョン可能性
-                        </label>
-                    </div>
-                    <div class="form-check mb-2">
-                        <input class="form-check-input" type="checkbox" value="timing" id="timingCheck">
-                        <label class="form-check-label" for="timingCheck">
-                            最適アプローチタイミング
-                        </label>
-                    </div>
-                    <div class="form-check mb-2">
-                        <input class="form-check-input" type="checkbox" value="channel" id="channelCheck">
-                        <label class="form-check-label" for="channelCheck">
-                            コミュニケーションチャネル分析
-                        </label>
-                    </div>
-                </div>
-            </div>
-            <button id="runAnalysisBtn" class="btn btn-primary">
-                <i class="fas fa-sync-alt"></i> 標準分析を実行
-            </button>
-        </div>
-
-        <div id="analysisLoading" style="display: none;">
-            <div class="d-flex justify-content-center">
-                <div class="spinner-border text-primary" role="status">
-                    <span class="visually-hidden">分析中...</span>
-                </div>
-            </div>
-            <p class="text-center mt-2">データを分析中...</p>
-        </div>
-
-        <div id="analysisError" class="alert alert-danger" style="display: none;"></div>
-        <div id="analysisResults" style="display: none;"></div>
-    </div>
-</div>
-
-<!-- カスタムAI分析セクション -->
-<div class="card mt-4">
-    <div class="card-header">
-        <h3 class="mb-0">カスタムAI分析</h3>
-    </div>
-    <div class="card-body">
-        <div class="form-group mb-3">
-            <label for="customPrompt" class="form-label">分析プロンプト</label>
-            <textarea id="customPrompt" class="form-control" rows="4" 
-                placeholder="分析の視点や観点を自由に入力してください。&#10;例：&#10;- 商談成立の可能性を過去の類似案件と比較して分析&#10;- コミュニケーションパターンから見る商談進捗の特徴&#10;- 業界特性を考慮した最適なアプローチ方法の提案"></textarea>
-        </div>
-
-        <div class="d-flex justify-content-end">
-            <button id="runCustomAnalysisBtn" class="btn btn-primary">
-                <i class="fas fa-brain"></i> カスタム分析を実行
-            </button>
-        </div>
-
-        <div id="customAnalysisLoading" style="display: none;" class="mt-3">
-            <div class="d-flex justify-content-center">
-                <div class="spinner-border text-primary" role="status">
-                    <span class="visually-hidden">分析中...</span>
-                </div>
-            </div>
-            <p class="text-center mt-2">カスタム分析を実行中...</p>
-        </div>
-
-        <div id="customAnalysisError" class="alert alert-danger mt-3" style="display: none;"></div>
-        
-        <div id="customAnalysisResults" class="mt-3" style="display: none;">
-            <div class="card">
-                <div class="card-header bg-light">
-                    <h5 class="mb-0">分析結果</h5>
-                </div>
-                <div class="card-body custom-analysis-content"></div>
-            </div>
-        </div>
-    </div>
-</div>
-    <div class="card-body">
-        <div id="analysisLoading" style="display: none;">
-            <div class="d-flex justify-content-center">
-                <div class="spinner-border text-primary" role="status">
-                    <span class="visually-hidden">分析中...</span>
-                </div>
-            </div>
-            <p class="text-center mt-2">データを分析中...</p>
-        </div>
-
-        <div id="analysisError" class="alert alert-danger" style="display: none;"></div>
-
-        <div id="analysisResults" style="display: none;">
-            <div class="row">
-                <!-- タスク分析 -->
-                <div class="col-md-6 mb-4">
-                    <div class="card h-100">
-                        <div class="card-header">
-                            <h5 class="mb-0">タスク分析</h5>
-                        </div>
-                        <div class="card-body">
-                            <canvas id="taskAnalysisChart"></canvas>
-                            <div id="taskAnalysisText" class="mt-3"></div>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- 商談分析 -->
-                <div class="col-md-6 mb-4">
-                    <div class="card h-100">
-                        <div class="card-header">
-                            <h5 class="mb-0">商談分析</h5>
-                        </div>
-                        <div class="card-body">
-                            <canvas id="opportunityAnalysisChart"></canvas>
-                            <div id="opportunityAnalysisText" class="mt-3"></div>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- スケジュール分析 -->
-                <div class="col-md-6 mb-4">
-                    <div class="card h-100">
-                        <div class="card-header">
-                            <h5 class="mb-0">スケジュール分析</h5>
-                        </div>
-                        <div class="card-body">
-                            <canvas id="scheduleAnalysisChart"></canvas>
-                            <div id="scheduleAnalysisText" class="mt-3"></div>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- コミュニケーション分析 -->
-                <div class="col-md-6 mb-4">
-                    <div class="card h-100">
-                        <div class="card-header">
-                            <h5 class="mb-0">コミュニケーション分析</h5>
-                        </div>
-                        <div class="card-body">
-                            <canvas id="communicationAnalysisChart"></canvas>
-                            <div id="communicationAnalysisText" class="mt-3"></div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- AIインサイト -->
-            <div class="card mt-4">
-                <div class="card-header">
-                    <h5 class="mb-0">AIインサイト</h5>
-                </div>
-                <div class="card-body">
-                    <div id="aiInsights"></div>
-                </div>
-            </div>
-        </div>
-    </div>
-</div>
-
-<!-- Chart.js -->
-<script src="https://cdn.jsdelivr.net/npm/chart.js@3.7.0/dist/chart.min.js"></script>
-
-<script>
-document.addEventListener('DOMContentLoaded', function() {
-    const leadId = {{ lead.id }};
-    const charts = {};
-
-    // カスタム分析の実行
-    const customAnalysisBtn = document.getElementById('runCustomAnalysisBtn');
-    const customPrompt = document.getElementById('customPrompt');
-    const customAnalysisLoading = document.getElementById('customAnalysisLoading');
-    const customAnalysisError = document.getElementById('customAnalysisError');
-    const customAnalysisResults = document.getElementById('customAnalysisResults');
-    const customAnalysisContent = document.querySelector('.custom-analysis-content');
-
-    customAnalysisBtn.addEventListener('click', async function() {
-        try {
-            // 入力チェック
-            if (!customPrompt.value.trim()) {
-                throw new Error('分析プロンプトを入力してください。');
-            }
-
-            // UI状態の更新
-            customAnalysisLoading.style.display = 'block';
-            customAnalysisError.style.display = 'none';
-            customAnalysisResults.style.display = 'none';
-            customAnalysisBtn.disabled = true;
-
-            // APIリクエスト
-            const response = await fetch(`/api/leads/${leadId}/custom-analysis`, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify({
-                    prompt: customPrompt.value.trim()
-                })
-            });
-
-            const data = await response.json();
-            if (!data.success) {
-                throw new Error(data.error || '分析中にエラーが発生しました');
-            }
-
-            // 結果の表示
-            customAnalysisContent.innerHTML = data.analysis;
-            customAnalysisResults.style.display = 'block';
-
-        } catch (error) {
-            customAnalysisError.textContent = error.message;
-            customAnalysisError.style.display = 'block';
-        } finally {
-            customAnalysisLoading.style.display = 'none';
-            customAnalysisBtn.disabled = false;
-        }
-    });
-
-    function createChart(elementId, type, data, options = {}) {
-        const ctx = document.getElementById(elementId);
-        if (charts[elementId]) {
-            charts[elementId].destroy();
-        }
-        charts[elementId] = new Chart(ctx, {
-            type: type,
-            data: data,
-            options: options
-        });
-    }
-
-    function displayAnalysisResults(data) {
-        const analysisResults = document.getElementById('analysisResults');
-        const rawData = data.raw_data;
-
-        // タスク分析のチャート表示
-        if (rawData.tasks && !rawData.tasks.error) {
-            createChart('taskAnalysisChart', 'doughnut', {
-                labels: ['完了', '未完了'],
-                datasets: [{
-                    data: [rawData.tasks.completion_rate, 100 - rawData.tasks.completion_rate],
-                    backgroundColor: ['#2ecc71', '#e74c3c']
-                }]
-            });
-            document.getElementById('taskAnalysisText').innerHTML = `
-                <p>完了率: ${rawData.tasks.completion_rate.toFixed(1)}%</p>
-                <p>総タスク数: ${rawData.tasks.total_tasks}</p>
-            `;
-        }
-
-        // 商談分析のチャート表示
-        if (rawData.opportunities && !rawData.opportunities.error) {
-            createChart('opportunityAnalysisChart', 'bar', {
-                labels: Object.keys(rawData.opportunities.stage_distribution),
-                datasets: [{
-                    label: '商談数',
-                    data: Object.values(rawData.opportunities.stage_distribution),
-                    backgroundColor: '#3498db'
-                }]
-            });
-            document.getElementById('opportunityAnalysisText').innerHTML = `
-                <p>成約率: ${rawData.opportunities.win_rate.toFixed(1)}%</p>
-                <p>平均商談金額: ¥${rawData.opportunities.average_amount.toLocaleString()}</p>
-            `;
-        }
-
-        // スケジュール分析のチャート表示
-        if (rawData.schedules && !rawData.schedules.error) {
-            const meetingData = rawData.schedules.meeting_frequency;
-            createChart('scheduleAnalysisChart', 'pie', {
-                labels: Object.keys(rawData.schedules.schedule_types),
-                datasets: [{
-                    data: Object.values(rawData.schedules.schedule_types),
-                    backgroundColor: ['#2ecc71', '#e74c3c', '#f1c40f', '#9b59b6']
-                }]
-            });
-            document.getElementById('scheduleAnalysisText').innerHTML = `
-                <p>月間ミーティング数: ${meetingData.total_meetings}</p>
-                <p>1日平均: ${meetingData.daily_average.toFixed(1)}件</p>
-            `;
-        }
-
-        // コミュニケーション分析のチャート表示
-        if (rawData.communication && !rawData.communication.error) {
-            const emailData = rawData.communication.email_patterns;
-            createChart('communicationAnalysisChart', 'bar', {
-                labels: Object.keys(rawData.communication.hour_distribution),
-                datasets: [{
-                    label: 'メール数',
-                    data: Object.values(rawData.communication.hour_distribution),
-                    backgroundColor: '#3498db'
-                }]
-            });
-            document.getElementById('communicationAnalysisText').innerHTML = `
-                <p>総メール数: ${emailData.total_emails}</p>
-                <p>平均応答時間: ${emailData.average_response_time_hours.toFixed(1)}時間</p>
-            `;
-        }
-
-        // AIインサイトの表示
-        const aiInsightsElement = document.getElementById('aiInsights');
-        try {
-            const insights = JSON.parse(data.ai_insights);
-            aiInsightsElement.innerHTML = `
-                <div class="mb-3">
-                    <h6>全体的なエンゲージメント状況</h6>
-                    <p>${insights.engagement_status || '分析中...'}</p>
-                </div>
-                <div class="mb-3">
-                    <h6>商談プロセスの効率性</h6>
-                    <p>${insights.process_efficiency || '分析中...'}</p>
-                </div>
-                <div class="mb-3">
-                    <h6>コミュニケーションパターン</h6>
-                    <p>${insights.communication_patterns || '分析中...'}</p>
-                </div>
-                <div class="mb-3">
-                    <h6>推奨アクション</h6>
-                    <p>${insights.recommendations || '分析中...'}</p>
-                </div>
-            `;
-        } catch (e) {
-            aiInsightsElement.innerHTML = `<p>${data.ai_insights}</p>`;
-        }
-
-        analysisResults.style.display = 'block';
-    }
-
-    // 分析実行ボタンのイベントリスナー
-    document.getElementById('runAnalysisBtn').addEventListener('click', async function() {
-        const loadingElement = document.getElementById('analysisLoading');
-        const errorElement = document.getElementById('analysisError');
-        const resultsElement = document.getElementById('analysisResults');
-
-        try {
-            loadingElement.style.display = 'block';
-            errorElement.style.display = 'none';
-            resultsElement.style.display = 'none';
-
-            // カスタム分析パラメータの収集
-            const customParams = [];
-            ['engagement', 'conversion', 'timing', 'channel'].forEach(param => {
-                const checkbox = document.getElementById(`${param}Check`);
-                if (checkbox && checkbox.checked) {
-                    customParams.push(param);
-                }
-            });
-
-            const response = await fetch(`/history/api/leads/${leadId}/analyze`, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify({
-                    custom_params: customParams
-                })
-            });
-
-            const data = await response.json();
-
-            if (!data.success) {
-                throw new Error(data.error || '分析中にエラーが発生しました');
-            }
-
-            displayAnalysisResults(data.data);
-        } catch (error) {
-            errorElement.textContent = error.message;
-            errorElement.style.display = 'block';
-        } finally {
-            loadingElement.style.display = 'none';
-        }
-    });
-});
-</script>
-    transition: background-color 0.3s;
-}
-
-.btn-primary {
-    background: #4299e1;
-    color: white;
-}
-
-.btn-edit {
-    background: #48bb78;
-    color: white;
-}
-
-.btn-delete {
-    background: #f56565;
-    color: white;
-}
-
-.btn:hover {
-    opacity: 0.9;
-}
-
 .email-section {
     margin-top: 2rem;
-    padding: 1rem;
-    background: #f8fafc;
-    border-radius: 8px;
 }
 
-.email-cards {
-    display: flex;
-    flex-direction: column;
-    gap: 1rem;
+.email-table {
+    width: 100%;
+    border-collapse: collapse;
     margin-top: 1rem;
 }
 
-.email-card {
-    background: #fff;
+.email-table th,
+.email-table td {
+    padding: 0.75rem;
     border: 1px solid #e2e8f0;
-    border-radius: 8px;
-    margin-bottom: 1rem;
-    overflow: hidden;
-    touch-action: pan-x pan-y;
-    transition: transform 0.2s ease;
-}
-
-.email-menu {
-    background: white;
-    border-radius: 8px;
-    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
-    overflow: hidden;
-    z-index: 1000;
-}
-
-.menu-item {
-    padding: 12px 20px;
-    cursor: pointer;
-    transition: background-color 0.2s;
-}
-
-.menu-item:hover {
-    background-color: #f7fafc;
-}
-
-@media (max-width: 768px) {
-    .email-card {
-        user-select: none;
-        -webkit-user-select: none;
-    }
-
-    .email-menu {
-        width: 200px;
-    }
-}
-
-.email-card-header {
-    background: #f8fafc;
-    padding: 1rem;
-    cursor: pointer;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    transition: background-color 0.3s ease;
-}
-
-.email-card-header:hover {
-    background: #edf2f7;
-}
-
-.header-content {
-    flex: 1;
-}
-
-.accordion-icon {
-    margin-left: 1rem;
-    transition: transform 0.3s ease;
-}
-
-.accordion-icon.active {
-    transform: rotate(180deg);
-}
-
-.email-card-body {
-    max-height: 0;
-    overflow: hidden;
-    transition: max-height 0.3s ease-out;
-    padding: 0 1rem;
-}
-
-.email-card-body.active {
-    max-height: 500px;
-    padding: 1rem;
-}
-
-.preview-content {
-    margin-bottom: 1rem;
-    color: #4a5568;
-    font-size: 0.9rem;
-    line-height: 1.5;
-}
-
-.view-details {
-    display: inline-block;
-    padding: 0.5rem 1rem;
-    font-size: 0.875rem;
-}
-
-.email-card-header {
-    margin-bottom: 0.5rem;
-}
-
-.email-subject {
-    font-size: 1rem;
-    font-weight: 600;
-    margin: 0;
-    color: #2d3748;
-}
-
-.email-date {
-    display: block;
-    font-size: 0.875rem;
-    color: #718096;
-    margin-top: 0.25rem;
-}
-
-.email-card-body {
-    font-size: 0.875rem;
-}
-
-.email-sender {
-    display: flex;
-    gap: 0.5rem;
-    margin-bottom: 0.5rem;
-}
-
-.email-sender .label {
-    color: #718096;
-}
-
-.email-sender .value {
-    color: #2d3748;
-}
-
-.email-preview {
-    color: #718096;
-    font-style: italic;
-}
-
-/* モバイル向けのモーダル最適化 */
-@media (max-width: 768px) {
-    .modal-content {
-        width: 95%;
-        margin: 2.5% auto;
-        padding: 1rem;
-    }
-
-    .close-button {
-        font-size: 24px;
-        padding: 0.5rem;
-    }
-
-    .modal-header h3 {
-        font-size: 1.1rem;
-        padding-right: 2rem;
-    }
-
-    .modal-body {
-        padding: 1rem 0;
-    }
-
-    .email-content {
-        font-size: 0.9rem;
-        padding: 0.75rem;
-    }
 }
 
 .email-content {
-    background: #fff;
-    padding: 1rem;
-    border-radius: 4px;
-    margin-top: 0.5rem;
-}
-
-.button {
-    display: inline-block;
-    padding: 0.5rem 1rem;
-    background: #4299e1;
-    color: white;
-    text-decoration: none;
-    border-radius: 4px;
-    margin: 1rem 0;
-}
-
-.button:hover {
-    background: #3182ce;
-}
-
-/* Modal Styles */
-.modal {
-    display: none;
-    position: fixed;
-    z-index: 1000;
-    left: 0;
-    top: 0;
-    width: 100%;
-    height: 100%;
-    background-color: rgba(0,0,0,0.5);
-    overflow: auto;
-}
-
-.modal-content {
-    background-color: #fff;
-    margin: 5% auto;
-    padding: 20px;
-    border-radius: 8px;
-    width: 80%;
-    max-width: 900px;
-    position: relative;
-    max-height: 90vh;
-    display: flex;
-    flex-direction: column;
-}
-
-.close-button {
-    color: #aaa;
-    float: right;
-    font-size: 28px;
-    font-weight: bold;
-    cursor: pointer;
-    position: absolute;
-    right: 20px;
-    top: 10px;
-}
-
-.close-button:hover,
-.close-button:focus {
-    color: #000;
-    text-decoration: none;
-    cursor: pointer;
-}
-
-.modal-header {
-    padding-bottom: 15px;
-    border-bottom: 1px solid #eee;
-    margin-bottom: 15px;
-    padding-right: 30px;
-}
-
-.modal-header h3 {
-    margin: 0 0 10px 0;
-    color: #2d3748;
-}
-
-.modal-body {
-    flex: 1;
-    overflow-y: auto;
-    padding: 15px 0;
-}
-
-.modal-body .email-content {
     white-space: pre-wrap;
-    font-family: inherit;
-    margin: 0 0 20px 0;
-    padding: 0;
-    background: none;
-    border: none;
+    padding: 1rem;
+    background: #f8fafc;
+    border-radius: 0.375rem;
 }
 
-/* AI Analysis Section Styles */
-.ai-analysis-section {
-    border-top: 1px solid #eee;
-    padding-top: 20px;
-    margin-top: 20px;
+/* AI分析セクションのスタイル */
+.analysis-section {
+    margin-top: 2rem;
+    background: white;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
 }
 
-.ai-analysis-header {
+.analysis-header {
+    padding: 1rem;
+    border-bottom: 1px solid #e2e8f0;
     display: flex;
     justify-content: space-between;
     align-items: center;
-    margin-bottom: 15px;
 }
 
-.ai-analysis-header h4 {
-    margin: 0;
-    color: #2d3748;
-}
-
-.ai-analysis-content {
+.analysis-options {
+    padding: 1rem;
     background: #f8fafc;
-    border-radius: 6px;
-    padding: 15px;
-    min-height: 100px;
+    border-radius: 8px;
+    margin: 1rem;
 }
 
-.analysis-placeholder {
-    color: #718096;
-    text-align: center;
-    padding: 20px;
+.analysis-results {
+    padding: 1rem;
 }
 
-/* Related Items Section Styles */
-.related-items-section {
-    border-top: 1px solid #eee;
-    padding-top: 20px;
-    margin-top: 20px;
-    display: grid;
-    grid-template-columns: repeat(2, 1fr);
-    gap: 20px;
+.chart-container {
+    height: 300px;
+    margin: 1rem 0;
 }
 
-.tasks-section,
-.schedules-section {
+.insights-container {
     background: #f8fafc;
-    border-radius: 6px;
-    padding: 15px;
-}
-
-.related-items-content {
-    min-height: 100px;
-}
-
-.related-item {
-    background: white;
-    border: 1px solid #e2e8f0;
-    border-radius: 4px;
-    padding: 10px;
-    margin-bottom: 10px;
-}
-
-.related-item:last-child {
-    margin-bottom: 0;
-}
-
-.loading-spinner {
-    text-align: center;
-    padding: 20px;
-    color: #4a5568;
-}
-
-#analyzeButton {
-    padding: 8px 16px;
-    font-size: 0.875rem;
-}
-
-#analyzeButton i {
-    margin-right: 6px;
+    padding: 1rem;
+    border-radius: 8px;
+    margin-top: 1rem;
 }
 </style>
 {% endblock %}
 
 {% block content %}
 <div class="detail-container">
-    <h1>リード詳細</h1>
-    <div class="lead-details">
-        <div class="detail-item">
-            <span class="detail-label">名前:</span>
-            <span class="detail-value">{{ lead.name or '未設定' }}</span>
+    <!-- リード基本情報 -->
+    <div class="card">
+        <div class="card-header">
+            <h2>{{ lead.name }}</h2>
         </div>
-        <div class="detail-item">
-            <span class="detail-label">メールアドレス:</span>
-            <span class="detail-value">{{ lead.email }}</span>
-        </div>
-        <div class="detail-item">
-            <span class="detail-label">電話番号:</span>
-            <span class="detail-value">{{ lead.phone or '未設定' }}</span>
-        </div>
-        <div class="detail-item">
-            <span class="detail-label">ステータス:</span>
-            <span class="detail-value">{{ lead.status }}</span>
-        </div>
-        <div class="detail-item">
-            <span class="detail-label">スコア:</span>
-            <span class="detail-value">{{ "%.1f"|format(lead.score) }}</span>
-        </div>
-        <div class="detail-item">
-            <span class="detail-label">作成日時:</span>
-            <span class="detail-value">{{ lead.created_at.strftime('%Y年%m月%d日 %H:%M:%S') }}</span>
-        </div>
-        <div class="detail-item">
-            <span class="detail-label">最終接触日時:</span>
-            <span class="detail-value">
-                {% if lead.last_contact %}
-                    {{ lead.last_contact.strftime('%Y年%m月%d日 %H:%M:%S') }}
-                {% else %}
-                    未接触
-                {% endif %}
-            </span>
+        <div class="card-body">
+            <div class="lead-details">
+                <div class="detail-item">
+                    <span class="detail-label">メールアドレス</span>
+                    <span class="detail-value">{{ lead.email }}</span>
+                </div>
+                <div class="detail-item">
+                    <span class="detail-label">電話番号</span>
+                    <span class="detail-value">{{ lead.phone or '未設定' }}</span>
+                </div>
+                <div class="detail-item">
+                    <span class="detail-label">ステータス</span>
+                    <span class="detail-value">{{ lead.status }}</span>
+                </div>
+                <div class="detail-item">
+                    <span class="detail-label">スコア</span>
+                    <span class="detail-value">{{ lead.score }}</span>
+                </div>
+                <div class="detail-item">
+                    <span class="detail-label">作成日時:</span>
+                    <span class="detail-value">{{ lead.created_at.strftime('%Y年%m月%d日 %H:%M:%S') }}</span>
+                </div>
+                <div class="detail-item">
+                    <span class="detail-label">最終接触日時:</span>
+                    <span class="detail-value">
+                        {% if lead.last_contact %}
+                            {{ lead.last_contact.strftime('%Y年%m月%d日 %H:%M:%S') }}
+                        {% else %}
+                            未接触
+                        {% endif %}
+                    </span>
+                </div>
+            </div>
         </div>
     </div>
+
+    <!-- 関連メールセクション -->
+    <div class="email-section card mt-4">
+        <div class="card-header">
+            <h3 class="mb-0">関連メール</h3>
+        </div>
+        <div class="card-body">
+            {% if emails %}
+                <table class="email-table">
+                    <thead>
+                        <tr>
+                            <th>送信者</th>
+                            <th>件名</th>
+                            <th>受信日時</th>
+                            <th>操作</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for email in emails %}
+                            <tr>
+                                <td>{{ email.sender }}</td>
+                                <td>{{ email.subject }}</td>
+                                <td>{{ email.created_at.strftime('%Y年%m月%d日 %H:%M:%S') }}</td>
+                                <td>
+                                    <button onclick="showEmailModal('{{ email.id }}')" class="btn btn-sm btn-primary">
+                                        内容を表示
+                                    </button>
+                                </td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            {% else %}
+                <p>このリードに関連するメールはありません。</p>
+            {% endif %}
+        </div>
+    </div>
+
     <div class="actions">
         <a href="{{ url_for('leads.list_leads') }}" class="btn btn-primary">一覧に戻る</a>
         <a href="{{ url_for('history.show_history', lead_id=lead.id) }}" class="btn btn-primary">
@@ -890,82 +197,18 @@ document.addEventListener('DOMContentLoaded', function() {
             </button>
         </form>
     </div>
+</div>
 
-    <div class="email-section">
-        <h2>関連メール</h2>
-        {% if emails %}
-            <div class="email-cards">
-                {% for email in emails %}
-                    <div class="email-card">
-                        <div class="email-card-header" onclick="toggleAccordion({{ email.id }})">
-                            <div class="header-content">
-                                <h3 class="email-subject">{{ email.subject or '(件名なし)' }}</h3>
-                                <span class="email-date">{{ email.created_at.strftime('%Y年%m月%d日 %H:%M:%S') }}</span>
-                            </div>
-                            <span class="accordion-icon">▼</span>
-                        </div>
-                        <div class="email-card-body" id="email-content-{{ email.id }}">
-                            <div class="email-sender">
-                                <span class="label">送信者:</span>
-                                <span class="value">{{ email.sender }}</span>
-                            </div>
-                            <div class="email-preview">
-                                <div class="preview-content">{{ email.content[:200] + '...' if email.content else '本文なし' }}</div>
-                                <button class="btn btn-primary view-details" onclick="showEmailModal('{{ email.id }}')">
-                                    詳細を表示
-                                </button>
-                            </div>
-                        </div>
-                    </div>
-                {% endfor %}
-            </div>
-        {% else %}
-            <p>このリードに関連するメールはありません。</p>
-        {% endif %}
-    </div>
-
-    <!-- Email Modal -->
-    <div id="emailModal" class="modal" data-email-id="">
+<!-- メール内容モーダル -->
+<div class="modal fade" id="emailModal" tabindex="-1">
+    <div class="modal-dialog modal-lg">
         <div class="modal-content">
-            <span class="close-button" onclick="closeEmailModal()">&times;</span>
             <div class="modal-header">
-                <h3 id="modalEmailSubject"></h3>
-                <p id="modalEmailInfo"></p>
+                <h5 class="modal-title">メール内容</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
             </div>
             <div class="modal-body">
-                <pre id="modalEmailContent" class="email-content"></pre>
-
-                <div class="ai-analysis-section">
-                    <div class="ai-analysis-header">
-                        <h4>AI分析</h4>
-                        <div class="ai-buttons">
-                            <button onclick="summarizeEmail()" id="summarizeButton" class="btn btn-primary">
-                                <i class="fas fa-file-alt"></i> メールを要約
-                            </button>
-                            <button onclick="analyzeEmail()" id="analyzeButton" class="btn btn-primary">
-                                <i class="fas fa-brain"></i> AI分析を実行
-                            </button>
-                        </div>
-                    </div>
-                    <div id="emailSummaryContent" class="email-summary-content" style="display: none;">
-                        <h5>メール要約</h5>
-                        <div class="summary-content"></div>
-                    </div>
-                    <div id="aiAnalysisContent" class="ai-analysis-content">
-                        <div class="analysis-placeholder">AIによる分析を実行してください。</div>
-                    </div>
-                </div>
-
-                <div class="related-items-section">
-                    <div class="tasks-section">
-                        <h4>関連タスク</h4>
-                        <div id="relatedTasks" class="related-items-content"></div>
-                    </div>
-                    <div class="schedules-section">
-                        <h4>関連スケジュール</h4>
-                        <div id="relatedSchedules" class="related-items-content"></div>
-                    </div>
-                </div>
+                <div id="emailContent"></div>
             </div>
         </div>
     </div>
@@ -973,368 +216,32 @@ document.addEventListener('DOMContentLoaded', function() {
 {% endblock %}
 
 {% block scripts %}
-<!-- タッチジェスチャー用のスクリプトを追加 -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script>
-// タッチ操作の状態を管理する変数
-let touchStartX = 0;
-let touchStartY = 0;
-let touchStartTime = 0;
-let longPressTimer;
-let isSwiping = false;
+// リードID
+const leadId = {{ lead.id }};
 
-// タッチ開始時の処理
-function handleTouchStart(event, emailCard) {
-    touchStartX = event.touches[0].clientX;
-    touchStartY = event.touches[0].clientY;
-    touchStartTime = new Date().getTime();
-
-    // 長押し検出用のタイマーを設定
-    longPressTimer = setTimeout(() => {
-        showEmailMenu(emailCard);
-    }, 500);
-
-    isSwiping = false;
-}
-
-// タッチ移動時の処理
-function handleTouchMove(event, emailCard) {
-    if (!touchStartX || !touchStartY) return;
-
-    const touchEndX = event.touches[0].clientX;
-    const touchEndY = event.touches[0].clientY;
-    const deltaX = touchEndX - touchStartX;
-    const deltaY = touchEndY - touchStartY;
-
-    // 水平方向の移動が垂直方向より大きい場合のみスワイプと判定
-    if (Math.abs(deltaX) > Math.abs(deltaY) && Math.abs(deltaX) > 30) {
-        isSwiping = true;
-        clearTimeout(longPressTimer);
-
-        // スワイプ中のアニメーション
-        emailCard.style.transform = `translateX(${deltaX}px)`;
-    }
-}
-
-// タッチ終了時の処理
-function handleTouchEnd(event, emailCard, emailId) {
-    const touchEndTime = new Date().getTime();
-    const touchDuration = touchEndTime - touchStartTime;
-
-    clearTimeout(longPressTimer);
-
-    if (isSwiping) {
-        const touchEndX = event.changedTouches[0].clientX;
-        const deltaX = touchEndX - touchStartX;
-
-        // スワイプ距離が十分な場合、アコーディオンを開閉
-        if (Math.abs(deltaX) > 100) {
-            toggleAccordion(emailId);
-        }
-
-        // 位置をリセット
-        emailCard.style.transform = '';
-    } else if (touchDuration < 500) {
-        // タップ（短押し）の場合、メール詳細を表示
-        showEmailModal(emailId);
-    }
-
-    // 状態をリセット
-    touchStartX = 0;
-    touchStartY = 0;
-    isSwiping = false;
-}
-
-// メールメニューを表示
-function showEmailMenu(emailCard) {
-    const menu = document.createElement('div');
-    menu.className = 'email-menu';
-    menu.innerHTML = `
-        <div class="menu-item">返信</div>
-        <div class="menu-item">転送</div>
-        <div class="menu-item">タスク作成</div>
-        <div class="menu-item">スケジュール作成</div>
-    `;
-
-    // メニューの位置を設定
-    const rect = emailCard.getBoundingClientRect();
-    menu.style.position = 'fixed';
-    menu.style.top = `${rect.top}px`;
-    menu.style.left = `${rect.left}px`;
-
-    document.body.appendChild(menu);
-
-    // メニュー以外をクリックしたら閉じる
-    const closeMenu = (e) => {
-        if (!menu.contains(e.target)) {
-            menu.remove();
-            document.removeEventListener('click', closeMenu);
-        }
-    };
-
-    setTimeout(() => {
-        document.addEventListener('click', closeMenu);
-    }, 0);
-}
-
-// 各メールカードにタッチイベントを設定
-document.addEventListener('DOMContentLoaded', () => {
-    const emailCards = document.querySelectorAll('.email-card');
-    emailCards.forEach(card => {
-        const emailId = card.querySelector('.email-card-body').id.replace('email-content-', '');
-        card.addEventListener('touchstart', (e) => handleTouchStart(e, card));
-        card.addEventListener('touchmove', (e) => handleTouchMove(e, card));
-        card.addEventListener('touchend', (e) => handleTouchEnd(e, card, emailId));
-    });
-});
-</script>
-
-<!-- Font Awesome from cdnjs -->
-<script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/js/all.min.js" crossorigin="anonymous"></script>
-
-<script>
-// アコーディオンの開閉を制御する関数
-function toggleAccordion(emailId) {
-    const content = document.getElementById(`email-content-${emailId}`);
-    const icon = content.previousElementSibling.querySelector('.accordion-icon');
-    const allContents = document.querySelectorAll('.email-card-body');
-    const allIcons = document.querySelectorAll('.accordion-icon');
-
-    // 他のすべてのアコーディオンを閉じる
-    allContents.forEach(item => {
-        if (item !== content && item.classList.contains('active')) {
-            item.classList.remove('active');
-        }
-    });
-
-    allIcons.forEach(item => {
-        if (item !== icon && item.classList.contains('active')) {
-            item.classList.remove('active');
-        }
-    });
-
-    // クリックされたアコーディオンの状態を切り替え
-    content.classList.toggle('active');
-    icon.classList.toggle('active');
-}
-
-// メール要約処理
-async function summarizeEmail() {
-    const emailId = document.getElementById('emailModal').getAttribute('data-email-id');
-    const summaryButton = document.getElementById('summarizeButton');
-    const summaryContent = document.getElementById('emailSummaryContent');
-    const summaryDiv = summaryContent.querySelector('.summary-content');
-
-    try {
-        summaryButton.disabled = true;
-        summaryButton.innerHTML = '<i class="fas fa-spinner fa-spin"></i> 要約中...';
-
-        const response = await fetch(`/api/emails/${emailId}/summarize`, {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json'
-            }
-        });
-
-        const data = await response.json();
-
-        if (data.error) {
-            throw new Error(data.error);
-        }
-
-        summaryContent.style.display = 'block';
-        summaryDiv.innerHTML = data.summary;
-
-    } catch (error) {
-        console.error('Error:', error);
-        alert('メールの要約中にエラーが発生しました: ' + error.message);
-    } finally {
-        summaryButton.disabled = false;
-        summaryButton.innerHTML = '<i class="fas fa-file-alt"></i> メールを要約';
-    }
-}
-
-// AI分析の関数
-async function analyzeEmail() {
-    try {
-        const modal = document.getElementById('emailModal');
-        if (!modal || !modal.dataset.emailId) {
-            console.error('メールモーダルまたはメールIDが見つかりません');
-            return;
-        }
-
-        const emailId = modal.dataset.emailId;
-        const analysisButton = document.getElementById('analyzeButton');
-        const analysisContent = document.getElementById('aiAnalysisContent');
-
-        if (!analysisButton || !analysisContent) {
-            console.error('必要なDOM要素が見つかりません');
-            return;
-        }
-
-        // Update button state
-        analysisButton.disabled = true;
-        analysisButton.innerHTML = '<i class="fas fa-spinner fa-spin"></i> 分析中...';
-
-        // Show analysis section
-        analysisContent.innerHTML = '<div class="loading-spinner">AI分析を実行中...</div>';
-
-        // Call API endpoint
-        const response = await fetch(`/api/emails/${emailId}/analyze`, {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json'
-            }
-        });
-
-        if (!response.ok) {
-            throw new Error('AI分析中にエラーが発生しました');
-        }
-
-        const data = await response.json();
-
-        // Parse and display analysis results
-        analysisContent.innerHTML = `<div>${escapeHtml(data.analysis)}</div>`;
-    } catch (error) {
-        console.error('AI分析エラー:', error);
-        const analysisContent = document.getElementById('aiAnalysisContent');
-        if (analysisContent) {
-            analysisContent.innerHTML = `<div class="alert alert-danger">${error.message || 'AI分析中にエラーが発生しました。'}</div>`;
-        }
-    } finally {
-        // Reset button state
-        const analysisButton = document.getElementById('analyzeButton');
-        if (analysisButton) {
-            analysisButton.disabled = false;
-            analysisButton.innerHTML = '<i class="fas fa-brain"></i> AI分析を実行';
-        }
-    }
-}
-
-// モーダル表示関数
+// メール内容表示モーダル関数
 function showEmailModal(emailId) {
-    const modal = document.getElementById('emailModal');
-    modal.setAttribute('data-email-id', emailId);
-    modal.style.display = 'block';
-
-    // 要約とAI分析の結果をリセット
-    document.getElementById('emailSummaryContent').style.display = 'none';
-    document.getElementById('aiAnalysisContent').innerHTML = 
-        '<div class="analysis-placeholder">AIによる分析を実行してください。</div>';
-
-    // メールの詳細を取得して表示
     fetch(`/api/emails/${emailId}`)
         .then(response => response.json())
         .then(data => {
-            if (data.error) {
-                throw new Error(data.error);
-            }
-
-            document.getElementById('modalEmailSubject').textContent = data.subject || '(件名なし)';
-            document.getElementById('modalEmailInfo').innerHTML = 
-                `送信者: ${data.sender}<br>
-                 日時: ${new Date(data.created_at).toLocaleString('ja-JP')}`;
-            document.getElementById('modalEmailContent').textContent = data.content;
+            document.getElementById('emailContent').innerHTML = `
+                <div class="email-details">
+                    <p><strong>From:</strong> ${data.sender}</p>
+                    <p><strong>Subject:</strong> ${data.subject}</p>
+                    <p><strong>Date:</strong> ${new Date(data.created_at).toLocaleString()}</p>
+                    <hr>
+                    <div class="email-body">${data.content}</div>
+                </div>
+            `;
+            new bootstrap.Modal(document.getElementById('emailModal')).show();
         })
         .catch(error => {
-            console.error('Error fetching email details:', error);
-            document.getElementById('modalEmailContent').innerHTML = 
-                `<p class="error-message">メール詳細の取得中にエラーが発生しました: ${error.message}</p>`;
+            console.error('Error fetching email content:', error);
+            alert('メール内容の取得に失敗しました。');
         });
-
-    // 関連アイテムを読み込む
-    loadRelatedItems(emailId);
 }
 
-// 関連アイテムを読み込む関数
-async function loadRelatedItems(emailId) {
-    const tasksContainer = document.getElementById('relatedTasks');
-    const schedulesContainer = document.getElementById('relatedSchedules');
-
-    try {
-        if (!tasksContainer || !schedulesContainer) {
-            console.error('関連アイテムのコンテナが見つかりません');
-            return;
-        }
-
-        // Show loading state
-        tasksContainer.innerHTML = '<div class="loading-spinner">タスクを読み込み中...</div>';
-        schedulesContainer.innerHTML = '<div class="loading-spinner">スケジュールを読み込み中...</div>';
-
-        const response = await fetch(`/api/emails/${emailId}/related-items`);
-        if (!response.ok) {
-            throw new Error('関連アイテムの取得に失敗しました');
-        }
-
-        const data = await response.json();
-
-        // Update tasks
-        if (data.tasks && data.tasks.length > 0) {
-            tasksContainer.innerHTML = data.tasks.map(task => `
-                <div class="related-item">
-                    <div><strong>${escapeHtml(task.title)}</strong></div>
-                    <div>${escapeHtml(task.description || '')}</div>
-                    <div>期限: ${task.due_date || '未設定'}</div>
-                </div>
-            `).join('');
-        } else {
-            tasksContainer.innerHTML = '<div class="analysis-placeholder">関連するタスクはありません</div>';
-        }
-
-        // Update schedules
-        if (data.schedules && data.schedules.length > 0) {
-            schedulesContainer.innerHTML = data.schedules.map(schedule => `
-                <div class="related-item">
-                    <div><strong>${escapeHtml(schedule.title)}</strong></div>
-                    <div>${escapeHtml(schedule.description || '')}</div>
-                    <div>日時: ${schedule.datetime || '未設定'}</div>
-                </div>
-            `).join('');
-        } else {
-            schedulesContainer.innerHTML = '<div class="analysis-placeholder">関連するスケジュールはありません</div>';
-        }
-    } catch (error) {
-        console.error('関連アイテムの読み込み中にエラーが発生しました:', error);
-        if (tasksContainer) {
-            tasksContainer.innerHTML = '<div class="error">タスクの読み込みに失敗しました</div>';
-        }
-        if (schedulesContainer) {
-            schedulesContainer.innerHTML = '<div class="error">スケジュールの読み込みに失敗しました</div>';
-        }
-    }
-}
-
-// Helper function to safely set text content
-function escapeHtml(unsafe) {
-    return unsafe
-        .replace(/&/g, "&amp;")
-        .replace(/</g, "&lt;")
-        .replace(/>/g, "&gt;")
-        .replace(/"/g, "&quot;")
-        .replace(/'/g, "&#039;");
-}
-
-// モーダルを閉じる関数
-function closeEmailModal() {
-    const modal = document.getElementById('emailModal');
-    if (modal) {
-        modal.style.display = 'none';
-    }
-}
-
-// モーダルの外側をクリックして閉じる
-window.addEventListener('click', function(event) {
-    const modal = document.getElementById('emailModal');
-    if (event.target === modal) {
-        closeEmailModal();
-    }
-});
-
-// ESCキーでモーダルを閉じる
-document.addEventListener('keydown', function(event) {
-    const modal = document.getElementById('emailModal');
-    if (event.key === 'Escape' && modal.style.display === 'block') {
-        closeEmailModal();
-    }
-});
 </script>
 {% endblock %}
